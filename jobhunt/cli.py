@@ -61,7 +61,8 @@ def cmd_doctor(settings: Settings) -> int:
     prov = settings["llm"]["provider"]
     key = {"anthropic": "ANTHROPIC_API_KEY"}.get(prov)
     print(f"llm: {prov}" + (" (missing ANTHROPIC_API_KEY)" if key and not settings.secret(key) else ""))
-    print(f"pdf export: {'LibreOffice found' if shutil.which('soffice') or shutil.which('libreoffice') else 'LibreOffice not found, DOCX only'}")
+    from .tailor import find_soffice
+    print(f"pdf export: {'LibreOffice found' if find_soffice() else 'LibreOffice not found, DOCX only'}")
     print(f"gmail: {'on' if settings['gmail'].get('enabled') else 'off'}")
     return 0 if ok else 1
 

@@ -19,7 +19,7 @@ It never applies for you and never sends email. You stay in control of every app
 
 ## Quick start
 
-You need Python 3.11 or newer.
+You need Python 3.11 or newer. Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
 
 ```bash
 git clone https://github.com/srvskr1/job-hunt-pipeline.git

@@ -309,8 +309,23 @@ def build_letter(job: dict, profile: dict, body: str, path: Path) -> None:
     doc.save(path)
 
 
+MAC_SOFFICE = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+WIN_SOFFICE = r"C:\Program Files\LibreOffice\program\soffice.exe"
+
+
+def find_soffice() -> str | None:
+    """LibreOffice is often not on PATH on macOS and Windows, so check the default install places."""
+    found = shutil.which("soffice") or shutil.which("libreoffice")
+    if found:
+        return found
+    for p in (MAC_SOFFICE, WIN_SOFFICE):
+        if Path(p).exists():
+            return p
+    return None
+
+
 def to_pdf(paths: list[Path]) -> list[Path]:
-    exe = shutil.which("soffice") or shutil.which("libreoffice")
+    exe = find_soffice()
     if not exe:
         return []
     outdir = paths[0].parent
