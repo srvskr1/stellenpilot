@@ -78,12 +78,15 @@ def keyword_score(job: dict, profile: dict) -> dict:
 
 
 SYSTEM = """You score job ads for one candidate. Be honest and specific. Never assume skills the candidate does not list.
+Read the candidate's skills carefully: a tool listed under Skills or used in Experience or Projects is something they HAVE.
+"Currently learning" items are not experience yet. Languages show their level (A1 to C2); A2 German is NOT fluent.
+Use the whole scale: 85 to 100 only when almost every requirement is met, 60 to 84 for a good fit with gaps, 40 to 59 for a stretch, below 40 for a poor fit. Most jobs land between 45 and 75.
 Return JSON with keys:
 match: integer 0 to 100 (skill overlap, seniority fit, location fit, language fit),
 fit: "Strong", "Possible" or "Stretch",
 why: one sentence on why it fits, starting with "Remote." if the job is remote,
 gaps: one honest sentence on what is missing,
-gap_tags: up to 4 short names of missing skills or requirements, e.g. ["dbt", "German"],
+gap_tags: up to 4 concrete tool or skill names the ad asks for and the candidate lacks, e.g. ["dbt", "German"]. Never vague words like "cloud" or "tools".
 german_fluency_required: true if the ad requires fluent, very good, C1 or native German."""
 
 
@@ -91,7 +94,7 @@ def llm_score(llm, job: dict, profile: dict, taste: str = "") -> dict:
     user = (f"CANDIDATE\n{profile_text(profile)}\n\n"
             + (f"CANDIDATE TASTE (from their thumbs up and down)\n{taste}\nAdjust match by at most 10 points toward this taste.\n\n" if taste else "")
             + f"JOB\nTitle: {job['title']}\nCompany: {job['company']}\nLocation: {job['location']}\n"
-            f"Description:\n{job['description'][:6000]}")
+            f"Description:\n{job['description'][:llm.max_chars]}")
     out = llm.complete_json(SYSTEM, user, max_tokens=600)
     try:
         match = int(out.get("match") or 0)
@@ -122,7 +125,14 @@ def taste_summary(rated: list[dict]) -> str:
 def score_job(job: dict, profile: dict, llm=None, taste: str = "", skip_german: bool = True) -> dict:
     text = job["title"] + "\n" + job["description"]
     german_req = requires_fluent_german(text)
-    result = llm_score(llm, job, profile, taste) if (llm and llm.enabled) else keyword_score(job, profile)
+    if llm and llm.enabled:
+        try:
+            result = llm_score(llm, job, profile, taste)
+        except Exception as e:  # a local model can time out or return broken JSON
+            result = keyword_score(job, profile)
+            result["why"] = f"{result['why']} (AI scoring failed: {str(e)[:80]}; keyword score used)"
+    else:
+        result = keyword_score(job, profile)
     german_req = german_req or result.pop("_german", False)
     lang = "German needed" if german_req else ("English" if ad_language(text) == "en" else "German ad")
     result["lang"] = lang

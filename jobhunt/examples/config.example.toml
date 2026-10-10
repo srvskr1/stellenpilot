@@ -41,12 +41,27 @@ location_ids = [2861876]
 english_only = true
 
 [llm]
-# provider: "anthropic", "openai" (any OpenAI compatible server, including Ollama and LM Studio) or "none".
-# With "none" the pipeline still runs and scores jobs by keyword overlap.
+# provider:
+#   "none"       keyword scoring and template letters, no AI
+#   "ollama"     local model through Ollama (default http://localhost:11434)
+#   "lmstudio"   local model through LM Studio's server (default http://localhost:1234/v1)
+#   "llamacpp"   llama.cpp server (default http://localhost:8080/v1)
+#   "vllm"       vLLM server (default http://localhost:8000/v1)
+#   "local"      any other OpenAI compatible server, set base_url
+#   "anthropic"  Claude, needs ANTHROPIC_API_KEY
+#   "openai"     OpenAI, needs OPENAI_API_KEY
+# See docs/local-llm.md for setting up a local model.
 provider = "none"
-model = "claude-sonnet-4-5"
-# For openai compatible servers, e.g. "http://localhost:11434/v1" for Ollama.
+# Model name as your server knows it, e.g. "qwen2.5:7b" for Ollama, "claude-sonnet-4-5" for Anthropic.
+model = ""
+# Leave empty to use the default for the provider.
 base_url = ""
+# Optional tuning, mostly for local models:
+# timeout = 600          # seconds per answer (local default 600, cloud 120)
+# num_ctx = 8192         # Ollama context window in tokens
+# max_input_chars = 4000 # longer job ads are cut to this many characters (local default 4000)
+# json_mode = true       # ask the server for strict JSON; turned off automatically if unsupported
+# temperature = 0.2
 
 [tailor]
 # Jobs at or above this match get a tailored CV and cover letter.

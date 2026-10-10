@@ -122,26 +122,28 @@ def _valid_plan(plan: dict, profile: dict) -> dict:
     groups = list(profile.get("skills") or {})
     hi = plan.get("headline_index", 0)
     plan["headline_index"] = hi if isinstance(hi, int) and 0 <= hi < len(heads) else 0
-    order = [g for g in (plan.get("skill_groups") or []) if g in groups]
+    raw_groups = plan.get("skill_groups") if isinstance(plan.get("skill_groups"), list) else []
+    order = [g for g in raw_groups if isinstance(g, str) and g in groups]
     plan["skill_groups"] = list(dict.fromkeys(order)) + [g for g in groups if g not in order]
-    exp_plan = plan.get("experience") or []
+    exp_plan = plan.get("experience") if isinstance(plan.get("experience"), list) else []
     fixed = []
     for i, e in enumerate(exp):
         n = len(e.get("bullets") or [])
         idx = exp_plan[i] if i < len(exp_plan) and isinstance(exp_plan[i], list) else []
-        idx = [j for j in dict.fromkeys(idx) if isinstance(j, int) and 0 <= j < n]
+        idx = list(dict.fromkeys(j for j in idx if isinstance(j, int) and 0 <= j < n))
         fixed.append(idx or list(range(n)))
     plan["experience"] = fixed
-    pidx = [i for i in dict.fromkeys(plan.get("projects") or []) if isinstance(i, int) and 0 <= i < len(projs)]
+    raw_p = plan.get("projects") if isinstance(plan.get("projects"), list) else []
+    pidx = list(dict.fromkeys(i for i in raw_p if isinstance(i, int) and 0 <= i < len(projs)))
     plan["projects"] = pidx or list(range(len(projs)))
-    plan["summary"] = str(plan.get("summary") or "")
+    plan["summary"] = plan["summary"] if isinstance(plan.get("summary"), str) else ""
     return plan
 
 
 def make_plan(job: dict, profile: dict, llm=None) -> dict:
     plan = keyword_plan(job, profile)
     if llm and llm.enabled:
-        user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nINDEXED ITEMS\n{_indexed_profile(profile)}\n\nJOB AD\n{job['title']} at {job['company']}\n{job['description'][:6000]}"
+        user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nINDEXED ITEMS\n{_indexed_profile(profile)}\n\nJOB AD\n{job['title']} at {job['company']}\n{job['description'][:llm.max_chars]}"
         try:
             got = llm.complete_json(PLAN_SYSTEM, user, max_tokens=1200)
             plan.update({k: got[k] for k in ("headline_index", "summary", "skill_groups", "experience", "projects") if k in got})
@@ -280,7 +282,7 @@ def letter_body(job: dict, profile: dict, plan: dict, llm=None) -> tuple[str, st
     if not (llm and llm.enabled):
         return template, "Template letter (no LLM configured)."
     name = (profile.get("person") or {}).get("name", "")
-    user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job['description'][:5000]}\n\nCandidate name: {name}"
+    user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job['description'][:llm.max_chars]}\n\nCandidate name: {name}"
     bad: list[str] = []
     for _ in range(2):
         try:

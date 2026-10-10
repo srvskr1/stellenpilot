@@ -61,8 +61,13 @@ Set `[llm]` in `config.toml`:
 | provider | what you need | notes |
 |---|---|---|
 | `none` | nothing | Keyword scoring and template letters. Works offline, less precise. |
-| `anthropic` | `ANTHROPIC_API_KEY` in `.env` | Uses Claude through the Anthropic API. |
-| `openai` | `OPENAI_API_KEY`, or a local server | Also works with Ollama or LM Studio: set `base_url = "http://localhost:11434/v1"` and a local model name. Fully offline. |
+| `ollama` | Ollama running, a pulled model | Local and free. Nothing leaves your computer. |
+| `lmstudio` | LM Studio with its server started | Local and free. |
+| `llamacpp`, `vllm`, `local` | a running server | Any OpenAI compatible local server. |
+| `anthropic` | `ANTHROPIC_API_KEY` in `.env` | Claude through the Anthropic API. |
+| `openai` | `OPENAI_API_KEY` in `.env` | OpenAI API. |
+
+Local model setup, model suggestions and hardware notes: [docs/local-llm.md](docs/local-llm.md). Run `jobhunt doctor` to check that your model server is reachable and the model is installed.
 
 ## Job sources
 

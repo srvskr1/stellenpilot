@@ -25,7 +25,7 @@ DEFAULTS = {
         "limits": {"adzuna_calls": 4, "theirstack_jobs": 6, "arbeitsagentur_results": 50},
         "theirstack_options": {"location_ids": [], "english_only": True},
     },
-    "llm": {"provider": "none", "model": "claude-sonnet-4-5", "base_url": ""},
+    "llm": {"provider": "none", "model": "", "base_url": ""},
     "tailor": {"min_match": 70, "max_per_run": 5, "output_dir": "output", "make_pdf": True, "only_english_ads": True},
     "gmail": {"enabled": False, "lookback_days": 3},
 }

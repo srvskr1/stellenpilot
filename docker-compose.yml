@@ -10,3 +10,9 @@ services:
     ports:
       - "127.0.0.1:8765:8765"   # only reachable from this computer
     restart: unless-stopped
+    # Using a local model (Ollama, LM Studio) on this computer? Uncomment both blocks
+    # and set llm.provider in data/config.toml. See docs/local-llm.md.
+    # environment:
+    #   JOBHUNT_LLM_BASE_URL: "http://host.docker.internal:11434"   # Ollama; LM Studio: http://host.docker.internal:1234/v1
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"                       # needed on Linux

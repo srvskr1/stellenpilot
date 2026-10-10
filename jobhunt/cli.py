@@ -59,13 +59,36 @@ def cmd_doctor(settings: Settings) -> int:
         state = "off" if not on else (f"ON but missing {', '.join(need)}" if need else "on")
         ok &= not (on and need)
         print(f"source {name:15} {state}")
-    prov = settings["llm"]["provider"]
-    key = {"anthropic": "ANTHROPIC_API_KEY"}.get(prov)
-    print(f"llm: {prov}" + (" (missing ANTHROPIC_API_KEY)" if key and not settings.secret(key) else ""))
+    ok &= _check_llm(settings)
     from .tailor import find_soffice
     print(f"pdf export: {'LibreOffice found' if find_soffice() else 'LibreOffice not found, DOCX only'}")
     print(f"gmail: {'on' if settings['gmail'].get('enabled') else 'off'}")
     return 0 if ok else 1
+
+
+def _check_llm(settings: Settings) -> bool:
+    from .llm import LLM
+    prov = settings["llm"]["provider"]
+    try:
+        llm = LLM(settings)
+    except RuntimeError as e:
+        print(f"llm: {prov} PROBLEM: {e}")
+        return False
+    if not llm.local:
+        print(f"llm: {prov}" + (f" ({llm.model})" if llm.enabled else " (keyword scoring, template letters)"))
+        return True
+    try:
+        models = llm.list_models()
+    except Exception as e:
+        print(f"llm: {prov} at {llm.base_url} is NOT reachable ({e.__class__.__name__}). Is the server running?")
+        return False
+    have = any(m == llm.model or m.split(":")[0] == llm.model or m.endswith("/" + llm.model) for m in models)
+    if have or (len(models) == 1 and prov != "ollama"):
+        print(f"llm: {prov} at {llm.base_url}, model {llm.model} ready")
+        return True
+    hint = f" Run: ollama pull {llm.model}" if prov == "ollama" else ""
+    print(f"llm: {prov} reachable, but model '{llm.model}' not found. Available: {', '.join(models[:8]) or 'none'}.{hint}")
+    return False
 
 
 def main(argv: list[str] | None = None) -> int:

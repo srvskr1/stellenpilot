@@ -67,7 +67,7 @@ Return JSON: {"prep": "..."}"""
 
 
 def make_prep(job: dict, profile: dict, llm) -> str:
-    user = f"CANDIDATE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job.get('description', '')[:6000]}"
+    user = f"CANDIDATE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job.get('description', '')[:llm.max_chars]}"
     text = str(llm.complete_json(PREP_SYSTEM, user, max_tokens=1800).get("prep") or "")
     # Stories must be true: drop story lines the truth guard rejects.
     out, in_stories, dropped = [], False, 0

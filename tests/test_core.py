@@ -76,7 +76,7 @@ class TruthGuardTests(unittest.TestCase):
         self.assertEqual(unsupported_claims("I would love to join N26.", PROFILE, n26), [])
 
     def test_llm_covered_list_is_ignored(self):
-        fake = mock.Mock(enabled=True)
+        fake = mock.Mock(enabled=True, max_chars=6000)
         fake.complete_json.return_value = {"summary": "", "covered": ["Kubernetes", "10 years of leadership"]}
         plan = make_plan(JOB, PROFILE, fake)
         self.assertNotIn("Kubernetes", plan["covered"])
@@ -88,8 +88,14 @@ class TruthGuardTests(unittest.TestCase):
         self.assertEqual(plan["experience"][0], [0])
         self.assertEqual(plan["projects"], list(range(len(PROFILE["projects"]))))
 
+    def test_malformed_llm_plan_is_survived(self):
+        plan = _valid_plan({"headline_index": "1", "skill_groups": [["Cloud"]], "experience": [[[0], {"a": 1}, 0]],
+                            "projects": [{"i": 0}, [1]], "summary": ["x"]}, PROFILE)
+        self.assertEqual(plan["experience"][0], [0])
+        self.assertEqual(plan["summary"], "")
+
     def test_llm_summary_with_fake_fact_falls_back(self):
-        fake = mock.Mock(enabled=True)
+        fake = mock.Mock(enabled=True, max_chars=6000)
         fake.complete_json.return_value = {"summary": "I led a team of 12 and used Snowflake daily."}
         plan = make_plan(JOB, PROFILE, fake)
         self.assertEqual(plan["summary"], PROFILE["person"]["summary"])
