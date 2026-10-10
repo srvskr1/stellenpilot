@@ -1,0 +1,72 @@
+# Your CV as structured data. Copy to profile.toml (ignored by git) and fill in your own facts.
+# The tailoring step only REORDERS and SELECTS these facts. It never invents new ones,
+# and a guard rejects generated text that mentions numbers or tools not listed here.
+
+[person]
+name = "Alex Example"
+email = "alex@example.com"
+phone = "+49 000 0000000"
+location = "Essen, Germany"
+links = ["github.com/alex-example", "linkedin.com/in/alex-example"]
+languages = ["English (C1)", "German (A2)"]
+
+# Headline options. The tailor picks the one that fits the job best.
+headlines = [
+  "Data Engineering Working Student | Python, SQL, AWS, Azure",
+  "Data Analyst | SQL, Python, Power BI",
+]
+
+# Default summary, used when a generated one fails the truth check.
+summary = "M.Sc. Data Science student with three years of experience building Python and SQL data pipelines and dashboards. Hands on with AWS and Azure data services through end to end portfolio projects."
+
+[skills]
+# One line per group. The tailor reorders groups and items to match the job.
+Languages = ["Python", "SQL", "PySpark"]
+Cloud = ["AWS S3", "AWS Glue", "Athena", "Azure Data Factory", "Databricks"]
+"Data Tools" = ["Airflow", "Docker", "Delta Lake", "Git"]
+BI = ["Power BI", "Tableau"]
+Learning = ["dbt", "Kafka", "Terraform"]
+
+[[experience]]
+title = "Junior Data Analyst"
+company = "Example Analytics Ltd"
+dates = "2020 to 2023"
+bullets = [
+  "Built Python and SQL pipelines that automated weekly reporting for five departments.",
+  "Designed Power BI dashboards used by management for monthly planning.",
+  "Trained predictive models for customer churn with scikit-learn.",
+]
+
+[[experience]]
+title = "Part time Warehouse Associate"
+company = "Example Logistics"
+dates = "2024 to now"
+bullets = [
+  "Checked inventory accuracy and reported data quality issues to the site team.",
+]
+
+[[projects]]
+name = "Serverless Taxi Data Pipeline on AWS"
+link = "github.com/alex-example/taxi-pipeline"
+bullets = [
+  "Ingested 3M trip records into S3 and transformed them with Glue and PySpark.",
+  "Queried the curated layer with Athena and built a Power BI report on top.",
+]
+
+[[projects]]
+name = "Train Delay Pipeline on Azure"
+link = "github.com/alex-example/delay-pipeline"
+bullets = [
+  "Orchestrated ingestion with Azure Data Factory into ADLS Gen2.",
+  "Modeled bronze, silver and gold Delta tables in Databricks.",
+]
+
+[[education]]
+degree = "M.Sc. Data Science"
+school = "Example University"
+dates = "2023 to now"
+
+[[education]]
+degree = "B.Sc. Software Engineering"
+school = "Example Institute of Technology"
+dates = "2016 to 2020"

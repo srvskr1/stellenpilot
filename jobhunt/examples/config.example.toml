@@ -1,0 +1,64 @@
+# Copy this file to config.toml and edit it. config.toml is ignored by git.
+# Secrets (API keys) go in environment variables or a .env file, never in this file.
+
+[search]
+# Job titles to look for. Each source turns these into its own query format.
+keywords = ["Werkstudent Data", "Working Student Data", "Junior Data Engineer", "Junior Data Analyst"]
+# Home base for on site and hybrid roles.
+city = "Essen"
+radius_km = 75
+# Extra place names that count as "near home" for sources that only give a city name (Arbeitnow).
+nearby_cities = ["Dortmund", "Bochum", "Duisburg", "Düsseldorf", "Köln", "Gelsenkirchen", "Oberhausen", "Mülheim", "Wuppertal", "Hagen", "Bonn", "Leverkusen", "Münster"]
+country = "de"
+# Also look for remote roles anywhere in the country.
+include_remote = true
+# Only ads published in the last N days.
+max_age_days = 3
+# Drop ads whose title contains any of these words (case insensitive).
+exclude_title_words = ["senior", "lead", "head of", "principal", "sales", "ausbildung"]
+
+[language]
+# Skip ads that demand fluent German (you can still see them on the board).
+skip_if_fluent_german_required = true
+
+[sources]
+arbeitsagentur = true   # Bundesagentur fuer Arbeit, free, no key
+arbeitnow = true        # free, no key, link back required (the dashboard shows it)
+adzuna = false          # needs ADZUNA_APP_ID and ADZUNA_APP_KEY
+theirstack = false      # needs THEIRSTACK_API_KEY, 200 free credits a month
+
+[sources.limits]
+# Hard caps per run, to stay inside free plans.
+adzuna_calls = 4
+theirstack_jobs = 6
+arbeitsagentur_results = 50
+
+[sources.theirstack_options]
+# Location ids from TheirStack's location catalog. 2861876 is North Rhine-Westphalia.
+# Leave empty to search the whole country.
+location_ids = [2861876]
+# Keep only ads written in English (saves credits if you only apply in English).
+english_only = true
+
+[llm]
+# provider: "anthropic", "openai" (any OpenAI compatible server, including Ollama and LM Studio) or "none".
+# With "none" the pipeline still runs and scores jobs by keyword overlap.
+provider = "none"
+model = "claude-sonnet-4-5"
+# For openai compatible servers, e.g. "http://localhost:11434/v1" for Ollama.
+base_url = ""
+
+[tailor]
+# Jobs at or above this match get a tailored CV and cover letter.
+min_match = 70
+max_per_run = 5
+output_dir = "output"
+# Convert DOCX to PDF with LibreOffice when it is installed.
+make_pdf = true
+# Only tailor for ads written in English. Set false if you also apply in German.
+only_english_ads = true
+
+[gmail]
+# Optional. See docs/gmail.md. Reads mail only, never sends.
+enabled = false
+lookback_days = 3

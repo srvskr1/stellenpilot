@@ -1,0 +1,17 @@
+# your data and secrets, never commit
+config.toml
+profile.toml
+.env
+credentials.json
+token.json
+*.db
+*.db-journal
+output/
+
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+build/
+dist/

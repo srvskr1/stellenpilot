@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "job-hunt-pipeline"
+version = "0.1.0"
+description = "Local job hunt pipeline: fetch job ads from public APIs, score them against your CV with an LLM, tailor your CV truthfully, and track everything on a local dashboard."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Sourav Sarker" }]
+requires-python = ">=3.11"
+dependencies = ["python-docx>=1.1"]
+
+[project.optional-dependencies]
+gmail = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2"]
+
+[project.scripts]
+jobhunt = "jobhunt.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["jobhunt*"]
+
+[tool.setuptools.package-data]
+jobhunt = ["web/*", "examples/*"]

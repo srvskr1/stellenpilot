@@ -1,0 +1,58 @@
+"""Arbeitnow job board API (Germany, many English speaking roles).
+
+Free and keyless. Their terms ask for a link back to https://www.arbeitnow.com ,
+which the dashboard shows on every Arbeitnow job and in its footer.
+"""
+from __future__ import annotations
+
+from datetime import datetime, timezone
+
+from ..http import request_json
+from ..text import strip_html
+
+NAME = "arbeitnow"
+LABEL = "Arbeitnow"
+URL = "https://www.arbeitnow.com/api/job-board-api"
+MAX_PAGES = 3  # 325 jobs per page; newest first
+
+
+def _matches(job: dict, keywords: list[str]) -> bool:
+    title = job.get("title", "").lower()
+    return any(all(w in title for w in kw.lower().split()) for kw in keywords)
+
+
+def fetch(settings) -> list[dict]:
+    from . import job_type_from_title
+
+    s = settings["search"]
+    places = [p.lower() for p in [s["city"], *s.get("nearby_cities", [])]]
+    cutoff = datetime.now(timezone.utc).timestamp() - int(s["max_age_days"]) * 86400
+    out = []
+    for page in range(1, MAX_PAGES + 1):
+        data = request_json(URL, params={"page": page})
+        items = data.get("data") or []
+        for j in items:
+            if j.get("created_at", 0) < cutoff:
+                return out
+            remote = bool(j.get("remote"))
+            here = any(p in (j.get("location") or "").lower() for p in places)
+            if not (here or (remote and s.get("include_remote"))):
+                continue
+            if not _matches(j, s["keywords"]):
+                continue
+            types = " ".join(j.get("job_types") or []).lower()
+            out.append({
+                "id": f"an-{j['slug']}",
+                "source": LABEL,
+                "title": j.get("title", ""),
+                "company": j.get("company_name", ""),
+                "location": ("Remote, " if remote else "") + (j.get("location") or ""),
+                "remote": remote,
+                "url": j.get("url", ""),
+                "description": strip_html(j.get("description")),
+                "posted_at": datetime.fromtimestamp(j["created_at"], timezone.utc).date().isoformat(),
+                "job_type": job_type_from_title(j.get("title", ""), "Werkstudent" if "student" in types else ""),
+            })
+        if not items:
+            break
+    return out
