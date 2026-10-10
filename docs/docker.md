@@ -8,11 +8,13 @@ No Python install needed. Works the same on Windows, macOS and Linux with Docker
 git clone https://github.com/srvskr1/job-hunt-pipeline.git
 cd job-hunt-pipeline
 mkdir data                                 # your files go here (create it yourself so you own it)
-docker compose build                       # first time only, takes a few minutes
+docker compose pull || docker compose build   # ready image, or build it yourself (a few minutes)
 docker compose run --rm jobhunt init       # creates data/config.toml, data/profile.toml, data/.env
 docker compose run --rm jobhunt demo       # optional: fictional sample jobs
 docker compose up -d                       # dashboard at http://127.0.0.1:8765
 ```
+
+The ready image (`ghcr.io/srvskr1/job-hunt-pipeline`) is published by GitHub Actions on every push to the main branch. Until the first one exists, or if the package is still private, `docker compose pull` fails and the command builds the image from your copy instead. `docker compose build` always uses the code in your folder.
 
 Your files live in the `data` folder next to `docker-compose.yml`: config, profile, `.env` with your keys, the database and the generated documents in `data/output`. Edit them with any editor on your computer.
 

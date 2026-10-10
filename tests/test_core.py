@@ -63,6 +63,18 @@ class TruthGuardTests(unittest.TestCase):
         self.assertIn("Snowflake", unsupported_claims("I am eager to learn. I ran Snowflake in production.", PROFILE, snow_job))
         self.assertIn("Snowflake", unsupported_claims("I learned Snowflake while building warehouses.", PROFILE, snow_job))
 
+    def test_language_level_claims_are_checked(self):
+        de_job = {**JOB, "description": "Kafka, Snowflake, Deutschkenntnisse"}
+        self.assertTrue(unsupported_claims("Meine Deutschkenntnisse sind fließend.", PROFILE, de_job))
+        self.assertTrue(unsupported_claims("I speak German at C1 level.", PROFILE, de_job))
+        self.assertEqual(unsupported_claims("My German is basic (A2) and I am improving it.", PROFILE, de_job), [])
+
+    def test_loose_learning_words_do_not_unlock_claims(self):
+        de_job = {**JOB, "description": "Kafka, Snowflake"}
+        self.assertIn("Kafka", unsupported_claims("Dabei konnte ich meine Kenntnisse in Kafka vertiefen.", PROFILE, de_job))
+        self.assertIn("Kafka", unsupported_claims("I used Kafka for machine learning features.", PROFILE, de_job))
+        self.assertEqual(unsupported_claims("In Snowflake arbeite ich mich gerade ein.", PROFILE, de_job), [])
+
     def test_learning_skills_are_not_experience(self):
         self.assertIn("dbt", unsupported_claims("I built dbt models in production.", PROFILE, JOB))
         from jobhunt.tailor import coverage
@@ -102,7 +114,7 @@ class TruthGuardTests(unittest.TestCase):
         self.assertIn("guard", plan)
 
     def test_tailor_writes_documents_with_verbatim_bullets(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             res = tailor_job({**JOB, "match": 80}, PROFILE, Path(d), llm=None, make_pdf=False)
             from docx import Document
             text = "\n".join(p.text for p in Document(res["files"][0]).paragraphs)
@@ -113,12 +125,12 @@ class TruthGuardTests(unittest.TestCase):
 class SparseProfileTests(unittest.TestCase):
     def test_minimal_profile_still_builds_documents(self):
         tiny = {"person": {}, "experience": [{"bullets": ["Did a thing."]}], "education": [{"degree": "BSc"}]}
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             res = tailor_job({**JOB, "match": 80}, tiny, Path(d), llm=None, make_pdf=False)
             self.assertEqual(len(res["files"]), 3)
 
     def test_two_roles_at_one_company_get_separate_folders(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             a = tailor_job({**JOB, "title": "Data Engineer"}, PROFILE, Path(d), make_pdf=False)
             b = tailor_job({**JOB, "title": "BI Analyst"}, PROFILE, Path(d), make_pdf=False)
             self.assertNotEqual(a["folder"], b["folder"])
@@ -141,7 +153,7 @@ class GmailLogicTests(unittest.TestCase):
 
 class DbTests(unittest.TestCase):
     def test_run_does_not_undo_a_manual_status(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             db = DB(Path(d) / "t.db")
             db.insert_job({**JOB, "dedupe_key": "k"})
             db.set_status("t-1", "applied", source="manual")
@@ -150,7 +162,7 @@ class DbTests(unittest.TestCase):
             self.assertEqual((j["status"], j["folder"]), ("applied", "/tmp/x"))
 
     def test_pipeline_never_overwrites_user_fields(self):
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             db = DB(Path(d) / "t.db")
             db.insert_job({**JOB, "dedupe_key": "k"})
             db.update_job("t-1", {"notes": "mine", "rating": 1}, by_user=True)
@@ -179,7 +191,7 @@ class ServerTests(unittest.TestCase):
     def test_patch_requires_header_and_saves(self):
         from http.server import ThreadingHTTPServer
         from jobhunt.server import make_handler
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             settings = Settings(Path(d))
             DB(settings.db_path).insert_job({**JOB, "dedupe_key": "k"})
             srv = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(settings))

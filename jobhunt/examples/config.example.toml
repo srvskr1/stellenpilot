@@ -9,6 +9,8 @@ city = "Essen"
 radius_km = 75
 # Extra place names that count as "near home" for sources that only give a city name (Arbeitnow).
 nearby_cities = ["Dortmund", "Bochum", "Duisburg", "Düsseldorf", "Köln", "Gelsenkirchen", "Oberhausen", "Mülheim", "Wuppertal", "Hagen", "Bonn", "Leverkusen", "Münster"]
+# Two letter country code. Bundesagentur and Arbeitnow cover Germany only; Adzuna covers
+# gb us at au be br ca ch de es fr in it mx nl nz pl sg za; TheirStack and the watchlist cover any country.
 country = "de"
 # Also look for remote roles anywhere in the country.
 include_remote = true
@@ -18,8 +20,12 @@ max_age_days = 3
 exclude_title_words = ["senior", "lead", "head of", "principal", "sales", "ausbildung"]
 
 [language]
-# Skip ads that demand fluent German (you can still see them on the board).
-skip_if_fluent_german_required = true
+# Your German level, A1 to C2. Leave empty to read it from profile.toml ("German (A2)").
+my_german_level = ""
+# Ads that ask for more than your level plus this many steps are marked "German needed"
+# and skipped (still visible on the board). With A2 and 1, B1 ads are kept, B2 and above skipped.
+german_tolerance = 1
+skip_if_german_too_high = true
 
 [sources]
 arbeitsagentur = true   # Bundesagentur fuer Arbeit, free, no key
@@ -39,6 +45,16 @@ arbeitsagentur_results = 50
 location_ids = [2861876]
 # Keep only ads written in English (saves credits if you only apply in English).
 english_only = true
+
+[watch]
+# Companies whose own job feeds are checked every run. Find the entry for a company with:
+#   jobhunt watch https://job-boards.greenhouse.io/trivago
+# Supported: greenhouse, lever, ashby, personio, smartrecruiters
+companies = []
+# Keep only titles containing one of these words. Empty: taken from search.keywords.
+title_words = []
+# Ignore postings older than this many days.
+max_age_days = 30
 
 [llm]
 # provider:
@@ -72,6 +88,17 @@ output_dir = "output"
 make_pdf = true
 # Only tailor for ads written in English. Set false if you also apply in German.
 only_english_ads = true
+# Cover letter language: "auto", "en" or "de".
+# "auto" writes German for German ads only if your German is B2 or better (and an LLM is set).
+# Below B2 it writes English: a polished German letter would suggest a level you do not have.
+letter_language = "auto"
+
+[notify]
+# A short digest to yourself after each run. Secrets go in .env, see docs/digest.md.
+email = false
+telegram = false
+# Skip the digest on days with no new jobs and no Gmail changes.
+only_when_new = false
 
 [gmail]
 # Optional. See docs/gmail.md. Reads mail only, never sends.

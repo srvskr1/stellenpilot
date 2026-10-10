@@ -19,6 +19,14 @@ OPENAI_API_KEY=
 ADZUNA_APP_ID=
 ADZUNA_APP_KEY=
 THEIRSTACK_API_KEY=
+# Optional daily digest to yourself (see docs/digest.md)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASSWORD=
+DIGEST_TO=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
 """
 
 
@@ -56,8 +64,13 @@ def cmd_doctor(settings: Settings) -> int:
     for name, mod in REGISTRY.items():
         on = settings["sources"].get(name)
         need = [k for k in getattr(mod, "NEEDS", ()) if not settings.secret(k)]
-        state = "off" if not on else (f"ON but missing {', '.join(need)}" if need else "on")
-        ok &= not (on and need)
+        covered = getattr(mod, "COUNTRIES", None)
+        country = settings["search"]["country"].lower()
+        state = "off" if not on else (f"ON but missing {', '.join(need)}" if need else
+                                      f"on, but it does not cover '{country}' (skipped)" if covered and country not in covered else "on")
+        if name == "watchlist":
+            state = f"{len(settings['watch'].get('companies') or [])} companies"
+        ok &= not (on and need and name != "watchlist")
         print(f"source {name:15} {state}")
     ok &= _check_llm(settings)
     from .tailor import find_soffice
@@ -106,6 +119,19 @@ def main(argv: list[str] | None = None) -> int:
                    help="address to listen on; keep 127.0.0.1 unless you run inside Docker")
     sub.add_parser("gmail", help="sync statuses from Gmail once")
     sub.add_parser("demo", help="load fictional sample jobs to try the dashboard without any keys")
+    sub.add_parser("notify-test", help="send a test digest by email or Telegram")
+    sub.add_parser("telegram-id", help="show your Telegram chat id after you messaged your bot")
+    im = sub.add_parser("import", help="turn your existing CV (PDF, DOCX, TXT) into profile.imported.toml")
+    im.add_argument("cv", type=Path)
+    ad = sub.add_parser("add", help="add a job yourself, from a link or pasted text")
+    ad.add_argument("url", nargs="?", default="", help="link to the ad on a company careers page")
+    ad.add_argument("--text", help="ad text, or a path to a .txt file, or - to read from stdin")
+    ad.add_argument("--title", default="")
+    ad.add_argument("--company", default="")
+    ad.add_argument("--location", default="")
+    ad.add_argument("--tailor", action="store_true", help="also make the CV and cover letter now")
+    w = sub.add_parser("watch", help="find the watchlist entry for a company's careers page")
+    w.add_argument("url", help="careers page or job link, or an entry like greenhouse:trivago")
     a = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO if a.verbose else logging.WARNING, format="%(message)s")
     home = a.home.resolve()
@@ -133,6 +159,98 @@ def main(argv: list[str] | None = None) -> int:
         from .gmail_sync import sync
         changes = sync(DB(settings.db_path), home, settings["gmail"].get("lookback_days", 3))
         print(f"{len(changes)} status changes")
+        return 0
+    if a.cmd == "notify-test":
+        from .db import DB, today
+        from .notify import send_digest
+        if not (settings["notify"].get("email") or settings["notify"].get("telegram")):
+            print("Turn on email or telegram under [notify] in config.toml first.")
+            return 1
+        cfg = dict(settings["notify"], only_when_new=False)
+        settings.cfg["notify"] = cfg
+        problems = send_digest(settings, DB(settings.db_path), {"new": 0, "shortlisted": 0, "problems": ["(test message)"]}, today())
+        print("\n".join(problems) if problems else "Sent. Check your inbox or Telegram.")
+        return 1 if problems else 0
+    if a.cmd == "telegram-id":
+        from .notify import telegram_chat_ids
+        token = settings.secret("TELEGRAM_BOT_TOKEN")
+        if not token:
+            print("Put TELEGRAM_BOT_TOKEN in .env first (from @BotFather).")
+            return 1
+        ids = telegram_chat_ids(token)
+        if not ids:
+            print("No messages yet. Send any message (e.g. /start) to your bot in Telegram, then run this again.")
+            return 1
+        for cid, who in ids:
+            print(f"TELEGRAM_CHAT_ID={cid}    ({who})")
+        return 0
+    if a.cmd == "import":
+        from .importer import import_cv
+        try:
+            out, notes = import_cv(a.cv, settings)
+        except FileNotFoundError as e:
+            print(f"Import failed: {e}")
+            return 1
+        except (RuntimeError, ValueError) as e:
+            print(f"Import failed: {e}")
+            return 1
+        except OSError as e:  # network: the AI model server is not running or not reachable
+            print(f"Import failed: could not reach the AI model ({e}). Is it running? Check with: jobhunt doctor")
+            return 1
+        except Exception as e:  # never show a raw traceback for a bad file or odd model output
+            print(f"Import failed: {e.__class__.__name__}: {e}")
+            return 1
+        print(f"Wrote {out.name}. Review it, then rename it to profile.toml.")
+        for n in notes[:12]:
+            print(f"  check: {n}")
+        if len(notes) > 12:
+            print(f"  ... {len(notes) - 12} more notes in the file")
+        return 0
+    if a.cmd == "add":
+        from .db import DB
+        from .manual import AddError, add_job
+        text = a.text or ""
+        if text == "-":
+            text = sys.stdin.read()
+        elif text and len(text) < 260 and "\n" not in text and Path(text).is_file():
+            text = Path(text).read_text(encoding="utf-8", errors="replace")
+        try:
+            res = add_job(settings, DB(settings.db_path), tailor=a.tailor, url=a.url, text=text,
+                          title=a.title, company=a.company, location=a.location)
+        except AddError as e:
+            print(f"Not added: {e}")
+            return 1
+        except Exception as e:  # never a raw traceback for an odd page or a model hiccup
+            print(f"Not added: {e.__class__.__name__}: {e}")
+            return 1
+        j = res["job"]
+        if res["status"] == "exists":
+            print(f"Already on your board: {j['title']} at {j['company']} (match {j['match']})")
+            return 0
+        print(f"Added: {j['title']} at {j['company']}, match {j['match']} ({j['fit']}). {j['why']}")
+        if j.get("german_level"):
+            print(f"  German asked for: {j['german_level']}")
+        if res.get("tailored"):
+            print(f"  Documents: {res['tailored']['folder']}")
+        return 0
+    if a.cmd == "watch":
+        from .sources.watchlist import fetch_company, parse_careers_url, title_matches, title_rules
+        entry = a.url if ":" in a.url and "//" not in a.url else parse_careers_url(a.url)
+        if not entry:
+            print("Could not recognize that link. Supported: Greenhouse, Lever, Ashby, Personio, SmartRecruiters.\n"
+                  "Tip: open a job on the company's careers page and use the link of its Apply page.")
+            return 1
+        try:
+            jobs = fetch_company(entry, settings["search"]["country"])
+        except Exception as e:
+            print(f"{entry}: could not read the feed ({e})")
+            return 1
+        rules = title_rules(settings)
+        hits = [j for j in jobs if title_matches(j["title"], rules)]
+        print(f"{entry}: {len(jobs)} open jobs, {len(hits)} match your keywords ({' or '.join(' + '.join(r) for r in rules)})")
+        for j in hits[:8]:
+            print(f"  * {j['title']}  ({j['location']})")
+        print(f'\nAdd this to [watch] companies in config.toml:  "{entry}"')
         return 0
     if a.cmd == "demo":
         from .demo import load_demo

@@ -115,6 +115,15 @@ th{background:var(--surface-alt);font:600 .6875rem var(--f-ui);letter-spacing:.0
 td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 
+.btn.ghost{background:var(--surface);color:var(--accent);border-color:var(--accent)}
+.btn.ghost:hover{background:var(--accent-soft);border-color:var(--accent)}
+.addform{display:flex;flex-direction:column;gap:12px;padding:16px}
+.addform label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.8125rem}
+.addform label.check{flex-direction:row;font-weight:500}
+.addform textarea.input{min-height:120px;padding:10px 12px;resize:vertical;font:400 .875rem/1.5 var(--f-ui)}
+.addrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.addrow.end{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+@media (max-width:760px){.addrow{grid-template-columns:1fr}}
 .credits{padding:16px clamp(16px,2.4vw,32px) 28px;margin-left:260px;font-size:.75rem;color:var(--text-tertiary)}
 .credits a{color:var(--text-secondary)}
 @media (max-width:760px){.credits{margin-left:0}}
@@ -250,7 +259,8 @@ tr:last-child td{border-bottom:none}
     <div class="filters">
       <p class="label" style="margin-bottom:0">Find</p>
       <input class="input" id="q" type="search" placeholder="Company or title" aria-label="Search company or title">
-      <label class="check" for="showDe"><input type="checkbox" id="showDe"> Show roles needing fluent German</label>
+      <label class="check" for="showDe"><input type="checkbox" id="showDe"> Show roles needing more German than you have</label>
+      <button class="btn ghost" id="addBtn" type="button" aria-expanded="false" aria-controls="addPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add a job</span></button>
       <button class="btn" id="gmailBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>Check Gmail</span></button>
     </div>
     <div class="lastrun" id="lastrun">Waiting for the first run</div>
@@ -262,6 +272,22 @@ tr:last-child td{border-bottom:none}
       <div class="kpi" style="--c:var(--s-ready)"><span class="v" id="k-ready">0</span><span class="k">Docs ready</span></div>
       <div class="kpi" style="--c:var(--s-applied)"><span class="v" id="k-applied">0</span><span class="k">Applied</span></div>
       <div class="kpi" style="--c:var(--s-interview)"><span class="v" id="k-int">0</span><span class="k">Interviews</span></div>
+    </section>
+    <section id="addPanel" aria-labelledby="add-h" hidden>
+      <div class="sechead"><h2 id="add-h">Add a job yourself</h2><span>Found it on LinkedIn, a company site or through a friend</span></div>
+      <form class="panel addform" id="addForm" style="margin-top:12px">
+        <label>Link to the ad <span class="muted">(company careers pages; for LinkedIn or StepStone paste the text below)</span>
+          <input class="input" name="url" type="url" placeholder="https://..."></label>
+        <label>Or paste the ad text
+          <textarea class="input" name="text" rows="6" placeholder="Copy the whole job ad here"></textarea></label>
+        <div class="addrow">
+          <label>Job title <input class="input" name="title" placeholder="needed when pasting text"></label>
+          <label>Company <input class="input" name="company"></label>
+          <label>Location <input class="input" name="location" placeholder="e.g. Essen or Remote"></label>
+        </div>
+        <label class="check"><input type="checkbox" name="tailor"> Also make the CV and cover letter now</label>
+        <div class="addrow end"><span class="muted" id="addMsg" role="status"></span><button class="btn" type="submit" id="addSubmit" style="width:auto">Add and score</button></div>
+      </form>
     </section>
     <section aria-labelledby="today-h">
       <div class="sechead"><h2 id="today-h">Today</h2><span id="today-count"></span></div>
@@ -343,7 +369,7 @@ function card(j){{
     <div class="body">
       <h3 class="title"><a href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">${esc(j.title)}</a></h3>
       <div class="meta"><b>${esc(j.company)}</b>${j.location?`<span>${esc(j.location)}</span>`:""}${j.jobType?`<span>${esc(j.jobType)}</span>`:""}${j.foundAt?`<span>Found ${fmtDate(j.foundAt)}</span>`:""}</div>
-      <div class="chips">${j.source==="Found in Gmail"?"":`<span class="chip ${j.lang==="German needed"?"de":"en"}">${j.lang==="German needed"?"Needs German":"English"}</span>`}${remote?`<span class="chip remote">Remote</span>`:""}${j.fit?`<span class="chip">${esc(j.fit)}</span>`:""}${srcChip(j.source)}${j.closed?`<span class="chip closed">Posting closed</span>`:""}${j.interviewAt?`<span class="chip int">Interview ${fmtWhen(j.interviewAt)}</span>`:""}</div>
+      <div class="chips">${j.source==="Found in Gmail"?"":`<span class="chip ${j.lang==="German needed"?"de":"en"}">${j.lang==="German needed"?"Needs German":j.lang==="German ad"?"German ad":"English"}</span>${j.germanLevel?`<span class="chip ${j.lang==="German needed"?"de":""}" title="German level the ad asks for">German ${esc(j.germanLevel)}</span>`:""}`}${remote?`<span class="chip remote">Remote</span>`:""}${j.fit?`<span class="chip">${esc(j.fit)}</span>`:""}${srcChip(j.source)}${j.closed?`<span class="chip closed">Posting closed</span>`:""}${j.interviewAt?`<span class="chip int">Interview ${fmtWhen(j.interviewAt)}</span>`:""}</div>
       ${j.why?`<p class="why">${esc(j.why)}</p>`:""}
       ${j.gaps?`<p class="gap">Gaps: ${esc(j.gaps)}</p>`:""}
       ${j.folder?`<div class="folder">${esc(j.folder)}</div>`:""}
@@ -356,6 +382,7 @@ function card(j){{
           <button class="mini" data-rate="1" data-id="${esc(j._id)}" aria-pressed="${j.rating===1}" title="Good match" ${canWrite?"":"disabled"}>${ICO.up}<span class="sr">Good</span></button>
           <button class="mini" data-rate="-1" data-id="${esc(j._id)}" aria-pressed="${j.rating===-1}" title="Not for me" ${canWrite?"":"disabled"}>${ICO.down}<span class="sr">Not for me</span></button></div>`:""}
         ${j.statusNote?`<div class="note">${esc(j.statusNote)}</div>`:""}
+        ${j.summaryEn?`<details class="xtra"><summary>English summary of this German ad</summary><div class="prepbody"><p>${esc(j.summaryEn)}</p></div></details>`:""}
         ${j.prep?`<details class="xtra" ${openPrep.has(j._id)?"open":""} data-prep="${esc(j._id)}"><summary>Interview prep pack</summary><div class="prepbody">${fmtPrep(j.prep)}</div></details>`:""}
         <details class="xtra" ${openNotes.has(j._id)?"open":""} data-notes="${esc(j._id)}"><summary>Notes${j.notes?" (saved)":""}</summary><textarea data-id="${esc(j._id)}" aria-label="Notes for ${esc(j.company)}" placeholder="Contact person, salary, what was said on calls" ${canWrite?"":"disabled"}>${esc(j.notes||"")}</textarea></details>
       </div>
@@ -569,6 +596,22 @@ async function checkGmail(){
   finally{btn.disabled=false;btn.querySelector("span").textContent="Check Gmail";localGmail=false;renderOffice()}
 }
 $("gmailBtn").addEventListener("click",checkGmail);
+$("addBtn").addEventListener("click",()=>{const p=$("addPanel"),open=p.hidden;p.hidden=!open;$("addBtn").setAttribute("aria-expanded",String(open));if(open){p.scrollIntoView({behavior:"smooth",block:"start"});p.querySelector("input").focus()}});
+$("addForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const f=e.target,btn=$("addSubmit"),msg=$("addMsg");
+  const body={url:f.url.value.trim(),text:f.text.value.trim(),title:f.title.value.trim(),company:f.company.value.trim(),location:f.location.value.trim(),tailor:f.tailor.checked};
+  if(!body.url&&!body.text){msg.textContent="Add a link or paste the ad text.";return}
+  btn.disabled=true;btn.textContent=body.tailor?"Scoring and tailoring…":"Scoring…";msg.textContent="";
+  try{
+    const r=await api("POST","/api/add",body);
+    const j=r.job;
+    msg.textContent=r.status==="exists"?`Already on your board: ${j.title} at ${j.company}.`:`Added ${j.title} at ${j.company}, match ${j.match}.`;
+    if(r.status!=="exists")f.reset();
+    await refresh();if(j&&j._id)goJob(j._id);
+  }catch(err){msg.textContent=err.message}
+  finally{btn.disabled=false;btn.textContent="Add and score"}
+});
 
 /* ---------- Local API ---------- */
 async function api(method,path,body){

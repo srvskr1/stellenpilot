@@ -36,7 +36,9 @@ CREATE TABLE IF NOT EXISTS jobs (
   prep TEXT NOT NULL DEFAULT '',
   rating INTEGER,
   notes TEXT NOT NULL DEFAULT '',
-  dedupe_key TEXT NOT NULL DEFAULT ''
+  dedupe_key TEXT NOT NULL DEFAULT '',
+  german_level TEXT NOT NULL DEFAULT '',
+  summary_en TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS jobs_dedupe ON jobs(dedupe_key);
 CREATE TABLE IF NOT EXISTS runs (
@@ -69,9 +71,18 @@ def today() -> str:
 
 class DB:
     def __init__(self, path: Path | str):
-        self.conn = sqlite3.connect(str(path), check_same_thread=False)
+        self.conn = sqlite3.connect(str(path), check_same_thread=False, timeout=30)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        """Add columns introduced after a user's database was created."""
+        have = {r[1] for r in self.conn.execute("PRAGMA table_info(jobs)")}
+        for col in ("german_level", "summary_en"):
+            if col not in have:
+                self.conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
+        self.conn.commit()
 
     # ---------- jobs ----------
     def job_ids(self) -> set[str]:

@@ -64,7 +64,7 @@ class LocalLLMTests(unittest.TestCase):
     def setUp(self):
         SEEN.clear()
         Fake.reject_json_mode = False
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.home = Path(self.tmp.name)
 
     def tearDown(self):

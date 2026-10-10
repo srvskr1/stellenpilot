@@ -19,9 +19,10 @@ from .db import DB, STATUSES
 CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "statusUpdatedAt",
          "status_note": "statusNote", "gap_tags": "gapTags", "interview_at": "interviewAt",
          "found_at": "foundAt", "posted_at": "postedAt", "job_type": "jobType", "closed_at": "closedAt",
-         "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
+         "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
+SLOW_POSTS = {"/api/add", "/api/gmail"}
 
 
 def camel(d: dict) -> dict:
@@ -47,6 +48,14 @@ def weekly_summary(jobs: list[dict]) -> list[dict]:
         tips.append(f"{top[0][0]} is the gap named most often, so it is the best skill to learn next.")
     return [{"weekOf": start.isoformat(), "applied": applied, "replies": replies, "interviews": interviews,
              "topGap": top[0][0] if top else "", "summary": " ".join(tips)}]
+
+
+def _sync_closing(sync, settings):
+    own = DB(settings.db_path)
+    try:
+        return sync(own, settings.home, settings["gmail"].get("lookback_days", 3))
+    finally:
+        own.conn.close()
 
 
 def open_in_file_manager(path: str) -> None:
@@ -129,6 +138,10 @@ def make_handler(settings, port: int = 8765):
         def do_POST(self):
             if not self._guard():
                 return
+            if self.path in SLOW_POSTS:
+                # Adding a job (fetch, AI scoring, maybe tailoring) and Gmail sync can take minutes with a
+                # local model. They use their own database connection so the dashboard stays responsive.
+                return self._post()
             with lock:
                 self._post()
 
@@ -185,12 +198,27 @@ def make_handler(settings, port: int = 8765):
                     return self._send(400, {"error": "No document folder for this job yet"})
                 open_in_file_manager(str(folder))
                 return self._send(200, {"ok": True})
+            if self.path == "/api/add":
+                from .manual import AddError, add_job
+                try:
+                    body = self._body()
+                    own = DB(settings.db_path)
+                    try:
+                        res = add_job(settings, own, tailor=bool(body.get("tailor")),
+                                      **{k: str(body.get(k) or "") for k in ("url", "text", "title", "company", "location")})
+                    finally:
+                        own.conn.close()
+                except (AddError, ValueError) as e:
+                    return self._send(400, {"error": str(e)})
+                except Exception as e:
+                    return self._send(500, {"error": f"Could not add the job: {e}"})
+                return self._send(200, {"status": res["status"], "job": camel(res["job"])})
             if self.path == "/api/gmail":
                 if not settings["gmail"].get("enabled"):
                     return self._send(400, {"error": "Gmail sync is off. See docs/gmail.md"})
                 try:
                     from .gmail_sync import sync
-                    return self._send(200, {"changes": sync(db, settings.home, settings["gmail"].get("lookback_days", 3))})
+                    return self._send(200, {"changes": _sync_closing(sync, settings)})
                 except Exception as e:
                     return self._send(500, {"error": str(e)})
             self._send(404, {"error": "not found"})

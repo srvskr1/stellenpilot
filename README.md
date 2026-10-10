@@ -1,20 +1,27 @@
 # Job Hunt Pipeline
 
+[![tests](https://github.com/srvskr1/job-hunt-pipeline/actions/workflows/tests.yml/badge.svg)](https://github.com/srvskr1/job-hunt-pipeline/actions/workflows/tests.yml)
+
 A local, open source job hunt assistant for Germany. Every day it collects fresh job ads from public APIs, scores them against your CV, writes a tailored CV and cover letter for the best matches, and shows everything on a dashboard in your browser. It runs on your own computer. Your CV and your data never leave it, except for the AI model you choose.
 
 ![Dashboard](docs/dashboard.png)
 
-It never applies for you and never sends email. You stay in control of every application.
+It never applies for you and never contacts companies. You stay in control of every application.
 
 ## What it does
 
+* **Starts from your CV.** `jobhunt import cv.pdf` turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
 * **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys). It removes duplicates across sources.
+* **Watches your dream companies.** Name companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters, and their new roles show up every day, often before they reach the job boards. `jobhunt watch <careers link>` finds the right entry.
+* **Takes jobs you found yourself.** Paste a link or the ad text (from LinkedIn, a friend, anywhere) with `jobhunt add` or the dashboard's "Add a job" panel. It gets scored and tailored like the rest.
+* **Understands German job ads.** It reads the German level an ad really asks for (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and gives you an English summary of German ads. It writes German cover letters only if your German is B2 or better, because a polished German letter from someone at A2 would suggest a level they do not have.
 * **Scores each job** from 0 to 100 against your profile, with a short reason and honest gaps. Ads that demand fluent German are flagged and skipped (you can switch that off).
 * **Learns your taste.** Give jobs a thumbs up or down on the dashboard and the next run leans toward what you liked.
-* **Tailors your CV truthfully.** It reorders and selects facts from your profile. It never invents experience. A guard rejects generated text that mentions numbers or tools you did not list, and falls back to safe text.
+* **Tailors your CV truthfully.** It reorders and selects facts from your profile. It never invents experience. A guard rejects generated text that mentions numbers, tools or language levels your profile does not back up, and falls back to safe text.
 * **Writes a cover letter** and a short report per job: what the ad asks for, what your CV covers, and which gaps to be honest about.
 * **Exports DOCX and PDF** (PDF needs LibreOffice).
 * **Optional Gmail sync** (read only) moves statuses forward when confirmations, interview invitations or rejections arrive.
+* **Daily digest to you** by Telegram or email: top new matches, CVs ready to send, interviews.
 * **Dashboard**: a Today list of what to do next, a pipeline you can filter, notes per job, interview prep, reply rates by source, the skill gaps employers mention most, a weekly summary, and a small animated office that shows what the run is doing.
 
 ## Quick start
@@ -47,7 +54,7 @@ See [docs/docker.md](docs/docker.md) for daily runs and details.
 
 Then make it yours:
 
-1. Put your real CV facts into `profile.toml`. Keep bullets short and true; they are copied word for word.
+1. Run `jobhunt import path/to/your_cv.pdf`, review `profile.imported.toml`, and rename it to `profile.toml`. Or type your facts into `profile.toml` by hand. Bullets are copied word for word, so keep them short and true.
 2. Set your keywords, city and radius in `config.toml`.
 3. Optional: add API keys to `.env` and switch sources on in `config.toml`.
 4. Run `jobhunt doctor` to check the setup, then `jobhunt run` for a real search.
@@ -96,6 +103,14 @@ There is no LinkedIn, StepStone or Indeed scraper on purpose. LinkedIn's and Ste
 
 See [docs/scheduling.md](docs/scheduling.md) for Windows Task Scheduler, cron and macOS.
 
+## Daily digest (optional)
+
+See [docs/digest.md](docs/digest.md) for Telegram (two minutes) or email.
+
+## Other countries
+
+Set `country` in `config.toml`. Adzuna covers 19 countries, TheirStack and the company watchlist cover any country, and the Bundesagentur and Arbeitnow cover Germany only (they are skipped elsewhere).
+
 ## Gmail status sync (optional)
 
 See [docs/gmail.md](docs/gmail.md). It uses read only access with your own Google Cloud OAuth client.
@@ -111,6 +126,12 @@ See [docs/gmail.md](docs/gmail.md). It uses read only access with your own Googl
 | `jobhunt serve` | start the dashboard on 127.0.0.1:8765 |
 | `jobhunt gmail` | sync statuses from Gmail once |
 | `jobhunt demo` | load fictional sample jobs |
+| `jobhunt import cv.pdf` | turn your CV into `profile.imported.toml` to review |
+| `jobhunt add LINK` | add a job from a careers page link |
+| `jobhunt add --text ad.txt --title "..." --company "..." --tailor` | add a pasted ad and tailor it now |
+| `jobhunt watch LINK` | find the watchlist entry for a company |
+| `jobhunt notify-test` | send a test digest |
+| `jobhunt telegram-id` | show your Telegram chat id |
 
 Use `--home PATH` to keep your files in another folder.
 

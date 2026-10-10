@@ -6,9 +6,9 @@ Only official or public APIs are used. No scraping of sites whose terms forbid i
 """
 from __future__ import annotations
 
-from . import adzuna, arbeitnow, arbeitsagentur, theirstack
+from . import adzuna, arbeitnow, arbeitsagentur, theirstack, watchlist
 
-REGISTRY = {m.NAME: m for m in (arbeitsagentur, arbeitnow, adzuna, theirstack)}
+REGISTRY = {m.NAME: m for m in (watchlist, arbeitsagentur, arbeitnow, adzuna, theirstack)}
 
 
 def job_type_from_title(title: str, fallback: str = "") -> str:

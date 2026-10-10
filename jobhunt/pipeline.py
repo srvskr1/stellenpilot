@@ -15,15 +15,20 @@ from .text import dedupe_key, title_excluded
 
 log = logging.getLogger("jobhunt")
 # Sources with full descriptions first, so duplicates keep the richer copy.
-ORDER = ["arbeitsagentur", "theirstack", "arbeitnow", "adzuna"]
+ORDER = ["watchlist", "arbeitsagentur", "theirstack", "arbeitnow", "adzuna"]
 
 
 def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
-    enabled = [n for n in ORDER if settings["sources"].get(n)]
+    enabled = [n for n in ORDER if settings["sources"].get(n) or (n == "watchlist" and settings["watch"].get("companies"))]
     known_ids, known_keys = db.job_ids(), db.dedupe_keys()
     excl = settings["search"].get("exclude_title_words", [])
     new, problems = [], []
+    country = settings["search"]["country"].lower()
     for name in enabled:
+        covered = getattr(sources.REGISTRY[name], "COUNTRIES", None)
+        if covered and country not in covered:
+            problems.append(f"{name} skipped: it does not cover country '{country}'")
+            continue
         db.stage("collect", f"Searching {sources.REGISTRY[name].LABEL}")
         try:
             found = sources.REGISTRY[name].fetch(settings)
@@ -32,6 +37,7 @@ def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
             log.warning("source %s failed: %s", name, e)
             continue
         log.info("%s returned %d jobs", name, len(found))
+        problems += [f"{name}: {p}" for p in getattr(sources.REGISTRY[name], "PROBLEMS", [])]
         for job in found:
             key = dedupe_key(job["company"], job["title"])
             if job["id"] in known_ids or key in known_keys or title_excluded(job["title"], excl):
@@ -43,10 +49,27 @@ def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
     return new, problems
 
 
+def my_german_level(settings) -> str:
+    """From config, else from the profile's languages ("German (A2)", "Deutsch: Muttersprache"), else A2."""
+    import re
+    from .text import normalize_level
+    lvl = normalize_level(settings["language"].get("my_german_level"))
+    if lvl:
+        return lvl
+    for entry in (settings.profile.get("person") or {}).get("languages") or []:
+        if re.search(r"(?i)\b(german|deutsch)", str(entry)):
+            lvl = normalize_level(re.sub(r"(?i)\b(german|deutsch)\w*", "", str(entry)))
+            if lvl:
+                return lvl
+    return "A2"
+
+
 def check_closed(db: DB, limit: int = 15) -> int:
     """Mark jobs whose posting now returns 404 or 410. Other errors are ignored (could be temporary)."""
     closed = 0
     for job in db.jobs("status IN ('new', 'ready') AND closed = 0 AND url != ''")[:limit]:
+        if not job["url"].lower().startswith(("http://", "https://")):
+            continue
         req = urllib.request.Request(job["url"], headers={"User-Agent": USER_AGENT})
         try:
             urllib.request.urlopen(req, timeout=15).close()
@@ -98,10 +121,12 @@ def run(settings, *, tailor: bool = True) -> dict:
     db.stage("score", f"Scoring {len(new)} new jobs against your CV")
     taste = taste_summary(db.jobs("rating IS NOT NULL"))
     added = 0
-    skip_de = settings["language"].get("skip_if_fluent_german_required", True)
+    lang_cfg = settings["language"]
+    skip_de = lang_cfg.get("skip_if_german_too_high", lang_cfg.get("skip_if_fluent_german_required", True))
+    my_de, tol = my_german_level(settings), int(lang_cfg.get("german_tolerance", 1))
     for job in new:
         try:
-            job.update(score_job(job, profile, llm, taste, skip_de))
+            job.update(score_job(job, profile, llm, taste, skip_de, my_de, tol))
         except Exception as e:
             problems.append(f"scoring {job['id']}: {e}")
             continue
@@ -119,7 +144,7 @@ def run(settings, *, tailor: bool = True) -> dict:
         for i, job in enumerate(todo, 1):
             db.stage("tailor", f"Tailoring CV {i} of {len(todo)}: {job['company']}")
             try:
-                res = tailor_job(job, profile, out_root, llm, t.get("make_pdf", True))
+                res = tailor_job(job, profile, out_root, llm, t.get("make_pdf", True), t.get("letter_language", "auto"), my_de)
             except Exception as e:
                 problems.append(f"tailoring {job['id']}: {e}")
                 continue
@@ -147,6 +172,9 @@ def run(settings, *, tailor: bool = True) -> dict:
             problems.append(f"gmail: {e}")
 
     shortlisted = sum(1 for j in new if (j.get("match") or 0) >= settings["tailor"]["min_match"] and j.get("lang") != "German needed")
+    from .notify import send_digest
+    problems += send_digest(settings, db, {"new": added, "shortlisted": shortlisted, "gmail": gmail_changes,
+                                           "problems": problems}, day)
     db.run_update(day, found=len(new), added=added, shortlisted=shortlisted, docs_made=docs,
                   gmail_updates=len(gmail_changes), notes="; ".join(problems)[:500])
     db.stage("done", f"Done: {len(new)} new jobs, {shortlisted} shortlisted")

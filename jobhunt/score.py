@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 
-from .text import ad_language, requires_fluent_german
+from .text import ad_language, german_too_high, required_german_level
 
 # Tools and skills commonly named in data job ads. Used for keyword scoring and gap tags.
 VOCAB = [
@@ -87,7 +87,8 @@ fit: "Strong", "Possible" or "Stretch",
 why: one sentence on why it fits, starting with "Remote." if the job is remote,
 gaps: one honest sentence on what is missing,
 gap_tags: up to 4 concrete tool or skill names the ad asks for and the candidate lacks, e.g. ["dbt", "German"]. Never vague words like "cloud" or "tools".
-german_fluency_required: true if the ad requires fluent, very good, C1 or native German."""
+german_fluency_required: true if the ad requires fluent, very good, C1 or native German,
+summary_en: if the ad is written in German, 3 short English sentences on what the job is and what it asks for; otherwise ""."""
 
 
 def llm_score(llm, job: dict, profile: dict, taste: str = "") -> dict:
@@ -107,6 +108,7 @@ def llm_score(llm, job: dict, profile: dict, taste: str = "") -> dict:
         "gaps": str(out.get("gaps", "")),
         "gap_tags": ([out["gap_tags"]] if isinstance(out.get("gap_tags"), str) else [str(t) for t in (out.get("gap_tags") or [])])[:4],
         "_german": bool(out.get("german_fluency_required")),
+        "summary_en": str(out.get("summary_en") or "")[:800],
     }
 
 
@@ -122,9 +124,24 @@ def taste_summary(rated: list[dict]) -> str:
     return "\n".join(parts)
 
 
-def score_job(job: dict, profile: dict, llm=None, taste: str = "", skip_german: bool = True) -> dict:
+SUMMARY_SYSTEM = """Summarize this German job ad in English for someone who does not read German well.
+Exactly 3 short sentences: what the job is, the main tasks, and the main requirements (including the German level if stated).
+Only use facts from the ad. Plain text, no lists."""
+
+
+def english_summary(llm, job: dict) -> str:
+    """A separate small request: small local models often skip optional fields in a bigger JSON answer."""
+    try:
+        text = llm.complete(SUMMARY_SYSTEM, f"{job['title']} at {job['company']}\n{job['description'][:llm.max_chars]}", max_tokens=250)
+    except Exception:
+        return ""
+    return " ".join(text.split())[:800]
+
+
+def score_job(job: dict, profile: dict, llm=None, taste: str = "", skip_german: bool = True,
+              my_german: str = "A2", tolerance: int = 1) -> dict:
     text = job["title"] + "\n" + job["description"]
-    german_req = requires_fluent_german(text)
+    level = required_german_level(text)
     if llm and llm.enabled:
         try:
             result = llm_score(llm, job, profile, taste)
@@ -133,12 +150,21 @@ def score_job(job: dict, profile: dict, llm=None, taste: str = "", skip_german: 
             result["why"] = f"{result['why']} (AI scoring failed: {str(e)[:80]}; keyword score used)"
     else:
         result = keyword_score(job, profile)
-    german_req = german_req or result.pop("_german", False)
-    lang = "German needed" if german_req else ("English" if ad_language(text) == "en" else "German ad")
-    result["lang"] = lang
-    if german_req and skip_german:
-        result["status"] = "skipped"
-        result["status_note"] = "Ad asks for fluent German"
+    if not level and result.pop("_german", False):
+        level = "B2"  # the model saw a fluency requirement the phrase rules missed
+    result.pop("_german", None)
+    too_high = german_too_high(level, my_german, tolerance)
+    result["german_level"] = level or ""
+    result["lang"] = "German needed" if too_high else ("English" if ad_language(text) == "en" else "German ad")
+    if too_high:
         if "German" not in result["gap_tags"]:
             result["gap_tags"] = ["German", *result["gap_tags"]][:4]
+        if skip_german:
+            result["status"] = "skipped"
+            result["status_note"] = f"Ad asks for German {level}, your level is {my_german.upper()}"
+    if result["lang"] != "German ad":
+        result["summary_en"] = ""  # the label says "English summary of this German ad"
+    elif (llm and llm.enabled and not result.get("summary_en")
+            and result.get("status") != "skipped"):
+        result["summary_en"] = english_summary(llm, job)
     return result

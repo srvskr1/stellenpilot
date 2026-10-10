@@ -11,6 +11,8 @@ from ..http import request_json
 from ..text import strip_html
 
 NAME = "adzuna"
+# Countries the Adzuna API serves (from its OpenAPI spec).
+COUNTRIES = {"gb", "us", "at", "au", "be", "br", "ca", "ch", "de", "es", "fr", "in", "it", "mx", "nl", "nz", "pl", "sg", "za"}
 LABEL = "Adzuna"
 NEEDS = ("ADZUNA_APP_ID", "ADZUNA_APP_KEY")
 

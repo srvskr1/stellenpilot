@@ -12,6 +12,7 @@ from ..http import HttpError, request_json
 from ..text import strip_html, title_excluded
 
 NAME = "arbeitsagentur"
+COUNTRIES = {"de"}
 LABEL = "Bundesagentur für Arbeit"
 BASE = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service"
 HEADERS = {"X-API-Key": "jobboerse-jobsuche"}

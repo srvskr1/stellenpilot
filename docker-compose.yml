@@ -3,8 +3,9 @@
 # A search run:          docker compose run --rm jobhunt run
 services:
   jobhunt:
+    # Uses the published image when available, otherwise builds it from this folder.
+    image: ghcr.io/srvskr1/job-hunt-pipeline:latest
     build: .
-    image: job-hunt-pipeline
     volumes:
       - ./data:/data
     ports:

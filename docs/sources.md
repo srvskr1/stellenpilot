@@ -33,3 +33,29 @@ Checked on 10 October 2026. Terms change, so read the linked pages yourself befo
 * **LinkedIn**: the User Agreement forbids software that scrapes or copies the service (https://www.linkedin.com/legal/user-agreement).
 * **StepStone**: the terms of use (section 4.3.4) forbid scraping or similar techniques.
 * **Indeed**: there is no public job search API for open source clients today.
+
+## Company watchlist feeds
+
+All checked live on 10 October 2026. None needs a key.
+
+| system | feed | notes |
+|---|---|---|
+| Greenhouse | `https://boards-api.greenhouse.io/v1/boards/{token}/jobs?content=true` | Docs: "Job Board data is publicly available, so authentication is not required" (https://developers.greenhouse.io/job-board.html). Job text arrives as escaped HTML. |
+| Lever | `https://api.lever.co/v0/postings/{site}?mode=json` | EU accounts use `api.eu.lever.co`; the tool tries both. The README says published postings "may be scraped by third parties" (https://github.com/lever/postings-api). |
+| Ashby | `https://api.ashbyhq.com/posting-api/job-board/{name}` | https://developers.ashbyhq.com/docs/public-job-posting-api |
+| Personio | `https://{company}.jobs.personio.de/xml` | Personio's FAQ: no credentials needed. Some companies disable the hosted job page, so the job link may not open even though the feed works. |
+| SmartRecruiters | `https://api.smartrecruiters.com/v1/companies/{id}/postings` | Public Posting API. An unknown company id returns zero jobs, not an error, so check `jobhunt watch` output. |
+
+## German level phrases
+
+The tool maps phrases to CEFR levels using conventions from German career sites. They are conventions, not an official standard:
+
+| phrase | level |
+|---|---|
+| Muttersprache, native | C2 |
+| verhandlungssicher, business fluent, sehr gute Deutschkenntnisse, very good German | C1 |
+| fließend, fluent, gute Deutschkenntnisse, good German | B2 |
+| Grundkenntnisse, basic German | A2 |
+| von Vorteil, wünschenswert, is a plus, nice to have | optional, not required |
+
+Sources: karriere.at (lebenslauf-sprachkenntnisse), jobcannon.io (what German level do employers actually ask for), Lingoda (German language levels), karrierebibel.de (Muss und Kann Qualifikationen).

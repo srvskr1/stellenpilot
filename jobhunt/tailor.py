@@ -27,7 +27,11 @@ from .score import RE_CACHE, _mentioned, learning_items, profile_text
 # ---------------------------------------------------------------- truth guard
 
 _NUM = re.compile(r"\d+(?:[.,]\d+)?(?:\s?%|[kKmM]\b)?")
-_LEARNING = re.compile(r"\b(learning|eager to learn|keen to learn|want to learn|would like to learn|looking forward to learning|not used \w+ yet|not yet|new to me|currently studying|still building)\b", re.I)
+# Phrases that clearly mark a tool as something you are learning, not something you used.
+# "machine learning" and "deep learning" do not count; neither do loose words like "not yet" or "vertiefen".
+_LEARNING = re.compile(r"(?<!machine )(?<!deep )(?<!reinforcement )\b(learning|eager to learn|keen to learn|want to learn|would like to learn|looking forward to learning"
+                       r"|not used \w+ yet|have not (?:yet )?(?:used|worked with)|no (?:professional |practical |hands on )?experience (?:yet )?(?:with|in)|new to me|currently studying|still building"
+                       r"|lerne\w*|arbeite\w*\s+(?:ich\s+)?mich\b[^.]{0,40}\bein|einarbeiten|einzuarbeiten|einarbeitung|aneignen|anzueignen|noch keine (?:praktische |berufliche )?erfahrung|noch nicht (?:gearbeitet|eingesetzt|genutzt|verwendet))\b", re.I)
 _SENTENCE = re.compile(r"[^.!?\n]+[.!?]?")
 
 
@@ -42,6 +46,12 @@ def unsupported_claims(text: str, profile: dict, job: dict | None = None) -> lis
     job_head = f"{(job or {}).get('title', '')} {(job or {}).get('company', '')}"
     allowed_nums = _num_tokens(facts) | _num_tokens(job_head)
     bad = [n for n in sorted(_num_tokens(text)) if n not in allowed_nums]
+    # Language levels: a letter must never claim more German or English than the profile states.
+    from .text import LEVELS, claimed_english_level, profile_language_level, required_german_level
+    for lang, claimed in (("German", required_german_level(text)), ("English", claimed_english_level(text))):
+        mine = profile_language_level(profile, lang.lower())
+        if claimed and (not mine or LEVELS.index(claimed) > LEVELS.index(mine)):
+            bad.append(f"{lang} {claimed} (your profile: {mine or 'not stated'})")
     have = _mentioned(facts)
     learnable = _mentioned(" ".join(learning_items(profile)))
     if job:
@@ -58,7 +68,7 @@ def unsupported_claims(text: str, profile: dict, job: dict | None = None) -> lis
 PLAN_SYSTEM = """You tailor a CV to a job ad WITHOUT inventing anything.
 You may only: choose a headline from the given list, write a 2 to 3 sentence summary that uses ONLY facts from the candidate profile, and reorder or drop items.
 Skills under "Currently learning" are NOT experience; never present them as used.
-Do not use hyphens or dashes as punctuation in the summary. No numbers or tools that are not in the profile.
+Do not use hyphens or dashes as punctuation in the summary. Never state language levels or fluency (no 'fluent German', no 'C1'). No numbers or tools that are not in the profile.
 Return JSON with keys:
 headline_index (int),
 summary (string),
@@ -260,8 +270,28 @@ LETTER_SYSTEM = """Write a short, warm, specific cover letter body (3 short para
 Use ONLY facts from the candidate profile. No new numbers, tools, employers or achievements.
 Skills under "Currently learning" may only be described as being learned.
 Be honest about one gap and say the candidate is learning it, if a gap exists.
-Write like a person, not a template. Do not use hyphens or dashes as punctuation. No greeting line and no sign off.
+Write like a person, not a template. Never state language levels or fluency (no 'fluent German', no 'C1'). Do not use hyphens or dashes as punctuation. No greeting line and no sign off.
 Return JSON: {"body": "..."}"""
+
+
+LETTER_SYSTEM_DE = """Schreibe den Hauptteil eines kurzen, persönlichen Anschreibens auf Deutsch (3 kurze Absätze, unter 230 Wörter).
+Nutze NUR Fakten aus dem Profil der Person. Keine neuen Zahlen, Tools, Arbeitgeber oder Erfolge.
+Punkte unter "Currently learning" dürfen nur als "lerne ich gerade" beschrieben werden.
+Sprich eine Lücke ehrlich an und sage, dass die Person sie gerade lernt, falls es eine gibt.
+Schreibe natürlich, nicht wie eine Vorlage, in einfachem, korrektem Deutsch. Keine Gedankenstriche. Nenne niemals Sprachniveaus (kein "fließend", kein "C1"). Keine Anrede und keine Grußformel.
+Antworte mit JSON: {"body": "..."}"""
+
+
+def template_letter_de(job: dict, plan: dict) -> str:
+    covered = ", ".join(plan.get("covered", [])[:4])
+    gaps = plan.get("learning", []) + plan.get("missing", [])
+    p1 = f"hiermit bewerbe ich mich auf die Stelle {job['title']} bei {job['company']}."
+    p2 = (f"In Ihrer Ausschreibung nennen Sie {covered}. Damit habe ich in meiner bisherigen Arbeit und in Projekten gearbeitet. " if covered
+          else "Die Aufgaben passen gut zu dem, was ich bisher in meiner Arbeit und in Projekten gemacht habe. ")
+    if gaps:
+        p2 += f"In {', '.join(gaps[:2])} arbeite ich mich gerade ein und lerne gern im Job dazu."
+    p3 = "Über die Möglichkeit eines persönlichen Gesprächs freue ich mich sehr."
+    return "\n\n".join([p1, p2.strip(), p3])
 
 
 def template_letter(job: dict, plan: dict) -> str:
@@ -276,9 +306,20 @@ def template_letter(job: dict, plan: dict) -> str:
     return "\n\n".join([para1, para2.strip(), para3])
 
 
-def letter_body(job: dict, profile: dict, plan: dict, llm=None) -> tuple[str, str]:
+def letter_language(job: dict, setting: str = "auto", llm=None, my_german: str = "A2") -> str:
+    """'auto' writes German only for German ads AND when your German is B2 or better. A polished
+    German letter from someone at A2 would suggest a level they do not have."""
+    from .text import LEVELS, ad_language
+    if setting in ("en", "de"):
+        return setting
+    fluent_enough = my_german.upper() in LEVELS and LEVELS.index(my_german.upper()) >= LEVELS.index("B2")
+    german_ad = ad_language(job["title"] + "\n" + job["description"]) == "de"
+    return "de" if german_ad and fluent_enough and llm and llm.enabled else "en"
+
+
+def letter_body(job: dict, profile: dict, plan: dict, llm=None, lang: str = "en") -> tuple[str, str]:
     """Returns (body, note). Falls back to a plain template when the guard rejects the draft."""
-    template = template_letter(job, plan)
+    template = template_letter_de(job, plan) if lang == "de" else template_letter(job, plan)
     if not (llm and llm.enabled):
         return template, "Template letter (no LLM configured)."
     name = (profile.get("person") or {}).get("name", "")
@@ -286,7 +327,7 @@ def letter_body(job: dict, profile: dict, plan: dict, llm=None) -> tuple[str, st
     bad: list[str] = []
     for _ in range(2):
         try:
-            body = str(llm.complete_json(LETTER_SYSTEM, user, max_tokens=900).get("body") or "")
+            body = str(llm.complete_json(LETTER_SYSTEM_DE if lang == "de" else LETTER_SYSTEM, user, max_tokens=900).get("body") or "")
         except Exception as e:
             return template, f"LLM letter failed ({e}), template used."
         bad = unsupported_claims(body, profile, job)
@@ -296,17 +337,18 @@ def letter_body(job: dict, profile: dict, plan: dict, llm=None) -> tuple[str, st
     return template, f"LLM drafts mentioned things not in your experience ({bad}), so a template letter was used."
 
 
-def build_letter(job: dict, profile: dict, body: str, path: Path) -> None:
+def build_letter(job: dict, profile: dict, body: str, path: Path, lang: str = "en") -> None:
     person = profile.get("person") or {}
     doc = _base_doc()
     _para(doc, person.get("name", ""), bold=True)
     _para(doc, _contact(person, links=False))
-    _para(doc, date.today().strftime("%d %B %Y")).alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    _para(doc, f"{job['company']}\nRe: {job['title']}")
-    _para(doc, "Dear Hiring Team,")
+    de = lang == "de"
+    _para(doc, date.today().strftime("%d.%m.%Y" if de else "%d %B %Y")).alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    _para(doc, f"{job['company']}\n{'Bewerbung als' if de else 'Re:'} {job['title']}")
+    _para(doc, "Sehr geehrte Damen und Herren," if de else "Dear Hiring Team,")
     for para in [p.strip() for p in body.split("\n") if p.strip()]:
         _para(doc, para)
-    _para(doc, "Kind regards,")
+    _para(doc, "Mit freundlichen Grüßen" if de else "Kind regards,")
     _para(doc, person.get("name", ""))
     doc.save(path)
 
@@ -343,7 +385,8 @@ def slug(s: str, n: int = 40) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", (s or "").translate(_UMLAUT)).strip("_")[:n].strip("_") or "job"
 
 
-def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: bool = True) -> dict:
+def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: bool = True,
+               letter_setting: str = "auto", my_german: str = "A2") -> dict:
     person = profile.get("person") or {}
     # Company plus title, so two roles at one company never overwrite each other.
     folder = out_root / date.today().isoformat() / f"{slug(job['company'], 30)}__{slug(job['title'], 40)}"
@@ -352,9 +395,15 @@ def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: boo
     who = slug(person.get("name", "CV"))
     cv = folder / f"{who}_CV_{slug(job['company'], 30)}.docx"
     build_cv(profile, plan, cv)
-    body, note = letter_body(job, profile, plan, llm)
-    letter = folder / f"{who}_Cover_Letter_{slug(job['company'], 30)}.docx"
-    build_letter(job, profile, body, letter)
+    lang = letter_language(job, letter_setting, llm, my_german)
+    body, note = letter_body(job, profile, plan, llm, lang)
+    from .text import LEVELS, normalize_level
+    level_note = ""
+    if lang == "de" and LEVELS.index(normalize_level(my_german) or "A2") < LEVELS.index("B2"):
+        level_note = (f"This letter is in German, but your German is {normalize_level(my_german) or 'A2'}. A polished German "
+                      "letter suggests a higher level than you have; consider letter_language = \"en\" or say your level in the letter.")
+    letter = folder / f"{who}_{'Anschreiben' if lang == 'de' else 'Cover_Letter'}_{slug(job['company'], 30)}.docx"
+    build_letter(job, profile, body, letter, lang)
     report = folder / "report.md"
     report.write_text("\n".join([
         f"# {job['title']} at {job['company']}",
@@ -364,7 +413,7 @@ def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: boo
         "## You are learning these", *[f"* {c}" for c in plan["learning"]], "",
         "## Missing (say so honestly if asked)", *[f"* {m}" for m in plan["missing"]], "",
         "## Notes", "* Read both documents before sending. The truth guard checks tools and numbers, not every claim.",
-        *[f"* {n}" for n in (plan.get("note"), plan.get("guard"), note) if n],
+        *[f"* {n}" for n in (level_note, plan.get("note"), plan.get("guard"), note) if n],
     ]) + "\n", encoding="utf-8")
     pdfs = to_pdf([cv, letter]) if make_pdf else []
     return {"folder": str(folder), "files": [str(p) for p in (cv, letter, report, *pdfs)],

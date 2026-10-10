@@ -16,7 +16,7 @@ DEFAULTS = {
         "max_age_days": 3,
         "exclude_title_words": ["senior", "lead", "head of", "principal"],
     },
-    "language": {"skip_if_fluent_german_required": True},
+    "language": {"skip_if_german_too_high": True, "my_german_level": "", "german_tolerance": 1},
     "sources": {
         "arbeitsagentur": True,
         "arbeitnow": True,
@@ -26,8 +26,10 @@ DEFAULTS = {
         "theirstack_options": {"location_ids": [], "english_only": True},
     },
     "llm": {"provider": "none", "model": "", "base_url": ""},
-    "tailor": {"min_match": 70, "max_per_run": 5, "output_dir": "output", "make_pdf": True, "only_english_ads": True},
+    "tailor": {"min_match": 70, "max_per_run": 5, "output_dir": "output", "make_pdf": True, "only_english_ads": True, "letter_language": "auto"},
     "gmail": {"enabled": False, "lookback_days": 3},
+    "watch": {"companies": [], "title_words": [], "max_age_days": 30},
+    "notify": {"email": False, "telegram": False, "only_when_new": False},
 }
 
 

@@ -11,6 +11,7 @@ from ..http import request_json
 from ..text import strip_html
 
 NAME = "arbeitnow"
+COUNTRIES = {"de"}
 LABEL = "Arbeitnow"
 URL = "https://www.arbeitnow.com/api/job-board-api"
 MAX_PAGES = 3  # 325 jobs per page; newest first
