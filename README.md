@@ -67,7 +67,19 @@ Set `[llm]` in `config.toml`:
 | `anthropic` | `ANTHROPIC_API_KEY` in `.env` | Claude through the Anthropic API. |
 | `openai` | `OPENAI_API_KEY` in `.env` | OpenAI API. |
 
-Local model setup, model suggestions and hardware notes: [docs/local-llm.md](docs/local-llm.md). Run `jobhunt doctor` to check that your model server is reachable and the model is installed.
+### Which local model?
+
+Use a 7B model or larger. Pick an instruction tuned version ("instruct" or "chat"), because the tool asks for JSON answers.
+
+| your computer | try |
+|---|---|
+| 8 GB RAM, no GPU | a 3B model, e.g. `qwen2.5:3b`. Expect rough scores and short letters. |
+| 16 GB RAM, or a GPU with 8 GB | a 7B or 8B model, e.g. `qwen2.5:7b` or `llama3.1:8b` |
+| GPU with 16 GB or more | 14B or larger, e.g. `qwen2.5:14b` |
+
+What we saw in testing with a very small model (Qwen2.5 1.5B on 2 CPU cores): the pipeline worked end to end, the German check and the truth guard did their job, and the cover letter stayed truthful. But the model gave every job the same score and wrote a two sentence letter, and each answer took about a minute. Small models are fine for trying the setup, not for real use.
+
+Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](docs/local-llm.md). Run `jobhunt doctor` to check that your model server is reachable and the model is installed.
 
 ## Job sources
 
