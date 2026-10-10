@@ -10,16 +10,19 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from .text import _norm
+
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 RANK = {"new": 0, "ready": 1, "skipped": 1, "applied": 2, "interview": 3, "offer": 4, "rejected": 5}
 RX = {
-    "offer": re.compile(r"(job offer|offer letter|we are pleased to offer|vertragsangebot|arbeitsvertrag|zusage)", re.I),
-    "rejected": re.compile(r"(leider|absage|unfortunately|not be considered|nicht ber(ü|ue)cksichtig|other candidates|anderen? kandidat|decided not to|not to move forward|nicht f(ü|ue)r (dich|sie) entschieden|regret to inform)", re.I),
-    "interview": re.compile(r"(invite you to (an |a )?(interview|call|conversation)|einladung zu(m)? |vorstellungsgespr(ä|ae)ch|kennenlern|schedule (an |a )?(interview|call)|interview invitation|coding challenge|take.?home|case study)", re.I),
-    "applied": re.compile(r"(received your application|application (was )?received|eingegangen|thank you for (your )?appl|thank you for applying|vielen dank f(ü|ue)r (ihre|deine) bewerbung|danke f(ü|ue)r (ihre|deine) bewerbung|application was sent)", re.I),
+    "offer": re.compile(r"\b(job offer|offer letter|we are (pleased|happy|delighted) to offer you|vertragsangebot|ihr arbeitsvertrag|zusage f(ü|ue)r)\b(?!s)", re.I),
+    "rejected": re.compile(r"\b(leider (müssen|muessen|können|koennen|haben) wir|absage|unfortunately,? we|not be considered|nicht ber(ü|ue)cksichtig|other candidates|anderen? kandidat|decided not to (move|proceed)|not to move forward|nicht f(ü|ue)r (dich|sie) entschieden|regret to inform)\b", re.I),
+    "interview": re.compile(r"\b(invite you to (an |a )?(interview|call|conversation)|einladung zu(m)? (vorstellungs|kennenlern|interview|gespr)|vorstellungsgespr(ä|ae)ch|schedule (an |a )?(interview|call)|interview invitation|coding challenge|take.?home (task|assignment))", re.I),
+    "applied": re.compile(r"\b(received your application|application (has been |was )?received|bewerbung (ist )?(bei uns )?eingegangen|thank you for (your )?applying|thank you for your application|vielen dank f(ü|ue)r (ihre|deine) bewerbung|danke f(ü|ue)r (ihre|deine) bewerbung|application was sent)", re.I),
 }
+ALERT = re.compile(r"(job ?alert|jobs? for you|new jobs|jobalerts|newsletter|recommended jobs|stellenangebote f(ü|ue)r sie)", re.I)
 QUERY = ('(subject:(application OR Bewerbung OR interview OR "Vorstellungsgespräch" OR offer OR Absage) '
-         'OR "your application" OR "deine Bewerbung" OR "Ihre Bewerbung")')
+         'OR "your application" OR "deine Bewerbung" OR "Ihre Bewerbung") -in:sent')
 
 
 def classify(text: str) -> str | None:
@@ -29,10 +32,22 @@ def classify(text: str) -> str | None:
     return None
 
 
-def company_key(name: str) -> str | None:
-    words = re.sub(r"[^a-z0-9äöüß ]", " ", (name or "").lower()).split()
-    words = [w for w in words if len(w) >= 3 and w not in {"gmbh", "group", "the", "und", "and", "se", "ag", "mbh"}]
-    return words[0] if words else None
+def _company_matches(company: str, text_norm: str, sender_domain: str) -> bool:
+    """Whole normalized company name in the email, or its main word in the sender's domain."""
+    name = _norm(company)
+    if not name:
+        return False
+    if re.search(rf"\b{re.escape(name)}\b", text_norm):
+        return True
+    main = max(name.split(), key=len)
+    return len(main) >= 4 and main in sender_domain
+
+
+def _pick(candidates: list[dict]) -> dict | None:
+    """Prefer jobs you are actively pursuing when several match."""
+    active = [j for j in candidates if j["status"] in ("applied", "interview", "ready")]
+    pool = active or candidates
+    return pool[0] if len(pool) == 1 else None  # ambiguous: do nothing
 
 
 def _service(home: Path):
@@ -64,25 +79,32 @@ def sync(db, home: Path, lookback_days: int = 3) -> list[dict]:
     svc = _service(home)
     q = f"newer_than:{lookback_days}d {QUERY}"
     threads = svc.users().threads().list(userId="me", q=q, maxResults=50).execute().get("threads", [])
-    jobs = [(j, company_key(j["company"])) for j in db.jobs()]
     changes = []
     for th in threads:
         full = svc.users().threads().get(userId="me", id=th["id"], format="metadata",
                                          metadataHeaders=["From", "Subject", "Date"]).execute()
-        last = full["messages"][-1]
+        received = [m for m in full.get("messages", []) if "SENT" not in (m.get("labelIds") or [])]
+        if not received:
+            continue
+        last = received[-1]
         hdr = {h["name"]: h["value"] for h in last["payload"].get("headers", [])}
-        text = " ".join([hdr.get("From", ""), hdr.get("Subject", ""), last.get("snippet", "")])
+        sender, subject = hdr.get("From", ""), hdr.get("Subject", "")
+        if ALERT.search(sender + " " + subject):
+            continue
+        text = " ".join([sender, subject, last.get("snippet", "")])
         status = classify(text)
         if not status:
             continue
-        low = text.lower()
-        hit = next((j for j, k in jobs if k and k in low), None)
-        if not hit or hit["status"] in ("rejected", "offer"):
+        domain = (re.search(r"@([\w.-]+)", sender) or [None, ""])[1].lower()
+        text_norm = _norm(text)
+        hit = _pick([j for j in db.jobs() if _company_matches(j["company"], text_norm, domain)])
+        if not hit:
             continue
-        if RANK[status] <= RANK.get(hit["status"], 0):
+        current = db.job(hit["id"])["status"]  # fresh read: earlier threads may have changed it
+        if current in ("rejected", "offer") or RANK[status] <= RANK.get(current, 0):
             continue
         note = {"applied": "Receipt confirmed", "interview": "Interview invitation",
                 "rejected": "Rejection email", "offer": "Offer email"}[status]
-        db.set_status(hit["id"], status, source="gmail", note=f"{note}: {hdr.get('Subject', '')[:80]}")
-        changes.append({"id": hit["id"], "company": hit["company"], "from": hit["status"], "to": status})
+        db.set_status(hit["id"], status, source="gmail", note=f"{note}: {subject[:80]}")
+        changes.append({"id": hit["id"], "company": hit["company"], "from": current, "to": status})
     return changes

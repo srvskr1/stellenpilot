@@ -17,7 +17,7 @@ MAX_PAGES = 3  # 325 jobs per page; newest first
 
 
 def _matches(job: dict, keywords: list[str]) -> bool:
-    title = job.get("title", "").lower()
+    title = (job.get("title") or "").lower()
     return any(all(w in title for w in kw.lower().split()) for kw in keywords)
 
 
@@ -32,7 +32,9 @@ def fetch(settings) -> list[dict]:
         data = request_json(URL, params={"page": page})
         items = data.get("data") or []
         for j in items:
-            if j.get("created_at", 0) < cutoff:
+            if not j.get("slug") or not j.get("title"):
+                continue
+            if (j.get("created_at") or 0) < cutoff:
                 return out
             remote = bool(j.get("remote"))
             here = any(p in (j.get("location") or "").lower() for p in places)
@@ -40,15 +42,15 @@ def fetch(settings) -> list[dict]:
                 continue
             if not _matches(j, s["keywords"]):
                 continue
-            types = " ".join(j.get("job_types") or []).lower()
+            types = " ".join(t for t in (j.get("job_types") or []) if t).lower()
             out.append({
                 "id": f"an-{j['slug']}",
                 "source": LABEL,
                 "title": j.get("title", ""),
-                "company": j.get("company_name", ""),
+                "company": j.get("company_name") or "",
                 "location": ("Remote, " if remote else "") + (j.get("location") or ""),
                 "remote": remote,
-                "url": j.get("url", ""),
+                "url": j.get("url") or "",
                 "description": strip_html(j.get("description")),
                 "posted_at": datetime.fromtimestamp(j["created_at"], timezone.utc).date().isoformat(),
                 "job_type": job_type_from_title(j.get("title", ""), "Werkstudent" if "student" in types else ""),

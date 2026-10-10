@@ -91,7 +91,8 @@ Use `--home PATH` to keep your files in another folder.
 * Everything is stored in `jobhunt.db` and the `output` folder next to your config. Both are ignored by git, together with `config.toml`, `profile.toml`, `.env` and Gmail tokens.
 * The dashboard listens on 127.0.0.1 only. Write requests need a custom header, so other websites cannot change your data through your browser.
 * Your profile and job ads are sent to the AI provider you configure. Choose `none` or a local model if you want nothing to leave your machine.
-* Read every tailored document before you send it. The truth guard catches invented numbers and tools, but you are the final check.
+* Read every tailored document before you send it. The truth guard checks digits and the tools it knows (see `VOCAB` in `jobhunt/score.py`). It cannot judge spelled out numbers or vague claims, so you are the final check.
+* Skills in a profile group named "Learning" are never presented as experience; documents may only say you are learning them.
 
 ## Project layout
 

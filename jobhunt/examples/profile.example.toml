@@ -25,6 +25,8 @@ Languages = ["Python", "SQL", "PySpark"]
 Cloud = ["AWS S3", "AWS Glue", "Athena", "Azure Data Factory", "Databricks"]
 "Data Tools" = ["Airflow", "Docker", "Delta Lake", "Git"]
 BI = ["Power BI", "Tableau"]
+# A group with "Learning" in its name is treated as NOT yet experience:
+# documents may only say you are learning these.
 Learning = ["dbt", "Kafka", "Terraform"]
 
 [[experience]]

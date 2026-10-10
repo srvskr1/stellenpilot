@@ -2,13 +2,15 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+import urllib.error
+import urllib.request
 
 from . import sources
 from .db import DB, today
 from .llm import LLM
-from .score import score_job, taste_summary
-from .tailor import tailor_job
+from .http import USER_AGENT
+from .score import profile_text, score_job, taste_summary
+from .tailor import tailor_job, unsupported_claims
 from .text import dedupe_key, title_excluded
 
 log = logging.getLogger("jobhunt")
@@ -41,6 +43,46 @@ def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
     return new, problems
 
 
+def check_closed(db: DB, limit: int = 15) -> int:
+    """Mark jobs whose posting now returns 404 or 410. Other errors are ignored (could be temporary)."""
+    closed = 0
+    for job in db.jobs("status IN ('new', 'ready') AND closed = 0 AND url != ''")[:limit]:
+        req = urllib.request.Request(job["url"], headers={"User-Agent": USER_AGENT})
+        try:
+            urllib.request.urlopen(req, timeout=15).close()
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410):
+                db.update_job(job["id"], {"closed": 1, "closed_at": today()})
+                closed += 1
+        except Exception:
+            pass
+    return closed
+
+
+PREP_SYSTEM = """Write an interview prep pack for the candidate. Plain text, each heading on its own line starting with "## ", bullets starting with "- ".
+Headings: "## About <company>" (2 to 4 lines, only what the ad says, no outside facts), "## What they will test", "## Likely questions" (6 to 8),
+"## Your stories" (3 to 5 STAR stories built ONLY from the candidate's real experience, one bullet each), "## Your gaps and how to answer", "## Questions to ask them" (3 to 4).
+Under 3500 characters. Do not use hyphens or dashes as punctuation inside sentences.
+Return JSON: {"prep": "..."}"""
+
+
+def make_prep(job: dict, profile: dict, llm) -> str:
+    user = f"CANDIDATE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job.get('description', '')[:6000]}"
+    text = str(llm.complete_json(PREP_SYSTEM, user, max_tokens=1800).get("prep") or "")
+    # Stories must be true: drop story lines the truth guard rejects.
+    out, in_stories, dropped = [], False, 0
+    for line in text.splitlines():
+        if line.startswith("## "):
+            in_stories = "stor" in line.lower()
+        elif in_stories and line.strip() and unsupported_claims(line, profile, job):
+            dropped += 1
+            continue
+        out.append(line)
+    if dropped:
+        out.append(f"(Removed {dropped} story line(s) that mentioned things not in your experience.)")
+    return "\n".join(out)[:4000]
+
+
 def run(settings, *, tailor: bool = True) -> dict:
     db = DB(settings.db_path)
     profile = settings.profile
@@ -55,6 +97,7 @@ def run(settings, *, tailor: bool = True) -> dict:
 
     db.stage("score", f"Scoring {len(new)} new jobs against your CV")
     taste = taste_summary(db.jobs("rating IS NOT NULL"))
+    added = 0
     skip_de = settings["language"].get("skip_if_fluent_german_required", True)
     for job in new:
         try:
@@ -62,7 +105,10 @@ def run(settings, *, tailor: bool = True) -> dict:
         except Exception as e:
             problems.append(f"scoring {job['id']}: {e}")
             continue
-        db.insert_job(job)
+        if db.insert_job(job):
+            added += 1
+        else:
+            problems.append(f"could not store {job['id']}")
 
     docs = 0
     if tailor:
@@ -77,9 +123,19 @@ def run(settings, *, tailor: bool = True) -> dict:
             except Exception as e:
                 problems.append(f"tailoring {job['id']}: {e}")
                 continue
-            db.update_job(job["id"], {"folder": res["folder"], "status": "ready",
-                                      "status_note": f"CV covers {res['coverage']}% of the ad"})
+            db.mark_ready(job["id"], res["folder"], f"Your experience shows {res['coverage']}% of the tools the ad names")
             docs += len(res["files"])
+
+    db.stage("score", "Checking if open postings are still online")
+    closed = check_closed(db)
+
+    if llm.enabled:
+        for job in db.jobs("status = 'interview' AND prep = ''")[:3]:
+            db.stage("gmail", f"Preparing your {job['company']} interview")
+            try:
+                db.update_job(job["id"], {"prep": make_prep(job, profile, llm)})
+            except Exception as e:
+                problems.append(f"prep {job['id']}: {e}")
 
     gmail_changes = []
     if settings["gmail"].get("enabled"):
@@ -91,8 +147,8 @@ def run(settings, *, tailor: bool = True) -> dict:
             problems.append(f"gmail: {e}")
 
     shortlisted = sum(1 for j in new if (j.get("match") or 0) >= settings["tailor"]["min_match"] and j.get("lang") != "German needed")
-    db.run_update(day, found=len(new), added=len(new), shortlisted=shortlisted, docs_made=docs,
+    db.run_update(day, found=len(new), added=added, shortlisted=shortlisted, docs_made=docs,
                   gmail_updates=len(gmail_changes), notes="; ".join(problems)[:500])
     db.stage("done", f"Done: {len(new)} new jobs, {shortlisted} shortlisted")
-    return {"new": len(new), "shortlisted": shortlisted, "docs": docs,
+    return {"new": added, "shortlisted": shortlisted, "docs": docs, "closed": closed,
             "gmail": gmail_changes, "problems": problems}

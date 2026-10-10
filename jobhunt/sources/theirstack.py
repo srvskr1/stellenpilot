@@ -58,13 +58,13 @@ def fetch(settings) -> list[dict]:
         data = request_json(URL, body={**common, **q}, method="POST",
                             headers={"Authorization": f"Bearer {key}"})
         for j in data.get("data", []):
-            title = j.get("job_title", "")
+            title = j.get("job_title") or ""
             remote = bool(j.get("remote"))
             out.append({
                 "id": f"ts-{j['id']}",
                 "source": LABEL,
                 "title": title,
-                "company": j.get("company") or (j.get("company_object") or {}).get("name", ""),
+                "company": j.get("company") or (j.get("company_object") or {}).get("name") or "",
                 "location": ("Remote, " if remote else "") + (j.get("short_location") or j.get("location") or ""),
                 "remote": remote,
                 "url": j.get("final_url") or j.get("url") or "",

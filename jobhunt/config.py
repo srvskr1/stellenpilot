@@ -47,7 +47,12 @@ def load_dotenv(path: Path) -> None:
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, _, val = line.partition("=")
-        os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
+        val = val.strip()
+        if val[:1] in ("'", '"') and val[:1] in val[1:]:
+            val = val[1:val.index(val[0], 1)]
+        else:
+            val = val.split(" #")[0].strip()
+        os.environ.setdefault(key.strip(), val)
 
 
 class Settings:

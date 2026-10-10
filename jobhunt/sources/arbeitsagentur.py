@@ -33,7 +33,7 @@ def _details(refnr: str) -> dict:
 def _normalize(item: dict, detail: dict) -> dict:
     from . import job_type_from_title
 
-    loc = (item.get("stellenlokationen") or [{}])[0].get("adresse", {})
+    loc = ((item.get("stellenlokationen") or [{}])[0] or {}).get("adresse") or {}
     ref = item["referenznummer"]
     title = item.get("stellenangebotsTitel") or item.get("titel") or ""
     remote = bool(item.get("homeofficemoeglich")) and (item.get("homeofficeprozent") or 0) >= 80
@@ -42,7 +42,7 @@ def _normalize(item: dict, detail: dict) -> dict:
         "source": LABEL,
         "title": title,
         "company": item.get("firma") or item.get("arbeitgeber") or "",
-        "location": ("Remote, " if remote else "") + ", ".join(x for x in (loc.get("ort"), loc.get("region", "").replace("_", " ").title()) if x),
+        "location": ("Remote, " if remote else "") + ", ".join(x for x in (loc.get("ort"), (loc.get("region") or "").replace("_", " ").title()) if x),
         "remote": remote,
         "url": detail.get("externeUrl") or f"https://www.arbeitsagentur.de/jobsuche/jobdetail/{ref}",
         "description": strip_html(detail.get("stellenangebotsBeschreibung", "")),

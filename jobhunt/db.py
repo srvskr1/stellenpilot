@@ -106,6 +106,13 @@ class DB:
         self.conn.execute(sql, [fields[c] for c in cols] + [job_id])
         self.conn.commit()
 
+    def mark_ready(self, job_id: str, folder: str, note: str) -> None:
+        """Store the folder; move to 'ready' only if the user has not changed the status meanwhile."""
+        self.conn.execute("UPDATE jobs SET folder = ? WHERE id = ?", (folder, job_id))
+        self.conn.execute("UPDATE jobs SET status = 'ready', status_source = 'run', status_updated_at = ?, "
+                          "status_note = ? WHERE id = ? AND status = 'new'", (now(), note, job_id))
+        self.conn.commit()
+
     def set_status(self, job_id: str, status: str, *, source: str, note: str = "") -> None:
         if status not in STATUSES:
             raise ValueError(f"unknown status {status}")

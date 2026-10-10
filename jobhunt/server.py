@@ -3,8 +3,10 @@ from __future__ import annotations
 
 import json
 import os
+import math
 import subprocess
 import sys
+import threading
 from collections import Counter
 from datetime import date, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -55,8 +57,10 @@ def open_in_file_manager(path: str) -> None:
         subprocess.Popen(["xdg-open", path])
 
 
-def make_handler(settings):
+def make_handler(settings, port: int = 8765):
     db = DB(settings.db_path)
+    lock = threading.Lock()  # one SQLite connection, so one request at a time touches it
+
     page = resources.files("jobhunt").joinpath("web/index.html").read_bytes()
     out_root = (settings.home / settings["tailor"]["output_dir"]).resolve()
     s = settings["search"]
@@ -75,19 +79,58 @@ def make_handler(settings):
             self.end_headers()
             self.wfile.write(data)
 
+        @property
+        def allowed_hosts(self) -> set[str]:
+            p = self.server.server_address[1]
+            return {f"127.0.0.1:{p}", f"localhost:{p}"}
+
+        def _host_ok(self) -> bool:
+            # Blocks DNS rebinding: a page on another domain that resolves to 127.0.0.1
+            # still sends its own Host header, which is refused here.
+            if self.headers.get("Host") not in self.allowed_hosts:
+                self._send(403, {"error": "unexpected Host header"})
+                return False
+            return True
+
         def _guard(self) -> bool:
             # A custom header forces a CORS preflight, which this server never answers,
             # so other websites cannot change your data through your browser.
-            if self.headers.get("X-Jobhunt") != "1":
-                self._send(403, {"error": "missing X-Jobhunt header"})
+            if not self._host_ok():
+                return False
+            origin = self.headers.get("Origin")
+            if self.headers.get("X-Jobhunt") != "1" or (origin and origin.split("//")[-1] not in self.allowed_hosts):
+                self._send(403, {"error": "request refused"})
                 return False
             return True
 
         def _body(self) -> dict:
             n = int(self.headers.get("Content-Length") or 0)
-            return json.loads(self.rfile.read(n) or b"{}") if n else {}
+            if n < 0 or n > 1_000_000:
+                raise ValueError("bad Content-Length")
+            data = json.loads(self.rfile.read(n) or b"{}") if n else {}
+            if not isinstance(data, dict):
+                raise ValueError("body must be a JSON object")
+            return data
 
         def do_GET(self):
+            if not self._host_ok():
+                return
+            with lock:
+                self._get()
+
+        def do_PATCH(self):
+            if not self._guard():
+                return
+            with lock:
+                self._patch()
+
+        def do_POST(self):
+            if not self._guard():
+                return
+            with lock:
+                self._post()
+
+        def _get(self):
             if self.path in ("/", "/index.html"):
                 return self._send(200, page, "text/html; charset=utf-8")
             if self.path == "/api/state":
@@ -101,16 +144,14 @@ def make_handler(settings):
                 })
             self._send(404, {"error": "not found"})
 
-        def do_PATCH(self):
-            if not self._guard():
-                return
+        def _patch(self):
             if not self.path.startswith("/api/jobs/"):
                 return self._send(404, {"error": "not found"})
             job_id = unquote(self.path[len("/api/jobs/"):])
             if not db.job(job_id):
                 return self._send(404, {"error": "unknown job"})
-            body = self._body()
             try:
+                body = self._body()
                 if "status" in body:
                     if body["status"] not in STATUSES:
                         raise ValueError("bad status")
@@ -118,20 +159,23 @@ def make_handler(settings):
                 fields = {}
                 if "rating" in body:
                     r = body["rating"]
-                    fields["rating"] = None if isinstance(r, dict) or r in (None, 0) else (1 if int(r) > 0 else -1)
+                    if isinstance(r, dict) or r in (None, 0):
+                        fields["rating"] = None
+                    elif isinstance(r, (int, float)) and math.isfinite(r):
+                        fields["rating"] = 1 if r > 0 else -1
+                    else:
+                        raise ValueError("rating must be 1, -1 or null")
                 if "notes" in body:
                     fields["notes"] = str(body["notes"])[:5000]
                 if "closed" in body:
                     fields["closed"] = int(bool(body["closed"]))
                 if fields:
                     db.update_job(job_id, fields, by_user=True)
-            except (ValueError, TypeError) as e:
+            except (ValueError, TypeError, OverflowError) as e:
                 return self._send(400, {"error": str(e)})
             self._send(200, {"ok": True})
 
-        def do_POST(self):
-            if not self._guard():
-                return
+        def _post(self):
             if self.path.startswith("/api/open-folder/"):
                 job = db.job(unquote(self.path[len("/api/open-folder/"):]))
                 folder = Path(job["folder"]).resolve() if job and job["folder"] else None
@@ -153,7 +197,7 @@ def make_handler(settings):
 
 
 def serve(settings, port: int = 8765) -> None:
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(settings))
+    httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(settings, port))
     print(f"Job Hunt Board running at http://127.0.0.1:{port}  (Ctrl+C to stop)")
     try:
         httpd.serve_forever()

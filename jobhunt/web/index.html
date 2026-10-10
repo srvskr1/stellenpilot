@@ -456,7 +456,7 @@ document.querySelector(".main").addEventListener("change",async e=>{
 
 /* ---------- Agent office ---------- */
 const OFF=[["collect","Job boards",120],["score","Scoring",320],["tailor","CV + letters",520],["gmail","Gmail",720],["break","Break room",962]];
-const OFF_NOTE={collect:"Scanning LinkedIn, StepStone, Indeed and English job sites",score:"Scoring jobs against your CV",tailor:"Tailoring CVs and cover letters",gmail:"Reading Gmail for application replies"};
+const OFF_NOTE={collect:"Searching your job sources",score:"Scoring jobs against your CV",tailor:"Tailoring CVs and cover letters",gmail:"Reading Gmail for application replies"};
 const V=n=>`var(--o-${n})`;
 const ICON={
  collect:`<circle cx="0" cy="0" r="11" fill="none" stroke="${V("blue")}" stroke-width="2"/><ellipse cx="0" cy="0" rx="5" ry="11" fill="none" stroke="${V("blue")}" stroke-width="1.5"/><path d="M-11 0H11M-9 -6H9M-9 6H9" stroke="${V("blue")}" stroke-width="1.2"/><circle cx="12" cy="9" r="5" fill="none" stroke="${V("amber")}" stroke-width="2"/><path d="M15.5 12.5l4 4" stroke="${V("amber")}" stroke-width="2.4" stroke-linecap="round"/>`,

@@ -14,20 +14,38 @@ VOCAB = [
     "TensorFlow", "PyTorch", "Power BI", "Tableau", "Looker", "Excel", "SAP", "PostgreSQL", "MySQL",
     "MongoDB", "NoSQL", "ETL", "ELT", "Data Modeling", "Machine Learning", "Statistics", "A/B Testing",
 ]
-RE_CACHE = {v: re.compile(rf"(?<![\w/]){re.escape(v)}(?![\w/])", re.I) for v in VOCAB}
+# Tool names that are also ordinary words ("I excel at", "spark interest") match case sensitively.
+CASE_SENSITIVE = {"Excel", "Glue", "Fabric", "Spark", "Lambda", "Git", "Looker", "Statistics", "Athena", "Prefect", "Iceberg", "Flink"}
+RE_CACHE = {v: re.compile(rf"(?<![\w/]){re.escape(v)}(?![\w/])", 0 if v in CASE_SENSITIVE else re.I) for v in VOCAB}
 
 
-def profile_text(profile: dict) -> str:
-    p = profile.get("person", {})
+def is_learning_group(name: str) -> bool:
+    """Skill groups named like 'Learning' hold skills you are learning, not experience."""
+    return "learn" in name.lower()
+
+
+def learning_items(profile: dict) -> list[str]:
+    return [i for g, items in (profile.get("skills") or {}).items() if is_learning_group(g) for i in items]
+
+
+def profile_text(profile: dict, include_learning: bool = True) -> str:
+    """The profile as plain text. With include_learning=False it holds only real experience,
+    which is what the truth guard and keyword scoring compare against."""
+    p = profile.get("person") or {}
+    summary = profile.get("summary") or p.get("summary") or ""
     lines = [f"Name: {p.get('name', '')}", f"Location: {p.get('location', '')}",
-             f"Languages: {', '.join(p.get('languages', []))}", f"Summary: {profile.get('summary', p.get('summary', ''))}"]
-    for group, items in profile.get("skills", {}).items():
-        lines.append(f"Skills, {group}: {', '.join(items)}")
-    for e in profile.get("experience", []):
-        lines.append(f"Experience: {e.get('title')} at {e.get('company')} ({e.get('dates')}): " + " ".join(e.get("bullets", [])))
-    for pr in profile.get("projects", []):
-        lines.append(f"Project: {pr.get('name')}: " + " ".join(pr.get("bullets", [])))
-    for ed in profile.get("education", []):
+             f"Languages: {', '.join(p.get('languages') or [])}", f"Summary: {summary}"]
+    for group, items in (profile.get("skills") or {}).items():
+        if is_learning_group(group):
+            if include_learning:
+                lines.append(f"Currently learning, no work experience yet: {', '.join(items)}")
+        else:
+            lines.append(f"Skills, {group}: {', '.join(items)}")
+    for e in (profile.get("experience") or []):
+        lines.append(f"Experience: {e.get('title')} at {e.get('company')} ({e.get('dates')}): " + " ".join(e.get("bullets") or []))
+    for pr in (profile.get("projects") or []):
+        lines.append(f"Project: {pr.get('name')}: " + " ".join(pr.get("bullets") or []))
+    for ed in (profile.get("education") or []):
         lines.append(f"Education: {ed.get('degree')}, {ed.get('school')} ({ed.get('dates')})")
     return "\n".join(lines)
 
@@ -38,7 +56,7 @@ def _mentioned(text: str) -> set[str]:
 
 def keyword_score(job: dict, profile: dict) -> dict:
     """No-LLM fallback: share of tools named in the ad that the profile also has."""
-    have = _mentioned(profile_text(profile))
+    have = _mentioned(profile_text(profile, include_learning=False))
     want = _mentioned(job["title"] + "\n" + job["description"])
     overlap = want & have
     missing = sorted(want - have)
@@ -75,13 +93,16 @@ def llm_score(llm, job: dict, profile: dict, taste: str = "") -> dict:
             + f"JOB\nTitle: {job['title']}\nCompany: {job['company']}\nLocation: {job['location']}\n"
             f"Description:\n{job['description'][:6000]}")
     out = llm.complete_json(SYSTEM, user, max_tokens=600)
-    match = int(out.get("match", 0))
+    try:
+        match = int(out.get("match") or 0)
+    except (TypeError, ValueError):
+        match = 0
     return {
         "match": max(0, min(100, match)),
         "fit": str(out.get("fit", "")),
         "why": str(out.get("why", "")),
         "gaps": str(out.get("gaps", "")),
-        "gap_tags": [str(t) for t in (out.get("gap_tags") or [])][:4],
+        "gap_tags": ([out["gap_tags"]] if isinstance(out.get("gap_tags"), str) else [str(t) for t in (out.get("gap_tags") or [])])[:4],
         "_german": bool(out.get("german_fluency_required")),
     }
 
