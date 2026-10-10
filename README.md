@@ -19,7 +19,7 @@ It never applies for you and never sends email. You stay in control of every app
 
 ## Quick start
 
-You need Python 3.11 or newer. Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
+You need Python 3.11 or newer (or Docker, see below). Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
 
 ```bash
 git clone https://github.com/srvskr1/job-hunt-pipeline.git
@@ -33,6 +33,17 @@ jobhunt init      # creates config.toml, profile.toml and .env
 jobhunt demo      # optional: fictional sample jobs, to look around first
 jobhunt serve     # open http://127.0.0.1:8765
 ```
+
+Prefer Docker? No Python needed:
+
+```bash
+mkdir data
+docker compose build
+docker compose run --rm jobhunt init
+docker compose up -d      # http://127.0.0.1:8765
+```
+
+See [docs/docker.md](docs/docker.md) for daily runs and details.
 
 Then make it yours:
 

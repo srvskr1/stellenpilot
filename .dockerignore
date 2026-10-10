@@ -1,0 +1,14 @@
+.git
+.venv
+data
+output
+*.db
+.env
+config.toml
+profile.toml
+credentials.json
+token.json
+__pycache__
+*.egg-info
+docs
+tests

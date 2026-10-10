@@ -21,6 +21,7 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
          "found_at": "foundAt", "posted_at": "postedAt", "job_type": "jobType", "closed_at": "closedAt",
          "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
 SENT = {"applied", "interview", "offer", "rejected"}
+LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
 
 
 def camel(d: dict) -> dict:
@@ -79,15 +80,16 @@ def make_handler(settings, port: int = 8765):
             self.end_headers()
             self.wfile.write(data)
 
-        @property
-        def allowed_hosts(self) -> set[str]:
-            p = self.server.server_address[1]
-            return {f"127.0.0.1:{p}", f"localhost:{p}"}
+        @staticmethod
+        def _local(hostport: str | None) -> bool:
+            # Port is ignored on purpose, so Docker port mappings work.
+            host = (hostport or "").rsplit(":", 1)[0] if not (hostport or "").startswith("[") else (hostport or "").split("]")[0] + "]"
+            return host in LOCAL_NAMES
 
         def _host_ok(self) -> bool:
             # Blocks DNS rebinding: a page on another domain that resolves to 127.0.0.1
-            # still sends its own Host header, which is refused here.
-            if self.headers.get("Host") not in self.allowed_hosts:
+            # still sends its own host name, which is refused here.
+            if not self._local(self.headers.get("Host")):
                 self._send(403, {"error": "unexpected Host header"})
                 return False
             return True
@@ -98,7 +100,7 @@ def make_handler(settings, port: int = 8765):
             if not self._host_ok():
                 return False
             origin = self.headers.get("Origin")
-            if self.headers.get("X-Jobhunt") != "1" or (origin and origin.split("//")[-1] not in self.allowed_hosts):
+            if self.headers.get("X-Jobhunt") != "1" or (origin and not self._local(origin.split("//")[-1])):
                 self._send(403, {"error": "request refused"})
                 return False
             return True
@@ -196,9 +198,11 @@ def make_handler(settings, port: int = 8765):
     return Handler
 
 
-def serve(settings, port: int = 8765) -> None:
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(settings, port))
-    print(f"Job Hunt Board running at http://127.0.0.1:{port}  (Ctrl+C to stop)")
+def serve(settings, port: int = 8765, host: str = "127.0.0.1") -> None:
+    # The Host header check below still only accepts 127.0.0.1 and localhost, so even when
+    # Docker listens on all interfaces inside the container, only your own browser gets in.
+    httpd = ThreadingHTTPServer((host, port), make_handler(settings, port))
+    print(f"Job Hunt Board running at http://127.0.0.1:{port}  (Ctrl+C to stop)", flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

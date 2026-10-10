@@ -1,0 +1,12 @@
+# Start the dashboard:   docker compose up -d     then open http://127.0.0.1:8765
+# One time setup:        docker compose run --rm jobhunt init
+# A search run:          docker compose run --rm jobhunt run
+services:
+  jobhunt:
+    build: .
+    image: job-hunt-pipeline
+    volumes:
+      - ./data:/data
+    ports:
+      - "127.0.0.1:8765:8765"   # only reachable from this computer
+    restart: unless-stopped

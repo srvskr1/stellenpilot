@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import shutil
 import sys
 from importlib import resources
@@ -78,6 +79,8 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--no-tailor", action="store_true", help="skip CV and letter generation")
     s = sub.add_parser("serve", help="open the local dashboard")
     s.add_argument("--port", type=int, default=8765)
+    s.add_argument("--host", default=os.environ.get("JOBHUNT_HOST", "127.0.0.1"),
+                   help="address to listen on; keep 127.0.0.1 unless you run inside Docker")
     sub.add_parser("gmail", help="sync statuses from Gmail once")
     sub.add_parser("demo", help="load fictional sample jobs to try the dashboard without any keys")
     a = ap.parse_args(argv)
@@ -100,7 +103,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "serve":
         from .server import serve
-        serve(settings, a.port)
+        serve(settings, a.port, a.host)
         return 0
     if a.cmd == "gmail":
         from .db import DB
