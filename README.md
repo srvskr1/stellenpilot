@@ -7,7 +7,9 @@
 
 A local, open source job hunt assistant for Germany. Every day it collects fresh job ads from public APIs, scores them against your CV, writes a tailored CV and cover letter for the best matches, and shows everything on a dashboard in your browser. It runs on your own computer. Your CV and your data never leave it, except for the AI model you choose.
 
-![Dashboard](https://raw.githubusercontent.com/srvskr1/stellenpilot/main/docs/dashboard.png)
+![Stellenpilot in 60 seconds: setup guide, CV import, settings, a daily run and the matched jobs](https://raw.githubusercontent.com/srvskr1/stellenpilot/main/docs/demo.gif)
+
+<sub>All names, companies and jobs in this demo are fictional.</sub>
 
 It never applies for you and never contacts companies. You stay in control of every application.
 
