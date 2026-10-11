@@ -15,11 +15,11 @@ from .text import dedupe_key, title_excluded
 
 log = logging.getLogger("stellenpilot")
 # Sources with full descriptions first, so duplicates keep the richer copy.
-ORDER = ["watchlist", "arbeitsagentur", "theirstack", "arbeitnow", "adzuna"]
+ORDER = ["watchlist", "arbeitsagentur", "theirstack", "arbeitnow", "adzuna", "jobicy", "remotive"]
 
 
 def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
-    enabled = [n for n in ORDER if settings["sources"].get(n) or (n == "watchlist" and settings["watch"].get("companies"))]
+    enabled = [n for n in ORDER if settings["sources"].get(n) or (n == "watchlist" and (settings["watch"].get("companies") or settings["watch"].get("starter_list")))]
     known_ids, known_keys = db.job_ids(), db.dedupe_keys()
     excl = settings["search"].get("exclude_title_words", [])
     new, problems = [], []

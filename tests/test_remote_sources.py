@@ -72,3 +72,9 @@ class JobicyTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OrderTest(unittest.TestCase):
+    def test_every_source_runs(self):
+        from stellenpilot import pipeline, sources
+        self.assertEqual(set(pipeline.ORDER), set(sources.REGISTRY))

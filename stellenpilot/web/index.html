@@ -385,6 +385,7 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
             <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off"></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="jobicy"> Jobicy <span class="muted">free, no key, remote jobs only</span></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="remotive"> Remotive <span class="muted">free, no key, remote jobs only, small feed</span></label></div>
+          <div class="srcrow"><label class="check"><input type="checkbox" name="starter_list"> Company watchlist: also check about 200 companies with offices in Germany <span class="muted">their own career feeds, often before the job boards; adds a minute or two per run</span></label></div>
           <p class="hint" style="margin:0">Saved keys are not shown again. Leave a key box empty to keep the saved one.</p>
         </fieldset>
         <fieldset class="fset" data-step="ai"><legend>AI model</legend>
@@ -856,7 +857,7 @@ $("cvSave").addEventListener("click",async()=>{
 let cvPrompted=false;
 
 /* ---------- Settings ---------- */
-const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"]};
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 function showProvider(){const pv=$("setForm").provider.value;$("setForm").querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));$("setForm").model.closest("label").hidden=pv==="none"}
@@ -925,7 +926,8 @@ const GUIDE=[
    <div class="gcard"><strong>Adzuna</strong><ol><li>Sign up at <a href="https://developer.adzuna.com" target="_blank" rel="noopener">developer.adzuna.com</a>.</li><li>Open your dashboard and copy the App ID and App key.</li><li>Tick Adzuna below and paste both.</li></ol></div>
    <div class="gcard"><strong>TheirStack</strong><ol><li>Sign up at <a href="https://theirstack.com" target="_blank" rel="noopener">theirstack.com</a>.</li><li>Copy your API key from the settings page.</li><li>Tick TheirStack below and paste it.</li></ol><p>200 free credits a month, one per job found.</p></div>
   </div>
-  <p style="margin-top:8px">Your keys are saved in the <code>.env</code> file on this computer only. Never share them.</p>`,save:saveSettings},
+  <p style="margin-top:8px">Your keys are saved in the <code>.env</code> file on this computer only. Never share them.</p>
+  <p>Tip: tick <b>Company watchlist</b> below to also check about 200 companies with offices in Germany directly on their own career pages.</p>`,save:saveSettings},
  {id:"finish",name:"Check and run",panel:"setPanel",steps:["schedule"],save:saveSettings,html:`<h3>Last step: check and run</h3><ul class="checks" id="gChecks"><li><span class="tx muted">Checking your setup…</span></li></ul>
   <p><button type="button" class="btn" id="gRun" style="width:auto">Run my first search</button></p>
   <p><b>Good to know</b></p>

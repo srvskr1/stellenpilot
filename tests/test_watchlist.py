@@ -74,3 +74,55 @@ class WatchlistTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StarterListTest(unittest.TestCase):
+    def settings(self, own, starter=True, country="de"):
+        class S:
+            cfg = {"watch": {"companies": own, "starter_list": starter, "title_words": [], "max_age_days": 30},
+                   "search": {"keywords": ["Data Engineer"], "city": "Essen", "nearby_cities": [], "country": country}}
+
+            def __getitem__(self, k):
+                return self.cfg[k]
+        return S()
+
+    def test_list_is_valid_and_large(self):
+        from stellenpilot.sources import watchlist
+        entries = watchlist.starter_entries()
+        self.assertGreaterEqual(len(entries), 200)
+        self.assertEqual(len(entries), len(set(entries)))
+        for e in entries:
+            system, _, slug = e.partition(":")
+            self.assertIn(system, watchlist.SYSTEMS)
+            self.assertTrue(slug)
+
+    def test_own_first_no_duplicates_germany_only(self):
+        from stellenpilot.sources import watchlist
+        todo, starter = watchlist.entries(self.settings(["greenhouse:trivago", "lever:mine"]))
+        self.assertEqual(todo[:2], ["greenhouse:trivago", "lever:mine"])
+        self.assertEqual(todo.count("greenhouse:trivago"), 1)
+        self.assertNotIn("greenhouse:trivago", starter)
+        self.assertEqual(watchlist.entries(self.settings(["lever:mine"], country="nl"))[0], ["lever:mine"])
+
+    def test_starter_failures_summarized_not_fatal(self):
+        from unittest import mock
+        from stellenpilot.sources import watchlist
+        with mock.patch.object(watchlist, "starter_entries", return_value=["greenhouse:a", "greenhouse:b"]), \
+             mock.patch.object(watchlist, "fetch_company", side_effect=RuntimeError("gone")):
+            self.assertEqual(watchlist.fetch(self.settings([])), [])
+        self.assertEqual(watchlist.PROBLEMS, ["2 of 2 starter list companies could not be read today"])
+
+
+class RemotePlaceTest(unittest.TestCase):
+    def test_remote_must_be_open_to_germany(self):
+        from stellenpilot.sources.watchlist import _place_ok
+
+        class S:
+            cfg = {"watch": {}, "search": {"city": "Essen", "nearby_cities": [], "country": "de"}}
+
+            def __getitem__(self, k):
+                return self.cfg[k]
+        for loc, remote, want in [("Remote-Friendly, United States", True, False), ("United Kingdom, United States", True, False),
+                                  ("Remote, Europe", True, True), ("Remote", True, True), ("Hamburg, Remote", False, True),
+                                  ("London", False, False), ("Remote, USA or Germany", True, True)]:
+            self.assertEqual(_place_ok({"location": loc, "remote": remote}, S()), want, loc)

@@ -42,7 +42,7 @@ Checked on 10 October 2026. Terms change, so read the linked pages yourself befo
 
 ## How many jobs to expect
 
-Measured on 11 October 2026 for data roles near Essen: with narrow titles ("Werkstudent Data", "Junior Data Engineer") and ads from the last 3 days, the Bundesagentur returned 15 jobs; the number is limited by the market, not by pages. With broader titles ("Data Engineer", "Data Analyst", "Python") and 14 days it returned 87 instead of 50 before pagination, Arbeitnow 3 instead of 0, and over 7 days Jobicy added 4 remote roles while Remotive added none. Broader titles and a longer `max_age_days` find more; the company watchlist finds roles that never reach job boards.
+Measured on 11 October 2026 for data roles near Essen: with narrow titles ("Werkstudent Data", "Junior Data Engineer") and ads from the last 3 days, the Bundesagentur returned 15 jobs; the number is limited by the market, not by pages. With broader titles ("Data Engineer", "Data Analyst", "Python") and 14 days it returned 87 instead of 50 before pagination, Arbeitnow 3 instead of 0, and over 7 days Jobicy added 4 remote roles while Remotive added none. The ready made company watchlist (207 companies) added 17 matching roles at 15 companies for the narrow titles, in about 20 seconds. Broader titles and a longer `max_age_days` find more; the watchlist finds roles that never reach job boards.
 
 ## Not included, on purpose
 
@@ -51,6 +51,8 @@ Measured on 11 October 2026 for data roles near Essen: with narrow titles ("Werk
 * **Indeed**: there is no public job search API for open source clients today.
 
 ## Company watchlist feeds
+
+`starter_list = true` (or the checkbox in Settings) adds about 200 companies from `stellenpilot/examples/watchlist_germany.txt`. Each was found by testing company names against all five systems on 11 October 2026 and kept only if its feed worked and listed at least one job in Germany that day. Companies switch hiring systems now and then; entries that stop working are skipped and counted in one line of the run notes. Remote roles count only when they are open to Germany, Europe or worldwide.
 
 All checked live on 10 October 2026. None needs a key.
 

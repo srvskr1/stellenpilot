@@ -9,13 +9,19 @@ In config.toml:
     [watch]
     companies = ["greenhouse:trivago", "ashby:deepl", "personio:hornetsecurity"]
 Find the right entry from a careers link with:  stellenpilot watch <careers page URL>
+
+    starter_list = true
+adds a ready list of about 200 companies with offices in Germany (examples/watchlist_germany.txt),
+each checked to have a working feed with jobs in Germany. Feeds are read in parallel.
 """
 from __future__ import annotations
 
 import html
 import re
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
+from importlib import resources
 
 from ..http import HttpError, request_json
 from ..text import strip_html
@@ -24,6 +30,7 @@ NAME = "watchlist"
 LABEL = "Company site"
 SYSTEMS = ("greenhouse", "lever", "ashby", "personio", "smartrecruiters")
 PROBLEMS: list[str] = []  # entries that failed in the last fetch; the pipeline shows them in the run notes
+WORKERS = 8  # feeds read at the same time; each company is a different site, so this stays polite
 STOP = {"werkstudent", "working", "student", "junior", "senior", "intern", "praktikant", "m/w/d", "and", "und"}
 
 
@@ -177,13 +184,25 @@ def title_matches(title: str, rules: list[list[str]]) -> bool:
     return any(all(w in t for w in rule) for rule in rules)
 
 
+FOREIGN = re.compile(r"united states|\busa?\b|\bu\.s\.|canada|united kingdom|\buk\b|london|ireland|dublin|india|bangalore|"
+                     r"singapore|australia|sydney|brazil|mexico|japan|tokyo|new york|san francisco|seattle|toronto|"
+                     r"israel|tel aviv|brussels|amsterdam|paris|madrid|barcelona|lisbon|warsaw|prague|stockholm|"
+                     r"copenhagen|oslo|helsinki|zurich|zürich|vienna|wien|milan|athens|bucharest|sofia|kyiv|istanbul", re.I)
+OPEN_REGION = re.compile(r"europe|emea|\beu\b|worldwide|anywhere|global|cet\b", re.I)
+
+
 def _place_ok(job: dict, settings) -> bool:
     places = settings["watch"].get("locations")
     if places is None:
         s = settings["search"]
-        places = [s["city"], *s.get("nearby_cities", []), "remote", *COUNTRY_WORDS.get(s["country"].lower(), [])]
+        places = [s["city"], *s.get("nearby_cities", []), *COUNTRY_WORDS.get(s["country"].lower(), [])]
     loc = (job.get("location") or "").lower()
-    return not loc or job.get("remote") or any(p.lower() in loc for p in places)
+    if not loc or any(p.lower() in loc for p in places):
+        return True
+    if job.get("remote") or "remote" in loc:
+        # Remote, but for whom? "Remote, United States" is not open to someone in Germany.
+        return bool(OPEN_REGION.search(loc)) or not FOREIGN.search(loc)
+    return False
 
 
 COUNTRY_WORDS = {"de": ["germany", "deutschland"], "at": ["austria", "österreich"], "ch": ["switzerland", "schweiz"],
@@ -201,18 +220,44 @@ def fetch_company(entry: str, country: str = "") -> list[dict]:
     return {"greenhouse": greenhouse, "lever": lever, "ashby": ashby, "personio": personio}[system](slug)
 
 
+def starter_entries() -> list[str]:
+    text = resources.files("stellenpilot").joinpath("examples/watchlist_germany.txt").read_text(encoding="utf-8")
+    return [ln.split("#", 1)[0].strip() for ln in text.splitlines() if ln.split("#", 1)[0].strip()]
+
+
+def entries(settings) -> tuple[list[str], set[str]]:
+    """Your own companies first, then the starter list (Germany only). Returns (entries, starter_only)."""
+    own = [e.strip() for e in settings["watch"].get("companies") or [] if e.strip()]
+    starter = []
+    if settings["watch"].get("starter_list") and settings["search"]["country"].lower() == "de":
+        starter = [e for e in starter_entries() if e not in own]
+    return own + starter, set(starter)
+
+
 def fetch(settings) -> list[dict]:
     from . import job_type_from_title
     w = settings["watch"]
     rules = title_rules(settings)
     cutoff = (datetime.now(timezone.utc) - timedelta(days=int(w.get("max_age_days", 30)))).date().isoformat()
-    out, problems = [], []
-    PROBLEMS.clear()
-    for entry in w.get("companies") or []:
+    todo, starter_only = entries(settings)
+    country = settings["search"]["country"]
+
+    def read(entry):
         try:
-            jobs = fetch_company(entry, settings["search"]["country"])
+            return entry, fetch_company(entry, country), None
         except Exception as e:
-            problems.append(f"{entry}: {e}")
+            return entry, [], e
+
+    out, problems, starter_failed = [], [], 0
+    PROBLEMS.clear()
+    with ThreadPoolExecutor(WORKERS) as pool:
+        results = list(pool.map(read, todo))
+    for entry, jobs, err in results:
+        if err is not None:
+            if entry in starter_only:
+                starter_failed += 1  # companies switch hiring systems; one summary line is enough
+            else:
+                problems.append(f"{entry}: {err}")
             continue
         for j in jobs:
             if not title_matches(j["title"], rules):
@@ -224,7 +269,9 @@ def fetch(settings) -> list[dict]:
             if "_detail" in j:
                 _sr_description(j)
             out.append({**j, "source": LABEL, "job_type": job_type_from_title(j["title"])})
+    if starter_failed:
+        problems.append(f"{starter_failed} of {len(starter_only)} starter list companies could not be read today")
     PROBLEMS.extend(problems)
-    if problems and not out:
+    if problems and not out and not starter_only:
         raise RuntimeError("; ".join(problems))
     return out

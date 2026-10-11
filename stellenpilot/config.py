@@ -31,7 +31,7 @@ DEFAULTS = {
     "llm": {"provider": "none", "model": "", "base_url": ""},
     "tailor": {"min_match": 70, "max_per_run": 5, "output_dir": "output", "make_pdf": True, "only_english_ads": True, "letter_language": "auto"},
     "gmail": {"enabled": False, "lookback_days": 3},
-    "watch": {"companies": [], "title_words": [], "max_age_days": 30},
+    "watch": {"companies": [], "starter_list": False, "title_words": [], "max_age_days": 30},
     "notify": {"email": False, "telegram": False, "only_when_new": False},
     "schedule": {"enabled": False, "time": "08:45"},
 }

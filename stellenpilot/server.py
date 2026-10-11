@@ -30,7 +30,8 @@ EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remo
             "llm": ("provider", "model", "base_url"),
             "language": ("my_german_level",),
             "tailor": ("min_match", "letter_language"),
-            "schedule": ("enabled", "time")}
+            "schedule": ("enabled", "time"),
+            "watch": ("starter_list",)}
 CHOICES = {("llm", "provider"): {"none", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
            ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
            ("tailor", "letter_language"): {"auto", "en", "de"}}

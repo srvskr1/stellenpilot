@@ -57,6 +57,9 @@ english_only = true
 #   stellenpilot watch https://job-boards.greenhouse.io/trivago
 # Supported: greenhouse, lever, ashby, personio, smartrecruiters
 companies = []
+# Also check a ready list of about 200 companies with offices in Germany, each verified to have
+# a working job feed (see examples/watchlist_germany.txt in the package). Germany only.
+starter_list = false
 # Keep only titles containing one of these words. Empty: taken from search.keywords.
 title_words = []
 # Ignore postings older than this many days.

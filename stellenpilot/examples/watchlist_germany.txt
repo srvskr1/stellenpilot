@@ -1,0 +1,212 @@
+# Starter watchlist: companies with offices in Germany and a public job feed.
+# Each feed was checked on 11 October 2026 and listed at least one job in Germany that day.
+# Companies change hiring systems now and then; entries that stop working are skipped quietly.
+# Format: system:company  # display name. Turn it on in Settings or with [watch] starter_list = true.
+
+personio:1komma5grad            # 1KOMMA5°
+personio:1nce                   # 1NCE
+greenhouse:adyen                # Adyen
+lever:agicap                    # Agicap
+ashby:alephalpha                # Aleph Alpha
+smartrecruiters:alten           # ALTEN
+personio:ampere                 # Ampere AG
+personio:ankerkraut             # Ankerkraut GmbH
+greenhouse:anthropic            # Anthropic
+personio:anton                  # ANTON
+lever:apex-ai                   # Apex.AI
+personio:appliedai              # appliedAI
+personio:argo                   # Argo Residential
+smartrecruiters:auto1           # AUTO1 Group
+greenhouse:autoscout24          # AutoScout24
+greenhouse:avimedical           # Avi Medical
+ashby:aviv                      # AVIV
+ashby:babbel                    # Babbel
+personio:banxware               # Banxware GmbH
+personio:bauer-gmbh             # BAUER
+personio:bettermarks            # bettermarks
+personio:bikeleasing            # Bikeleasing Gruppe
+ashby:billie                    # Billie
+greenhouse:bitpanda             # Bitpanda
+greenhouse:blacklane            # BLACKLANE
+personio:blickfeld              # Blickfeld
+greenhouse:bloomreach           # Bloomreach
+smartrecruiters:brainlab        # Brainlab
+lever:brevo                     # Brevo
+ashby:camunda                   # Camunda
+smartrecruiters:canva           # Canva
+personio:capmo                  # Capmo
+personio:cargoboard             # Cargoboard
+personio:casavi                 # casavi GmbH
+greenhouse:catawiki             # Catawiki
+greenhouse:celonis              # Celonis
+personio:chargecloud-gmbh       # chargecloud
+personio:chrono24               # Chrono24
+personio:clark                  # CLARK
+ashby:clickhouse                # ClickHouse
+personio:climedo                # Climedo
+personio:codecentric            # codecentric
+ashby:cohere                    # Cohere
+greenhouse:commercetools        # commercetools
+greenhouse:contentful           # Contentful
+smartrecruiters:continental     # Continental
+personio:contorion              # Contorion
+ashby:cube                      # CUBE
+personio:cylib-gmbh             # cylib GmbH
+personio:data4life              # D4L data4life gGmbH
+greenhouse:databricks           # Databricks
+greenhouse:datadog              # Datadog
+greenhouse:dataiku              # Dataiku
+ashby:deepl                     # DeepL
+smartrecruiters:deliveryhero    # Delivery Hero
+greenhouse:doctolib             # Doctolib
+greenhouse:ebury                # Ebury
+smartrecruiters:ecovadis        # EcoVadis
+personio:edyoucated             # edyoucated
+ashby:egym                      # EGYM
+greenhouse:elastic              # Elastic
+ashby:elevenlabs                # ElevenLabs
+greenhouse:emnify               # emnify
+ashby:enpal                     # Enpal
+personio:entrix                 # Entrix GmbH
+personio:envelio                # envelio
+greenhouse:evernest             # Evernest
+personio:everphone              # everphone
+personio:feather                # Feather
+greenhouse:finanzcheck          # FFG FINANZCHECK Finanzportale GmbH
+greenhouse:figma                # Figma
+lever:finn                      # FINN
+greenhouse:fivetran             # Fivetran
+greenhouse:flix                 # Flix
+ashby:forto                     # Forto
+greenhouse:freenow              # Freenow by Lyft
+personio:fulfin                 # fulfin
+personio:gematik                # gematik
+personio:getquin                # getquin
+greenhouse:getyourguide         # GetYourGuide
+greenhouse:gostudent            # GoStudent
+personio:gridx                  # gridX GmbH
+greenhouse:grover               # Grover
+greenhouse:hellofresh           # HelloFresh
+greenhouse:helsing              # Helsing
+ashby:holidu                    # Holidu
+smartrecruiters:home24          # home24
+personio:honic                  # Honic
+personio:hornetsecurity         # Hornetsecurity
+greenhouse:idnow                # IDnow
+ashby:immowelt                  # immowelt
+lever:innogames                 # InnoGames
+personio:instaffo               # Instaffo
+personio:ionity-gmbh            # IONITY GmbH
+greenhouse:ionos                # IONOS DE
+greenhouse:isaraerospace        # Isar Aerospace SE
+ashby:jameda                    # Jameda
+personio:jedox                  # Jedox GmbH
+greenhouse:jetbrains            # JetBrains
+personio:join                   # Join GmbH
+smartrecruiters:joonko          # Joonko
+smartrecruiters:kaiahealth      # Kaia Health
+ashby:knowunity                 # Knowunity GmbH
+greenhouse:konux                # KONUX
+ashby:koro                      # KoRo
+personio:kraftblock             # Kraftblock
+ashby:langdock                  # Langdock
+personio:liveeo-gmbh            # LiveEO GmbH
+ashby:luminovo                  # Luminovo
+personio:magazino               # Magazino GmbH
+lever:malt                      # Malt
+personio:mediaire               # mediaire
+personio:memodo-gmbh            # Memodo GmbH
+personio:merantix               # Merantix
+personio:merantix-momentum      # Merantix Momentum
+personio:miles-mobility         # MILES Mobility GmbH
+ashby:miro                      # Miro
+smartrecruiters:moberries       # MoBerries
+lever:mobileye                  # Mobileye
+greenhouse:moia                 # MOIA GmbH
+ashby:mollie                    # Mollie
+greenhouse:mongodb              # MongoDB
+ashby:moss                      # Moss
+ashby:motherduck                # MotherDuck
+personio:mynaric                # Mynaric
+greenhouse:n26                  # N26
+ashby:n8n                       # n8n
+greenhouse:navvis               # NavVis
+ashby:nelly                     # Nelly Solutions
+personio:neon                   # NEON
+lever:netlight                  # Netlight
+smartrecruiters:nexthink        # Nexthink
+personio:node-energy            # node.energy
+ashby:notion                    # Notion
+smartrecruiters:omio            # Omio
+ashby:openai                    # OpenAI
+personio:ororatech              # OroraTech GmbH
+personio:oskar                  # Oskar
+ashby:ostrom                    # Ostrom
+personio:ottonova               # ottonova Holding AG
+ashby:oviva                     # Oviva
+greenhouse:parloa               # Parloa
+personio:personio-gmbh          # personio
+personio:pflegix                # Pflegix GmbH
+personio:pickware               # Pickware GmbH
+ashby:pleo                      # Pleo
+ashby:pliant                    # Pliant
+personio:polarstern-gmbh        # Polarstern GmbH
+ashby:preply                    # Preply
+personio:proglove               # ProGlove
+lever:qonto                     # Qonto
+greenhouse:raisin               # Raisin
+personio:ratepay                # Ratepay GmbH
+personio:recup                  # RECUP
+lever:researchgate              # ResearchGate
+personio:retresco               # Retresco GmbH
+ashby:sanity                    # Sanity
+greenhouse:scout24              # Scout24
+personio:sipgate                # sipgate
+smartrecruiters:sixt            # SIXT
+personio:smartbroker            # Smartbroker AG
+ashby:snowflake                 # Snowflake
+personio:softgarden             # softgarden
+greenhouse:solarisbank          # Solaris
+smartrecruiters:speexx          # Speexx
+greenhouse:spryker              # Spryker
+greenhouse:staffbase            # Staffbase
+ashby:statista                  # Statista
+personio:statworx               # statworx
+greenhouse:stripe               # Stripe
+personio:studyflix-gmbh         # Studyflix GmbH
+greenhouse:sumup                # SumUp
+greenhouse:superchat            # Superchat
+ashby:synthesia                 # Synthesia
+personio:tado                   # tado GmbH
+personio:tanso                  # Tanso Technologies GmbH
+ashby:the-exploration-company   # The Exploration Company
+personio:thermondo              # thermondo
+greenhouse:think-cell           # think-cell
+greenhouse:thoughtworks         # Thoughtworks
+personio:tiramizoo              # tiramizoo
+personio:tngtech                # TNG Technology Consulting
+personio:tomorrow-gmbh          # Tomorrow GmbH
+personio:tonies                 # tonies GmbH
+ashby:tourlane                  # Tourlane
+personio:trbo                   # trbo GmbH
+greenhouse:trivago              # trivago
+personio:twaice                 # TWAICE
+personio:ubitricity-gmbh        # ubitricity
+lever:unzer                     # Unzer
+ashby:upvest                    # Upvest
+greenhouse:valtech              # Valtech
+greenhouse:vay                  # Vay
+personio:verivox                # Verivox
+personio:visable                # Visable
+personio:vivid                  # Vivid
+personio:vivira                 # Vivira Health Lab
+personio:wandelbots             # Wandelbots GmbH
+ashby:wayve                     # Wayve
+personio:weclapp                # weclapp
+personio:westwing               # Westwing
+personio:wirelane               # Wirelane
+personio:workpath               # Workpath
+smartrecruiters:wundermobility  # Wunder Mobility
+lever:xentral                   # Xentral
+greenhouse:zattoo               # Zattoo
+ashby:zenjob                    # Zenjob

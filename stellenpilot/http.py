@@ -7,7 +7,9 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-USER_AGENT = "stellenpilot/0.1 (+https://github.com/srvskr1/stellenpilot)"
+from . import __version__
+
+USER_AGENT = f"stellenpilot/{__version__} (+https://github.com/srvskr1/stellenpilot)"
 
 
 class HttpError(RuntimeError):
