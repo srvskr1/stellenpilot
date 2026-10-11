@@ -26,6 +26,8 @@ It never applies for you and never contacts companies. You stay in control of ev
 
 ## Quick start
 
+**New to Python or the terminal?** Follow [INSTALL.md](INSTALL.md): step by step for Windows, macOS, Linux and Docker, from installing Python to your first search.
+
 You need Python 3.11 or newer (or Docker, see below). Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
 
 ```bash
