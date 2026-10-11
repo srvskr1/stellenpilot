@@ -15,6 +15,8 @@ Job ads shown by this tool come from the sources you enable, and remain the prop
 * Arbeitnow, https://www.arbeitnow.com
 * The Adzuna API, https://www.adzuna.de
 * TheirStack, https://theirstack.com
+* Jobicy, https://jobicy.com
+* Remotive, https://remotive.com
 
 ## Fonts
 

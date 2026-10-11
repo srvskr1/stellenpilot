@@ -383,6 +383,8 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
             <label>App key <span class="keyset" data-key="ADZUNA_APP_KEY"></span><input class="input" name="ADZUNA_APP_KEY" type="password" autocomplete="off"></label></div></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="theirstack"> TheirStack <span class="muted">free key from theirstack.com, 200 credits a month</span></label>
             <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off"></label></div>
+          <div class="srcrow"><label class="check"><input type="checkbox" name="jobicy"> Jobicy <span class="muted">free, no key, remote jobs only</span></label></div>
+          <div class="srcrow"><label class="check"><input type="checkbox" name="remotive"> Remotive <span class="muted">free, no key, remote jobs only, small feed</span></label></div>
           <p class="hint" style="margin:0">Saved keys are not shown again. Leave a key box empty to keep the saved one.</p>
         </fieldset>
         <fieldset class="fset" data-step="ai"><legend>AI model</legend>
@@ -479,7 +481,7 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
   </main>
 </div>
 <div class="toast" id="toast" hidden></div>
-<footer class="credits">Job data from <a href="https://www.arbeitsagentur.de/jobsuche/" target="_blank" rel="noopener">Bundesagentur für Arbeit</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a>, <a href="https://www.adzuna.de" target="_blank" rel="noopener">The Adzuna API</a> and <a href="https://theirstack.com" target="_blank" rel="noopener">TheirStack</a>, depending on which sources you enable.</footer>
+<footer class="credits">Job data from <a href="https://www.arbeitsagentur.de/jobsuche/" target="_blank" rel="noopener">Bundesagentur für Arbeit</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a>, <a href="https://www.adzuna.de" target="_blank" rel="noopener">The Adzuna API</a>, <a href="https://theirstack.com" target="_blank" rel="noopener">TheirStack</a>, <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a> and <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>, depending on which sources you enable.</footer>
 
 <script>
 const STAGES=[["new","New"],["ready","Docs ready"],["applied","Applied"],["interview","Interview"],["offer","Offer"],["rejected","Rejected"],["skipped","Skipped"]];
@@ -586,9 +588,9 @@ function renderToday(){
   $("today").innerHTML=items.length?items.map(i=>`<div class="todo ${i.c}"><span class="ic">${i.ic}</span><div class="tx">${i.t}<small>${i.s}</small></div><div class="acts">${i.a}</div></div>`).join("")
     :`<div class="todo"><div class="tx">Nothing waiting on you right now.<small>The next run adds new matches and documents.</small></div></div>`;
 }
-const SRCLINK={Adzuna:"https://www.adzuna.de",Arbeitnow:"https://www.arbeitnow.com",TheirStack:"https://theirstack.com","Bundesagentur für Arbeit":"https://www.arbeitsagentur.de/jobsuche/"};
+const SRCLINK={Adzuna:"https://www.adzuna.de",Arbeitnow:"https://www.arbeitnow.com",TheirStack:"https://theirstack.com",Jobicy:"https://jobicy.com",Remotive:"https://remotive.com","Bundesagentur für Arbeit":"https://www.arbeitsagentur.de/jobsuche/"};
 const srcChip=s=>SRCLINK[s]?`<a class="chip" href="${SRCLINK[s]}" target="_blank" rel="noopener">${esc(s)}</a>`:`<span class="chip">${esc(s)}</span>`;
-const SRC=s=>/arbeitsagentur/i.test(s)?"Bundesagentur":/arbeitnow/i.test(s)?"Arbeitnow":/theirstack/i.test(s)?"TheirStack":/adzuna/i.test(s)?"Adzuna":/linkedin/i.test(s)?"LinkedIn":/stepstone/i.test(s)?"StepStone":/indeed/i.test(s)?"Indeed":/gmail/i.test(s)?"Found in Gmail":/jobswithoutgerman|firecrawl/i.test(s)?"jobswithoutgerman.de":"Other";
+const SRC=s=>/arbeitsagentur/i.test(s)?"Bundesagentur":/arbeitnow/i.test(s)?"Arbeitnow":/theirstack/i.test(s)?"TheirStack":/jobicy/i.test(s)?"Jobicy":/remotive/i.test(s)?"Remotive":/adzuna/i.test(s)?"Adzuna":/linkedin/i.test(s)?"LinkedIn":/stepstone/i.test(s)?"StepStone":/indeed/i.test(s)?"Indeed":/gmail/i.test(s)?"Found in Gmail":/jobswithoutgerman|firecrawl/i.test(s)?"jobswithoutgerman.de":"Other";
 const SENT=["applied","interview","offer","rejected"],REPLY=["interview","offer","rejected"];
 const GAPDICT=[["German",/german/i],["dbt",/\bdbt\b/i],["Snowflake",/snowflake/i],["Kafka",/kafka/i],["Terraform",/terraform/i],["Spark",/spark/i],["Kubernetes",/kubernetes|k8s/i],["GCP",/\bgcp\b|google cloud/i],["Java or Scala",/\bjava\b|scala/i],["AWS CDK",/\bcdk\b/i],["Professional DE experience",/professional|years of experience/i]];
 function bars(rows,max,warm){return rows.map(r=>`<div class="brow"><span>${esc(r.k)}</span><span class="bt"><i class="${warm?"w":""}" style="width:${max?Math.round(r.v/max*100):0}%"></i></span><span class="nm">${r.lbl}</span></div>`).join("")}
@@ -854,7 +856,7 @@ $("cvSave").addEventListener("click",async()=>{
 let cvPrompted=false;
 
 /* ---------- Settings ---------- */
-const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"]};
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 function showProvider(){const pv=$("setForm").provider.value;$("setForm").querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));$("setForm").model.closest("label").hidden=pv==="none"}
@@ -918,7 +920,7 @@ const GUIDE=[
   </div>
   <p style="margin-top:12px"><button type="button" class="mini" id="gTest">Test</button> <span id="gTestMsg" class="muted"></span></p>`,save:saveSettings},
  {id:"sources",name:"Job sources",panel:"setPanel",steps:["sources"],html:`<h3>Step 4: where jobs come from</h3>
-  <p>The Bundesagentur für Arbeit and Arbeitnow work right away with no key. Two more sources are optional and free:</p>
+  <p>The Bundesagentur für Arbeit and Arbeitnow work right away with no key, and so do Jobicy and Remotive for remote jobs (when "Also remote jobs" is ticked in step 2). Two more sources are optional and free:</p>
   <div class="gcards">
    <div class="gcard"><strong>Adzuna</strong><ol><li>Sign up at <a href="https://developer.adzuna.com" target="_blank" rel="noopener">developer.adzuna.com</a>.</li><li>Open your dashboard and copy the App ID and App key.</li><li>Tick Adzuna below and paste both.</li></ol></div>
    <div class="gcard"><strong>TheirStack</strong><ol><li>Sign up at <a href="https://theirstack.com" target="_blank" rel="noopener">theirstack.com</a>.</li><li>Copy your API key from the settings page.</li><li>Tick TheirStack below and paste it.</li></ol><p>200 free credits a month, one per job found.</p></div>

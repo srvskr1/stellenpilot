@@ -16,6 +16,7 @@ COUNTRIES = {"de"}
 LABEL = "Bundesagentur für Arbeit"
 BASE = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service"
 HEADERS = {"X-API-Key": "jobboerse-jobsuche"}
+PAGE_SIZE = 50
 
 
 def _search(params: dict) -> list[dict]:
@@ -54,22 +55,28 @@ def _normalize(item: dict, detail: dict) -> dict:
 
 def fetch(settings) -> list[dict]:
     s = settings["search"]
-    size = int(settings["sources"]["limits"].get("arbeitsagentur_results", 50))
+    limits = settings["sources"]["limits"]
+    cap = int(limits.get("arbeitsagentur_results", 150))  # each kept job costs one detail request
+    max_pages = int(limits.get("arbeitsagentur_pages", 5))
     seen, out = set(), []
     queries = [{"wo": s["city"], "umkreis": s["radius_km"]}]
     if s.get("include_remote"):
         queries.append({"arbeitszeit": "ho"})  # home office / telework, whole country
     for kw in s["keywords"]:
         for q in queries:
-            params = {"was": kw, "angebotsart": 1, "veroeffentlichtseit": s["max_age_days"],
-                      "size": min(size, 100), "page": 1, **q}
-            for item in _search(params):
-                ref = item.get("referenznummer")
-                title = item.get("stellenangebotsTitel") or ""
-                if not ref or ref in seen or title_excluded(title, s.get("exclude_title_words", [])):
-                    continue
-                seen.add(ref)
-                out.append(_normalize(item, _details(ref)))
-                if len(out) >= size:
-                    return out
+            for page in range(1, max_pages + 1):
+                params = {"was": kw, "angebotsart": 1, "veroeffentlichtseit": s["max_age_days"],
+                          "size": PAGE_SIZE, "page": page, **q}
+                items = _search(params)
+                for item in items:
+                    ref = item.get("referenznummer")
+                    title = item.get("stellenangebotsTitel") or ""
+                    if not ref or ref in seen or title_excluded(title, s.get("exclude_title_words", [])):
+                        continue
+                    seen.add(ref)
+                    out.append(_normalize(item, _details(ref)))
+                    if len(out) >= cap:
+                        return out
+                if len(items) < PAGE_SIZE:
+                    break
     return out

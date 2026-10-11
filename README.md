@@ -22,7 +22,7 @@ Then open http://127.0.0.1:8765 . A setup guide walks you through the rest. Work
 * **Easy to set up, no files to edit.** A step by step setup guide in the dashboard: your CV, what you are looking for, the AI model and the job sources, with a check at the end. Everything can be changed later under **My CV** and **Settings**.
 * **Runs by itself every day.** Switch on **Automatic search** in Settings and pick a time; it sets up Task Scheduler on Windows or cron on macOS and Linux for you. Or press **Run search now** any time.
 * **Starts from your CV.** Drop it on the dashboard (or run `stellenpilot import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
-* **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys). It removes duplicates across sources.
+* **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys), plus remote roles from Jobicy and Remotive. It reads several pages per search, within each source's free limits. It removes duplicates across sources.
 * **Watches your dream companies.** Name companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters, and their new roles show up every day, often before they reach the job boards. `stellenpilot watch <careers link>` finds the right entry.
 * **Takes jobs you found yourself.** Paste a link or the ad text (from LinkedIn, a friend, anywhere) with `stellenpilot add` or the dashboard's "Add a job" panel. It gets scored and tailored like the rest.
 * **Understands German job ads.** It reads the German level an ad really asks for (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and gives you an English summary of German ads. It writes German cover letters only if your German is B2 or better, because a polished German letter from someone at A2 would suggest a level they do not have.
@@ -120,6 +120,8 @@ Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips an
 | Arbeitnow | none | free | Their terms require a link back to arbeitnow.com. The dashboard shows it. |
 | Adzuna | free, from developer.adzuna.com | default 250 calls a day | Allowed for personal research. Adzuna must be credited; every Adzuna job links to Adzuna. Returns short snippets, not full ads. |
 | TheirStack | free, from theirstack.com | 200 credits a month, 1 credit per job | Keys may not be shared. Each user needs their own. |
+| Jobicy | none | free, one pass an hour at most | Remote jobs only. Credit Jobicy with a link to the listing; the dashboard does this. |
+| Remotive | none | free, about 4 calls a day at most | Remote jobs only, one call per run. Small feed, delayed by a day. Credit and link back to Remotive; the dashboard does this. |
 
 There is no LinkedIn, StepStone or Indeed scraper on purpose. LinkedIn's and StepStone's terms forbid scraping, and Indeed has no public job search API. See [docs/sources.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/sources.md) for the details and links.
 
@@ -133,7 +135,7 @@ See [docs/digest.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/dige
 
 ## Other countries
 
-Set `country` in `config.toml`. Adzuna covers 19 countries, TheirStack and the company watchlist cover any country, and the Bundesagentur and Arbeitnow cover Germany only (they are skipped elsewhere).
+Set `country` in `config.toml`. Adzuna covers 19 countries, Jobicy and Remotive cover remote roles open to your country, TheirStack and the company watchlist cover any country, and the Bundesagentur and Arbeitnow cover Germany only (they are skipped elsewhere).
 
 ## Gmail status sync (optional)
 

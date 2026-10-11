@@ -6,9 +6,15 @@ Only official or public APIs are used. No scraping of sites whose terms forbid i
 """
 from __future__ import annotations
 
-from . import adzuna, arbeitnow, arbeitsagentur, theirstack, watchlist
+from . import adzuna, arbeitnow, arbeitsagentur, jobicy, remotive, theirstack, watchlist
 
-REGISTRY = {m.NAME: m for m in (watchlist, arbeitsagentur, arbeitnow, adzuna, theirstack)}
+REGISTRY = {m.NAME: m for m in (watchlist, arbeitsagentur, arbeitnow, adzuna, theirstack, jobicy, remotive)}
+
+
+def title_has_keyword(title: str, keywords: list[str]) -> bool:
+    """True when every word of at least one keyword is in the title ("Werkstudent Data")."""
+    t = (title or "").lower()
+    return any(all(w in t for w in kw.lower().split()) for kw in keywords)
 
 
 def job_type_from_title(title: str, fallback: str = "") -> str:

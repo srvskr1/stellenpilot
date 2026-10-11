@@ -181,7 +181,7 @@ class SourceTests(unittest.TestCase):
             {"slug": "c", "title": "Werkstudent Data", "company_name": "C", "location": "Munich", "remote": True, "created_at": now, "description": "", "job_types": [], "url": "u"},
         ]}
         st = mock.Mock()
-        st.__getitem__ = lambda self, k: {"search": {"city": "Essen", "nearby_cities": [], "max_age_days": 3, "include_remote": True, "keywords": ["Werkstudent Data"]}}[k]
+        st.__getitem__ = lambda self, k: {"search": {"city": "Essen", "nearby_cities": [], "max_age_days": 3, "include_remote": True, "keywords": ["Werkstudent Data"]}, "sources": {"limits": {}}}[k]
         with mock.patch("stellenpilot.sources.arbeitnow.request_json", side_effect=[page, {"data": []}]):
             ids = [j["id"] for j in sources.arbeitnow.fetch(st)]
         self.assertEqual(ids, ["an-a", "an-c"])
