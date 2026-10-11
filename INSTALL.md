@@ -116,70 +116,50 @@ In the rest of this guide, wherever it says `jobhunt something`, type `docker co
 
 ## First day setup
 
-Run these commands inside your workspace folder (`my-hunt`, or the project folder for Docker).
-
-### 1. Look around with sample data (optional, 1 minute)
+Everything from here happens in your browser. In your workspace folder (`my-hunt`, or the project folder for Docker), start the dashboard:
 
 ```bash
-jobhunt demo
 jobhunt serve
 ```
-Open http://127.0.0.1:8765 in your browser. These are fictional jobs. Press **Ctrl+C** in the terminal to stop the dashboard, then delete `jobhunt.db` to remove the samples.
+Open http://127.0.0.1:8765 . Leave the terminal open while you use it; **Ctrl+C** stops it.
 
-### 2. Add your CV (5 minutes)
+### 1. My CV (5 minutes)
 
-**The easy way: drag and drop.** Start the dashboard with `jobhunt serve`, open http://127.0.0.1:8765 and click **My CV** (it opens by itself the first time). Drop your CV file on the box. The tool reads it and shows your profile:
-* Read the **Check these before saving** notes. They list anything that was dropped or left out.
-* Fix what is wrong right in the box, then click **Save as my profile**. Your old profile is kept as `profile.backup.toml`.
+The **My CV** panel opens by itself the first time.
+1. Drop your CV file (PDF, DOCX or TXT) on the box, or click it to choose the file.
+2. The form fills in. Without an AI model only your name, contact details and languages are filled; your CV text is shown above the form so you can copy the rest in.
+3. Check every field. Add jobs, projects and degrees with the **+ Add** buttons. Keep bullets short and true: they are copied word for word into your tailored CVs.
+4. Put skills you are still learning in a group called `Learning`. They are never presented as experience.
+5. Click **Save my CV**.
 
-**From the terminal** instead: `jobhunt import path/to/your_cv.pdf` writes `profile.imported.toml`. Check it the same way, then rename it to `profile.toml`.
+Your languages matter: your German level decides which ads get skipped and whether letters are written in German (only at B2 or better).
 
-Without an AI model (see step 4), only your contact details and languages are filled in, and your CV text is copied into the file as comments for you to sort by hand.
+### 2. Settings (3 minutes)
 
-**By hand:** open `profile.toml` and replace Alex Example's facts with yours. Keep bullets short and true. They are copied word for word into your tailored CVs.
+Click **Settings** in the left menu:
+* **What you are looking for**: job titles (one per line), city, distance, remote.
+* **Job sources**: the Bundesagentur and Arbeitnow need no key. For Adzuna and TheirStack, tick the box and paste your free key ([where to get them](docs/sources.md)).
+* **AI model**: optional but recommended. Without one, jobs are scored by keywords and letters come from a template.
 
-Two things to get right:
-* `languages`, for example `["English (C1)", "German (A2)"]`. Your German level decides which ads get skipped and whether letters are written in German (only at B2 or better).
-* Put skills you are still learning in a group called `Learning`. They are never presented as experience.
-
-### 3. Say what you are looking for (2 minutes)
-
-Open `config.toml` and set at least:
-```toml
-[search]
-keywords = ["Werkstudent Data", "Junior Data Engineer"]
-city = "Essen"
-radius_km = 75
-country = "de"
-```
-The file explains every other option in its comments.
-
-### 4. Choose an AI model (optional, but recommended)
-
-Without one, jobs are scored by keyword overlap and letters come from a template. With one, scores, CV plans and letters are much better.
-
-| choice | set in `config.toml` | then |
+| choice | pick | then |
 |---|---|---|
-| Free, on your computer | `provider = "ollama"` and `model = "qwen2.5:7b"` | install Ollama from https://ollama.com and run `ollama pull qwen2.5:7b` |
-| Claude | `provider = "anthropic"` | put `ANTHROPIC_API_KEY=...` in `.env` |
-| OpenAI | `provider = "openai"` and a `model` | put `OPENAI_API_KEY=...` in `.env` |
+| Free, on your computer | Ollama, model `qwen2.5:7b` | install Ollama from https://ollama.com and run `ollama pull qwen2.5:7b` once |
+| Claude | Claude, paste your Anthropic API key | nothing else |
+| OpenAI | OpenAI, a model name, your API key | nothing else |
 
 Which local model fits your computer: [docs/local-llm.md](docs/local-llm.md).
 
-### 5. Check everything
+Click **Save settings**.
 
-```bash
-jobhunt doctor
-```
-It tells you, in plain words, what is missing: a profile still set to the example, a source switched on without its key, an AI model that is not running.
+### 3. Run your first search
 
-### 6. Your first real search
+Click **Run search now**. The little office shows what it is doing. When it is done, good matches have a tailored CV and cover letter in the `output` folder. Read every document before you send it.
 
-```bash
-jobhunt run
-jobhunt serve
-```
-Open http://127.0.0.1:8765 . Good matches get a tailored CV and cover letter in the `output` folder. Read every document before you send it.
+Something not working? In the terminal (Ctrl+C first), `jobhunt doctor` tells you in plain words what is missing.
+
+### Want to look around first?
+
+`jobhunt demo` loads fictional sample jobs. Delete `jobhunt.db` afterwards to remove them.
 
 ---
 

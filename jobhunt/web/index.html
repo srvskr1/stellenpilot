@@ -124,6 +124,31 @@ tr:last-child td{border-bottom:none}
 .drop strong{font-size:.9375rem}
 .cvnotes{margin:0;padding-left:18px;color:var(--text-secondary);font-size:.8125rem;line-height:1.5}
 .addform textarea.input.cvtext{font:.8125rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:320px;resize:vertical}
+.fset{border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;margin:0}
+.fset legend{font:700 .875rem var(--f-ui);padding:0 6px}
+.fset .hint{margin:-6px 0 0;color:var(--text-tertiary);font-size:.8125rem}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.g2,.g3{grid-template-columns:1fr}}
+.item{border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--surface-alt)}
+.itemhead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:600;font-size:.8125rem}
+.skillrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.4fr) auto;gap:8px;align-items:center}
+@media (max-width:760px){.skillrow{grid-template-columns:1fr auto}.skillrow input:nth-child(2){grid-column:1/-1;grid-row:2}}
+.mini{font:600 .8125rem var(--f-ui);min-height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--accent);cursor:pointer;width:auto;align-self:flex-start}
+.mini:hover{border-color:var(--accent);background:var(--accent-soft)}
+.mini:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mini.rm{color:var(--text-tertiary);min-width:36px;padding:0 10px}
+.mini.rm:hover{color:#dc2626;border-color:#dc2626;background:transparent}
+.addform textarea.input.lines{min-height:84px}
+.cvsrc{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--surface-alt)}
+.cvsrc summary{cursor:pointer;font-weight:600;font-size:.8125rem}
+.cvsrc pre{white-space:pre-wrap;font:.8125rem/1.5 var(--f-mono);max-height:320px;overflow:auto;margin:10px 0 0;color:var(--text-secondary)}
+.keyset{font-weight:500;color:#059669;font-size:.75rem}
+.srcrow{display:flex;flex-direction:column;gap:8px;padding:10px 0;border-top:1px solid var(--border)}
+.srcrow:first-of-type{border-top:0;padding-top:0}
+.runmsg{font-size:.8125rem;color:var(--text-secondary);margin:2px 2px 0;line-height:1.45}
+.runmsg.bad{color:#dc2626}
+.sticky-save{position:sticky;bottom:0;background:var(--surface);padding:12px 0 2px;border-top:1px solid var(--border)}
 .addform{display:flex;flex-direction:column;gap:12px;padding:16px}
 .addform label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.8125rem}
 .addform label.check{flex-direction:row;font-weight:500}
@@ -267,7 +292,10 @@ tr:last-child td{border-bottom:none}
       <p class="label" style="margin-bottom:0">Find</p>
       <input class="input" id="q" type="search" placeholder="Company or title" aria-label="Search company or title">
       <label class="check" for="showDe"><input type="checkbox" id="showDe"> Show roles needing more German than you have</label>
+      <button class="btn" id="runBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span>Run search now</span></button>
+      <p class="runmsg" id="runMsg" role="status"></p>
       <button class="btn ghost" id="cvBtn" type="button" aria-expanded="false" aria-controls="cvPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg><span>My CV</span></button>
+      <button class="btn ghost" id="setBtn" type="button" aria-expanded="false" aria-controls="setPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
       <button class="btn ghost" id="addBtn" type="button" aria-expanded="false" aria-controls="addPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add a job</span></button>
       <button class="btn" id="gmailBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>Check Gmail</span></button>
     </div>
@@ -292,10 +320,71 @@ tr:last-child td{border-bottom:none}
         </label>
         <span class="muted" id="cvMsg" role="status"></span>
         <div id="cvNotesBox" hidden><strong style="font-size:.8125rem">Check these before saving</strong><ul class="cvnotes" id="cvNotes"></ul></div>
-        <label>Your profile <span class="muted">(edit freely; bullets are copied word for word into your CVs, so keep them true)</span>
-          <textarea class="input cvtext" id="cvText" spellcheck="false" placeholder="Drop your CV above to fill this in"></textarea></label>
-        <div class="addrow end"><span class="muted" id="cvSaveMsg" role="status"></span><button class="btn" type="button" id="cvSave" style="width:auto">Save as my profile</button></div>
+        <details class="cvsrc" id="cvSrc" hidden><summary>Your CV text, to copy from</summary><pre id="cvSrcText"></pre></details>
+        <div id="cvForm"></div>
+        <div class="addrow end sticky-save"><span class="muted" id="cvSaveMsg" role="status"></span><button class="btn" type="button" id="cvSave" style="width:auto">Save my CV</button></div>
       </div>
+    </section>
+    <section id="setPanel" aria-labelledby="set-h" hidden>
+      <div class="sechead"><h2 id="set-h">Settings</h2><span>What to search, where, and which AI model writes your documents</span></div>
+      <form class="panel addform" id="setForm" style="margin-top:12px">
+        <fieldset class="fset"><legend>What you are looking for</legend>
+          <label>Job titles <span class="muted">(one per line)</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
+          <div class="g3">
+            <label>City <input class="input" name="city" placeholder="Essen"></label>
+            <label>Distance from the city (km) <input class="input" name="radius_km" type="number" min="0" max="1000"></label>
+            <label>Country code <input class="input" name="country" maxlength="2" placeholder="de"></label>
+          </div>
+          <label class="check"><input type="checkbox" name="include_remote"> Also remote jobs anywhere in the country</label>
+          <div class="g2">
+            <label>Only ads from the last ... days <input class="input" name="max_age_days" type="number" min="1" max="60"></label>
+            <label>Skip titles with these words <span class="muted">(one per line)</span><textarea class="input lines" name="exclude_title_words" placeholder="senior&#10;lead"></textarea></label>
+          </div>
+        </fieldset>
+        <fieldset class="fset"><legend>Job sources</legend>
+          <div class="srcrow"><label class="check"><input type="checkbox" name="arbeitsagentur"> Bundesagentur für Arbeit <span class="muted">free, no key</span></label></div>
+          <div class="srcrow"><label class="check"><input type="checkbox" name="arbeitnow"> Arbeitnow <span class="muted">free, no key</span></label></div>
+          <div class="srcrow"><label class="check"><input type="checkbox" name="adzuna"> Adzuna <span class="muted">free key from developer.adzuna.com</span></label>
+            <div class="g2"><label>App ID <span class="keyset" data-key="ADZUNA_APP_ID"></span><input class="input" name="ADZUNA_APP_ID" autocomplete="off"></label>
+            <label>App key <span class="keyset" data-key="ADZUNA_APP_KEY"></span><input class="input" name="ADZUNA_APP_KEY" type="password" autocomplete="off"></label></div></div>
+          <div class="srcrow"><label class="check"><input type="checkbox" name="theirstack"> TheirStack <span class="muted">free key from theirstack.com, 200 credits a month</span></label>
+            <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off"></label></div>
+          <p class="hint" style="margin:0">Saved keys are not shown again. Leave a key box empty to keep the saved one.</p>
+        </fieldset>
+        <fieldset class="fset"><legend>AI model</legend>
+          <p class="hint" style="margin:0">Without a model, jobs are scored by keywords and letters come from a template. With one, scores, CVs and letters are much better.</p>
+          <div class="g2">
+            <label>Model service
+              <select class="input" name="provider">
+                <option value="none">None (keywords and templates)</option>
+                <option value="ollama">Ollama, free on your computer</option>
+                <option value="lmstudio">LM Studio, free on your computer</option>
+                <option value="anthropic">Claude (Anthropic API key)</option>
+                <option value="openai">OpenAI (API key)</option>
+                <option value="llamacpp">llama.cpp server</option>
+                <option value="vllm">vLLM server</option>
+                <option value="local">Other local server</option>
+              </select></label>
+            <label>Model name <input class="input" name="model" list="modelList" placeholder="e.g. qwen2.5:7b"></label>
+            <datalist id="modelList"><option value="qwen2.5:7b"><option value="llama3.1:8b"><option value="qwen2.5:14b"></datalist>
+          </div>
+          <label data-for="anthropic">Anthropic API key <span class="keyset" data-key="ANTHROPIC_API_KEY"></span><input class="input" name="ANTHROPIC_API_KEY" type="password" autocomplete="off"></label>
+          <label data-for="openai">OpenAI API key <span class="keyset" data-key="OPENAI_API_KEY"></span><input class="input" name="OPENAI_API_KEY" type="password" autocomplete="off"></label>
+          <label data-for="local llamacpp vllm lmstudio ollama">Server address <span class="muted">(leave empty for the usual one)</span><input class="input" name="base_url" placeholder="http://localhost:11434"></label>
+          <p class="hint" style="margin:0" data-for="ollama">Install Ollama from ollama.com, then run <code>ollama pull qwen2.5:7b</code> once.</p>
+        </fieldset>
+        <fieldset class="fset"><legend>Documents and German</legend>
+          <div class="g3">
+            <label>My German level
+              <select class="input" name="my_german_level"><option value="">From my CV</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></label>
+            <label>Make documents for matches from (0 to 100) <input class="input" name="min_match" type="number" min="0" max="100"></label>
+            <label>Cover letter language
+              <select class="input" name="letter_language"><option value="auto">Automatic</option><option value="en">Always English</option><option value="de">Always German</option></select></label>
+          </div>
+          <p class="hint" style="margin:0">Automatic writes German letters only if your German is B2 or better.</p>
+        </fieldset>
+        <div class="addrow end sticky-save"><span class="muted" id="setMsg" role="status"></span><button class="btn" type="submit" id="setSave" style="width:auto">Save settings</button></div>
+      </form>
     </section>
     <section id="addPanel" aria-labelledby="add-h" hidden>
       <div class="sechead"><h2 id="add-h">Add a job yourself</h2><span>Found it on LinkedIn, a company site or through a friend</span></div>
@@ -637,10 +726,64 @@ $("addForm").addEventListener("submit",async e=>{
   finally{btn.disabled=false;btn.textContent="Add and score"}
 });
 
-/* ---------- My CV ---------- */
-function togglePanel(id,btnId,open){const p=$(id);open=open??p.hidden;p.hidden=!open;$(btnId).setAttribute("aria-expanded",String(open));if(open)p.scrollIntoView({behavior:"smooth",block:"start"})}
-async function loadCv(){try{const r=await api("GET","/api/cv");if(!$("cvText").value)$("cvText").value=r.profile||r.imported||""}catch(e){$("cvMsg").textContent=e.message}}
-$("cvBtn").addEventListener("click",()=>{togglePanel("cvPanel","cvBtn");if(!$("cvPanel").hidden)loadCv()});
+/* ---------- Panels ---------- */
+function togglePanel(id,btnId,open){const p=$(id);open=open??p.hidden;p.hidden=!open;$(btnId).setAttribute("aria-expanded",String(open));if(open)p.scrollIntoView({behavior:"smooth",block:"start"});return open}
+const lines=v=>String(v||"").split("\n").map(x=>x.trim()).filter(Boolean);
+
+/* ---------- My CV (form) ---------- */
+let cv=null;
+const blankCv=()=>({person:{name:"",email:"",phone:"",location:"",links:[],languages:[],headlines:[],summary:""},skills:{},experience:[],projects:[],education:[]});
+function normCv(p){const b=blankCv();p=p||{};return{person:{...b.person,...(p.person||{})},skills:{...(p.skills||{})},experience:[...(p.experience||[])],projects:[...(p.projects||[])],education:[...(p.education||[])]}}
+const inp=(k,v,ph="",type="text")=>`<input class="input" data-k="${k}" type="${type}" value="${esc(v)}" placeholder="${esc(ph)}">`;
+const area=(k,v,ph="")=>`<textarea class="input lines" data-k="${k}" placeholder="${esc(ph)}">${esc(Array.isArray(v)?v.join("\n"):v)}</textarea>`;
+const rm=(sec,i)=>`<button type="button" class="mini rm" data-rm="${sec}" data-i="${i}" aria-label="Remove">✕</button>`;
+function renderCv(){
+  const p=cv.person;
+  const exp=cv.experience.map((e,i)=>`<div class="item" data-sec="experience"><div class="itemhead">Job ${i+1}${rm("experience",i)}</div>
+    <div class="g3"><label>Job title ${inp("title",e.title,"Data Analyst")}</label><label>Company ${inp("company",e.company)}</label><label>Dates ${inp("dates",e.dates,"2021 to 2023")}</label></div>
+    <label>What you did <span class="muted">(one point per line)</span>${area("bullets",e.bullets||[],"Built SQL reports for the sales team")}</label></div>`).join("");
+  const prj=cv.projects.map((e,i)=>`<div class="item" data-sec="projects"><div class="itemhead">Project ${i+1}${rm("projects",i)}</div>
+    <div class="g2"><label>Name ${inp("name",e.name)}</label><label>Link ${inp("link",e.link,"github.com/you/project")}</label></div>
+    <label>What it does <span class="muted">(one point per line)</span>${area("bullets",e.bullets||[])}</label></div>`).join("");
+  const edu=cv.education.map((e,i)=>`<div class="item" data-sec="education"><div class="itemhead">Degree ${i+1}${rm("education",i)}</div>
+    <div class="g3"><label>Degree ${inp("degree",e.degree,"M.Sc. Data Science")}</label><label>School ${inp("school",e.school)}</label><label>Dates ${inp("dates",e.dates,"2023 to now")}</label></div></div>`).join("");
+  const sk=Object.entries(cv.skills).map(([g,items],i)=>`<div class="skillrow" data-sec="skills">${inp("group",g,"Group, e.g. Cloud")}${inp("items",(items||[]).join(", "),"AWS S3, Glue, Athena")}${rm("skills",i)}</div>`).join("");
+  $("cvForm").innerHTML=`<div style="display:flex;flex-direction:column;gap:14px">
+  <fieldset class="fset" data-sec="person"><legend>About you</legend>
+    <div class="g2"><label>Full name ${inp("name",p.name)}</label><label>Email ${inp("email",p.email,"","email")}</label><label>Phone ${inp("phone",p.phone)}</label><label>City ${inp("location",p.location,"Essen, Germany")}</label></div>
+    <div class="g2"><label>Languages <span class="muted">(one per line, with level)</span>${area("languages",p.languages,"English (C1)\nGerman (A2)")}</label>
+    <label>Links <span class="muted">(one per line)</span>${area("links",p.links,"linkedin.com/in/you\ngithub.com/you")}</label></div>
+    <label>Headlines <span class="muted">(one per line; the best fit is picked for each job)</span>${area("headlines",p.headlines,"Data Engineering Working Student | Python, SQL, AWS")}</label>
+    <label>Short summary ${area("summary",p.summary,"Two or three true sentences about you")}</label></fieldset>
+  <fieldset class="fset"><legend>Skills</legend><p class="hint">A group named <b>Learning</b> is never presented as experience, only as something you are learning.</p>${sk}<button type="button" class="mini" data-add="skills">+ Add skill group</button></fieldset>
+  <fieldset class="fset"><legend>Work experience</legend>${exp||'<p class="hint" style="margin:0">No jobs yet.</p>'}<button type="button" class="mini" data-add="experience">+ Add job</button></fieldset>
+  <fieldset class="fset"><legend>Projects</legend>${prj||'<p class="hint" style="margin:0">No projects yet.</p>'}<button type="button" class="mini" data-add="projects">+ Add project</button></fieldset>
+  <fieldset class="fset"><legend>Education</legend>${edu||'<p class="hint" style="margin:0">No degrees yet.</p>'}<button type="button" class="mini" data-add="education">+ Add degree</button></fieldset></div>`;
+}
+function readCv(){
+  const v=(el,k)=>el.querySelector(`[data-k="${k}"]`).value.trim();
+  const P=$("cvForm").querySelector('[data-sec="person"]');
+  const person={name:v(P,"name"),email:v(P,"email"),phone:v(P,"phone"),location:v(P,"location"),languages:lines(v(P,"languages")),links:lines(v(P,"links")),headlines:lines(v(P,"headlines")),summary:v(P,"summary")};
+  const all=sec=>[...$("cvForm").querySelectorAll(`[data-sec="${sec}"]`)];
+  const skills={};all("skills").forEach(r=>{const g=v(r,"group"),items=v(r,"items").split(",").map(x=>x.trim()).filter(Boolean);if(g||items.length)skills[g||"Skills"]=items});
+  return{person,skills,
+    experience:all("experience").map(r=>({title:v(r,"title"),company:v(r,"company"),dates:v(r,"dates"),bullets:lines(v(r,"bullets"))})),
+    projects:all("projects").map(r=>({name:v(r,"name"),link:v(r,"link"),bullets:lines(v(r,"bullets"))})),
+    education:all("education").map(r=>({degree:v(r,"degree"),school:v(r,"school"),dates:v(r,"dates")}))};
+}
+$("cvForm").addEventListener("click",e=>{
+  const add=e.target.closest("[data-add]"),del=e.target.closest("[data-rm]");if(!add&&!del)return;
+  cv=readCv();
+  if(add){const s=add.dataset.add;if(s==="skills")cv.skills[""]=[];else cv[s].push({})}
+  else{const s=del.dataset.rm,i=+del.dataset.i;if(s==="skills"){const k=Object.keys(cv.skills);delete cv.skills[k[i]]}else cv[s].splice(i,1)}
+  renderCv();
+  if(add){const items=$("cvForm").querySelectorAll(`[data-sec="${add.dataset.add}"]`);items[items.length-1]?.querySelector("input")?.focus()}
+});
+async function loadCv(){
+  if(cv)return;
+  try{const r=await api("GET","/api/cv");cv=r.isExample?blankCv():normCv(r.profile);renderCv()}catch(e){$("cvMsg").textContent=e.message}
+}
+$("cvBtn").addEventListener("click",()=>{if(togglePanel("cvPanel","cvBtn"))loadCv()});
 async function importCv(file){
   const msg=$("cvMsg");
   if(!file)return;
@@ -650,9 +793,11 @@ async function importCv(file){
   try{
     const data=await new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=()=>bad(new Error("Could not read the file"));fr.readAsDataURL(file)});
     const r=await api("POST","/api/cv/import",{name:file.name,data});
-    $("cvText").value=r.imported;
+    cv=normCv(r.profile);renderCv();
     $("cvNotes").innerHTML=r.notes.map(n=>`<li>${esc(n)}</li>`).join("");$("cvNotesBox").hidden=!r.notes.length;
-    msg.textContent="Done. Read it through, fix anything wrong, then save.";
+    $("cvSrcText").textContent=r.cvText||"";$("cvSrc").hidden=!r.cvText;
+    const thin=!cv.experience.length&&!cv.education.length;$("cvSrc").open=thin;
+    msg.textContent=thin?"Your contact details and languages are filled in. Add your jobs, skills and degrees below; your CV text is there to copy from.":"Done. Check every field below, fix anything wrong, then save.";
   }catch(e){msg.textContent=e.message}
   finally{$("drop").style.pointerEvents="";$("cvFile").value=""}
 }
@@ -663,10 +808,53 @@ $("drop").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.prev
 $("drop").addEventListener("drop",e=>importCv(e.dataTransfer.files[0]));
 $("cvSave").addEventListener("click",async()=>{
   const m=$("cvSaveMsg"),b=$("cvSave");b.disabled=true;m.textContent="";
-  try{await api("POST","/api/cv/save",{text:$("cvText").value});m.textContent="Saved. The next run uses this profile.";lastState="";refresh()}
+  try{cv=readCv();await api("POST","/api/cv/save",{profile:cv});m.textContent="Saved. The next search uses your CV.";lastState="";refresh()}
   catch(e){m.textContent=e.message}finally{b.disabled=false}
 });
 let cvPrompted=false;
+
+/* ---------- Settings ---------- */
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"]};
+function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,label:not(.check)").forEach(el=>el.hidden=!on)})}
+$("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
+function showProvider(){const pv=$("setForm").provider.value;$("setForm").querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));$("setForm").model.closest("label").hidden=pv==="none"}
+async function loadSettings(){
+  const f=$("setForm");
+  try{
+    const r=await api("GET","/api/settings");
+    for(const [sec,keys] of Object.entries(SETF))for(const k of keys){const el=f.elements[k],v=r[sec][k];if(el.type==="checkbox")el.checked=!!v;else el.value=Array.isArray(v)?v.join("\n"):v??""}
+    f.querySelectorAll(".keyset").forEach(el=>el.textContent=r.keys[el.dataset.key]?"saved":"");
+    f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";el.placeholder=r.keys[el.name]?"saved, type to replace":""});
+    showProvider();showKeys();
+  }catch(e){$("setMsg").textContent=e.message}
+}
+$("setBtn").addEventListener("click",()=>{if(togglePanel("setPanel","setBtn"))loadSettings()});
+$("setForm").provider.addEventListener("change",showProvider);
+$("setForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const f=e.target,m=$("setMsg"),b=$("setSave"),body={keys:{}};
+  for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
+  f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
+  b.disabled=true;m.textContent="";
+  try{await api("POST","/api/settings",body);m.textContent="Saved. Press Run search now to try it.";await loadSettings();lastState="";refresh()}
+  catch(err){m.textContent=err.message}finally{b.disabled=false}
+});
+
+/* ---------- Run search ---------- */
+let wasRunning=false;
+function showRun(r){
+  const btn=$("runBtn"),msg=$("runMsg");if(!r)return;
+  btn.disabled=r.running;btn.querySelector("span").textContent=r.running?"Searching…":"Run search now";
+  msg.classList.toggle("bad",!!r.error);
+  if(r.running)msg.textContent="Watch the office below. This takes a few minutes.";
+  else if(r.error)msg.textContent=`The search stopped: ${r.error}`;
+  else if(r.result)msg.textContent=`Done: ${r.result.new} new jobs, ${r.result.shortlisted} good matches, ${r.result.docs} documents.`+(r.result.problems.length?` ${r.result.problems.length} problem${r.result.problems.length>1?"s":""}: ${r.result.problems.slice(0,2).join("; ")}`:"");
+  wasRunning=r.running;
+}
+$("runBtn").addEventListener("click",async()=>{
+  try{await api("POST","/api/run");showRun({running:true});lastState="";refresh()}
+  catch(e){$("runMsg").textContent=e.message;$("runMsg").classList.add("bad")}
+});
 
 /* ---------- Local API ---------- */
 async function api(method,path,body){
@@ -684,7 +872,8 @@ async function refresh(){
     lastState=sig;
     jobs=st.jobs;runs=st.runs;weekly=st.weekly;
     $("gmailBtn").hidden=!st.gmailEnabled;
-    if(!st.profileReady&&!cvPrompted){cvPrompted=true;$("cvPanel").hidden=false;$("cvBtn").setAttribute("aria-expanded","true");loadCv();$("cvMsg").textContent="Start here: your profile is still the example. Drop your CV to replace it."}
+    showRun(st.run);
+    if(!st.profileReady&&!cvPrompted){cvPrompted=true;togglePanel("cvPanel","cvBtn",true);loadCv();$("cvMsg").textContent="Start here: drop your CV, check the fields, and save. Then set what you are looking for in Settings."}
     if(st.subtitle)$("subtitle").textContent=st.subtitle;
     render();renderRuns();renderOffice();
   }catch(e){if(!jobs.length)$("list").innerHTML=`<div class="empty">Cannot reach the local server. Start it with: jobhunt serve</div>`}

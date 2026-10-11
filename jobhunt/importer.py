@@ -271,10 +271,11 @@ def _arr(vals) -> str:
     return "[\n" + "".join(f"  {_s(v)},\n" for v in vals) + "]"
 
 
-def to_toml(profile: dict, notes: list[str], source_text: str | None = None) -> str:
+def to_toml(profile: dict, notes: list[str] | None, source_text: str | None = None) -> str:
     p = profile.get("person") or {}
-    out = ["# Imported by `jobhunt import`. Review every line, then save it as your profile (My CV on the dashboard, or rename this file to profile.toml).",
-           "# Bullets are copied word for word from your CV; tailoring only reorders them.", ""]
+    first = ("# Your profile, saved from the dashboard (My CV)." if notes is None else
+             "# Imported by `jobhunt import`. Review every line, then rename this file to profile.toml.")
+    out = [first, "# Bullets are copied word for word into your CVs; tailoring only reorders them.", ""]
     if notes:
         out += ["# CHECK THESE:", *[f"#   {n}" for n in notes], ""]
     out += ["[person]", f"name = {_s(p.get('name'))}", f"email = {_s(p.get('email'))}", f"phone = {_s(p.get('phone'))}",

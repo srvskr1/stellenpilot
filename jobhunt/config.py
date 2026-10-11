@@ -75,3 +75,61 @@ class Settings:
     def secret(name: str) -> str | None:
         val = os.environ.get(name, "").strip()
         return val or None
+
+
+# ---------------------------------------------------------------- saving from the dashboard
+
+def _toml_value(v) -> str:
+    import json
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return repr(v)
+    if isinstance(v, list):
+        return "[" + ", ".join(_toml_value(x) for x in v) + "]"
+    return json.dumps(str(v), ensure_ascii=False)  # JSON strings are valid TOML basic strings
+
+
+def dump_toml(data: dict, prefix: str = "") -> str:
+    import json
+    key = lambda k: k if k.replace("_", "").replace("-", "").isalnum() else json.dumps(k, ensure_ascii=False)
+    lines = [f"{key(k)} = {_toml_value(v)}" for k, v in data.items() if not isinstance(v, dict)]
+    for k, v in data.items():
+        if isinstance(v, dict):
+            name = f"{prefix}.{key(k)}" if prefix else key(k)
+            lines += ["", f"[{name}]", dump_toml(v, name).strip("\n")]
+    return "\n".join(lines).strip("\n") + "\n"
+
+
+def save_user_config(home: Path, updates: dict) -> dict:
+    """Merge updates into config.toml, keep a backup, return the new merged config."""
+    path = home / "config.toml"
+    user = tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    user = _merge(user, updates)
+    body = ("# Saved from the dashboard. Every option is explained in config.example.toml in the project.\n\n"
+            + dump_toml(user))
+    tomllib.loads(body)  # never write a file that would not load
+    if path.exists():
+        path.replace(home / "config.backup.toml")
+    path.write_text(body, encoding="utf-8")
+    return _merge(DEFAULTS, user)
+
+
+def save_secrets(home: Path, secrets: dict) -> None:
+    """Set keys in .env, keeping every other line. Empty values are ignored (keep the old key)."""
+    secrets = {k: v.strip() for k, v in secrets.items() if v and v.strip()}
+    if not secrets:
+        return
+    for v in secrets.values():
+        if "\n" in v or "\r" in v:
+            raise ValueError("A key cannot contain a line break.")
+    path = home / ".env"
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    left = dict(secrets)
+    for i, ln in enumerate(lines):
+        name = ln.split("=", 1)[0].strip()
+        if "=" in ln and not ln.lstrip().startswith("#") and name in left:
+            lines[i] = f"{name}={left.pop(name)}"
+    lines += [f"{k}={v}" for k, v in left.items()]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    os.environ.update(secrets)

@@ -23,6 +23,53 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
 SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import"}
+# What the Settings page may change. Types come from config.DEFAULTS.
+EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remote", "max_age_days", "exclude_title_words"),
+            "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack"),
+            "llm": ("provider", "model", "base_url"),
+            "language": ("my_german_level",),
+            "tailor": ("min_match", "letter_language")}
+CHOICES = {("llm", "provider"): {"none", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
+           ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
+           ("tailor", "letter_language"): {"auto", "en", "de"}}
+SECRETS = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ADZUNA_APP_ID", "ADZUNA_APP_KEY", "THEIRSTACK_API_KEY")
+
+
+def clean_settings(body: dict) -> dict:
+    """Keep only editable fields, with the type the default has. Raises ValueError with a friendly message."""
+    from .config import DEFAULTS
+    out = {}
+    for section, keys in EDITABLE.items():
+        given = body.get(section)
+        if not isinstance(given, dict):
+            continue
+        for k in keys:
+            if k not in given:
+                continue
+            want, v = DEFAULTS[section][k], given[k]
+            if isinstance(want, bool):
+                v = bool(v)
+            elif isinstance(want, int):
+                try:
+                    v = int(v)
+                except (TypeError, ValueError):
+                    raise ValueError(f"{k.replace('_', ' ')} must be a whole number") from None
+                if not 0 <= v <= 1000:
+                    raise ValueError(f"{k.replace('_', ' ')} must be between 0 and 1000")
+            elif isinstance(want, list):
+                v = [str(x).strip()[:120] for x in (v if isinstance(v, list) else []) if str(x).strip()][:50]
+            else:
+                v = str(v or "").strip()[:300]
+            if (section, k) in CHOICES and v not in CHOICES[(section, k)]:
+                raise ValueError(f"unknown {k.replace('_', ' ')}: {v}")
+            out.setdefault(section, {})[k] = v
+    if "country" in out.get("search", {}):
+        out["search"]["country"] = out["search"]["country"].lower()
+        if not (len(out["search"]["country"]) == 2 and out["search"]["country"].isalpha()):
+            raise ValueError("country must be a two letter code, for example de")
+    if "search" in out and "keywords" in out["search"] and not out["search"]["keywords"]:
+        raise ValueError("add at least one job title to search for")
+    return out
 CV_TYPES = {".pdf", ".docx", ".txt", ".md"}
 MAX_CV_BYTES = 10_000_000
 
@@ -71,12 +118,25 @@ def open_in_file_manager(path: str) -> None:
 
 def make_handler(settings, port: int = 8765):
     db = DB(settings.db_path)
+    run_state = {"running": False, "result": None, "error": ""}
     lock = threading.Lock()  # one SQLite connection, so one request at a time touches it
 
     page = resources.files("jobhunt").joinpath("web/index.html").read_bytes()
     out_root = (settings.home / settings["tailor"]["output_dir"]).resolve()
-    s = settings["search"]
-    subtitle = f"{', '.join(s['keywords'][:2])} near {s['city']}" + (" and remote" if s.get("include_remote") else "")
+
+    def subtitle():
+        s = settings["search"]
+        return f"{', '.join(s['keywords'][:2])} near {s['city']}" + (" and remote" if s.get("include_remote") else "")
+
+    def background_run():
+        from .pipeline import run
+        try:
+            res = run(settings)
+            run_state.update(result={k: res[k] for k in ("new", "shortlisted", "docs", "problems")}, error="")
+        except Exception as e:  # shown on the dashboard instead of a traceback
+            run_state.update(result=None, error=str(e) or e.__class__.__name__)
+        finally:
+            run_state["running"] = False
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *a):  # quiet
@@ -157,14 +217,16 @@ def make_handler(settings, port: int = 8765):
                     "runs": [camel(r) for r in db.runs()],
                     "weekly": weekly_summary(jobs),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
-                    "subtitle": subtitle,
+                    "subtitle": subtitle(),
+                    "run": run_state,
                     "profileReady": bool(settings.profile) and settings.profile.get("person", {}).get("name") != "Alex Example",
                 })
+            if self.path == "/api/settings":
+                return self._send(200, {**{sec: {k: settings[sec][k] for k in keys} for sec, keys in EDITABLE.items()},
+                                        "keys": {k: bool(settings.secret(k)) for k in SECRETS}})
             if self.path == "/api/cv":
-                prof = settings.home / "profile.toml"
-                imp = settings.home / "profile.imported.toml"
-                return self._send(200, {"profile": prof.read_text(encoding="utf-8") if prof.exists() else "",
-                                        "imported": imp.read_text(encoding="utf-8") if imp.exists() else ""})
+                return self._send(200, {"profile": settings.profile,
+                                        "isExample": settings.profile.get("person", {}).get("name") == "Alex Example"})
             self._send(404, {"error": "not found"})
 
         def _patch(self):
@@ -221,6 +283,23 @@ def make_handler(settings, port: int = 8765):
                 except Exception as e:
                     return self._send(500, {"error": f"Could not add the job: {e}"})
                 return self._send(200, {"status": res["status"], "job": camel(res["job"])})
+            if self.path == "/api/run":
+                if run_state["running"]:
+                    return self._send(409, {"error": "A search is already running."})
+                run_state.update(running=True, result=None, error="")
+                threading.Thread(target=background_run, daemon=True).start()
+                return self._send(200, {"ok": True})
+            if self.path == "/api/settings":
+                from .config import save_secrets, save_user_config
+                try:
+                    body = self._body()
+                    updates = clean_settings(body)
+                    keys = body.get("keys") if isinstance(body.get("keys"), dict) else {}
+                    save_secrets(settings.home, {k: str(keys.get(k) or "") for k in SECRETS})
+                    settings.cfg = save_user_config(settings.home, updates)
+                except ValueError as e:
+                    return self._send(400, {"error": str(e)})
+                return self._send(200, {"ok": True})
             if self.path == "/api/cv/import":
                 return self._cv_import()
             if self.path == "/api/cv/save":
@@ -238,7 +317,7 @@ def make_handler(settings, port: int = 8765):
         def _cv_import(self):
             import base64
             import tempfile
-            from .importer import import_cv
+            from .importer import import_cv, read_cv_text
             try:
                 body = self._body(limit=MAX_CV_BYTES * 4 // 3 + 4096)
                 suffix = Path(str(body.get("name") or "")).suffix.lower()
@@ -254,30 +333,39 @@ def make_handler(settings, port: int = 8765):
                 path.write_bytes(data)
                 try:
                     out, notes = import_cv(path, settings)
+                    cv_text = read_cv_text(path)
                 except (RuntimeError, ValueError) as e:
                     return self._send(400, {"error": str(e)})
                 except OSError as e:
                     return self._send(502, {"error": f"Could not reach the AI model ({e}). Is it running? Check with: jobhunt doctor"})
                 except Exception as e:
                     return self._send(500, {"error": f"Import failed: {e.__class__.__name__}: {e}"})
-            return self._send(200, {"imported": out.read_text(encoding="utf-8"), "notes": notes})
+            import tomllib
+            return self._send(200, {"profile": tomllib.loads(out.read_text(encoding="utf-8")), "notes": notes, "cvText": cv_text})
 
         def _cv_save(self):
             import tomllib
+            from .importer import _shape, to_toml
             try:
-                text = str(self._body(limit=2_000_000).get("text") or "")
+                given = self._body(limit=2_000_000).get("profile")
+                if not isinstance(given, dict):
+                    raise ValueError("profile missing")
+                profile = _shape(given)
+                person = given.get("person") if isinstance(given.get("person"), dict) else {}
+                profile["person"] = {k: ([str(x).strip() for x in person.get(k) or [] if str(x).strip()] if k in ("links", "languages", "headlines")
+                                         else str(person.get(k) or "").strip())
+                                     for k in ("name", "email", "phone", "location", "links", "languages", "headlines", "summary")}
+                if not profile["person"]["name"]:
+                    raise ValueError("Add your name first.")
+                text = to_toml(profile, None)
                 data = tomllib.loads(text)
-            except tomllib.TOMLDecodeError as e:
-                return self._send(400, {"error": f"The profile has a formatting error: {e}"})
             except (ValueError, TypeError) as e:
                 return self._send(400, {"error": str(e)})
-            if not isinstance(data.get("person"), dict) or not data["person"].get("name"):
-                return self._send(400, {"error": "The profile needs a [person] section with your name."})
             prof = settings.home / "profile.toml"
             if prof.exists():
                 prof.replace(settings.home / "profile.backup.toml")
             prof.write_text(text, encoding="utf-8")
-            settings.profile = data  # the next added job is scored against the new profile
+            settings.profile = data  # the next search and added job use the new profile
             return self._send(200, {"ok": True})
 
     return Handler

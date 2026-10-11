@@ -54,12 +54,13 @@ docker compose up -d      # http://127.0.0.1:8765
 
 See [docs/docker.md](docs/docker.md) for daily runs and details.
 
-Then make it yours:
+Then make it yours, all on the dashboard:
 
-1. On the dashboard, click **My CV** and drop your CV file. Review the result and click **Save as my profile**. (Terminal: `jobhunt import path/to/your_cv.pdf`, then rename `profile.imported.toml` to `profile.toml`.) Or type your facts into `profile.toml` by hand. Bullets are copied word for word, so keep them short and true.
-2. Set your keywords, city and radius in `config.toml`.
-3. Optional: add API keys to `.env` and switch sources on in `config.toml`.
-4. Run `jobhunt doctor` to check the setup, then `jobhunt run` for a real search.
+1. **My CV**: drop your CV file, check the form, add anything missing, save. Bullets are copied word for word, so keep them short and true.
+2. **Settings**: job titles, city, job sources and their keys, and your AI model.
+3. **Run search now**.
+
+Prefer files? Everything is also in `profile.toml`, `config.toml` and `.env`, and `jobhunt run` searches from the terminal. `jobhunt doctor` checks the setup.
 
 To start fresh after the demo, delete `jobhunt.db`.
 
