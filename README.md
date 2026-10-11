@@ -21,7 +21,6 @@ Then open http://127.0.0.1:8765 . A setup guide walks you through the rest. Work
 
 * **Easy to set up, no files to edit.** A step by step setup guide in the dashboard: your CV, what you are looking for, the AI model and the job sources, with a check at the end. Everything can be changed later under **My CV** and **Settings**.
 * **Runs by itself every day.** Switch on **Automatic search** in Settings and pick a time; it sets up Task Scheduler on Windows or cron on macOS and Linux for you. Or press **Run search now** any time.
-
 * **Starts from your CV.** Drop it on the dashboard (or run `stellenpilot import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
 * **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys). It removes duplicates across sources.
 * **Watches your dream companies.** Name companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters, and their new roles show up every day, often before they reach the job boards. `stellenpilot watch <careers link>` finds the right entry.
