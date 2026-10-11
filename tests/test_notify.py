@@ -4,9 +4,9 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from jobhunt import notify
-from jobhunt.config import Settings
-from jobhunt.db import DB, today
+from jobradar import notify
+from jobradar.config import Settings
+from jobradar.db import DB, today
 
 
 class NotifyTests(unittest.TestCase):

@@ -11,7 +11,7 @@ RUN if [ "$WITH_PDF" = "true" ]; then \
 
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE ./
-COPY jobhunt ./jobhunt
+COPY jobradar ./jobradar
 RUN pip install --no-cache-dir ".[gmail]"
 
 # Run as a normal user, not root.

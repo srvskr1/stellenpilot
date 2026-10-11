@@ -9,14 +9,14 @@ from importlib import resources
 from pathlib import Path
 from unittest import mock
 
-from jobhunt import sources
-from jobhunt.config import Settings
-from jobhunt.db import DB
-from jobhunt.score import keyword_score, score_job
-from jobhunt.tailor import _valid_plan, make_plan, tailor_job, unsupported_claims
-from jobhunt.text import dedupe_key, requires_fluent_german, strip_html
+from jobradar import sources
+from jobradar.config import Settings
+from jobradar.db import DB
+from jobradar.score import keyword_score, score_job
+from jobradar.tailor import _valid_plan, make_plan, tailor_job, unsupported_claims
+from jobradar.text import dedupe_key, requires_fluent_german, strip_html
 
-PROFILE = tomllib.loads(resources.files("jobhunt").joinpath("examples/profile.example.toml").read_text(encoding="utf-8"))
+PROFILE = tomllib.loads(resources.files("jobradar").joinpath("examples/profile.example.toml").read_text(encoding="utf-8"))
 JOB = {"id": "t-1", "source": "Test", "title": "Working Student Data Engineering (m/w/d)", "company": "Test GmbH",
        "location": "Essen", "remote": False, "url": "https://example.com", "posted_at": "",
        "description": "You will build pipelines with Python, SQL, Airflow and dbt on AWS. Good English."}
@@ -77,7 +77,7 @@ class TruthGuardTests(unittest.TestCase):
 
     def test_learning_skills_are_not_experience(self):
         self.assertIn("dbt", unsupported_claims("I built dbt models in production.", PROFILE, JOB))
-        from jobhunt.tailor import coverage
+        from jobradar.tailor import coverage
         cov = coverage(JOB, PROFILE)
         self.assertIn("dbt", cov["learning"])
         self.assertNotIn("dbt", cov["covered"])
@@ -138,14 +138,14 @@ class SparseProfileTests(unittest.TestCase):
 
 class GmailLogicTests(unittest.TestCase):
     def test_classifier_ignores_alerts_and_plurals(self):
-        from jobhunt.gmail_sync import ALERT, classify
+        from jobradar.gmail_sync import ALERT, classify
         self.assertIsNone(classify("30 new job offers for you"))
         self.assertTrue(ALERT.search("LinkedIn Job Alerts"))
         self.assertEqual(classify("Unfortunately, we decided not to move forward"), "rejected")
 
     def test_company_matching_is_strict(self):
-        from jobhunt.gmail_sync import _company_matches
-        from jobhunt.text import _norm
+        from jobradar.gmail_sync import _company_matches
+        from jobradar.text import _norm
         self.assertFalse(_company_matches("Data Solutions GmbH", _norm("Siemens: news from the big data team"), "siemens.com"))
         self.assertTrue(_company_matches("Siemens AG", _norm("Your application at Siemens"), "x.com"))
         self.assertTrue(_company_matches("Nordlicht Energy GmbH", _norm("Thank you"), "jobs.nordlicht.de"))
@@ -182,7 +182,7 @@ class SourceTests(unittest.TestCase):
         ]}
         st = mock.Mock()
         st.__getitem__ = lambda self, k: {"search": {"city": "Essen", "nearby_cities": [], "max_age_days": 3, "include_remote": True, "keywords": ["Werkstudent Data"]}}[k]
-        with mock.patch("jobhunt.sources.arbeitnow.request_json", side_effect=[page, {"data": []}]):
+        with mock.patch("jobradar.sources.arbeitnow.request_json", side_effect=[page, {"data": []}]):
             ids = [j["id"] for j in sources.arbeitnow.fetch(st)]
         self.assertEqual(ids, ["an-a", "an-c"])
 
@@ -190,7 +190,7 @@ class SourceTests(unittest.TestCase):
 class ServerTests(unittest.TestCase):
     def test_patch_requires_header_and_saves(self):
         from http.server import ThreadingHTTPServer
-        from jobhunt.server import make_handler
+        from jobradar.server import make_handler
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             settings = Settings(Path(d))
             DB(settings.db_path).insert_job({**JOB, "dedupe_key": "k"})

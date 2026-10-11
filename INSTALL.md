@@ -36,7 +36,19 @@ python3 --version
 ```
 Ubuntu 24.04 and Debian 13 ship 3.12 or newer. On older versions, install a newer Python first.
 
-### Step 2: Get the project
+### Step 2: Install JobRadar
+
+**The quick way** (Windows, macOS, Linux):
+```bash
+python -m venv jobradar-env
+# Windows: jobradar-env\Scripts\Activate.ps1    macOS or Linux: source jobradar-env/bin/activate
+pip install jobradar
+```
+Then skip to [Step 4](#step-4-make-your-workspace). Each time you open a new terminal, activate `jobradar-env` again. Update later with `pip install -U jobradar`.
+
+**From the source code** instead (if you want to change it), follow the rest of Step 2 and Step 3.
+
+#### Get the project
 
 With git:
 ```bash

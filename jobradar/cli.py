@@ -31,7 +31,7 @@ TELEGRAM_CHAT_ID=
 
 
 def _examples_dir() -> Path:
-    return Path(str(resources.files("jobhunt").joinpath("examples")))
+    return Path(str(resources.files("jobradar").joinpath("examples")))
 
 
 def cmd_init(home: Path) -> None:

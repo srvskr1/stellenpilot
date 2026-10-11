@@ -77,7 +77,7 @@ def enable(home: Path, time: str) -> str:
     log = home / "run.log"
     if sys.platform.startswith("win"):
         script = home / "jobhunt-daily.cmd"
-        script.write_text(f'@echo off\r\ncd /d "{home}"\r\n"{sys.executable}" -m jobhunt.cli --home "{home}" run >> "{log}" 2>&1\r\n',
+        script.write_text(f'@echo off\r\ncd /d "{home}"\r\n"{sys.executable}" -m jobradar.cli --home "{home}" run >> "{log}" 2>&1\r\n',
                           encoding="utf-8")
         for old in OLD_TASK_NAMES:
             _run(["schtasks", "/Delete", "/TN", old, "/F"])
@@ -88,7 +88,7 @@ def enable(home: Path, time: str) -> str:
         if r.returncode != 0:
             raise ScheduleError(f"Windows refused to create the task: {(r.stderr or r.stdout).strip()}")
         return f"Every day at {hour:02d}:{minute:02d}. If the PC is off then, it runs as soon as you log in."
-    line = (f"{minute} {hour} * * * cd {shlex.quote(str(home))} && {shlex.quote(sys.executable)} -m jobhunt.cli "
+    line = (f"{minute} {hour} * * * cd {shlex.quote(str(home))} && {shlex.quote(sys.executable)} -m jobradar.cli "
             f"--home {shlex.quote(str(home))} run >> {shlex.quote(str(log))} 2>&1 {MARK} {home}")
     _write_crontab([ln for ln in _read_crontab() if not _ours(ln, home)] + [line])
     return f"Every day at {hour:02d}:{minute:02d} while the computer is awake. Missed runs happen when you open the dashboard."

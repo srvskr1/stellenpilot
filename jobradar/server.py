@@ -130,7 +130,7 @@ def make_handler(settings, port: int = 8765):
     run_state = {"running": False, "result": None, "error": ""}
     lock = threading.Lock()  # one SQLite connection, so one request at a time touches it
 
-    page = resources.files("jobhunt").joinpath("web/index.html").read_bytes()
+    page = resources.files("jobradar").joinpath("web/index.html").read_bytes()
     out_root = (settings.home / settings["tailor"]["output_dir"]).resolve()
 
     def subtitle():
@@ -418,6 +418,11 @@ def serve(settings, port: int = 8765, host: str = "127.0.0.1") -> None:
                 pass
             threading.Event().wait(600)
     threading.Thread(target=watch, daemon=True).start()
+    if settings["schedule"].get("enabled"):
+        try:  # keeps the daily task pointing at this install, e.g. after an update or a rename
+            schedule.enable(settings.home, settings["schedule"]["time"])
+        except Exception as e:
+            print(f"Note: could not refresh the automatic search ({e}). Open Settings and save to fix it.", flush=True)
     print(f"JobRadar running at http://127.0.0.1:{port}  (Ctrl+C to stop)", flush=True)
     try:
         httpd.serve_forever()

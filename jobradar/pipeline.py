@@ -13,7 +13,7 @@ from .score import profile_text, score_job, taste_summary
 from .tailor import tailor_job, unsupported_claims
 from .text import dedupe_key, title_excluded
 
-log = logging.getLogger("jobhunt")
+log = logging.getLogger("jobradar")
 # Sources with full descriptions first, so duplicates keep the richer copy.
 ORDER = ["watchlist", "arbeitsagentur", "theirstack", "arbeitnow", "adzuna"]
 

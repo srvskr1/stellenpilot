@@ -4,7 +4,7 @@
 
 A local, open source job hunt assistant for Germany. Every day it collects fresh job ads from public APIs, scores them against your CV, writes a tailored CV and cover letter for the best matches, and shows everything on a dashboard in your browser. It runs on your own computer. Your CV and your data never leave it, except for the AI model you choose.
 
-![Dashboard](docs/dashboard.png)
+![Dashboard](https://raw.githubusercontent.com/srvskr1/jobradar/main/docs/dashboard.png)
 
 It never applies for you and never contacts companies. You stay in control of every application.
 
@@ -26,9 +26,15 @@ It never applies for you and never contacts companies. You stay in control of ev
 
 ## Quick start
 
-**New to Python or the terminal?** Follow [INSTALL.md](INSTALL.md): step by step for Windows, macOS, Linux and Docker, from installing Python to your first search.
+**New to Python or the terminal?** Follow [INSTALL.md](https://github.com/srvskr1/jobradar/blob/main/INSTALL.md): step by step for Windows, macOS, Linux and Docker, from installing Python to your first search.
 
-You need Python 3.11 or newer (or Docker, see below). Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
+```bash
+pip install jobradar
+mkdir my-hunt && cd my-hunt
+jobradar serve      # open http://127.0.0.1:8765, the Setup guide walks you through the rest
+```
+
+From the source code instead: you need Python 3.11 or newer (or Docker, see below). Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
 
 ```bash
 git clone https://github.com/srvskr1/jobradar.git
@@ -52,7 +58,7 @@ docker compose run --rm jobradar init
 docker compose up -d      # http://127.0.0.1:8765
 ```
 
-See [docs/docker.md](docs/docker.md) for daily runs and details.
+See [docs/docker.md](https://github.com/srvskr1/jobradar/blob/main/docs/docker.md) for daily runs and details.
 
 Then make it yours, all on the dashboard. The **Setup guide** opens by itself the first time and walks you through it:
 
@@ -89,7 +95,7 @@ Use a 7B model or larger. Pick an instruction tuned version ("instruct" or "chat
 
 What we saw in testing with a very small model (Qwen2.5 1.5B on 2 CPU cores): the pipeline worked end to end, the German check and the truth guard did their job, and the cover letter stayed truthful. But the model gave every job the same score and wrote a two sentence letter, and each answer took about a minute. Small models are fine for trying the setup, not for real use.
 
-Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](docs/local-llm.md). Run `jobradar doctor` to check that your model server is reachable and the model is installed.
+Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](https://github.com/srvskr1/jobradar/blob/main/docs/local-llm.md). Run `jobradar doctor` to check that your model server is reachable and the model is installed.
 
 ## Job sources
 
@@ -100,15 +106,15 @@ Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips an
 | Adzuna | free, from developer.adzuna.com | default 250 calls a day | Allowed for personal research. Adzuna must be credited; every Adzuna job links to Adzuna. Returns short snippets, not full ads. |
 | TheirStack | free, from theirstack.com | 200 credits a month, 1 credit per job | Keys may not be shared. Each user needs their own. |
 
-There is no LinkedIn, StepStone or Indeed scraper on purpose. LinkedIn's and StepStone's terms forbid scraping, and Indeed has no public job search API. See [docs/sources.md](docs/sources.md) for the details and links.
+There is no LinkedIn, StepStone or Indeed scraper on purpose. LinkedIn's and StepStone's terms forbid scraping, and Indeed has no public job search API. See [docs/sources.md](https://github.com/srvskr1/jobradar/blob/main/docs/sources.md) for the details and links.
 
 ## Run it every day
 
-Switch on **Automatic search** in the dashboard's Settings and pick a time. It sets up Task Scheduler on Windows or cron on macOS and Linux for you. Doing it by hand: [docs/scheduling.md](docs/scheduling.md).
+Switch on **Automatic search** in the dashboard's Settings and pick a time. It sets up Task Scheduler on Windows or cron on macOS and Linux for you. Doing it by hand: [docs/scheduling.md](https://github.com/srvskr1/jobradar/blob/main/docs/scheduling.md).
 
 ## Daily digest (optional)
 
-See [docs/digest.md](docs/digest.md) for Telegram (two minutes) or email.
+See [docs/digest.md](https://github.com/srvskr1/jobradar/blob/main/docs/digest.md) for Telegram (two minutes) or email.
 
 ## Other countries
 
@@ -116,7 +122,7 @@ Set `country` in `config.toml`. Adzuna covers 19 countries, TheirStack and the c
 
 ## Gmail status sync (optional)
 
-See [docs/gmail.md](docs/gmail.md). It uses read only access with your own Google Cloud OAuth client.
+See [docs/gmail.md](https://github.com/srvskr1/jobradar/blob/main/docs/gmail.md). It uses read only access with your own Google Cloud OAuth client.
 
 ## Commands
 
@@ -143,13 +149,13 @@ Use `--home PATH` to keep your files in another folder.
 * Everything is stored in `jobhunt.db` and the `output` folder next to your config. Both are ignored by git, together with `config.toml`, `profile.toml`, `.env` and Gmail tokens.
 * The dashboard listens on 127.0.0.1 only. Write requests need a custom header, so other websites cannot change your data through your browser.
 * Your profile and job ads are sent to the AI provider you configure. Choose `none` or a local model if you want nothing to leave your machine.
-* Read every tailored document before you send it. The truth guard checks digits and the tools it knows (see `VOCAB` in `jobhunt/score.py`). It cannot judge spelled out numbers or vague claims, so you are the final check.
+* Read every tailored document before you send it. The truth guard checks digits and the tools it knows (see `VOCAB` in `jobradar/score.py`). It cannot judge spelled out numbers or vague claims, so you are the final check.
 * Skills in a profile group named "Learning" are never presented as experience; documents may only say you are learning them.
 
 ## Project layout
 
 ```
-jobhunt/
+jobradar/
   sources/      one module per job API
   pipeline.py   the daily run: collect, score, tailor, Gmail
   score.py      LLM or keyword scoring, taste from your ratings
@@ -162,8 +168,8 @@ tests/          offline tests: python -m unittest discover -s tests
 
 ## Contributing
 
-Issues and pull requests are welcome. New sources should use an official or clearly permitted API, follow the shape in `jobhunt/sources/__init__.py`, and come with an offline test.
+Issues and pull requests are welcome. New sources should use an official or clearly permitted API, follow the shape in `jobradar/sources/__init__.py`, and come with an offline test.
 
 ## Credits and license
 
-MIT, see [LICENSE](LICENSE). Credits for ideas and data are in [NOTICE.md](NOTICE.md).
+MIT, see [LICENSE](https://github.com/srvskr1/jobradar/blob/main/LICENSE). Credits for ideas and data are in [NOTICE.md](https://github.com/srvskr1/jobradar/blob/main/NOTICE.md).

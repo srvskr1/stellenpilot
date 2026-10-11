@@ -1,31 +1,43 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "jobradar"
 version = "0.1.0"
-description = "Local job hunt pipeline: fetch job ads from public APIs, score them against your CV with an LLM, tailor your CV truthfully, and track everything on a local dashboard."
+description = "Local job search assistant for Germany: finds jobs daily, scores them against your CV, and writes truthful tailored CVs and cover letters."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Sourav Sarker" }]
 requires-python = ">=3.11"
 dependencies = ["python-docx>=1.1", "pypdf>=4"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Web Environment",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Office/Business",
+]
 keywords = ["job search", "cv", "resume", "germany", "werkstudent", "llm", "ollama"]
 
 [project.urls]
 Homepage = "https://github.com/srvskr1/jobradar"
 Issues = "https://github.com/srvskr1/jobradar/issues"
+Documentation = "https://github.com/srvskr1/jobradar/blob/main/INSTALL.md"
 
 [project.optional-dependencies]
 gmail = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2"]
 
 [project.scripts]
-jobradar = "jobhunt.cli:main"
-jobhunt = "jobhunt.cli:main"   # old name, kept so existing setups keep working
+jobradar = "jobradar.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["jobhunt*"]
+include = ["jobradar*"]
 
 [tool.setuptools.package-data]
-jobhunt = ["web/*", "examples/*"]
+jobradar = ["web/*", "examples/*"]
