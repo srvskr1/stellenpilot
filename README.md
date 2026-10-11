@@ -183,6 +183,34 @@ stellenpilot/
 tests/          offline tests: python -m unittest discover -s tests
 ```
 
+## Uninstall completely
+
+Do these steps in order. Steps 1 and 2 matter most: they stop the daily search before the program is gone.
+
+**1. Stop the dashboard.** Press **Ctrl+C** in the terminal where `stellenpilot serve` runs (Docker: `docker compose down`).
+
+**2. Remove the automatic daily search**, if you switched it on. Easiest: in the dashboard open **Settings**, untick **Automatic search** and save. If the dashboard is already gone:
+
+* Windows (PowerShell): `schtasks /Delete /TN "Stellenpilot daily search" /F`
+* macOS and Linux: run `crontab -e` and delete the line that ends with `# jobhunt-daily`
+
+**3. Remove the program.**
+
+* Installed with pip: activate the environment you installed it in, then `pip uninstall stellenpilot`. Delete that environment folder too if you made one just for it (for example `stellenpilot-env` or `.venv`).
+* Installed from source: delete the `stellenpilot` folder you cloned or unzipped (the environment `.venv` is inside it).
+* Docker: in the project folder run `docker compose down`, then `docker rmi ghcr.io/srvskr1/stellenpilot` (and `docker image prune` to free the space of any self built image).
+
+**4. Delete your data.** Your workspace folder (`my-hunt`, or `data` for Docker) holds everything personal: your CV profile, `.env` with your API keys, the job database, the generated CVs and cover letters, `run.log`, backups and the Gmail `token.json`. Delete the whole folder. Nothing is stored anywhere else on your computer.
+
+**5. Close your accounts and keys** (optional, but good practice):
+
+* API keys you created for it: delete them at Adzuna, TheirStack, Anthropic or OpenAI.
+* Gmail sync: remove access at https://myaccount.google.com/permissions and delete the Google Cloud project you made for it.
+* Telegram digest: send `/deletebot` to @BotFather.
+* Local AI model: `ollama rm qwen2.5:7b` (or the model you pulled), and uninstall Ollama or LM Studio if you only used them for this.
+
+LibreOffice and Python stay installed; remove them like any other app if you no longer need them.
+
 ## Contributing
 
 Issues and pull requests are welcome. New sources should use an official or clearly permitted API, follow the shape in `stellenpilot/sources/__init__.py`, and come with an offline test.

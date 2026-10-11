@@ -203,7 +203,7 @@ Docker: `git pull`, then `docker compose pull || docker compose build`. Your wor
 
 ## Uninstalling
 
-Delete the `stellenpilot` folder. Your workspace (`my-hunt`, or `data` for Docker) holds your CV, keys and documents; delete it too if you want everything gone. Nothing else is installed on your system apart from Python (or Docker) and, optionally, LibreOffice and Ollama.
+Turn off **Automatic search** in Settings first, then remove the program and delete your workspace folder (`my-hunt`, or `data` for Docker). Full step by step list, including API keys and Gmail access: [Uninstall completely](https://github.com/srvskr1/stellenpilot#uninstall-completely) in the README.
 
 ---
 
