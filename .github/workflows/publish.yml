@@ -1,31 +1,43 @@
-# Publishes to PyPI when a version tag like v0.2.0 is pushed. Uses PyPI trusted publishing:
-# no password or token is stored anywhere. Set up once on pypi.org (see RELEASING.md).
+# Publishes to PyPI when the version in pyproject.toml is new (not on PyPI yet).
+# Runs on every push to main that touches pyproject.toml, and from the Actions tab ("Run workflow").
+# Uses PyPI trusted publishing: no password or token is stored anywhere (see RELEASING.md).
 name: publish to PyPI
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+    paths: [pyproject.toml]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      new: ${{ steps.check.outputs.new }}
+      version: ${{ steps.check.outputs.version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - run: python -m pip install build twine
-      - name: tag matches the version in pyproject.toml
-        run: test "v$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')" = "${GITHUB_REF_NAME}"
-      - run: python -m build
-      - run: python -m twine check dist/*
-      - uses: actions/upload-artifact@v4
+      - id: check
+        name: is this version new on PyPI?
+        run: |
+          v=$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          code=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/stellenpilot/$v/json")
+          if [ "$code" = "404" ]; then echo "new=true" >> "$GITHUB_OUTPUT"; else echo "new=false" >> "$GITHUB_OUTPUT"; echo "Version $v is already on PyPI, nothing to do."; fi
+      - if: steps.check.outputs.new == 'true'
+        run: python -m pip install build twine && python -m build && python -m twine check dist/*
+      - if: steps.check.outputs.new == 'true'
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
 
   publish:
     needs: build
+    if: needs.build.outputs.new == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
