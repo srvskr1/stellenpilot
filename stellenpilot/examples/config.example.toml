@@ -48,7 +48,7 @@ english_only = true
 
 [watch]
 # Companies whose own job feeds are checked every run. Find the entry for a company with:
-#   jobradar watch https://job-boards.greenhouse.io/trivago
+#   stellenpilot watch https://job-boards.greenhouse.io/trivago
 # Supported: greenhouse, lever, ashby, personio, smartrecruiters
 companies = []
 # Keep only titles containing one of these words. Empty: taken from search.keywords.

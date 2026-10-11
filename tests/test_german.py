@@ -1,7 +1,7 @@
 """German level detection on real ad phrases."""
 import unittest
 
-from jobradar.text import german_too_high, required_german_level
+from stellenpilot.text import german_too_high, required_german_level
 
 CASES = {
     "Sehr gute Deutsch- und Englischkenntnisse in Wort und Schrift": "C1",
@@ -59,7 +59,7 @@ class RealAdPhrasesTests(unittest.TestCase):
 class LetterLanguageTests(unittest.TestCase):
     def test_auto_writes_german_only_from_b2(self):
         from unittest import mock
-        from jobradar.tailor import letter_language
+        from stellenpilot.tailor import letter_language
         llm = mock.Mock(enabled=True)
         ad = {"title": "Werkstudent Daten", "description": "Wir suchen dich für unser Team und die Arbeit mit Daten und Kunden."}
         self.assertEqual(letter_language(ad, "auto", llm, "A2"), "en")
@@ -96,7 +96,7 @@ class ReviewPhraseTests(unittest.TestCase):
                 self.assertEqual(required_german_level(text), want)
 
     def test_own_level_words(self):
-        from jobradar.text import normalize_level
+        from stellenpilot.text import normalize_level
         self.assertEqual(normalize_level("B2+"), "B2")
         self.assertEqual(normalize_level("native"), "C2")
         self.assertEqual(normalize_level("Muttersprache"), "C2")

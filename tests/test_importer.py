@@ -4,7 +4,7 @@ import tomllib
 import unittest
 from pathlib import Path
 
-from jobradar.importer import contact_facts, missing_lines, read_cv_text, to_toml, verify
+from stellenpilot.importer import contact_facts, missing_lines, read_cv_text, to_toml, verify
 
 CV = """Alex Example
 alex@example.com | +49 000 0000000 | github.com/alex-example

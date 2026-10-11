@@ -1,7 +1,7 @@
 """Optional Gmail status sync. Read only (gmail.readonly scope), never sends or changes mail.
 
 Setup (docs/gmail.md): create your own Google Cloud project and OAuth client, save it as
-credentials.json next to config.toml, then run `jobradar gmail`. A browser window asks for
+credentials.json next to config.toml, then run `stellenpilot gmail`. A browser window asks for
 consent once; the token is stored in token.json (ignored by git). Apps in Google's Testing
 mode need re-consent about every 7 days.
 """
@@ -57,7 +57,7 @@ def _service(home: Path):
         from google_auth_oauthlib.flow import InstalledAppFlow
         from googleapiclient.discovery import build
     except ImportError as e:
-        raise RuntimeError('Gmail sync needs extra packages. Inside the jobradar folder run: pip install -e ".[gmail]"') from e
+        raise RuntimeError('Gmail sync needs extra packages. Inside the stellenpilot folder run: pip install -e ".[gmail]"') from e
     token, creds_file = home / "token.json", home / "credentials.json"
     creds = Credentials.from_authorized_user_file(str(token), SCOPES) if token.exists() else None
     if not creds or not creds.valid:

@@ -2,7 +2,7 @@
 
 Windows: a Task Scheduler task that also runs after a missed start (PC was off at that time).
 macOS and Linux: one crontab line, marked so it can be found and removed again.
-The command runs `jobradar run` with the same Python as the dashboard, logging to run.log.
+The command runs `stellenpilot run` with the same Python as the dashboard, logging to run.log.
 """
 from __future__ import annotations
 
@@ -14,8 +14,8 @@ import sys
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-TASK_NAME = "JobRadar daily search"
-OLD_TASK_NAMES = ("JobHunt daily search",)
+TASK_NAME = "Stellenpilot daily search"
+OLD_TASK_NAMES = ("JobHunt daily search", "JobRadar daily search")
 MARK = "# jobhunt-daily"
 
 
@@ -45,7 +45,7 @@ def _run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
 def _windows_xml(script: Path, hour: int, minute: int) -> str:
     return f"""<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
-  <RegistrationInfo><Description>Daily job search by jobradar</Description></RegistrationInfo>
+  <RegistrationInfo><Description>Daily job search by stellenpilot</Description></RegistrationInfo>
   <Triggers>
     <CalendarTrigger>
       <StartBoundary>2026-01-01T{hour:02d}:{minute:02d}:00</StartBoundary>
@@ -77,7 +77,7 @@ def enable(home: Path, time: str) -> str:
     log = home / "run.log"
     if sys.platform.startswith("win"):
         script = home / "jobhunt-daily.cmd"
-        script.write_text(f'@echo off\r\ncd /d "{home}"\r\n"{sys.executable}" -m jobradar.cli --home "{home}" run >> "{log}" 2>&1\r\n',
+        script.write_text(f'@echo off\r\ncd /d "{home}"\r\n"{sys.executable}" -m stellenpilot.cli --home "{home}" run >> "{log}" 2>&1\r\n',
                           encoding="utf-8")
         for old in OLD_TASK_NAMES:
             _run(["schtasks", "/Delete", "/TN", old, "/F"])
@@ -88,7 +88,7 @@ def enable(home: Path, time: str) -> str:
         if r.returncode != 0:
             raise ScheduleError(f"Windows refused to create the task: {(r.stderr or r.stdout).strip()}")
         return f"Every day at {hour:02d}:{minute:02d}. If the PC is off then, it runs as soon as you log in."
-    line = (f"{minute} {hour} * * * cd {shlex.quote(str(home))} && {shlex.quote(sys.executable)} -m jobradar.cli "
+    line = (f"{minute} {hour} * * * cd {shlex.quote(str(home))} && {shlex.quote(sys.executable)} -m stellenpilot.cli "
             f"--home {shlex.quote(str(home))} run >> {shlex.quote(str(log))} 2>&1 {MARK} {home}")
     _write_crontab([ln for ln in _read_crontab() if not _ours(ln, home)] + [line])
     return f"Every day at {hour:02d}:{minute:02d} while the computer is awake. Missed runs happen when you open the dashboard."

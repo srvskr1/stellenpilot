@@ -1,4 +1,4 @@
-# JobRadar in a container. Your files live in the /data volume.
+# Stellenpilot in a container. Your files live in the /data volume.
 FROM python:3.12-slim
 
 # PDF export needs LibreOffice (about 400 MB). Build with --build-arg WITH_PDF=false to skip it.
@@ -11,7 +11,7 @@ RUN if [ "$WITH_PDF" = "true" ]; then \
 
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE ./
-COPY jobradar ./jobradar
+COPY stellenpilot ./stellenpilot
 RUN pip install --no-cache-dir ".[gmail]"
 
 # Run as a normal user, not root.
@@ -22,5 +22,5 @@ WORKDIR /data
 VOLUME /data
 EXPOSE 8765
 
-ENTRYPOINT ["jobradar", "--home", "/data"]
+ENTRYPOINT ["stellenpilot", "--home", "/data"]
 CMD ["serve"]

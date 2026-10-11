@@ -36,15 +36,15 @@ python3 --version
 ```
 Ubuntu 24.04 and Debian 13 ship 3.12 or newer. On older versions, install a newer Python first.
 
-### Step 2: Install JobRadar
+### Step 2: Install Stellenpilot
 
 **The quick way** (Windows, macOS, Linux):
 ```bash
-python -m venv jobradar-env
-# Windows: jobradar-env\Scripts\Activate.ps1    macOS or Linux: source jobradar-env/bin/activate
-pip install jobradar
+python -m venv stellenpilot-env
+# Windows: stellenpilot-env\Scripts\Activate.ps1    macOS or Linux: source stellenpilot-env/bin/activate
+pip install stellenpilot
 ```
-Then skip to [Step 4](#step-4-make-your-workspace). Each time you open a new terminal, activate `jobradar-env` again. Update later with `pip install -U jobradar`.
+Then skip to [Step 4](#step-4-make-your-workspace). Each time you open a new terminal, activate `stellenpilot-env` again. Update later with `pip install -U stellenpilot`.
 
 **From the source code** instead (if you want to change it), follow the rest of Step 2 and Step 3.
 
@@ -52,15 +52,15 @@ Then skip to [Step 4](#step-4-make-your-workspace). Each time you open a new ter
 
 With git:
 ```bash
-git clone https://github.com/srvskr1/jobradar.git
+git clone https://github.com/srvskr1/stellenpilot.git
 ```
-Without git: on the GitHub page click **Code**, then **Download ZIP**, and unzip it in your user folder. The unzipped folder is called `jobradar-main`; rename it to `jobradar` so the commands below match.
+Without git: on the GitHub page click **Code**, then **Download ZIP**, and unzip it in your user folder. The unzipped folder is called `stellenpilot-main`; rename it to `stellenpilot` so the commands below match.
 
 ### Step 3: Install it
 
 **Windows (PowerShell)**
 ```powershell
-cd $HOME\jobradar
+cd $HOME\stellenpilot
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e .
@@ -72,7 +72,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 **macOS and Linux (Terminal)**
 ```bash
-cd ~/jobradar
+cd ~/stellenpilot
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -80,10 +80,10 @@ pip install -e .
 
 Check that it worked:
 ```bash
-jobradar --help
+stellenpilot --help
 ```
 
-> **Every time you open a new terminal**, activate first: `.venv\Scripts\Activate.ps1` on Windows, `source .venv/bin/activate` on macOS and Linux (from inside the `jobradar` folder). You will see `(.venv)` at the start of the line when it is active.
+> **Every time you open a new terminal**, activate first: `.venv\Scripts\Activate.ps1` on Windows, `source .venv/bin/activate` on macOS and Linux (from inside the `stellenpilot` folder). You will see `(.venv)` at the start of the line when it is active.
 
 ### Step 4: Make your workspace
 
@@ -93,16 +93,16 @@ Keep your own files (CV, keys, database, generated documents) in a separate fold
 ```powershell
 mkdir $HOME\my-hunt
 cd $HOME\my-hunt
-jobradar init
+stellenpilot init
 ```
 
 **macOS and Linux**
 ```bash
 mkdir ~/my-hunt && cd ~/my-hunt
-jobradar init
+stellenpilot init
 ```
 
-`jobradar init` creates three files: `config.toml` (what to search), `profile.toml` (your CV facts) and `.env` (your API keys). Continue with [First day setup](#first-day-setup).
+`stellenpilot init` creates three files: `config.toml` (what to search), `profile.toml` (your CV facts) and `.env` (your API keys). Continue with [First day setup](#first-day-setup).
 
 ### Optional: PDF export
 
@@ -115,14 +115,14 @@ Without LibreOffice you get Word files (DOCX). With it you also get PDFs. Instal
 1. Install **Docker Desktop** from https://www.docker.com/products/docker-desktop/ (Windows, macOS) or Docker Engine on Linux, and start it.
 2. Get the project (see [Step 2](#step-2-get-the-project) above), then in a terminal:
    ```bash
-   cd jobradar
+   cd stellenpilot
    mkdir data
    docker compose pull || docker compose build
-   docker compose run --rm jobradar init
+   docker compose run --rm stellenpilot init
    ```
-3. Your files are now in the `data` folder inside `jobradar`. The container can only see this folder, so put your CV file there too before importing it: `docker compose run --rm jobradar import your_cv.pdf`.
+3. Your files are now in the `data` folder inside `stellenpilot`. The container can only see this folder, so put your CV file there too before importing it: `docker compose run --rm stellenpilot import your_cv.pdf`.
 
-In the rest of this guide, wherever it says `jobradar something`, type `docker compose run --rm jobradar something` instead, and start the dashboard with `docker compose up -d`. More details: [docs/docker.md](docs/docker.md).
+In the rest of this guide, wherever it says `stellenpilot something`, type `docker compose run --rm stellenpilot something` instead, and start the dashboard with `docker compose up -d`. More details: [docs/docker.md](docs/docker.md).
 
 ---
 
@@ -131,7 +131,7 @@ In the rest of this guide, wherever it says `jobradar something`, type `docker c
 Everything from here happens in your browser. In your workspace folder (`my-hunt`, or the project folder for Docker), start the dashboard:
 
 ```bash
-jobradar serve
+stellenpilot serve
 ```
 Open http://127.0.0.1:8765 . Leave the terminal open while you use it; **Ctrl+C** stops it.
 
@@ -171,11 +171,11 @@ Click **Run search now**. The little office shows what it is doing. When it is d
 
 To search every morning by itself, open **Settings**, switch on **Automatic search** and pick a time. Your computer must be on; the dashboard does not need to be open.
 
-Something not working? In the terminal (Ctrl+C first), `jobradar doctor` tells you in plain words what is missing.
+Something not working? In the terminal (Ctrl+C first), `stellenpilot doctor` tells you in plain words what is missing.
 
 ### Want to look around first?
 
-`jobradar demo` loads fictional sample jobs. Delete `jobhunt.db` afterwards to remove them.
+`stellenpilot demo` loads fictional sample jobs. Delete `jobhunt.db` afterwards to remove them.
 
 ---
 
@@ -184,8 +184,8 @@ Something not working? In the terminal (Ctrl+C first), `jobradar doctor` tells y
 | want | how | guide |
 |---|---|---|
 | More job sources | free keys for Adzuna and TheirStack, in `.env` | [docs/sources.md](docs/sources.md) |
-| Watch your dream companies | `jobradar watch <careers page link>`, then add the entry to `[watch] companies` | [README](README.md) |
-| Add a job you found yourself | `jobradar add <link>` or the **Add a job** button on the dashboard | [README](README.md) |
+| Watch your dream companies | `stellenpilot watch <careers page link>`, then add the entry to `[watch] companies` | [README](README.md) |
+| Add a job you found yourself | `stellenpilot add <link>` or the **Add a job** button on the dashboard | [README](README.md) |
 | A daily message with your top matches | Telegram or email | [docs/digest.md](docs/digest.md) |
 | Status updates from your inbox | read only Gmail sync | [docs/gmail.md](docs/gmail.md) |
 | Run every morning by itself | Task Scheduler, cron or launchd | [docs/scheduling.md](docs/scheduling.md) |
@@ -195,7 +195,7 @@ Something not working? In the terminal (Ctrl+C first), `jobradar doctor` tells y
 ## Updating
 
 ```bash
-cd jobradar
+cd stellenpilot
 git pull
 pip install -e .        # with the virtual environment active
 ```
@@ -203,7 +203,7 @@ Docker: `git pull`, then `docker compose pull || docker compose build`. Your wor
 
 ## Uninstalling
 
-Delete the `jobradar` folder. Your workspace (`my-hunt`, or `data` for Docker) holds your CV, keys and documents; delete it too if you want everything gone. Nothing else is installed on your system apart from Python (or Docker) and, optionally, LibreOffice and Ollama.
+Delete the `stellenpilot` folder. Your workspace (`my-hunt`, or `data` for Docker) holds your CV, keys and documents; delete it too if you want everything gone. Nothing else is installed on your system apart from Python (or Docker) and, optionally, LibreOffice and Ollama.
 
 ---
 
@@ -211,14 +211,14 @@ Delete the `jobradar` folder. Your workspace (`my-hunt`, or `data` for Docker) h
 
 | problem | fix |
 |---|---|
-| `python` or `jobradar` is "not recognized" or "command not found" | Windows: reinstall Python with "Add python.exe to PATH" ticked. Everywhere: activate the virtual environment first (see Step 3). |
+| `python` or `stellenpilot` is "not recognized" or "command not found" | Windows: reinstall Python with "Add python.exe to PATH" ticked. Everywhere: activate the virtual environment first (see Step 3). |
 | "running scripts is disabled" in PowerShell | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, once. |
 | `error: externally-managed-environment` on Linux | You are outside the virtual environment. Run `source .venv/bin/activate` first. |
 | `No module named venv` on Linux | `sudo apt install python3-venv` |
-| The dashboard does not open | `jobradar serve` must keep running in its terminal. Use http://127.0.0.1:8765 , not https. |
-| Port 8765 is already in use | `jobradar serve --port 8800`, then open http://127.0.0.1:8800 |
-| No PDFs, only DOCX | Install LibreOffice; `jobradar doctor` shows whether it is found. |
-| `jobradar import` says the PDF has almost no text | Your PDF is a scanned image. Export your CV from Word or Google Docs as DOCX and import that. |
-| "could not reach the AI model" | Start Ollama or your model server, then check with `jobradar doctor`. |
+| The dashboard does not open | `stellenpilot serve` must keep running in its terminal. Use http://127.0.0.1:8765 , not https. |
+| Port 8765 is already in use | `stellenpilot serve --port 8800`, then open http://127.0.0.1:8800 |
+| No PDFs, only DOCX | Install LibreOffice; `stellenpilot doctor` shows whether it is found. |
+| `stellenpilot import` says the PDF has almost no text | Your PDF is a scanned image. Export your CV from Word or Google Docs as DOCX and import that. |
+| "could not reach the AI model" | Start Ollama or your model server, then check with `stellenpilot doctor`. |
 | Docker: permission errors in `data` on Linux | `sudo chown -R 1000 data` |
-| Something else | Run the command again with `-v` for more detail, for example `jobradar -v run`, and open an issue with the output. Leave out your keys and personal data. |
+| Something else | Run the command again with `-v` for more detail, for example `stellenpilot -v run`, and open an issue with the output. Leave out your keys and personal data. |

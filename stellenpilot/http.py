@@ -7,7 +7,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-USER_AGENT = "jobradar/0.1 (+https://github.com/srvskr1/jobradar)"
+USER_AGENT = "stellenpilot/0.1 (+https://github.com/srvskr1/stellenpilot)"
 
 
 class HttpError(RuntimeError):

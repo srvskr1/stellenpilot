@@ -1,4 +1,4 @@
-"""Command line: jobradar init | doctor | run | serve | gmail | demo"""
+"""Command line: stellenpilot init | doctor | run | serve | gmail | demo"""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .config import Settings
 
-ENV_TEMPLATE = """# Secrets for jobradar. This file is ignored by git. Never commit it.
+ENV_TEMPLATE = """# Secrets for stellenpilot. This file is ignored by git. Never commit it.
 # LLM (pick one, matching llm.provider in config.toml)
 ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
@@ -31,7 +31,7 @@ TELEGRAM_CHAT_ID=
 
 
 def _examples_dir() -> Path:
-    return Path(str(resources.files("jobradar").joinpath("examples")))
+    return Path(str(resources.files("stellenpilot").joinpath("examples")))
 
 
 def cmd_init(home: Path) -> None:
@@ -47,7 +47,7 @@ def cmd_init(home: Path) -> None:
     if not env.exists():
         env.write_text(ENV_TEMPLATE, encoding="utf-8")
         print("made  .env (put your API keys here)")
-    print("\nNext: edit profile.toml with your real CV facts, check config.toml, then run `jobradar doctor`.")
+    print("\nNext: edit profile.toml with your real CV facts, check config.toml, then run `stellenpilot doctor`.")
 
 
 def cmd_doctor(settings: Settings) -> int:
@@ -56,7 +56,7 @@ def cmd_doctor(settings: Settings) -> int:
     print(f"home: {settings.home}")
     print(f"config.toml: {'found' if (settings.home / 'config.toml').exists() else 'missing, using defaults'}")
     if not settings.profile:
-        print("profile.toml: MISSING (run jobradar init)"); ok = False
+        print("profile.toml: MISSING (run stellenpilot init)"); ok = False
     elif settings.profile.get("person", {}).get("name") == "Alex Example":
         print("profile.toml: still the example profile. Replace it with your own facts.")
     else:
@@ -107,7 +107,7 @@ def _check_llm(settings: Settings) -> bool:
 
 
 def setup_checks(settings: Settings) -> list[dict]:
-    """The same checks as `jobradar doctor`, as data for the dashboard's setup guide."""
+    """The same checks as `stellenpilot doctor`, as data for the dashboard's setup guide."""
     from .sources import REGISTRY
     from .tailor import find_soffice
     out = []
@@ -130,7 +130,7 @@ def setup_checks(settings: Settings) -> list[dict]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="jobradar", description="JobRadar: your local job search assistant")
+    ap = argparse.ArgumentParser(prog="stellenpilot", description="Stellenpilot: your local job search assistant")
     ap.add_argument("--home", type=Path, default=Path.cwd(), help="folder with config.toml and profile.toml")
     ap.add_argument("-v", "--verbose", action="store_true")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -220,7 +220,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Import failed: {e}")
             return 1
         except OSError as e:  # network: the AI model server is not running or not reachable
-            print(f"Import failed: could not reach the AI model ({e}). Is it running? Check with: jobradar doctor")
+            print(f"Import failed: could not reach the AI model ({e}). Is it running? Check with: stellenpilot doctor")
             return 1
         except Exception as e:  # never show a raw traceback for a bad file or odd model output
             print(f"Import failed: {e.__class__.__name__}: {e}")
@@ -280,7 +280,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "demo":
         from .demo import load_demo
         n = load_demo(settings)
-        print(f"Loaded {n} fictional jobs into {settings.db_path.name}. Now run: jobradar serve")
+        print(f"Loaded {n} fictional jobs into {settings.db_path.name}. Now run: stellenpilot serve")
         return 0
     return 1
 

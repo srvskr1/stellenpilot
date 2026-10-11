@@ -16,12 +16,12 @@ about: Something does not work as described
 * Python version (`python --version`), or Docker:
 * AI model provider (none, ollama, anthropic, ...):
 
-**Output of `jobradar doctor`**
+**Output of `stellenpilot doctor`**
 ```
 paste here
 ```
 
-**Error output** (run the command again with `-v`, for example `jobradar -v run`)
+**Error output** (run the command again with `-v`, for example `stellenpilot -v run`)
 ```
 paste here
 ```

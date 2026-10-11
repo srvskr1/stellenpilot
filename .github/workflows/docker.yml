@@ -1,6 +1,6 @@
 name: docker image
 
-# Publishes ghcr.io/<owner>/jobradar for amd64 and arm64 (Apple silicon, Raspberry Pi).
+# Publishes ghcr.io/<owner>/stellenpilot for amd64 and arm64 (Apple silicon, Raspberry Pi).
 on:
   push:
     branches: [main, master]

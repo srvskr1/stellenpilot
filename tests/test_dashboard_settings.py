@@ -4,8 +4,8 @@ import tomllib
 import unittest
 from pathlib import Path
 
-from jobradar.config import DEFAULTS, dump_toml, save_secrets, save_user_config
-from jobradar.server import clean_settings
+from stellenpilot.config import DEFAULTS, dump_toml, save_secrets, save_user_config
+from stellenpilot.server import clean_settings
 
 
 class SettingsTest(unittest.TestCase):

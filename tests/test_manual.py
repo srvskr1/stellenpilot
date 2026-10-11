@@ -1,7 +1,7 @@
 """Adding jobs by hand."""
 import unittest
 
-from jobradar.manual import AddError, build_job, fetch_page, job_from_jsonld
+from stellenpilot.manual import AddError, build_job, fetch_page, job_from_jsonld
 
 PAGE = """<html><head><title>Careers</title>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"JobPosting","title":"Data Analyst (m/w/d)",
@@ -35,12 +35,12 @@ if __name__ == "__main__":
 class SmartRecruitersLinkTests(unittest.TestCase):
     def test_job_link_reads_single_posting(self):
         from unittest import mock
-        from jobradar.manual import job_from_feed
+        from stellenpilot.manual import job_from_feed
         posting = {"name": "Working Student Data", "company": {"name": "Bosch"}, "location": {"city": "Stuttgart", "country": "de"},
                    "postingUrl": "https://jobs.smartrecruiters.com/BoschGroup/744000111111111", "releasedDate": "2026-10-01T00:00:00Z",
                    "jobAd": {"sections": {"jobDescription": {"text": "<p>Python and SQL</p>"}}}}
-        with mock.patch("jobradar.http.request_json", return_value=posting), \
-             mock.patch("jobradar.sources.watchlist.request_json", return_value=posting):
+        with mock.patch("stellenpilot.http.request_json", return_value=posting), \
+             mock.patch("stellenpilot.sources.watchlist.request_json", return_value=posting):
             job = job_from_feed("https://jobs.smartrecruiters.com/BoschGroup/744000111111111-working-student-data")
         self.assertEqual(job["title"], "Working Student Data")
         self.assertIn("Python and SQL", job["description"])
@@ -81,7 +81,7 @@ class SafeFetchTests(unittest.TestCase):
                 fetch_page(url)
 
     def test_redirect_to_local_address_is_refused(self):
-        from jobradar.manual import _CheckedRedirects
+        from stellenpilot.manual import _CheckedRedirects
         import urllib.request
         req = urllib.request.Request("https://example.com/")
         with self.assertRaises(AddError):

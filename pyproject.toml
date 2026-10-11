@@ -3,7 +3,7 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "jobradar"
+name = "stellenpilot"
 version = "0.1.0"
 description = "Local job search assistant for Germany: finds jobs daily, scores them against your CV, and writes truthful tailored CVs and cover letters."
 readme = "README.md"
@@ -26,18 +26,18 @@ classifiers = [
 keywords = ["job search", "cv", "resume", "germany", "werkstudent", "llm", "ollama"]
 
 [project.urls]
-Homepage = "https://github.com/srvskr1/jobradar"
-Issues = "https://github.com/srvskr1/jobradar/issues"
-Documentation = "https://github.com/srvskr1/jobradar/blob/main/INSTALL.md"
+Homepage = "https://github.com/srvskr1/stellenpilot"
+Issues = "https://github.com/srvskr1/stellenpilot/issues"
+Documentation = "https://github.com/srvskr1/stellenpilot/blob/main/INSTALL.md"
 
 [project.optional-dependencies]
 gmail = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2"]
 
 [project.scripts]
-jobradar = "jobradar.cli:main"
+stellenpilot = "stellenpilot.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["jobradar*"]
+include = ["stellenpilot*"]
 
 [tool.setuptools.package-data]
-jobradar = ["web/*", "examples/*"]
+stellenpilot = ["web/*", "examples/*"]

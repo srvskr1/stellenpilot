@@ -130,7 +130,7 @@ def make_handler(settings, port: int = 8765):
     run_state = {"running": False, "result": None, "error": ""}
     lock = threading.Lock()  # one SQLite connection, so one request at a time touches it
 
-    page = resources.files("jobradar").joinpath("web/index.html").read_bytes()
+    page = resources.files("stellenpilot").joinpath("web/index.html").read_bytes()
     out_root = (settings.home / settings["tailor"]["output_dir"]).resolve()
 
     def subtitle():
@@ -359,7 +359,7 @@ def make_handler(settings, port: int = 8765):
                 except (RuntimeError, ValueError) as e:
                     return self._send(400, {"error": str(e)})
                 except OSError as e:
-                    return self._send(502, {"error": f"Could not reach the AI model ({e}). Is it running? Check with: jobradar doctor"})
+                    return self._send(502, {"error": f"Could not reach the AI model ({e}). Is it running? Check with: stellenpilot doctor"})
                 except Exception as e:
                     return self._send(500, {"error": f"Import failed: {e.__class__.__name__}: {e}"})
             import tomllib
@@ -423,7 +423,7 @@ def serve(settings, port: int = 8765, host: str = "127.0.0.1") -> None:
             schedule.enable(settings.home, settings["schedule"]["time"])
         except Exception as e:
             print(f"Note: could not refresh the automatic search ({e}). Open Settings and save to fix it.", flush=True)
-    print(f"JobRadar running at http://127.0.0.1:{port}  (Ctrl+C to stop)", flush=True)
+    print(f"Stellenpilot running at http://127.0.0.1:{port}  (Ctrl+C to stop)", flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

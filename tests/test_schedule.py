@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
-from jobradar import schedule
+from stellenpilot import schedule
 
 
 class FakeSettings:

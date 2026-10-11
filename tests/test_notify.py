@@ -4,9 +4,9 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from jobradar import notify
-from jobradar.config import Settings
-from jobradar.db import DB, today
+from stellenpilot import notify
+from stellenpilot.config import Settings
+from stellenpilot.db import DB, today
 
 
 class NotifyTests(unittest.TestCase):

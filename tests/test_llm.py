@@ -6,8 +6,8 @@ import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from jobradar.config import Settings
-from jobradar.llm import LLM, parse_json
+from stellenpilot.config import Settings
+from stellenpilot.llm import LLM, parse_json
 
 SEEN = []
 
@@ -114,8 +114,8 @@ class FallbackTests(unittest.TestCase):
         import tomllib
         from importlib import resources
         from unittest import mock
-        from jobradar.score import score_job
-        profile = tomllib.loads(resources.files("jobradar").joinpath("examples/profile.example.toml").read_text(encoding="utf-8"))
+        from stellenpilot.score import score_job
+        profile = tomllib.loads(resources.files("stellenpilot").joinpath("examples/profile.example.toml").read_text(encoding="utf-8"))
         broken = mock.Mock(enabled=True, max_chars=4000)
         broken.complete_json.side_effect = ValueError("LLM did not return JSON")
         job = {"title": "Working Student Data", "company": "X", "location": "Essen", "description": "Python and SQL."}

@@ -10,10 +10,10 @@ The sync reads recent mail about your applications and moves statuses forward: c
 4. **OAuth consent screen**: choose **External**, fill in the app name and your email, add the scope `gmail.readonly`, and add your own Gmail address as a **test user**. Leave the app in **Testing**.
 5. **Credentials, Create credentials, OAuth client ID**, type **Desktop app**. Download the JSON and save it as `credentials.json` in your workspace folder (next to `config.toml`).
 6. In `config.toml` set `[gmail] enabled = true`.
-7. Run `jobradar gmail`. A browser window asks you to allow access. Google shows an "unverified app" warning because it is your own private app; continue.
+7. Run `stellenpilot gmail`. A browser window asks you to allow access. Google shows an "unverified app" warning because it is your own private app; continue.
 
 ## Good to know
 
-* Google does not require verification for a personal app in Testing mode, but consent expires after about 7 days in Testing. When the sync fails with an auth error, delete `token.json` and run `jobradar gmail` again.
+* Google does not require verification for a personal app in Testing mode, but consent expires after about 7 days in Testing. When the sync fails with an auth error, delete `token.json` and run `stellenpilot gmail` again.
 * Do not share your `credentials.json` or `token.json`. Both are ignored by git.
 * Matching uses the company name, so an email from a recruiting platform about a company that is not on your board is ignored.

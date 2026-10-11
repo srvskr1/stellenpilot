@@ -3,7 +3,7 @@ import json
 import unittest
 from unittest import mock
 
-from jobradar.sources import watchlist as wl
+from stellenpilot.sources import watchlist as wl
 
 GH = {"jobs": [{"id": 1, "title": "Working Student - Data & Insights", "company_name": "trivago",
                 "location": {"name": "Düsseldorf"}, "absolute_url": "https://x/1", "first_published": "2026-10-01T10:00:00+02:00",
@@ -47,7 +47,7 @@ class WatchlistTests(unittest.TestCase):
         self.assertTrue(j["posted_at"].startswith("2026"))
 
     def test_lever_falls_back_to_eu_host(self):
-        from jobradar.http import HttpError
+        from stellenpilot.http import HttpError
         with mock.patch.object(wl, "request_json", side_effect=[HttpError(404, "nf"), LEVER]) as m:
             wl.lever("x")
         self.assertIn("api.eu.lever.co", m.call_args_list[1].args[0])
