@@ -6,7 +6,15 @@ credentials.json
 token.json
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 output/
+profile.imported.toml
+profile.backup.toml
+config.backup.toml
+run.log
+jobhunt-daily.cmd
+jobhunt-daily.xml
 
 # python
 __pycache__/
