@@ -124,6 +124,31 @@ tr:last-child td{border-bottom:none}
 .drop strong{font-size:.9375rem}
 .cvnotes{margin:0;padding-left:18px;color:var(--text-secondary);font-size:.8125rem;line-height:1.5}
 .addform textarea.input.cvtext{font:.8125rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:320px;resize:vertical}
+#guide .panel{padding:20px;display:flex;flex-direction:column;gap:16px}
+.gsteps{display:flex;gap:6px;flex-wrap:wrap;list-style:none;margin:0;padding:0}
+.gsteps button{font:600 .75rem var(--f-ui);min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-tertiary);cursor:pointer}
+.gsteps button.done{color:#059669;border-color:#05966955}
+.gsteps button.cur{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.gsteps button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gbody h3{font:800 1.25rem/1.3 var(--f-ui);margin:0 0 6px}
+.gbody p{margin:0 0 8px;color:var(--text-secondary);max-width:72ch}
+.gbody ol,.gbody ul{margin:0 0 8px;padding-left:20px;color:var(--text-secondary);line-height:1.6}
+.gbody code{font:.8125rem var(--f-mono);background:var(--surface-alt);padding:1px 6px;border-radius:6px}
+.gbody a{color:var(--accent)}
+.gcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:8px}
+.gcard{border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--surface-alt)}
+.gcard strong{display:block;margin-bottom:4px}
+.gcard p,.gcard ol{font-size:.8125rem;margin:0}
+.gnav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:14px}
+.gnav .btn{width:auto}
+.checks{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
+.checks li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.checks .ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:800;color:#fff;background:#059669}
+.checks .bad .ic{background:#dc2626}.checks .opt .ic{background:var(--text-tertiary)}
+.checks .tx{flex:1}
+body.guiding .main>*:not(#guide):not(.inguide){display:none!important}
+body.guiding #setPanel fieldset[data-step]:not(.cur){display:none}
+body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
 .fset{border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;margin:0}
 .fset legend{font:700 .875rem var(--f-ui);padding:0 6px}
 .fset .hint{margin:-6px 0 0;color:var(--text-tertiary);font-size:.8125rem}
@@ -299,10 +324,19 @@ tr:last-child td{border-bottom:none}
       <button class="btn ghost" id="addBtn" type="button" aria-expanded="false" aria-controls="addPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add a job</span></button>
       <button class="btn" id="gmailBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>Check Gmail</span></button>
     </div>
+    <button class="btn ghost" id="guideBtn" type="button" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg><span>Setup guide</span></button>
     <div class="lastrun" id="lastrun">Waiting for the first run</div>
   </aside>
 
   <main class="main">
+    <section id="guide" aria-labelledby="g-h" hidden>
+      <div class="panel">
+        <div class="sechead"><h2 id="g-h">Setup guide</h2><button type="button" class="mini" id="gClose">Close guide</button></div>
+        <ol class="gsteps" id="gSteps"></ol>
+        <div class="gbody" id="gBody"></div>
+        <div class="gnav"><button type="button" class="mini" id="gBack">Back</button><span class="muted" id="gMsg" role="status"></span><button type="button" class="btn" id="gNext">Next</button></div>
+      </div>
+    </section>
     <section class="kpis" id="kpis" aria-label="Summary">
       <div class="kpi" style="--c:var(--s-new)"><span class="v" id="k-total">0</span><span class="k">Tracked</span></div>
       <div class="kpi" style="--c:var(--s-ready)"><span class="v" id="k-ready">0</span><span class="k">Docs ready</span></div>
@@ -328,7 +362,7 @@ tr:last-child td{border-bottom:none}
     <section id="setPanel" aria-labelledby="set-h" hidden>
       <div class="sechead"><h2 id="set-h">Settings</h2><span>What to search, where, and which AI model writes your documents</span></div>
       <form class="panel addform" id="setForm" style="margin-top:12px">
-        <fieldset class="fset"><legend>What you are looking for</legend>
+        <fieldset class="fset" data-step="search"><legend>What you are looking for</legend>
           <label>Job titles <span class="muted">(one per line)</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
           <div class="g3">
             <label>City <input class="input" name="city" placeholder="Essen"></label>
@@ -341,7 +375,7 @@ tr:last-child td{border-bottom:none}
             <label>Skip titles with these words <span class="muted">(one per line)</span><textarea class="input lines" name="exclude_title_words" placeholder="senior&#10;lead"></textarea></label>
           </div>
         </fieldset>
-        <fieldset class="fset"><legend>Job sources</legend>
+        <fieldset class="fset" data-step="sources"><legend>Job sources</legend>
           <div class="srcrow"><label class="check"><input type="checkbox" name="arbeitsagentur"> Bundesagentur für Arbeit <span class="muted">free, no key</span></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="arbeitnow"> Arbeitnow <span class="muted">free, no key</span></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="adzuna"> Adzuna <span class="muted">free key from developer.adzuna.com</span></label>
@@ -351,7 +385,7 @@ tr:last-child td{border-bottom:none}
             <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off"></label></div>
           <p class="hint" style="margin:0">Saved keys are not shown again. Leave a key box empty to keep the saved one.</p>
         </fieldset>
-        <fieldset class="fset"><legend>AI model</legend>
+        <fieldset class="fset" data-step="ai"><legend>AI model</legend>
           <p class="hint" style="margin:0">Without a model, jobs are scored by keywords and letters come from a template. With one, scores, CVs and letters are much better.</p>
           <div class="g2">
             <label>Model service
@@ -373,7 +407,7 @@ tr:last-child td{border-bottom:none}
           <label data-for="local llamacpp vllm lmstudio ollama">Server address <span class="muted">(leave empty for the usual one)</span><input class="input" name="base_url" placeholder="http://localhost:11434"></label>
           <p class="hint" style="margin:0" data-for="ollama">Install Ollama from ollama.com, then run <code>ollama pull qwen2.5:7b</code> once.</p>
         </fieldset>
-        <fieldset class="fset"><legend>Documents and German</legend>
+        <fieldset class="fset" data-step="search"><legend>Documents and German</legend>
           <div class="g3">
             <label>My German level
               <select class="input" name="my_german_level"><option value="">From my CV</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></label>
@@ -830,6 +864,12 @@ async function loadSettings(){
 }
 $("setBtn").addEventListener("click",()=>{if(togglePanel("setPanel","setBtn"))loadSettings()});
 $("setForm").provider.addEventListener("change",showProvider);
+async function saveSettings(){
+  const f=$("setForm"),body={keys:{}};
+  for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
+  f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
+  await api("POST","/api/settings",body);await loadSettings();lastState="";refresh();
+}
 $("setForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const f=e.target,m=$("setMsg"),b=$("setSave"),body={keys:{}};
@@ -839,6 +879,89 @@ $("setForm").addEventListener("submit",async e=>{
   try{await api("POST","/api/settings",body);m.textContent="Saved. Press Run search now to try it.";await loadSettings();lastState="";refresh()}
   catch(err){m.textContent=err.message}finally{b.disabled=false}
 });
+
+
+/* ---------- Setup guide ---------- */
+const GUIDE=[
+ {id:"welcome",name:"Welcome",html:`<h3>Welcome! Let's get you set up</h3>
+  <p>This takes about 10 minutes. You will add your CV, say what jobs you want, choose how the documents are written, and pick where jobs come from. Then you run your first search.</p>
+  <ul><li>Everything stays on this computer, except what you send to an AI service if you choose one.</li>
+  <li>It never applies for you and never contacts companies. You decide what to send.</li>
+  <li>You can change every answer later under <b>My CV</b> and <b>Settings</b>, or open this guide again from the menu.</li></ul>`},
+ {id:"cv",name:"Your CV",panel:"cvPanel",html:`<h3>Step 1: your CV</h3>
+  <p>Drop your CV on the box below. The form fills in by itself. Then read it through, fix what is wrong and add anything missing with the <b>+ Add</b> buttons.</p>
+  <ul><li>Bullets are copied word for word into your tailored CVs, so keep them short and true. Nothing is ever invented.</li>
+  <li>Put skills you are still learning in a group called <b>Learning</b>.</li>
+  <li>Write languages with a level, like <code>German (A2)</code>. Your German level decides which ads are skipped.</li>
+  <li>Without an AI model only your contact details and languages are filled in. Your CV text is shown so you can copy the rest. Tip: set up the AI model in step 3 first and come back here, it fills the whole form.</li></ul>`,
+  save:async()=>{cv=readCv();await api("POST","/api/cv/save",{profile:cv});lastState="";refresh()}},
+ {id:"search",name:"What you want",panel:"setPanel",steps:["search"],html:`<h3>Step 2: what you are looking for</h3>
+  <p>Write each job title on its own line, the way companies write them, for example <code>Werkstudent Data</code> or <code>Junior Data Engineer</code>. Add your city and how far you would travel.</p>
+  <p>Below that you can set your German level and when documents are made. A match of 70 or more is a good start.</p>`,save:saveSettings},
+ {id:"ai",name:"AI model",panel:"setPanel",steps:["ai"],html:`<h3>Step 3: who writes your documents</h3>
+  <p>Pick one option in the box below, then press <b>Test</b>. You can always start with None and add a model later.</p>
+  <div class="gcards">
+   <div class="gcard"><strong>None</strong><p>Free and offline. Jobs are scored by matching keywords and letters come from a template. Fine to try things out.</p></div>
+   <div class="gcard"><strong>Ollama (free, on your computer)</strong><ol><li>Download Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com</a> and install it.</li><li>Open a terminal and run <code>ollama pull qwen2.5:7b</code> (about 5 GB, once).</li><li>Choose Ollama below, model <code>qwen2.5:7b</code>.</li></ol><p>Needs about 16 GB RAM. With 8 GB use <code>qwen2.5:3b</code>, results are rougher.</p></div>
+   <div class="gcard"><strong>Claude (best results, paid)</strong><ol><li>Sign in at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</li><li>Add a little credit under Billing.</li><li>Create a key under API keys and paste it below.</li></ol><p>A daily run usually costs a few cents.</p></div>
+   <div class="gcard"><strong>OpenAI (paid)</strong><ol><li>Sign in at <a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a>.</li><li>Create a key under API keys.</li><li>Paste it below with a model name.</li></ol></div>
+  </div>
+  <p style="margin-top:12px"><button type="button" class="mini" id="gTest">Test</button> <span id="gTestMsg" class="muted"></span></p>`,save:saveSettings},
+ {id:"sources",name:"Job sources",panel:"setPanel",steps:["sources"],html:`<h3>Step 4: where jobs come from</h3>
+  <p>The Bundesagentur für Arbeit and Arbeitnow work right away with no key. Two more sources are optional and free:</p>
+  <div class="gcards">
+   <div class="gcard"><strong>Adzuna</strong><ol><li>Sign up at <a href="https://developer.adzuna.com" target="_blank" rel="noopener">developer.adzuna.com</a>.</li><li>Open your dashboard and copy the App ID and App key.</li><li>Tick Adzuna below and paste both.</li></ol></div>
+   <div class="gcard"><strong>TheirStack</strong><ol><li>Sign up at <a href="https://theirstack.com" target="_blank" rel="noopener">theirstack.com</a>.</li><li>Copy your API key from the settings page.</li><li>Tick TheirStack below and paste it.</li></ol><p>200 free credits a month, one per job found.</p></div>
+  </div>
+  <p style="margin-top:8px">Your keys are saved in the <code>.env</code> file on this computer only. Never share them.</p>`,save:saveSettings},
+ {id:"finish",name:"Check and run",html:`<h3>Last step: check and run</h3><ul class="checks" id="gChecks"><li><span class="tx muted">Checking your setup…</span></li></ul>
+  <p><button type="button" class="btn" id="gRun" style="width:auto">Run my first search</button></p>
+  <p><b>Good to know</b></p>
+  <ul><li>The dashboard only works while <code>jobhunt serve</code> is running in its terminal window.</li>
+  <li>Your documents land in the <code>output</code> folder inside your workspace. Read every one before you send it.</li>
+  <li>To search every morning by itself, see <code>docs/scheduling.md</code> in the project (Task Scheduler on Windows).</li>
+  <li>Optional: install LibreOffice for PDF files, connect Gmail to update statuses (<code>docs/gmail.md</code>), or get a daily Telegram message (<code>docs/digest.md</code>).</li></ul>`}
+];
+let gStep=0;
+function guideOpen(on){
+  document.body.classList.toggle("guiding",on);$("guide").hidden=!on;
+  if(!on){document.querySelectorAll(".inguide").forEach(el=>{el.classList.remove("inguide");el.hidden=true});return}
+  if(!$("setForm").elements.city.value)loadSettings();
+  if(!cv)loadCv();
+  guideShow(gStep);
+}
+function guideShow(i){
+  gStep=i;const g=GUIDE[i];
+  $("gSteps").innerHTML=GUIDE.map((x,j)=>`<li><button type="button" data-g="${j}" class="${j===i?"cur":j<i?"done":""}">${j+1}. ${esc(x.name)}</button></li>`).join("");
+  $("gBody").innerHTML=g.html;$("gMsg").textContent="";
+  document.querySelectorAll(".inguide").forEach(el=>{el.classList.remove("inguide");el.hidden=true});
+  if(g.panel){const p=$(g.panel);p.hidden=false;p.classList.add("inguide")}
+  $("setForm").querySelectorAll("fieldset[data-step]").forEach(f=>f.classList.toggle("cur",!!g.steps&&g.steps.includes(f.dataset.step)));
+  $("gBack").style.visibility=i?"visible":"hidden";
+  $("gNext").textContent=i===0?"Start":i===GUIDE.length-1?"Finish":"Save and continue";
+  if(g.id==="finish")guideChecks();
+  $("guide").scrollIntoView({block:"start"});
+}
+async function guideChecks(){
+  try{
+    const r=await api("GET","/api/check"),go={cv:1,search:2,ai:3,sources:4};
+    $("gChecks").innerHTML=r.checks.map(c=>`<li class="${c.optional?"opt":c.ok?"":"bad"}"><span class="ic">${c.ok&&!c.optional?"✓":c.optional?"i":"!"}</span><span class="tx">${esc(c.text)}</span>${!c.ok&&go[c.step]?`<button type="button" class="mini" data-g="${go[c.step]}">Fix</button>`:""}</li>`).join("");
+  }catch(e){$("gChecks").innerHTML=`<li class="bad"><span class="ic">!</span><span class="tx">${esc(e.message)}</span></li>`}
+}
+$("guide").addEventListener("click",async e=>{
+  const j=e.target.closest("[data-g]");if(j){guideShow(+j.dataset.g);return}
+  if(e.target.id==="gTest"){const m=$("gTestMsg");m.textContent="Saving and testing…";
+    try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.textContent=(c.ok?"✓ ":"✗ ")+c.text;m.style.color=c.ok?"#059669":"#dc2626"}catch(err){m.textContent=err.message}}
+  if(e.target.id==="gRun"){guideOpen(false);$("runBtn").click()}
+});
+$("gNext").addEventListener("click",async()=>{
+  const g=GUIDE[gStep],b=$("gNext");
+  if(g.save){b.disabled=true;$("gMsg").textContent="Saving…";try{await g.save()}catch(e){$("gMsg").textContent=e.message;b.disabled=false;return}b.disabled=false}
+  if(gStep<GUIDE.length-1)guideShow(gStep+1);else guideOpen(false);
+});
+$("gBack").addEventListener("click",()=>guideShow(Math.max(0,gStep-1)));
+$("gClose").addEventListener("click",()=>guideOpen(false));
+$("guideBtn").addEventListener("click",()=>{gStep=0;guideOpen(true)});
 
 /* ---------- Run search ---------- */
 let wasRunning=false;
@@ -873,7 +996,7 @@ async function refresh(){
     jobs=st.jobs;runs=st.runs;weekly=st.weekly;
     $("gmailBtn").hidden=!st.gmailEnabled;
     showRun(st.run);
-    if(!st.profileReady&&!cvPrompted){cvPrompted=true;togglePanel("cvPanel","cvBtn",true);loadCv();$("cvMsg").textContent="Start here: drop your CV, check the fields, and save. Then set what you are looking for in Settings."}
+    if(!st.profileReady&&!cvPrompted){cvPrompted=true;guideOpen(true)}
     if(st.subtitle)$("subtitle").textContent=st.subtitle;
     render();renderRuns();renderOffice();
   }catch(e){if(!jobs.length)$("list").innerHTML=`<div class="empty">Cannot reach the local server. Start it with: jobhunt serve</div>`}

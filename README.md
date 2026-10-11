@@ -54,7 +54,7 @@ docker compose up -d      # http://127.0.0.1:8765
 
 See [docs/docker.md](docs/docker.md) for daily runs and details.
 
-Then make it yours, all on the dashboard:
+Then make it yours, all on the dashboard. The **Setup guide** opens by itself the first time and walks you through it:
 
 1. **My CV**: drop your CV file, check the form, add anything missing, save. Bullets are copied word for word, so keep them short and true.
 2. **Settings**: job titles, city, job sources and their keys, and your AI model.

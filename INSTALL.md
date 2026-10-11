@@ -123,6 +123,8 @@ jobhunt serve
 ```
 Open http://127.0.0.1:8765 . Leave the terminal open while you use it; **Ctrl+C** stops it.
 
+The **Setup guide** opens by itself the first time and walks you through everything below, with instructions for each choice and a check at the end. You can open it again any time from the left menu. The steps below are the same thing in writing.
+
 ### 1. My CV (5 minutes)
 
 The **My CV** panel opens by itself the first time.

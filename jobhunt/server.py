@@ -188,6 +188,9 @@ def make_handler(settings, port: int = 8765):
         def do_GET(self):
             if not self._host_ok():
                 return
+            if self.path == "/api/check":  # may wait up to 10 s for a local model server, so no lock
+                from .cli import setup_checks
+                return self._send(200, {"checks": setup_checks(settings)})
             with lock:
                 self._get()
 

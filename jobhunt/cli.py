@@ -79,29 +79,54 @@ def cmd_doctor(settings: Settings) -> int:
     return 0 if ok else 1
 
 
-def _check_llm(settings: Settings) -> bool:
+def llm_status(settings: Settings) -> tuple[bool, str]:
     from .llm import LLM
     prov = settings["llm"]["provider"]
     try:
         llm = LLM(settings)
     except RuntimeError as e:
-        print(f"llm: {prov} PROBLEM: {e}")
-        return False
+        return False, f"{prov}: {e}"
     if not llm.local:
-        print(f"llm: {prov}" + (f" ({llm.model})" if llm.enabled else " (keyword scoring, template letters)"))
-        return True
+        return True, (f"{prov} ({llm.model})" if llm.enabled else "none: keyword scoring and template letters")
     try:
         models = llm.list_models()
     except Exception as e:
-        print(f"llm: {prov} at {llm.base_url} is NOT reachable ({e.__class__.__name__}). Is the server running?")
-        return False
+        start = "Start the Ollama app (or run: ollama serve)" if prov == "ollama" else "Start the model server"
+        return False, f"nothing answers at {llm.base_url}. {start}, then test again. ({e.__class__.__name__})"
     have = any(m == llm.model or m.split(":")[0] == llm.model or m.endswith("/" + llm.model) for m in models)
     if have or (len(models) == 1 and prov != "ollama"):
-        print(f"llm: {prov} at {llm.base_url}, model {llm.model} ready")
-        return True
+        return True, f"{prov} at {llm.base_url}, model {llm.model} ready"
     hint = f" Run: ollama pull {llm.model}" if prov == "ollama" else ""
-    print(f"llm: {prov} reachable, but model '{llm.model}' not found. Available: {', '.join(models[:8]) or 'none'}.{hint}")
-    return False
+    return False, f"{prov} is running, but model '{llm.model}' is not installed. Available: {', '.join(models[:8]) or 'none'}.{hint}"
+
+
+def _check_llm(settings: Settings) -> bool:
+    ok, msg = llm_status(settings)
+    print(f"llm: {msg}" if ok else f"llm: PROBLEM: {msg}")
+    return ok
+
+
+def setup_checks(settings: Settings) -> list[dict]:
+    """The same checks as `jobhunt doctor`, as data for the dashboard's setup guide."""
+    from .sources import REGISTRY
+    from .tailor import find_soffice
+    out = []
+    name = settings.profile.get("person", {}).get("name") if settings.profile else ""
+    out.append({"step": "cv", "ok": bool(name) and name != "Alex Example",
+                "text": f"CV saved for {name}" if name and name != "Alex Example" else "Your CV is not saved yet"})
+    out.append({"step": "search", "ok": bool(settings["search"]["keywords"]),
+                "text": f"Looking for {', '.join(settings['search']['keywords'][:3])} near {settings['search']['city']}"})
+    ok, msg = llm_status(settings)
+    out.append({"step": "ai", "ok": ok, "text": "AI model: " + msg})
+    on = [n for n, m in REGISTRY.items() if n != "watchlist" and settings["sources"].get(n)]
+    for n in on:
+        need = [k for k in getattr(REGISTRY[n], "NEEDS", ()) if not settings.secret(k)]
+        if need:
+            out.append({"step": "sources", "ok": False, "text": f"{REGISTRY[n].LABEL} is on but its key is missing"})
+    out.append({"step": "sources", "ok": bool(on), "text": f"{len(on)} job source{'s' if len(on) != 1 else ''} on" if on else "No job source is switched on"})
+    out.append({"step": "extra", "ok": True, "optional": True,
+                "text": "PDF export: LibreOffice found" if find_soffice() else "No LibreOffice, so you get Word files only (optional)"})
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:
