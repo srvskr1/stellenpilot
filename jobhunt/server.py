@@ -22,7 +22,9 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
          "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
-SLOW_POSTS = {"/api/add", "/api/gmail"}
+SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import"}
+CV_TYPES = {".pdf", ".docx", ".txt", ".md"}
+MAX_CV_BYTES = 10_000_000
 
 
 def camel(d: dict) -> dict:
@@ -114,9 +116,9 @@ def make_handler(settings, port: int = 8765):
                 return False
             return True
 
-        def _body(self) -> dict:
+        def _body(self, limit: int = 1_000_000) -> dict:
             n = int(self.headers.get("Content-Length") or 0)
-            if n < 0 or n > 1_000_000:
+            if n < 0 or n > limit:
                 raise ValueError("bad Content-Length")
             data = json.loads(self.rfile.read(n) or b"{}") if n else {}
             if not isinstance(data, dict):
@@ -156,7 +158,13 @@ def make_handler(settings, port: int = 8765):
                     "weekly": weekly_summary(jobs),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
                     "subtitle": subtitle,
+                    "profileReady": bool(settings.profile) and settings.profile.get("person", {}).get("name") != "Alex Example",
                 })
+            if self.path == "/api/cv":
+                prof = settings.home / "profile.toml"
+                imp = settings.home / "profile.imported.toml"
+                return self._send(200, {"profile": prof.read_text(encoding="utf-8") if prof.exists() else "",
+                                        "imported": imp.read_text(encoding="utf-8") if imp.exists() else ""})
             self._send(404, {"error": "not found"})
 
         def _patch(self):
@@ -213,6 +221,10 @@ def make_handler(settings, port: int = 8765):
                 except Exception as e:
                     return self._send(500, {"error": f"Could not add the job: {e}"})
                 return self._send(200, {"status": res["status"], "job": camel(res["job"])})
+            if self.path == "/api/cv/import":
+                return self._cv_import()
+            if self.path == "/api/cv/save":
+                return self._cv_save()
             if self.path == "/api/gmail":
                 if not settings["gmail"].get("enabled"):
                     return self._send(400, {"error": "Gmail sync is off. See docs/gmail.md"})
@@ -222,6 +234,51 @@ def make_handler(settings, port: int = 8765):
                 except Exception as e:
                     return self._send(500, {"error": str(e)})
             self._send(404, {"error": "not found"})
+
+        def _cv_import(self):
+            import base64
+            import tempfile
+            from .importer import import_cv
+            try:
+                body = self._body(limit=MAX_CV_BYTES * 4 // 3 + 4096)
+                suffix = Path(str(body.get("name") or "")).suffix.lower()
+                if suffix not in CV_TYPES:
+                    raise ValueError("Use a PDF, DOCX, TXT or MD file.")
+                data = base64.b64decode(str(body.get("data") or ""), validate=True)
+                if not data:
+                    raise ValueError("The file is empty.")
+            except (ValueError, TypeError) as e:
+                return self._send(400, {"error": str(e)})
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / ("cv" + suffix)
+                path.write_bytes(data)
+                try:
+                    out, notes = import_cv(path, settings)
+                except (RuntimeError, ValueError) as e:
+                    return self._send(400, {"error": str(e)})
+                except OSError as e:
+                    return self._send(502, {"error": f"Could not reach the AI model ({e}). Is it running? Check with: jobhunt doctor"})
+                except Exception as e:
+                    return self._send(500, {"error": f"Import failed: {e.__class__.__name__}: {e}"})
+            return self._send(200, {"imported": out.read_text(encoding="utf-8"), "notes": notes})
+
+        def _cv_save(self):
+            import tomllib
+            try:
+                text = str(self._body(limit=2_000_000).get("text") or "")
+                data = tomllib.loads(text)
+            except tomllib.TOMLDecodeError as e:
+                return self._send(400, {"error": f"The profile has a formatting error: {e}"})
+            except (ValueError, TypeError) as e:
+                return self._send(400, {"error": str(e)})
+            if not isinstance(data.get("person"), dict) or not data["person"].get("name"):
+                return self._send(400, {"error": "The profile needs a [person] section with your name."})
+            prof = settings.home / "profile.toml"
+            if prof.exists():
+                prof.replace(settings.home / "profile.backup.toml")
+            prof.write_text(text, encoding="utf-8")
+            settings.profile = data  # the next added job is scored against the new profile
+            return self._send(200, {"ok": True})
 
     return Handler
 

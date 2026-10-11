@@ -10,7 +10,7 @@ It never applies for you and never contacts companies. You stay in control of ev
 
 ## What it does
 
-* **Starts from your CV.** `jobhunt import cv.pdf` turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
+* **Starts from your CV.** Drop it on the dashboard (or run `jobhunt import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
 * **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys). It removes duplicates across sources.
 * **Watches your dream companies.** Name companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters, and their new roles show up every day, often before they reach the job boards. `jobhunt watch <careers link>` finds the right entry.
 * **Takes jobs you found yourself.** Paste a link or the ad text (from LinkedIn, a friend, anywhere) with `jobhunt add` or the dashboard's "Add a job" panel. It gets scored and tailored like the rest.
@@ -56,7 +56,7 @@ See [docs/docker.md](docs/docker.md) for daily runs and details.
 
 Then make it yours:
 
-1. Run `jobhunt import path/to/your_cv.pdf`, review `profile.imported.toml`, and rename it to `profile.toml`. Or type your facts into `profile.toml` by hand. Bullets are copied word for word, so keep them short and true.
+1. On the dashboard, click **My CV** and drop your CV file. Review the result and click **Save as my profile**. (Terminal: `jobhunt import path/to/your_cv.pdf`, then rename `profile.imported.toml` to `profile.toml`.) Or type your facts into `profile.toml` by hand. Bullets are copied word for word, so keep them short and true.
 2. Set your keywords, city and radius in `config.toml`.
 3. Optional: add API keys to `.env` and switch sources on in `config.toml`.
 4. Run `jobhunt doctor` to check the setup, then `jobhunt run` for a real search.

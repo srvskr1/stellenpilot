@@ -117,6 +117,13 @@ tr:last-child td{border-bottom:none}
 
 .btn.ghost{background:var(--surface);color:var(--accent);border-color:var(--accent)}
 .btn.ghost:hover{background:var(--accent-soft);border-color:var(--accent)}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:28px 16px;border:2px dashed var(--border-hover);border-radius:12px;background:var(--surface-alt);cursor:pointer;transition:border-color .15s ease,background .15s ease}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.drop svg{width:28px;height:28px;color:var(--accent)}
+.drop strong{font-size:.9375rem}
+.cvnotes{margin:0;padding-left:18px;color:var(--text-secondary);font-size:.8125rem;line-height:1.5}
+.addform textarea.input.cvtext{font:.8125rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:320px;resize:vertical}
 .addform{display:flex;flex-direction:column;gap:12px;padding:16px}
 .addform label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.8125rem}
 .addform label.check{flex-direction:row;font-weight:500}
@@ -260,6 +267,7 @@ tr:last-child td{border-bottom:none}
       <p class="label" style="margin-bottom:0">Find</p>
       <input class="input" id="q" type="search" placeholder="Company or title" aria-label="Search company or title">
       <label class="check" for="showDe"><input type="checkbox" id="showDe"> Show roles needing more German than you have</label>
+      <button class="btn ghost" id="cvBtn" type="button" aria-expanded="false" aria-controls="cvPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg><span>My CV</span></button>
       <button class="btn ghost" id="addBtn" type="button" aria-expanded="false" aria-controls="addPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add a job</span></button>
       <button class="btn" id="gmailBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>Check Gmail</span></button>
     </div>
@@ -272,6 +280,22 @@ tr:last-child td{border-bottom:none}
       <div class="kpi" style="--c:var(--s-ready)"><span class="v" id="k-ready">0</span><span class="k">Docs ready</span></div>
       <div class="kpi" style="--c:var(--s-applied)"><span class="v" id="k-applied">0</span><span class="k">Applied</span></div>
       <div class="kpi" style="--c:var(--s-interview)"><span class="v" id="k-int">0</span><span class="k">Interviews</span></div>
+    </section>
+    <section id="cvPanel" aria-labelledby="cv-h" hidden>
+      <div class="sechead"><h2 id="cv-h">My CV</h2><span>Every job is scored and tailored from this profile</span></div>
+      <div class="panel addform" style="margin-top:12px">
+        <label class="drop" id="drop" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg>
+          <strong>Drop your CV here, or click to choose</strong>
+          <span class="muted">PDF, DOCX or TXT. It stays on this computer, apart from the AI model you chose.</span>
+          <input type="file" id="cvFile" accept=".pdf,.docx,.txt,.md" hidden>
+        </label>
+        <span class="muted" id="cvMsg" role="status"></span>
+        <div id="cvNotesBox" hidden><strong style="font-size:.8125rem">Check these before saving</strong><ul class="cvnotes" id="cvNotes"></ul></div>
+        <label>Your profile <span class="muted">(edit freely; bullets are copied word for word into your CVs, so keep them true)</span>
+          <textarea class="input cvtext" id="cvText" spellcheck="false" placeholder="Drop your CV above to fill this in"></textarea></label>
+        <div class="addrow end"><span class="muted" id="cvSaveMsg" role="status"></span><button class="btn" type="button" id="cvSave" style="width:auto">Save as my profile</button></div>
+      </div>
     </section>
     <section id="addPanel" aria-labelledby="add-h" hidden>
       <div class="sechead"><h2 id="add-h">Add a job yourself</h2><span>Found it on LinkedIn, a company site or through a friend</span></div>
@@ -613,6 +637,37 @@ $("addForm").addEventListener("submit",async e=>{
   finally{btn.disabled=false;btn.textContent="Add and score"}
 });
 
+/* ---------- My CV ---------- */
+function togglePanel(id,btnId,open){const p=$(id);open=open??p.hidden;p.hidden=!open;$(btnId).setAttribute("aria-expanded",String(open));if(open)p.scrollIntoView({behavior:"smooth",block:"start"})}
+async function loadCv(){try{const r=await api("GET","/api/cv");if(!$("cvText").value)$("cvText").value=r.profile||r.imported||""}catch(e){$("cvMsg").textContent=e.message}}
+$("cvBtn").addEventListener("click",()=>{togglePanel("cvPanel","cvBtn");if(!$("cvPanel").hidden)loadCv()});
+async function importCv(file){
+  const msg=$("cvMsg");
+  if(!file)return;
+  if(!/\.(pdf|docx|txt|md)$/i.test(file.name)){msg.textContent="Use a PDF, DOCX or TXT file.";return}
+  if(file.size>10e6){msg.textContent="That file is over 10 MB.";return}
+  msg.textContent=`Reading ${file.name}… with a local AI model this can take a few minutes.`;$("drop").style.pointerEvents="none";
+  try{
+    const data=await new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=()=>bad(new Error("Could not read the file"));fr.readAsDataURL(file)});
+    const r=await api("POST","/api/cv/import",{name:file.name,data});
+    $("cvText").value=r.imported;
+    $("cvNotes").innerHTML=r.notes.map(n=>`<li>${esc(n)}</li>`).join("");$("cvNotesBox").hidden=!r.notes.length;
+    msg.textContent="Done. Read it through, fix anything wrong, then save.";
+  }catch(e){msg.textContent=e.message}
+  finally{$("drop").style.pointerEvents="";$("cvFile").value=""}
+}
+$("cvFile").addEventListener("change",e=>importCv(e.target.files[0]));
+$("drop").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cvFile").click()}});
+["dragenter","dragover"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.add("over")}));
+["dragleave","drop"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.remove("over")}));
+$("drop").addEventListener("drop",e=>importCv(e.dataTransfer.files[0]));
+$("cvSave").addEventListener("click",async()=>{
+  const m=$("cvSaveMsg"),b=$("cvSave");b.disabled=true;m.textContent="";
+  try{await api("POST","/api/cv/save",{text:$("cvText").value});m.textContent="Saved. The next run uses this profile.";lastState="";refresh()}
+  catch(e){m.textContent=e.message}finally{b.disabled=false}
+});
+let cvPrompted=false;
+
 /* ---------- Local API ---------- */
 async function api(method,path,body){
   const r=await fetch(path,{method,headers:{"Content-Type":"application/json","X-Jobhunt":"1"},body:body?JSON.stringify(body):undefined});
@@ -629,6 +684,7 @@ async function refresh(){
     lastState=sig;
     jobs=st.jobs;runs=st.runs;weekly=st.weekly;
     $("gmailBtn").hidden=!st.gmailEnabled;
+    if(!st.profileReady&&!cvPrompted){cvPrompted=true;$("cvPanel").hidden=false;$("cvBtn").setAttribute("aria-expanded","true");loadCv();$("cvMsg").textContent="Start here: your profile is still the example. Drop your CV to replace it."}
     if(st.subtitle)$("subtitle").textContent=st.subtitle;
     render();renderRuns();renderOffice();
   }catch(e){if(!jobs.length)$("list").innerHTML=`<div class="empty">Cannot reach the local server. Start it with: jobhunt serve</div>`}

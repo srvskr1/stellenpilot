@@ -128,13 +128,11 @@ Open http://127.0.0.1:8765 in your browser. These are fictional jobs. Press **Ct
 
 ### 2. Add your CV (5 minutes)
 
-**The quick way:** let the tool read your existing CV.
-```bash
-jobhunt import path/to/your_cv.pdf
-```
-This writes `profile.imported.toml`. Open it in any text editor:
-* Read the `# CHECK THESE` notes at the top. They list anything that was dropped or left out.
-* Fix what is wrong, then rename the file to `profile.toml` (replace the example one).
+**The easy way: drag and drop.** Start the dashboard with `jobhunt serve`, open http://127.0.0.1:8765 and click **My CV** (it opens by itself the first time). Drop your CV file on the box. The tool reads it and shows your profile:
+* Read the **Check these before saving** notes. They list anything that was dropped or left out.
+* Fix what is wrong right in the box, then click **Save as my profile**. Your old profile is kept as `profile.backup.toml`.
+
+**From the terminal** instead: `jobhunt import path/to/your_cv.pdf` writes `profile.imported.toml`. Check it the same way, then rename it to `profile.toml`.
 
 Without an AI model (see step 4), only your contact details and languages are filled in, and your CV text is copied into the file as comments for you to sort by hand.
 
