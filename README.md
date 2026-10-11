@@ -1,6 +1,9 @@
 # Stellenpilot
 
+[![PyPI](https://img.shields.io/pypi/v/stellenpilot)](https://pypi.org/project/stellenpilot/)
+[![Python](https://img.shields.io/pypi/pyversions/stellenpilot)](https://pypi.org/project/stellenpilot/)
 [![tests](https://github.com/srvskr1/stellenpilot/actions/workflows/tests.yml/badge.svg)](https://github.com/srvskr1/stellenpilot/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE)
 
 A local, open source job hunt assistant for Germany. Every day it collects fresh job ads from public APIs, scores them against your CV, writes a tailored CV and cover letter for the best matches, and shows everything on a dashboard in your browser. It runs on your own computer. Your CV and your data never leave it, except for the AI model you choose.
 
@@ -8,7 +11,16 @@ A local, open source job hunt assistant for Germany. Every day it collects fresh
 
 It never applies for you and never contacts companies. You stay in control of every application.
 
+```bash
+pip install stellenpilot
+stellenpilot serve
+```
+Then open http://127.0.0.1:8765 . A setup guide walks you through the rest. Works on Windows, macOS and Linux with Python 3.11 or newer.
+
 ## What it does
+
+* **Easy to set up, no files to edit.** A step by step setup guide in the dashboard: your CV, what you are looking for, the AI model and the job sources, with a check at the end. Everything can be changed later under **My CV** and **Settings**.
+* **Runs by itself every day.** Switch on **Automatic search** in Settings and pick a time; it sets up Task Scheduler on Windows or cron on macOS and Linux for you. Or press **Run search now** any time.
 
 * **Starts from your CV.** Drop it on the dashboard (or run `stellenpilot import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
 * **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys). It removes duplicates across sources.
@@ -24,9 +36,11 @@ It never applies for you and never contacts companies. You stay in control of ev
 * **Daily digest to you** by Telegram or email: top new matches, CVs ready to send, interviews.
 * **Dashboard**: a Today list of what to do next, a pipeline you can filter, notes per job, interview prep, reply rates by source, the skill gaps employers mention most, a weekly summary, and a small animated office that shows what the run is doing.
 
-## Quick start
+## Install
 
 **New to Python or the terminal?** Follow [INSTALL.md](https://github.com/srvskr1/stellenpilot/blob/main/INSTALL.md): step by step for Windows, macOS, Linux and Docker, from installing Python to your first search.
+
+**With pip** (recommended):
 
 ```bash
 pip install stellenpilot
@@ -34,7 +48,9 @@ mkdir my-hunt && cd my-hunt
 stellenpilot serve      # open http://127.0.0.1:8765, the Setup guide walks you through the rest
 ```
 
-From the source code instead: you need Python 3.11 or newer (or Docker, see below). Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
+Update later with `pip install -U stellenpilot`. Your files in `my-hunt` are never touched by an update.
+
+**From the source code** instead: you need Python 3.11 or newer (or Docker, see below). Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
 
 ```bash
 git clone https://github.com/srvskr1/stellenpilot.git
