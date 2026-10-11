@@ -417,6 +417,12 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
           </div>
           <p class="hint" style="margin:0">Automatic writes German letters only if your German is B2 or better.</p>
         </fieldset>
+        <fieldset class="fset" data-step="schedule"><legend>Automatic search</legend>
+          <label class="check"><input type="checkbox" name="enabled"> Search for new jobs automatically every day</label>
+          <div class="g3"><label>At <input class="input" name="time" type="time" value="08:45"></label></div>
+          <p class="hint" style="margin:0" id="schedState"></p>
+          <p class="hint" style="margin:0">Your computer must be on. On Windows a missed search runs when you log in; on Mac and Linux it runs when you open the dashboard. The dashboard does not need to be open for the daily search.</p>
+        </fieldset>
         <div class="addrow end sticky-save"><span class="muted" id="setMsg" role="status"></span><button class="btn" type="submit" id="setSave" style="width:auto">Save settings</button></div>
       </form>
     </section>
@@ -539,7 +545,7 @@ function renderRuns(){
   if(!runs.length)return;
   const r=[...runs].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   $("runs").innerHTML=r.map(x=>`<tr><td class="num">${esc(x.date)}</td><td class="num">${esc(x.found)}</td><td class="num">${esc(x.shortlisted)}</td><td class="num">${esc(x.docsMade)}</td><td class="num">${esc(x.gmailUpdates)}</td><td>${esc(x.notes)}</td></tr>`).join("");
-  const last=r[0]; $("lastrun").innerHTML=`Last run <b>${esc(last.date)}</b><br>${esc(last.shortlisted)} shortlisted of ${esc(last.found)} scanned. Next run as scheduled.`;
+  const last=r[0]; $("lastrun").innerHTML=`Last run <b>${esc(last.date)}</b><br>${esc(last.shortlisted)} shortlisted of ${esc(last.found)} scanned. ${schedText()}`;
 }
 const ICO={
  up:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11H3V10zM7 10l4-8a3 3 0 0 1 3 3v4h5.5a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.1 21H7"/></svg>`,
@@ -707,7 +713,7 @@ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function officeState(){
   if(localGmail)return{st:"gmail",note:"Checking your Gmail right now"};
   const r=[...runs].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
-  if(!r)return{st:"break",note:"Waiting for the first run. Start one with: jobhunt run"};
+  if(!r)return{st:"break",note:"Waiting for the first search. Press Run search now in the menu."};
   if(r.stage&&r.stage!=="done"&&OFF_NOTE[r.stage]){
     const age=Date.now()-Date.parse(r.stageAt||r.date);
     if(age>3*3600e3)return{st:"break",warn:true,note:`The ${r.date} run stopped at "${OFF.find(s=>s[0]===r.stage)[1]}". Was the PC on?`};
@@ -848,7 +854,7 @@ $("cvSave").addEventListener("click",async()=>{
 let cvPrompted=false;
 
 /* ---------- Settings ---------- */
-const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"]};
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 function showProvider(){const pv=$("setForm").provider.value;$("setForm").querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));$("setForm").model.closest("label").hidden=pv==="none"}
@@ -860,6 +866,8 @@ async function loadSettings(){
     f.querySelectorAll(".keyset").forEach(el=>el.textContent=r.keys[el.dataset.key]?"saved":"");
     f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";el.placeholder=r.keys[el.name]?"saved, type to replace":""});
     showProvider();showKeys();
+    $("schedState").textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"⚠ Switched on here, but the task is missing on your computer. Save again to recreate it.":r.scheduleActive?`✓ Active: every day at ${r.schedule.time}.`:"Off. Tick the box and save to switch it on.";
+    f.elements.enabled.disabled=r.inDocker;
   }catch(e){$("setMsg").textContent=e.message}
 }
 $("setBtn").addEventListener("click",()=>{if(togglePanel("setPanel","setBtn"))loadSettings()});
@@ -868,7 +876,7 @@ async function saveSettings(){
   const f=$("setForm"),body={keys:{}};
   for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
   f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
-  await api("POST","/api/settings",body);await loadSettings();lastState="";refresh();
+  const r=await api("POST","/api/settings",body);await loadSettings();lastState="";refresh();return r;
 }
 $("setForm").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -876,11 +884,13 @@ $("setForm").addEventListener("submit",async e=>{
   for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
   f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
   b.disabled=true;m.textContent="";
-  try{await api("POST","/api/settings",body);m.textContent="Saved. Press Run search now to try it.";await loadSettings();lastState="";refresh()}
+  try{const r=await api("POST","/api/settings",body);m.textContent="Saved. "+(r.scheduleNote?"Automatic search: "+r.scheduleNote:"Press Run search now to try it.");await loadSettings();lastState="";refresh()}
   catch(err){m.textContent=err.message}finally{b.disabled=false}
 });
 
 
+let sched={enabled:false,time:"08:45"};
+const schedText=()=>sched.enabled?`Automatic search daily at <b>${esc(sched.time)}</b>.`:"Automatic search is off (Settings).";
 /* ---------- Setup guide ---------- */
 const GUIDE=[
  {id:"welcome",name:"Welcome",html:`<h3>Welcome! Let's get you set up</h3>
@@ -914,12 +924,12 @@ const GUIDE=[
    <div class="gcard"><strong>TheirStack</strong><ol><li>Sign up at <a href="https://theirstack.com" target="_blank" rel="noopener">theirstack.com</a>.</li><li>Copy your API key from the settings page.</li><li>Tick TheirStack below and paste it.</li></ol><p>200 free credits a month, one per job found.</p></div>
   </div>
   <p style="margin-top:8px">Your keys are saved in the <code>.env</code> file on this computer only. Never share them.</p>`,save:saveSettings},
- {id:"finish",name:"Check and run",html:`<h3>Last step: check and run</h3><ul class="checks" id="gChecks"><li><span class="tx muted">Checking your setup…</span></li></ul>
+ {id:"finish",name:"Check and run",panel:"setPanel",steps:["schedule"],save:saveSettings,html:`<h3>Last step: check and run</h3><ul class="checks" id="gChecks"><li><span class="tx muted">Checking your setup…</span></li></ul>
   <p><button type="button" class="btn" id="gRun" style="width:auto">Run my first search</button></p>
   <p><b>Good to know</b></p>
   <ul><li>The dashboard only works while <code>jobhunt serve</code> is running in its terminal window.</li>
   <li>Your documents land in the <code>output</code> folder inside your workspace. Read every one before you send it.</li>
-  <li>To search every morning by itself, see <code>docs/scheduling.md</code> in the project (Task Scheduler on Windows).</li>
+  <li>Want it to search every morning by itself? Switch on <b>Automatic search</b> below and press Finish.</li>
   <li>Optional: install LibreOffice for PDF files, connect Gmail to update statuses (<code>docs/gmail.md</code>), or get a daily Telegram message (<code>docs/digest.md</code>).</li></ul>`}
 ];
 let gStep=0;
@@ -952,7 +962,7 @@ $("guide").addEventListener("click",async e=>{
   const j=e.target.closest("[data-g]");if(j){guideShow(+j.dataset.g);return}
   if(e.target.id==="gTest"){const m=$("gTestMsg");m.textContent="Saving and testing…";
     try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.textContent=(c.ok?"✓ ":"✗ ")+c.text;m.style.color=c.ok?"#059669":"#dc2626"}catch(err){m.textContent=err.message}}
-  if(e.target.id==="gRun"){guideOpen(false);$("runBtn").click()}
+  if(e.target.id==="gRun"){try{await saveSettings()}catch(err){$("gMsg").textContent=err.message;return}guideOpen(false);$("runBtn").click()}
 });
 $("gNext").addEventListener("click",async()=>{
   const g=GUIDE[gStep],b=$("gNext");
@@ -995,7 +1005,7 @@ async function refresh(){
     lastState=sig;
     jobs=st.jobs;runs=st.runs;weekly=st.weekly;
     $("gmailBtn").hidden=!st.gmailEnabled;
-    showRun(st.run);
+    showRun(st.run);if(st.schedule)sched=st.schedule;if(!st.runs.length)$("lastrun").innerHTML="No search yet. "+schedText();
     if(!st.profileReady&&!cvPrompted){cvPrompted=true;guideOpen(true)}
     if(st.subtitle)$("subtitle").textContent=st.subtitle;
     render();renderRuns();renderOffice();

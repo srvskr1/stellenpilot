@@ -14,6 +14,7 @@ from importlib import resources
 from pathlib import Path
 from urllib.parse import unquote
 
+from . import schedule
 from .db import DB, STATUSES
 
 CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "statusUpdatedAt",
@@ -28,7 +29,8 @@ EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remo
             "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack"),
             "llm": ("provider", "model", "base_url"),
             "language": ("my_german_level",),
-            "tailor": ("min_match", "letter_language")}
+            "tailor": ("min_match", "letter_language"),
+            "schedule": ("enabled", "time")}
 CHOICES = {("llm", "provider"): {"none", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
            ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
            ("tailor", "letter_language"): {"auto", "en", "de"}}
@@ -67,6 +69,13 @@ def clean_settings(body: dict) -> dict:
         out["search"]["country"] = out["search"]["country"].lower()
         if not (len(out["search"]["country"]) == 2 and out["search"]["country"].isalpha()):
             raise ValueError("country must be a two letter code, for example de")
+    if "time" in out.get("schedule", {}):
+        from .schedule import ScheduleError, parse_time
+        try:
+            h, m = parse_time(out["schedule"]["time"])
+        except ScheduleError as e:
+            raise ValueError(str(e)) from None
+        out["schedule"]["time"] = f"{h:02d}:{m:02d}"
     if "search" in out and "keywords" in out["search"] and not out["search"]["keywords"]:
         raise ValueError("add at least one job title to search for")
     return out
@@ -222,11 +231,14 @@ def make_handler(settings, port: int = 8765):
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
                     "subtitle": subtitle(),
                     "run": run_state,
+                    "schedule": settings["schedule"],
                     "profileReady": bool(settings.profile) and settings.profile.get("person", {}).get("name") != "Alex Example",
                 })
             if self.path == "/api/settings":
                 return self._send(200, {**{sec: {k: settings[sec][k] for k in keys} for sec, keys in EDITABLE.items()},
-                                        "keys": {k: bool(settings.secret(k)) for k in SECRETS}})
+                                        "keys": {k: bool(settings.secret(k)) for k in SECRETS},
+                                        "scheduleActive": schedule.is_enabled(settings.home),
+                                        "inDocker": schedule.in_docker()})
             if self.path == "/api/cv":
                 return self._send(200, {"profile": settings.profile,
                                         "isExample": settings.profile.get("person", {}).get("name") == "Alex Example"})
@@ -299,10 +311,17 @@ def make_handler(settings, port: int = 8765):
                     updates = clean_settings(body)
                     keys = body.get("keys") if isinstance(body.get("keys"), dict) else {}
                     save_secrets(settings.home, {k: str(keys.get(k) or "") for k in SECRETS})
+                    note = ""
+                    want = {**settings["schedule"], **updates.get("schedule", {})}
+                    if "schedule" in updates:
+                        if want["enabled"]:
+                            note = schedule.enable(settings.home, want["time"])
+                        elif settings["schedule"].get("enabled") or schedule.is_enabled(settings.home):
+                            schedule.disable(settings.home)
                     settings.cfg = save_user_config(settings.home, updates)
-                except ValueError as e:
+                except (ValueError, schedule.ScheduleError) as e:
                     return self._send(400, {"error": str(e)})
-                return self._send(200, {"ok": True})
+                return self._send(200, {"ok": True, "scheduleNote": note})
             if self.path == "/api/cv/import":
                 return self._cv_import()
             if self.path == "/api/cv/save":
@@ -371,13 +390,34 @@ def make_handler(settings, port: int = 8765):
             settings.profile = data  # the next search and added job use the new profile
             return self._send(200, {"ok": True})
 
+    def catch_up():
+        # A laptop asleep at the scheduled time misses the run; do it once the dashboard is open.
+        if run_state["running"]:
+            return
+        with lock:
+            last = max((r["date"] for r in db.runs()), default=None)
+        if schedule.missed_today(settings, last):
+            run_state.update(running=True, result=None, error="")
+            threading.Thread(target=background_run, daemon=True).start()
+
+    Handler.catch_up = staticmethod(catch_up)
     return Handler
 
 
 def serve(settings, port: int = 8765, host: str = "127.0.0.1") -> None:
     # The Host header check below still only accepts 127.0.0.1 and localhost, so even when
     # Docker listens on all interfaces inside the container, only your own browser gets in.
-    httpd = ThreadingHTTPServer((host, port), make_handler(settings, port))
+    handler = make_handler(settings, port)
+    httpd = ThreadingHTTPServer((host, port), handler)
+
+    def watch():
+        while True:
+            try:
+                handler.catch_up()
+            except Exception:  # never let the watcher stop the dashboard
+                pass
+            threading.Event().wait(600)
+    threading.Thread(target=watch, daemon=True).start()
     print(f"Job Hunt Board running at http://127.0.0.1:{port}  (Ctrl+C to stop)", flush=True)
     try:
         httpd.serve_forever()

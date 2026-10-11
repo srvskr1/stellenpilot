@@ -1,8 +1,21 @@
 # Run it every day
 
+## The easy way: the dashboard
+
+Open **Settings**, tick **Search for new jobs automatically every day**, pick a time and save. The dashboard creates the task on your computer for you:
+
+* **Windows**: a Task Scheduler task named "JobHunt daily search". If the PC is off at that time, it runs as soon as you log in.
+* **macOS and Linux**: one line in your crontab. A missed search (laptop asleep) runs when you open the dashboard.
+
+The dashboard does not need to be open for the daily search. Untick the box and save to remove the task again. Output goes to `run.log` in your workspace. Inside Docker this is not possible; see [docker.md](docker.md).
+
+The steps below do the same thing by hand.
+
+## By hand
+
 The run takes from under a minute to a few minutes, depending on sources and the AI model. Your computer must be on at that time.
 
-## Windows (Task Scheduler)
+### Windows (Task Scheduler)
 
 1. Find the full path of the command: in your activated virtual environment run `where jobhunt`.
 2. Open Task Scheduler and choose **Create Basic Task**.
@@ -12,7 +25,7 @@ The run takes from under a minute to a few minutes, depending on sources and the
    * Arguments: `--home "C:\Users\you\my-hunt" run`
 5. Finish, then right click the task, **Properties**, and tick **Run task as soon as possible after a scheduled start is missed**, so a run still happens when the PC was off.
 
-## Linux (cron)
+### Linux (cron)
 
 ```bash
 crontab -e
@@ -20,7 +33,7 @@ crontab -e
 45 8 * * * /home/you/job-hunt-pipeline/.venv/bin/jobhunt --home /home/you/my-hunt run >> /home/you/my-hunt/run.log 2>&1
 ```
 
-## macOS
+### macOS
 
 cron works the same way. On a laptop that sleeps, launchd is more reliable; a minimal plist:
 

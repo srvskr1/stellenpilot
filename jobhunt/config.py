@@ -30,6 +30,7 @@ DEFAULTS = {
     "gmail": {"enabled": False, "lookback_days": 3},
     "watch": {"companies": [], "title_words": [], "max_age_days": 30},
     "notify": {"email": False, "telegram": False, "only_when_new": False},
+    "schedule": {"enabled": False, "time": "08:45"},
 }
 
 

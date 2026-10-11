@@ -104,7 +104,7 @@ There is no LinkedIn, StepStone or Indeed scraper on purpose. LinkedIn's and Ste
 
 ## Run it every day
 
-See [docs/scheduling.md](docs/scheduling.md) for Windows Task Scheduler, cron and macOS.
+Switch on **Automatic search** in the dashboard's Settings and pick a time. It sets up Task Scheduler on Windows or cron on macOS and Linux for you. Doing it by hand: [docs/scheduling.md](docs/scheduling.md).
 
 ## Daily digest (optional)
 

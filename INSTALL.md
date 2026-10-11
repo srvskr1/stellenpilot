@@ -157,6 +157,8 @@ Click **Save settings**.
 
 Click **Run search now**. The little office shows what it is doing. When it is done, good matches have a tailored CV and cover letter in the `output` folder. Read every document before you send it.
 
+To search every morning by itself, open **Settings**, switch on **Automatic search** and pick a time. Your computer must be on; the dashboard does not need to be open.
+
 Something not working? In the terminal (Ctrl+C first), `jobhunt doctor` tells you in plain words what is missing.
 
 ### Want to look around first?
