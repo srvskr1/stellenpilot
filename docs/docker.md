@@ -5,16 +5,16 @@ No Python install needed. Works the same on Windows, macOS and Linux with Docker
 ## Start
 
 ```bash
-git clone https://github.com/srvskr1/job-hunt-pipeline.git
-cd job-hunt-pipeline
+git clone https://github.com/srvskr1/jobradar.git
+cd jobradar
 mkdir data                                 # your files go here (create it yourself so you own it)
 docker compose pull || docker compose build   # ready image, or build it yourself (a few minutes)
-docker compose run --rm jobhunt init       # creates data/config.toml, data/profile.toml, data/.env
-docker compose run --rm jobhunt demo       # optional: fictional sample jobs
+docker compose run --rm jobradar init       # creates data/config.toml, data/profile.toml, data/.env
+docker compose run --rm jobradar demo       # optional: fictional sample jobs
 docker compose up -d                       # dashboard at http://127.0.0.1:8765
 ```
 
-The ready image (`ghcr.io/srvskr1/job-hunt-pipeline`) is published by GitHub Actions on every push to the main branch. Until the first one exists, or if the package is still private, `docker compose pull` fails and the command builds the image from your copy instead. `docker compose build` always uses the code in your folder.
+The ready image (`ghcr.io/srvskr1/jobradar`) is published by GitHub Actions on every push to the main branch. Until the first one exists, or if the package is still private, `docker compose pull` fails and the command builds the image from your copy instead. `docker compose build` always uses the code in your folder.
 
 Your files live in the `data` folder next to `docker-compose.yml`: config, profile, `.env` with your keys, the database and the generated documents in `data/output`. Edit them with any editor on your computer.
 
@@ -22,8 +22,8 @@ Your files live in the `data` folder next to `docker-compose.yml`: config, profi
 
 | what | command |
 |---|---|
-| check your setup | `docker compose run --rm jobhunt doctor` |
-| search, score and tailor | `docker compose run --rm jobhunt run` |
+| check your setup | `docker compose run --rm jobradar doctor` |
+| search, score and tailor | `docker compose run --rm jobradar run` |
 | stop the dashboard | `docker compose down` |
 | update after `git pull` | `docker compose build && docker compose up -d` |
 
@@ -37,18 +37,18 @@ docker compose build --build-arg WITH_PDF=false
 
 ## Daily run
 
-Schedule `docker compose run --rm jobhunt run` on your computer, for example with cron on Linux:
+Schedule `docker compose run --rm jobradar run` on your computer, for example with cron on Linux:
 
 ```
-45 8 * * * cd /path/to/job-hunt-pipeline && docker compose run --rm jobhunt run >> data/run.log 2>&1
+45 8 * * * cd /path/to/jobradar && docker compose run --rm jobradar run >> data/run.log 2>&1
 ```
 
-On Windows use Task Scheduler with program `docker` and arguments `compose -f C:\path\to\job-hunt-pipeline\docker-compose.yml run --rm jobhunt run`.
+On Windows use Task Scheduler with program `docker` and arguments `compose -f C:\path\to\jobradar\docker-compose.yml run --rm jobradar run`.
 
 ## Good to know
 
 * The dashboard port is published on 127.0.0.1 only, so other devices on your network cannot open it. The server also refuses requests that do not come from 127.0.0.1 or localhost.
 * "Open folder" on the dashboard does not work inside Docker (the container cannot open your file manager). Open `data/output` yourself.
-* Gmail: the first consent needs a browser, which a container does not have. Run `jobhunt gmail` once with a normal Python install to create `token.json`, then copy it into `data`. After that the container can sync until Google asks for consent again.
+* Gmail: the first consent needs a browser, which a container does not have. Run `jobradar gmail` once with a normal Python install to create `token.json`, then copy it into `data`. After that the container can sync until Google asks for consent again.
 * On Linux the container runs as user id 1000. If your user has a different id and you get permission errors in `data`, run `sudo chown -R 1000 data`.
 * Using Ollama on the same computer: set `base_url = "http://host.docker.internal:11434/v1"` in `config.toml`. On Linux also add `extra_hosts: ["host.docker.internal:host-gateway"]` to the service in `docker-compose.yml`.

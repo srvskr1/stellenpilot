@@ -1,10 +1,10 @@
 # Start the dashboard:   docker compose up -d     then open http://127.0.0.1:8765
-# One time setup:        docker compose run --rm jobhunt init
-# A search run:          docker compose run --rm jobhunt run
+# One time setup:        docker compose run --rm jobradar init
+# A search run:          docker compose run --rm jobradar run
 services:
-  jobhunt:
+  jobradar:
     # Uses the published image when available, otherwise builds it from this folder.
-    image: ghcr.io/srvskr1/job-hunt-pipeline:latest
+    image: ghcr.io/srvskr1/jobradar:latest
     build: .
     volumes:
       - ./data:/data

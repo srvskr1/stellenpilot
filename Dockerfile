@@ -1,4 +1,4 @@
-# Job Hunt Pipeline in a container. Your files live in the /data volume.
+# JobRadar in a container. Your files live in the /data volume.
 FROM python:3.12-slim
 
 # PDF export needs LibreOffice (about 400 MB). Build with --build-arg WITH_PDF=false to skip it.
@@ -22,5 +22,5 @@ WORKDIR /data
 VOLUME /data
 EXPOSE 8765
 
-ENTRYPOINT ["jobhunt", "--home", "/data"]
+ENTRYPOINT ["jobradar", "--home", "/data"]
 CMD ["serve"]

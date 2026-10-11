@@ -274,7 +274,7 @@ def _arr(vals) -> str:
 def to_toml(profile: dict, notes: list[str] | None, source_text: str | None = None) -> str:
     p = profile.get("person") or {}
     first = ("# Your profile, saved from the dashboard (My CV)." if notes is None else
-             "# Imported by `jobhunt import`. Review every line, then rename this file to profile.toml.")
+             "# Imported by `jobradar import`. Review every line, then rename this file to profile.toml.")
     out = [first, "# Bullets are copied word for word into your CVs; tailoring only reorders them.", ""]
     if notes:
         out += ["# CHECK THESE:", *[f"#   {n}" for n in notes], ""]

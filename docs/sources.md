@@ -44,7 +44,7 @@ All checked live on 10 October 2026. None needs a key.
 | Lever | `https://api.lever.co/v0/postings/{site}?mode=json` | EU accounts use `api.eu.lever.co`; the tool tries both. The README says published postings "may be scraped by third parties" (https://github.com/lever/postings-api). |
 | Ashby | `https://api.ashbyhq.com/posting-api/job-board/{name}` | https://developers.ashbyhq.com/docs/public-job-posting-api |
 | Personio | `https://{company}.jobs.personio.de/xml` | Personio's FAQ: no credentials needed. Some companies disable the hosted job page, so the job link may not open even though the feed works. |
-| SmartRecruiters | `https://api.smartrecruiters.com/v1/companies/{id}/postings` | Public Posting API. An unknown company id returns zero jobs, not an error, so check `jobhunt watch` output. |
+| SmartRecruiters | `https://api.smartrecruiters.com/v1/companies/{id}/postings` | Public Posting API. An unknown company id returns zero jobs, not an error, so check `jobradar watch` output. |
 
 ## German level phrases
 

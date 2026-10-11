@@ -2,7 +2,7 @@
 
 Windows: a Task Scheduler task that also runs after a missed start (PC was off at that time).
 macOS and Linux: one crontab line, marked so it can be found and removed again.
-The command runs `jobhunt run` with the same Python as the dashboard, logging to run.log.
+The command runs `jobradar run` with the same Python as the dashboard, logging to run.log.
 """
 from __future__ import annotations
 
@@ -14,7 +14,8 @@ import sys
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-TASK_NAME = "JobHunt daily search"
+TASK_NAME = "JobRadar daily search"
+OLD_TASK_NAMES = ("JobHunt daily search",)
 MARK = "# jobhunt-daily"
 
 
@@ -44,7 +45,7 @@ def _run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
 def _windows_xml(script: Path, hour: int, minute: int) -> str:
     return f"""<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
-  <RegistrationInfo><Description>Daily job search by job-hunt-pipeline</Description></RegistrationInfo>
+  <RegistrationInfo><Description>Daily job search by jobradar</Description></RegistrationInfo>
   <Triggers>
     <CalendarTrigger>
       <StartBoundary>2026-01-01T{hour:02d}:{minute:02d}:00</StartBoundary>
@@ -78,6 +79,8 @@ def enable(home: Path, time: str) -> str:
         script = home / "jobhunt-daily.cmd"
         script.write_text(f'@echo off\r\ncd /d "{home}"\r\n"{sys.executable}" -m jobhunt.cli --home "{home}" run >> "{log}" 2>&1\r\n',
                           encoding="utf-8")
+        for old in OLD_TASK_NAMES:
+            _run(["schtasks", "/Delete", "/TN", old, "/F"])
         xml = home / "jobhunt-daily.xml"
         xml.write_text(_windows_xml(script, hour, minute), encoding="utf-16")
         r = _run(["schtasks", "/Create", "/TN", TASK_NAME, "/XML", str(xml), "/F"])
@@ -96,6 +99,8 @@ def disable(home: Path) -> None:
     if in_docker():
         return
     if sys.platform.startswith("win"):
+        for old in OLD_TASK_NAMES:
+            _run(["schtasks", "/Delete", "/TN", old, "/F"])
         r = _run(["schtasks", "/Delete", "/TN", TASK_NAME, "/F"])
         if r.returncode != 0 and is_enabled(home):
             raise ScheduleError(f"Windows refused to remove the task: {(r.stderr or r.stdout).strip()}")

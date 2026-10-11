@@ -15,7 +15,7 @@ With a local model, scoring, CV planning, cover letters and interview prep run o
    provider = "ollama"
    model = "qwen2.5:7b"
    ```
-4. Check: `jobhunt doctor` should say `model qwen2.5:7b ready`.
+4. Check: `jobradar doctor` should say `model qwen2.5:7b ready`.
 
 The Ollama provider uses Ollama's own API, which lets the tool set the context window (`num_ctx`, default 8192 tokens). Ollama's default window is smaller, which would silently cut long job ads.
 
@@ -64,7 +64,7 @@ What we saw while testing with Qwen2.5 1.5B (the smallest sensible model) on 2 C
 
 In our test, a 1.5B model on 2 CPU cores needed about a minute per answer; a run with 4 jobs and 1 tailored CV took about 10 minutes. A 7B model without a GPU is several times slower; with a GPU it is fast. Each tailored job needs several answers (plan, letter, sometimes a retry). Tips:
 
-* Run `jobhunt run --no-tailor` for a quick scored list, and tailor fewer jobs (`tailor.max_per_run`).
+* Run `jobradar run --no-tailor` for a quick scored list, and tailor fewer jobs (`tailor.max_per_run`).
 * Schedule the daily run for a time you are not using the computer.
 * If answers time out, raise `timeout` in `[llm]`.
 * If the model forgets things in long ads, raise `num_ctx` (Ollama) or lower `max_input_chars`.

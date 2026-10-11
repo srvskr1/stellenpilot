@@ -110,7 +110,7 @@ def run(settings, *, tailor: bool = True) -> dict:
     db = DB(settings.db_path)
     profile = settings.profile
     if not profile:
-        raise RuntimeError("profile.toml is missing. Run `jobhunt init` and fill it in.")
+        raise RuntimeError("profile.toml is missing. Run `jobradar init` and fill it in.")
     llm = LLM(settings)
     day = today()
     db.run_update(day, notes="")

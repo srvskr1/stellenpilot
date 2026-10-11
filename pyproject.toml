@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "job-hunt-pipeline"
+name = "jobradar"
 version = "0.1.0"
 description = "Local job hunt pipeline: fetch job ads from public APIs, score them against your CV with an LLM, tailor your CV truthfully, and track everything on a local dashboard."
 readme = "README.md"
@@ -14,14 +14,15 @@ dependencies = ["python-docx>=1.1", "pypdf>=4"]
 keywords = ["job search", "cv", "resume", "germany", "werkstudent", "llm", "ollama"]
 
 [project.urls]
-Homepage = "https://github.com/srvskr1/job-hunt-pipeline"
-Issues = "https://github.com/srvskr1/job-hunt-pipeline/issues"
+Homepage = "https://github.com/srvskr1/jobradar"
+Issues = "https://github.com/srvskr1/jobradar/issues"
 
 [project.optional-dependencies]
 gmail = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2"]
 
 [project.scripts]
-jobhunt = "jobhunt.cli:main"
+jobradar = "jobhunt.cli:main"
+jobhunt = "jobhunt.cli:main"   # old name, kept so existing setups keep working
 
 [tool.setuptools.packages.find]
 include = ["jobhunt*"]

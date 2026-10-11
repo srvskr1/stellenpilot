@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Job Hunt Board</title>
+<title>JobRadar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -306,7 +306,7 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
 <div class="app">
   <aside class="side">
     <div class="brand">
-      <h1>Job Hunt Board</h1>
+      <h1>JobRadar</h1>
       <p id="subtitle">Your local job search</p>
     </div>
     <nav aria-label="Filter by status">
@@ -927,7 +927,7 @@ const GUIDE=[
  {id:"finish",name:"Check and run",panel:"setPanel",steps:["schedule"],save:saveSettings,html:`<h3>Last step: check and run</h3><ul class="checks" id="gChecks"><li><span class="tx muted">Checking your setup…</span></li></ul>
   <p><button type="button" class="btn" id="gRun" style="width:auto">Run my first search</button></p>
   <p><b>Good to know</b></p>
-  <ul><li>The dashboard only works while <code>jobhunt serve</code> is running in its terminal window.</li>
+  <ul><li>The dashboard only works while <code>jobradar serve</code> is running in its terminal window.</li>
   <li>Your documents land in the <code>output</code> folder inside your workspace. Read every one before you send it.</li>
   <li>Want it to search every morning by itself? Switch on <b>Automatic search</b> below and press Finish.</li>
   <li>Optional: install LibreOffice for PDF files, connect Gmail to update statuses (<code>docs/gmail.md</code>), or get a daily Telegram message (<code>docs/digest.md</code>).</li></ul>`}
@@ -1009,7 +1009,7 @@ async function refresh(){
     if(!st.profileReady&&!cvPrompted){cvPrompted=true;guideOpen(true)}
     if(st.subtitle)$("subtitle").textContent=st.subtitle;
     render();renderRuns();renderOffice();
-  }catch(e){if(!jobs.length)$("list").innerHTML=`<div class="empty">Cannot reach the local server. Start it with: jobhunt serve</div>`}
+  }catch(e){if(!jobs.length)$("list").innerHTML=`<div class="empty">Cannot reach the local server. Start it with: jobradar serve</div>`}
 }
 refresh();setInterval(refresh,5000);
 render();renderOffice();

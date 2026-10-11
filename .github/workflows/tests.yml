@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           mkdir smoke && cd smoke
-          jobhunt init
-          jobhunt demo
-          jobhunt doctor
-          jobhunt --help
+          jobradar init
+          jobradar demo
+          jobradar doctor
+          jobradar --help

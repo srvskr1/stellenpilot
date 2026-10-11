@@ -8,7 +8,7 @@ often before they reach the big job boards.
 In config.toml:
     [watch]
     companies = ["greenhouse:trivago", "ashby:deepl", "personio:hornetsecurity"]
-Find the right entry from a careers link with:  jobhunt watch <careers page URL>
+Find the right entry from a careers link with:  jobradar watch <careers page URL>
 """
 from __future__ import annotations
 

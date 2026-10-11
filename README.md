@@ -1,6 +1,6 @@
-# Job Hunt Pipeline
+# JobRadar
 
-[![tests](https://github.com/srvskr1/job-hunt-pipeline/actions/workflows/tests.yml/badge.svg)](https://github.com/srvskr1/job-hunt-pipeline/actions/workflows/tests.yml)
+[![tests](https://github.com/srvskr1/jobradar/actions/workflows/tests.yml/badge.svg)](https://github.com/srvskr1/jobradar/actions/workflows/tests.yml)
 
 A local, open source job hunt assistant for Germany. Every day it collects fresh job ads from public APIs, scores them against your CV, writes a tailored CV and cover letter for the best matches, and shows everything on a dashboard in your browser. It runs on your own computer. Your CV and your data never leave it, except for the AI model you choose.
 
@@ -10,10 +10,10 @@ It never applies for you and never contacts companies. You stay in control of ev
 
 ## What it does
 
-* **Starts from your CV.** Drop it on the dashboard (or run `jobhunt import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
+* **Starts from your CV.** Drop it on the dashboard (or run `jobradar import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
 * **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys). It removes duplicates across sources.
-* **Watches your dream companies.** Name companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters, and their new roles show up every day, often before they reach the job boards. `jobhunt watch <careers link>` finds the right entry.
-* **Takes jobs you found yourself.** Paste a link or the ad text (from LinkedIn, a friend, anywhere) with `jobhunt add` or the dashboard's "Add a job" panel. It gets scored and tailored like the rest.
+* **Watches your dream companies.** Name companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters, and their new roles show up every day, often before they reach the job boards. `jobradar watch <careers link>` finds the right entry.
+* **Takes jobs you found yourself.** Paste a link or the ad text (from LinkedIn, a friend, anywhere) with `jobradar add` or the dashboard's "Add a job" panel. It gets scored and tailored like the rest.
 * **Understands German job ads.** It reads the German level an ad really asks for (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and gives you an English summary of German ads. It writes German cover letters only if your German is B2 or better, because a polished German letter from someone at A2 would suggest a level they do not have.
 * **Scores each job** from 0 to 100 against your profile, with a short reason and honest gaps. Ads that demand fluent German are flagged and skipped (you can switch that off).
 * **Learns your taste.** Give jobs a thumbs up or down on the dashboard and the next run leans toward what you liked.
@@ -31,16 +31,16 @@ It never applies for you and never contacts companies. You stay in control of ev
 You need Python 3.11 or newer (or Docker, see below). Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
 
 ```bash
-git clone https://github.com/srvskr1/job-hunt-pipeline.git
-cd job-hunt-pipeline
+git clone https://github.com/srvskr1/jobradar.git
+cd jobradar
 python -m venv .venv
 # Windows: .venv\Scripts\activate    macOS or Linux: source .venv/bin/activate
 pip install -e .
 
 mkdir my-hunt && cd my-hunt
-jobhunt init      # creates config.toml, profile.toml and .env
-jobhunt demo      # optional: fictional sample jobs, to look around first
-jobhunt serve     # open http://127.0.0.1:8765
+jobradar init      # creates config.toml, profile.toml and .env
+jobradar demo      # optional: fictional sample jobs, to look around first
+jobradar serve     # open http://127.0.0.1:8765
 ```
 
 Prefer Docker? No Python needed:
@@ -48,7 +48,7 @@ Prefer Docker? No Python needed:
 ```bash
 mkdir data
 docker compose build
-docker compose run --rm jobhunt init
+docker compose run --rm jobradar init
 docker compose up -d      # http://127.0.0.1:8765
 ```
 
@@ -60,7 +60,7 @@ Then make it yours, all on the dashboard. The **Setup guide** opens by itself th
 2. **Settings**: job titles, city, job sources and their keys, and your AI model.
 3. **Run search now**.
 
-Prefer files? Everything is also in `profile.toml`, `config.toml` and `.env`, and `jobhunt run` searches from the terminal. `jobhunt doctor` checks the setup.
+Prefer files? Everything is also in `profile.toml`, `config.toml` and `.env`, and `jobradar run` searches from the terminal. `jobradar doctor` checks the setup.
 
 To start fresh after the demo, delete `jobhunt.db`.
 
@@ -89,7 +89,7 @@ Use a 7B model or larger. Pick an instruction tuned version ("instruct" or "chat
 
 What we saw in testing with a very small model (Qwen2.5 1.5B on 2 CPU cores): the pipeline worked end to end, the German check and the truth guard did their job, and the cover letter stayed truthful. But the model gave every job the same score and wrote a two sentence letter, and each answer took about a minute. Small models are fine for trying the setup, not for real use.
 
-Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](docs/local-llm.md). Run `jobhunt doctor` to check that your model server is reachable and the model is installed.
+Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](docs/local-llm.md). Run `jobradar doctor` to check that your model server is reachable and the model is installed.
 
 ## Job sources
 
@@ -122,19 +122,19 @@ See [docs/gmail.md](docs/gmail.md). It uses read only access with your own Googl
 
 | command | does |
 |---|---|
-| `jobhunt init` | create config, profile and .env from the examples |
-| `jobhunt doctor` | check the setup and keys |
-| `jobhunt run` | search, score, tailor, and sync Gmail if enabled |
-| `jobhunt run --no-tailor` | search and score only |
-| `jobhunt serve` | start the dashboard on 127.0.0.1:8765 |
-| `jobhunt gmail` | sync statuses from Gmail once |
-| `jobhunt demo` | load fictional sample jobs |
-| `jobhunt import cv.pdf` | turn your CV into `profile.imported.toml` to review |
-| `jobhunt add LINK` | add a job from a careers page link |
-| `jobhunt add --text ad.txt --title "..." --company "..." --tailor` | add a pasted ad and tailor it now |
-| `jobhunt watch LINK` | find the watchlist entry for a company |
-| `jobhunt notify-test` | send a test digest |
-| `jobhunt telegram-id` | show your Telegram chat id |
+| `jobradar init` | create config, profile and .env from the examples |
+| `jobradar doctor` | check the setup and keys |
+| `jobradar run` | search, score, tailor, and sync Gmail if enabled |
+| `jobradar run --no-tailor` | search and score only |
+| `jobradar serve` | start the dashboard on 127.0.0.1:8765 |
+| `jobradar gmail` | sync statuses from Gmail once |
+| `jobradar demo` | load fictional sample jobs |
+| `jobradar import cv.pdf` | turn your CV into `profile.imported.toml` to review |
+| `jobradar add LINK` | add a job from a careers page link |
+| `jobradar add --text ad.txt --title "..." --company "..." --tailor` | add a pasted ad and tailor it now |
+| `jobradar watch LINK` | find the watchlist entry for a company |
+| `jobradar notify-test` | send a test digest |
+| `jobradar telegram-id` | show your Telegram chat id |
 
 Use `--home PATH` to keep your files in another folder.
 

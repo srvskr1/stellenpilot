@@ -43,7 +43,7 @@ def build_digest(db, result: dict, today: str) -> str:
         lines.append("\nStatus changes from Gmail: " + ", ".join(f"{c['company']} to {c['to']}" for c in result["gmail"]))
     if result.get("problems"):
         lines.append("\nProblems: " + "; ".join(result["problems"][:5]))
-    lines.append("\nOpen your board: jobhunt serve, then http://127.0.0.1:8765")
+    lines.append("\nOpen your board: jobradar serve, then http://127.0.0.1:8765")
     return "\n".join(lines)
 
 
@@ -79,7 +79,7 @@ def send_telegram(settings, body: str) -> None:
                             body={"chat_id": chat, "text": body, "link_preview_options": {"is_disabled": True}})
     except HttpError as e:
         hint = {401: "the bot token is wrong; copy it again from @BotFather",
-                400: "the chat id is wrong, or you have not messaged your bot yet; run jobhunt telegram-id",
+                400: "the chat id is wrong, or you have not messaged your bot yet; run jobradar telegram-id",
                 403: "the bot cannot write to you; open your bot in Telegram and press Start"}.get(e.status, str(e))
         raise RuntimeError(f"telegram: {hint}") from None
     if not data.get("ok"):

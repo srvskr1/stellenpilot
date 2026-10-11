@@ -1,14 +1,14 @@
 # Daily digest by email or Telegram
 
-After each `jobhunt run`, you can get a short message with your top new matches, the CVs ready to send, upcoming interviews and status changes. It goes to you only. The tool never writes to companies.
+After each `jobradar run`, you can get a short message with your top new matches, the CVs ready to send, upcoming interviews and status changes. It goes to you only. The tool never writes to companies.
 
-Turn it on under `[notify]` in `config.toml`, put the secrets in `.env`, then check with `jobhunt notify-test`.
+Turn it on under `[notify]` in `config.toml`, put the secrets in `.env`, then check with `jobradar notify-test`.
 
 ## Telegram (easiest)
 
 1. In Telegram, open **@BotFather**, send `/newbot`, pick a name. Copy the token into `.env` as `TELEGRAM_BOT_TOKEN`.
 2. Open your new bot and send it any message, for example `/start`.
-3. Run `jobhunt telegram-id` and copy the printed line into `.env`.
+3. Run `jobradar telegram-id` and copy the printed line into `.env`.
 4. Set `telegram = true` under `[notify]`.
 
 ## Email
