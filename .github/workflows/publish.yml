@@ -1,10 +1,10 @@
-# Publishes to PyPI when a GitHub release is published. Uses PyPI trusted publishing:
+# Publishes to PyPI when a version tag like v0.2.0 is pushed. Uses PyPI trusted publishing:
 # no password or token is stored anywhere. Set up once on pypi.org (see RELEASING.md).
 name: publish to PyPI
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
 
 jobs:
   build:
@@ -15,6 +15,8 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -m pip install build twine
+      - name: tag matches the version in pyproject.toml
+        run: test "v$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')" = "${GITHUB_REF_NAME}"
       - run: python -m build
       - run: python -m twine check dist/*
       - uses: actions/upload-artifact@v4
