@@ -169,6 +169,10 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
 .cvsrc summary{cursor:pointer;font-weight:600;font-size:.8125rem}
 .cvsrc pre{white-space:pre-wrap;font:.8125rem/1.5 var(--f-mono);max-height:320px;overflow:auto;margin:10px 0 0;color:var(--text-secondary)}
 .keyset{font-weight:500;color:#059669;font-size:.75rem}
+.keyhelp{border:1px solid var(--border);border-radius:10px;background:var(--surface-alt);padding:10px 14px;font-size:.8125rem;color:var(--text-secondary)}
+.keyhelp summary{cursor:pointer;font-weight:600;color:var(--text);min-height:28px;display:flex;align-items:center}
+.keyhelp ol{margin:8px 0 4px;padding-left:20px;line-height:1.6}
+.keyhelp p{margin:6px 0 0}
 .srcrow{display:flex;flex-direction:column;gap:8px;padding:10px 0;border-top:1px solid var(--border)}
 .srcrow:first-of-type{border-top:0;padding-top:0}
 .runmsg{font-size:.8125rem;color:var(--text-secondary);margin:2px 2px 0;line-height:1.45}
@@ -379,10 +383,27 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
           <div class="srcrow"><label class="check"><input type="checkbox" name="arbeitsagentur"> Bundesagentur für Arbeit <span class="muted">free, no key</span></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="arbeitnow"> Arbeitnow <span class="muted">free, no key</span></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="adzuna"> Adzuna <span class="muted">free key from developer.adzuna.com</span></label>
-            <div class="g2"><label>App ID <span class="keyset" data-key="ADZUNA_APP_ID"></span><input class="input" name="ADZUNA_APP_ID" autocomplete="off"></label>
-            <label>App key <span class="keyset" data-key="ADZUNA_APP_KEY"></span><input class="input" name="ADZUNA_APP_KEY" type="password" autocomplete="off"></label></div></div>
+            <details class="keyhelp"><summary>How to get your free Adzuna keys (about 3 minutes)</summary>
+              <ol>
+                <li>Open <a href="https://developer.adzuna.com/signup" target="_blank" rel="noopener">developer.adzuna.com</a> and register. It is free; any website field can be your GitHub or LinkedIn profile.</li>
+                <li>Confirm the email Adzuna sends you, then log in.</li>
+                <li>On your Adzuna developer dashboard you see two values: <b>Application ID</b> (short, 8 characters) and <b>Application Key</b> (long, 32 characters).</li>
+                <li>Copy the Application ID into <b>App ID</b> below and the Application Key into <b>App key</b>, then press <b>Save settings</b>.</li>
+              </ol>
+              <p>The free plan allows 250 searches a day; Stellenpilot uses at most 20 per run. Never share these keys or paste them in chats.</p>
+            </details>
+            <div class="g2"><label>App ID <span class="keyset" data-key="ADZUNA_APP_ID"></span><input class="input" name="ADZUNA_APP_ID" autocomplete="off" placeholder="Application ID, e.g. 1a2b3c4d"></label>
+            <label>App key <span class="keyset" data-key="ADZUNA_APP_KEY"></span><input class="input" name="ADZUNA_APP_KEY" type="password" autocomplete="off" placeholder="Application Key, 32 characters"></label></div></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="theirstack"> TheirStack <span class="muted">free key from theirstack.com, 200 credits a month</span></label>
-            <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off"></label></div>
+            <details class="keyhelp"><summary>How to get your free TheirStack key (about 2 minutes)</summary>
+              <ol>
+                <li>Open <a href="https://theirstack.com" target="_blank" rel="noopener">theirstack.com</a> and sign up for free (Google sign in works).</li>
+                <li>Open your account settings and find the <b>API key</b> section.</li>
+                <li>Copy the key (a long text) into <b>API key</b> below and press <b>Save settings</b>.</li>
+              </ol>
+              <p>The free plan has 200 credits a month, one credit per job found. Stellenpilot asks for 6 jobs a run, which lasts a month of daily searches. Keys are personal, so never share yours.</p>
+            </details>
+            <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off" placeholder="Paste your TheirStack API key"></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="jobicy"> Jobicy <span class="muted">free, no key, remote jobs only</span></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="remotive"> Remotive <span class="muted">free, no key, remote jobs only, small feed</span></label></div>
           <div class="srcrow"><label class="check"><input type="checkbox" name="starter_list"> Company watchlist: also check about 200 companies with offices in Germany <span class="muted">their own career feeds, often before the job boards; adds a minute or two per run</span></label></div>
@@ -858,7 +879,7 @@ let cvPrompted=false;
 
 /* ---------- Settings ---------- */
 const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"]};
-function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,label:not(.check)").forEach(el=>el.hidden=!on)})}
+function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,.keyhelp,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 function showProvider(){const pv=$("setForm").provider.value;$("setForm").querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));$("setForm").model.closest("label").hidden=pv==="none"}
 async function loadSettings(){
@@ -867,7 +888,7 @@ async function loadSettings(){
     const r=await api("GET","/api/settings");
     for(const [sec,keys] of Object.entries(SETF))for(const k of keys){const el=f.elements[k],v=r[sec][k];if(el.type==="checkbox")el.checked=!!v;else el.value=Array.isArray(v)?v.join("\n"):v??""}
     f.querySelectorAll(".keyset").forEach(el=>el.textContent=r.keys[el.dataset.key]?"saved":"");
-    f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";el.placeholder=r.keys[el.name]?"saved, type to replace":""});
+    f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";if(el.dataset.ph===undefined)el.dataset.ph=el.placeholder;el.placeholder=r.keys[el.name]?"saved, type to replace":el.dataset.ph});
     showProvider();showKeys();
     $("schedState").textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"⚠ Switched on here, but the task is missing on your computer. Save again to recreate it.":r.scheduleActive?`✓ Active: every day at ${r.schedule.time}.`:"Off. Tick the box and save to switch it on.";
     f.elements.enabled.disabled=r.inDocker;
