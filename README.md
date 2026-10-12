@@ -45,9 +45,12 @@ Then open http://127.0.0.1:8765 . A setup guide walks you through the rest. Work
 
 ```bash
 pip install stellenpilot
-mkdir my-hunt && cd my-hunt
+mkdir my-hunt
+cd my-hunt
 stellenpilot serve      # open http://127.0.0.1:8765, the Setup guide walks you through the rest
 ```
+
+**"stellenpilot is not recognized"?** pip put the command in a folder that is not on your PATH (it prints a yellow warning saying so). Start it with `python -m stellenpilot serve` instead (`python3` on macOS and Linux). That always works.
 
 Update later with `pip install -U stellenpilot`. Your files in `my-hunt` are never touched by an update.
 
@@ -60,7 +63,8 @@ python -m venv .venv
 # Windows: .venv\Scripts\activate    macOS or Linux: source .venv/bin/activate
 pip install -e .
 
-mkdir my-hunt && cd my-hunt
+mkdir my-hunt
+cd my-hunt
 stellenpilot init      # creates config.toml, profile.toml and .env
 stellenpilot demo      # optional: fictional sample jobs, to look around first
 stellenpilot serve     # open http://127.0.0.1:8765

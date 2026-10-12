@@ -98,7 +98,8 @@ stellenpilot init
 
 **macOS and Linux**
 ```bash
-mkdir ~/my-hunt && cd ~/my-hunt
+mkdir ~/my-hunt
+cd ~/my-hunt
 stellenpilot init
 ```
 
@@ -211,7 +212,7 @@ Turn off **Automatic search** in Settings first, then remove the program and del
 
 | problem | fix |
 |---|---|
-| `python` or `stellenpilot` is "not recognized" or "command not found" | Windows: reinstall Python with "Add python.exe to PATH" ticked. Everywhere: activate the virtual environment first (see Step 3). |
+| `python` or `stellenpilot` is "not recognized" or "command not found" | Start it with `python -m stellenpilot serve` (works without PATH changes). Windows: reinstall Python with "Add python.exe to PATH" ticked, or activate the virtual environment first (see Step 3). |
 | "running scripts is disabled" in PowerShell | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, once. |
 | `error: externally-managed-environment` on Linux | You are outside the virtual environment. Run `source .venv/bin/activate` first. |
 | `No module named venv` on Linux | `sudo apt install python3-venv` |
