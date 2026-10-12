@@ -158,7 +158,7 @@ Click **Settings** in the left menu:
 
 | choice | pick | then |
 |---|---|---|
-| Free, on your computer | Ollama, model `qwen2.5:7b` | install Ollama from https://ollama.com and run `ollama pull qwen2.5:7b` once |
+| Free, on your computer | Ollama, model `qwen3.5:4b` | install Ollama from https://ollama.com and run `ollama pull qwen3.5:4b` once |
 | Claude | Claude, paste your Anthropic API key | nothing else |
 | OpenAI | OpenAI, a model name, your API key | nothing else |
 

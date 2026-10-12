@@ -135,3 +135,36 @@ class ParseJsonTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ThinkingTest(unittest.TestCase):
+    def test_strip_thinking(self):
+        from stellenpilot.llm import parse_json, strip_thinking
+        self.assertEqual(strip_thinking('<think>long reasoning {"x": 1}</think>\n{"match": 80}'), '{"match": 80}')
+        self.assertEqual(parse_json(strip_thinking('<think>{"bad": 1}</think>{"good": 2}')), {"good": 2})
+        self.assertEqual(strip_thinking("plain"), "plain")
+
+    def test_ollama_sends_think_false_and_falls_back(self):
+        from unittest import mock
+        from stellenpilot import llm as L
+        from stellenpilot.http import HttpError
+
+        class S:
+            cfg = {"llm": {"provider": "ollama", "model": "qwen3.5:4b", "base_url": ""}}
+            def __getitem__(self, k): return self.cfg[k]
+            @staticmethod
+            def secret(n): return None
+        bodies = []
+
+        def fake(url, body=None, **kw):
+            bodies.append(dict(body))
+            if "think" in body:
+                raise HttpError(400, '{"error":"model does not support thinking (think)"}')
+            return {"message": {"content": '{"ok": true}'}}
+        m = L.LLM(S())
+        with mock.patch.object(L, "request_json", side_effect=fake):
+            self.assertEqual(m.complete_json("s", "u"), {"ok": True})
+            m.complete("s", "u")
+        self.assertIs(bodies[0]["think"], False)
+        self.assertNotIn("think", bodies[1])
+        self.assertNotIn("think", bodies[2])  # remembered for later calls

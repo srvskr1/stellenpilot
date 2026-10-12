@@ -77,7 +77,8 @@ max_age_days = 30
 #   "openai"     OpenAI, needs OPENAI_API_KEY
 # See docs/local-llm.md for setting up a local model.
 provider = "none"
-# Model name as your server knows it, e.g. "qwen2.5:7b" for Ollama, "claude-sonnet-4-5" for Anthropic.
+# Model name as your server knows it, e.g. "qwen3.5:4b" or "ministral-3:8b" for Ollama,
+# "claude-haiku-4-5-20251001" (cheap) or "claude-sonnet-5-5" (best letters) for Anthropic.
 model = ""
 # Leave empty to use the default for the provider.
 base_url = ""
@@ -87,6 +88,7 @@ base_url = ""
 # max_input_chars = 4000 # longer job ads are cut to this many characters (local default 4000)
 # json_mode = true       # ask the server for strict JSON; turned off automatically if unsupported
 # temperature = 0.2
+# think = false         # Qwen3.5 and Gemma 4 can reason before answering; slower, rarely needed here
 
 [tailor]
 # Jobs at or above this match get a tailored CV and cover letter.

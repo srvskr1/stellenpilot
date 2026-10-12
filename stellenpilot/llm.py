@@ -29,7 +29,7 @@ class LLM:
         self.provider = (c.get("provider") or "none").lower()
         if self.provider not in CLOUD | set(LOCAL_PRESETS) | {"none"}:
             raise RuntimeError(f"Unknown llm.provider '{self.provider}'. Use one of: none, anthropic, openai, {', '.join(LOCAL_PRESETS)}")
-        self.model = c.get("model") or ("claude-sonnet-4-5" if self.provider == "anthropic" else "")
+        self.model = c.get("model") or ("claude-haiku-4-5-20251001" if self.provider == "anthropic" else "")
         self.local = self.provider in LOCAL_PRESETS
         # JOBHUNT_LLM_BASE_URL overrides the config, handy in Docker (host.docker.internal).
         base = os.environ.get("JOBHUNT_LLM_BASE_URL") or c.get("base_url") or LOCAL_PRESETS.get(self.provider, "")
@@ -37,6 +37,7 @@ class LLM:
         self.timeout = float(c.get("timeout") or (600 if self.local else 120))
         self.json_mode = c.get("json_mode", True)
         self.num_ctx = int(c.get("num_ctx") or 8192)
+        self.think = bool(c["think"]) if "think" in c else False
         self.temperature = float(c.get("temperature", 0.2))
         # Small local models have small context windows; long ads get cut to this many characters.
         self.max_chars = int(c.get("max_input_chars") or (4000 if self.local else 6000))
@@ -48,7 +49,7 @@ class LLM:
         if self.provider == "local" and not self.base_url:
             raise RuntimeError("llm.provider is local: set llm.base_url, e.g. http://localhost:8080/v1")
         if self.enabled and not self.model:
-            raise RuntimeError("Set llm.model in config.toml (for Ollama e.g. qwen2.5:7b)")
+            raise RuntimeError("Set llm.model in config.toml (for Ollama e.g. qwen3.5:4b)")
 
     @property
     def enabled(self) -> bool:
@@ -70,8 +71,20 @@ class LLM:
                     "options": {"num_ctx": self.num_ctx, "temperature": self.temperature, "num_predict": max_tokens}}
             if want_json and self.json_mode:
                 body["format"] = "json"
-            data = request_json(f"{self.base_url}/api/chat", method="POST", timeout=self.timeout, body=body, retries=0)
-            return (data.get("message") or {}).get("content", "")
+            if self.think is not None:
+                # Qwen3/3.5 and Gemma 4 think before answering by default; for short JSON tasks that
+                # only costs time and output tokens. llm.think = true turns it back on.
+                body["think"] = self.think
+            try:
+                data = request_json(f"{self.base_url}/api/chat", method="POST", timeout=self.timeout, body=body, retries=0)
+            except HttpError as e:
+                if "think" in body and e.status == 400 and "think" in str(e).lower():
+                    self.think = None  # this model or an older Ollama does not know the option
+                    body.pop("think")
+                    data = request_json(f"{self.base_url}/api/chat", method="POST", timeout=self.timeout, body=body, retries=0)
+                else:
+                    raise
+            return strip_thinking((data.get("message") or {}).get("content", ""))
         if self.provider == "none":
             raise RuntimeError("No LLM configured (llm.provider = none)")
         return self._openai_compatible(system, user, max_tokens, want_json)
@@ -96,7 +109,7 @@ class LLM:
                                     headers=headers, body=body, retries=0)
             else:
                 raise
-        return data["choices"][0]["message"]["content"] or ""
+        return strip_thinking(data["choices"][0]["message"]["content"] or "")
 
     def complete_json(self, system: str, user: str, max_tokens: int = 1500) -> dict:
         system = system + "\nReply with one JSON object and nothing else."
@@ -118,6 +131,12 @@ class LLM:
             return [m.get("name", "") for m in data.get("models", [])]
         data = request_json(f"{self.base_url}/models", timeout=10, retries=0)
         return [m.get("id", "") for m in data.get("data", [])]
+
+
+def strip_thinking(text: str) -> str:
+    """Drop <think>...</think> blocks that reasoning models put before the answer."""
+    text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S)
+    return text.split("</think>", 1)[-1].strip() if "</think>" in text else text.strip()
 
 
 def parse_json(text: str) -> dict:

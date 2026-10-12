@@ -106,13 +106,15 @@ Set `[llm]` in `config.toml`:
 
 ### Which local model?
 
-Use a 7B model or larger. Pick an instruction tuned version ("instruct" or "chat"), because the tool asks for JSON answers.
+Pick an instruction tuned version ("instruct" or "chat"), because the tool asks for JSON answers.
 
-| your computer | try |
-|---|---|
-| 8 GB RAM, no GPU | a 3B model, e.g. `qwen2.5:3b`. Expect rough scores and short letters. |
-| 16 GB RAM, or a GPU with 8 GB | a 7B or 8B model, e.g. `qwen2.5:7b` or `llama3.1:8b` |
-| GPU with 16 GB or more | 14B or larger, e.g. `qwen2.5:14b` |
+| your computer | try | download |
+|---|---|---|
+| 8 GB RAM, no GPU | `ministral-3:3b` or `qwen3.5:2b`. Expect rougher scores and shorter letters. | about 3 GB |
+| 16 GB RAM, or a GPU with 8 GB | `qwen3.5:4b` (default pick), or `ministral-3:8b` if many of your ads are in German | 4 to 6 GB |
+| GPU with 16 GB or more | `qwen3.5:9b` or `gemma4:12b` | 7 to 9 GB |
+
+Why these (checked on their model cards, October 2026): all are Apache 2.0, run in Ollama, and handle JSON well. Qwen3.5 covers 201 languages; Ministral 3 lists German among its main languages and is built for JSON output; Gemma 4 is Google's newest small family. Qwen3.5 and Gemma 4 can "think" before answering, which makes them slow; Stellenpilot switches that off for Ollama (set `think = true` under `[llm]` to turn it back on).
 
 What we saw in testing with a very small model (Qwen2.5 1.5B on 2 CPU cores): the pipeline worked end to end, the German check and the truth guard did their job, and the cover letter stayed truthful. But the model gave every job the same score and wrote a two sentence letter, and each answer took about a minute. Small models are fine for trying the setup, not for real use.
 
@@ -213,7 +215,7 @@ Do these steps in order. Steps 1 and 2 matter most: they stop the daily search b
 * API keys you created for it: delete them at Adzuna, TheirStack, Anthropic or OpenAI.
 * Gmail sync: remove access at https://myaccount.google.com/permissions and delete the Google Cloud project you made for it.
 * Telegram digest: send `/deletebot` to @BotFather.
-* Local AI model: `ollama rm qwen2.5:7b` (or the model you pulled), and uninstall Ollama or LM Studio if you only used them for this.
+* Local AI model: `ollama rm qwen3.5:4b` (or the model you pulled), and uninstall Ollama or LM Studio if you only used them for this.
 
 LibreOffice and Python stay installed; remove them like any other app if you no longer need them.
 

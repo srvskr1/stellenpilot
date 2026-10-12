@@ -402,13 +402,13 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
                 <option value="vllm">vLLM server</option>
                 <option value="local">Other local server</option>
               </select></label>
-            <label>Model name <input class="input" name="model" list="modelList" placeholder="e.g. qwen2.5:7b"></label>
-            <datalist id="modelList"><option value="qwen2.5:7b"><option value="llama3.1:8b"><option value="qwen2.5:14b"></datalist>
+            <label>Model name <input class="input" name="model" list="modelList" placeholder="e.g. qwen3.5:4b"></label>
+            <datalist id="modelList"><option value="qwen3.5:4b"><option value="ministral-3:8b"><option value="ministral-3:3b"><option value="qwen3.5:9b"><option value="gemma4:12b"><option value="claude-haiku-4-5-20251001"><option value="claude-sonnet-5-5"></datalist>
           </div>
           <label data-for="anthropic">Anthropic API key <span class="keyset" data-key="ANTHROPIC_API_KEY"></span><input class="input" name="ANTHROPIC_API_KEY" type="password" autocomplete="off"></label>
           <label data-for="openai">OpenAI API key <span class="keyset" data-key="OPENAI_API_KEY"></span><input class="input" name="OPENAI_API_KEY" type="password" autocomplete="off"></label>
           <label data-for="local llamacpp vllm lmstudio ollama">Server address <span class="muted">(leave empty for the usual one)</span><input class="input" name="base_url" placeholder="http://localhost:11434"></label>
-          <p class="hint" style="margin:0" data-for="ollama">Install Ollama from ollama.com, then run <code>ollama pull qwen2.5:7b</code> once.</p>
+          <p class="hint" style="margin:0" data-for="ollama">Install Ollama from ollama.com, then run <code>ollama pull qwen3.5:4b</code> once.</p>
         </fieldset>
         <fieldset class="fset" data-step="search"><legend>Documents and German</legend>
           <div class="g3">
@@ -915,7 +915,7 @@ const GUIDE=[
   <p>Pick one option in the box below, then press <b>Test</b>. You can always start with None and add a model later.</p>
   <div class="gcards">
    <div class="gcard"><strong>None</strong><p>Free and offline. Jobs are scored by matching keywords and letters come from a template. Fine to try things out.</p></div>
-   <div class="gcard"><strong>Ollama (free, on your computer)</strong><ol><li>Download Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com</a> and install it.</li><li>Open a terminal and run <code>ollama pull qwen2.5:7b</code> (about 5 GB, once).</li><li>Choose Ollama below, model <code>qwen2.5:7b</code>.</li></ol><p>Needs about 16 GB RAM. With 8 GB use <code>qwen2.5:3b</code>, results are rougher.</p></div>
+   <div class="gcard"><strong>Ollama (free, on your computer)</strong><ol><li>Download Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com</a> and install it.</li><li>Open a terminal and run <code>ollama pull qwen3.5:4b</code> (about 4 GB, once).</li><li>Choose Ollama below, model <code>qwen3.5:4b</code>.</li></ol><p>Needs about 16 GB RAM. Many German ads? Try <code>ministral-3:8b</code>. With 8 GB RAM use <code>ministral-3:3b</code>, results are rougher.</p></div>
    <div class="gcard"><strong>Claude (best results, paid)</strong><ol><li>Sign in at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</li><li>Add a little credit under Billing.</li><li>Create a key under API keys and paste it below.</li></ol><p>A daily run usually costs a few cents.</p></div>
    <div class="gcard"><strong>OpenAI (paid)</strong><ol><li>Sign in at <a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a>.</li><li>Create a key under API keys.</li><li>Paste it below with a model name.</li></ol></div>
   </div>

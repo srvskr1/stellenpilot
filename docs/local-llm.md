@@ -7,15 +7,15 @@ With a local model, scoring, CV planning, cover letters and interview prep run o
 1. Install Ollama from https://ollama.com (Windows, macOS, Linux).
 2. Download a model, for example:
    ```bash
-   ollama pull qwen2.5:7b
+   ollama pull qwen3.5:4b
    ```
 3. In `config.toml`:
    ```toml
    [llm]
    provider = "ollama"
-   model = "qwen2.5:7b"
+   model = "qwen3.5:4b"
    ```
-4. Check: `stellenpilot doctor` should say `model qwen2.5:7b ready`.
+4. Check: `stellenpilot doctor` should say `model qwen3.5:4b ready`.
 
 The Ollama provider uses Ollama's own API, which lets the tool set the context window (`num_ctx`, default 8192 tokens). Ollama's default window is smaller, which would silently cut long job ads.
 
@@ -43,18 +43,20 @@ Example with the llama.cpp Python server:
 
 ```bash
 pip install "llama-cpp-python[server]"
-python -m llama_cpp.server --model qwen2.5-7b-instruct-q4_k_m.gguf --n_ctx 8192 --port 8080
+python -m llama_cpp.server --model Qwen3.5-4B-Q4_K_M.gguf --n_ctx 8192 --port 8080
 ```
 
 ## Which model?
 
 Pick a model trained to follow instructions ("instruct" or "chat" versions). The tool asks for JSON answers, and instruction tuned models handle that much better.
 
-| your computer | try |
-|---|---|
-| 8 GB RAM, no GPU | a 3B model, e.g. `qwen2.5:3b`. Expect rough scores and short letters. |
-| 16 GB RAM, or a GPU with 8 GB | a 7B or 8B model, e.g. `qwen2.5:7b` or `llama3.1:8b` |
-| GPU with 16 GB or more | 14B or larger, e.g. `qwen2.5:14b` |
+| your computer | try | download |
+|---|---|---|
+| 8 GB RAM, no GPU | `ministral-3:3b` or `qwen3.5:2b`. Expect rougher scores and shorter letters. | about 3 GB |
+| 16 GB RAM, or a GPU with 8 GB | `qwen3.5:4b` (default pick), or `ministral-3:8b` if many of your ads are in German | 4 to 6 GB |
+| GPU with 16 GB or more | `qwen3.5:9b` or `gemma4:12b` | 7 to 9 GB |
+
+Why these (checked on their model cards, October 2026): all are Apache 2.0, run in Ollama, and handle JSON well. Qwen3.5 covers 201 languages; Ministral 3 lists German among its main languages and is built for JSON output; Gemma 4 is Google's newest small family. Qwen3.5 and Gemma 4 can "think" before answering, which makes them slow; Stellenpilot switches that off for Ollama (set `think = true` under `[llm]` to turn it back on).
 
 These are starting points, not benchmarks. Look at a few scores and letters and switch models if you are not happy.
 
