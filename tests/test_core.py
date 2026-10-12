@@ -217,3 +217,21 @@ class ServerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OfflineMessageTest(unittest.TestCase):
+    def test_all_sources_offline_gives_one_clear_line(self):
+        import socket, urllib.error
+        from unittest import mock
+        from stellenpilot import pipeline
+        err = urllib.error.URLError(socket.gaierror(11001, "getaddrinfo failed"))
+        st = mock.MagicMock()
+        cfg = {"sources": {"arbeitsagentur": True, "arbeitnow": True}, "watch": {}, "search": {"exclude_title_words": [], "country": "de"}}
+        st.__getitem__.side_effect = lambda k: cfg[k]
+        db = mock.MagicMock(); db.job_ids.return_value = set(); db.dedupe_keys.return_value = set()
+        with mock.patch.object(pipeline.sources.REGISTRY["arbeitsagentur"], "fetch", side_effect=err), \
+             mock.patch.object(pipeline.sources.REGISTRY["arbeitnow"], "fetch", side_effect=err):
+            new, problems = pipeline.collect(st, db)
+        self.assertEqual(new, [])
+        self.assertEqual(len(problems), 1)
+        self.assertIn("internet connection", problems[0])

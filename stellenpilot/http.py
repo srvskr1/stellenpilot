@@ -46,3 +46,19 @@ def request_json(url: str, *, params: dict | None = None, headers: dict | None =
                 continue
             raise
     raise RuntimeError("unreachable")
+
+
+def friendly_error(e: Exception) -> str:
+    """Plain words for network errors, so people know what to check."""
+    text = str(e)
+    low = text.lower()
+    if "getaddrinfo" in low or "name or service not known" in low or "nodename nor servname" in low or "11001" in low:
+        return "no internet: could not look up the website address. Check your connection, VPN or proxy"
+    if "timed out" in low or "timeout" in low:
+        return "the website did not answer in time. Try again later"
+    if "certificate" in low or "ssl" in low:
+        return "secure connection failed (often an antivirus or company proxy checking traffic)"
+    if "connection refused" in low or "10061" in low:
+        return "connection refused. A firewall may be blocking Python"
+    return text
+

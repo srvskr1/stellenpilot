@@ -6,6 +6,7 @@ import urllib.error
 import urllib.request
 
 from . import sources
+from .http import friendly_error
 from .db import DB, today
 from .llm import LLM
 from .http import USER_AGENT
@@ -33,7 +34,7 @@ def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
         try:
             found = sources.REGISTRY[name].fetch(settings)
         except Exception as e:  # one broken source must not stop the run
-            problems.append(f"{name}: {e}")
+            problems.append(f"{name}: {friendly_error(e)}")
             log.warning("source %s failed: %s", name, e)
             continue
         log.info("%s returned %d jobs", name, len(found))
@@ -46,6 +47,11 @@ def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
             known_keys.add(key)
             job["dedupe_key"] = key
             new.append(job)
+    offline = [p for p in problems if "no internet" in p]
+    if not new and len(offline) >= 2:  # every reachable source failed the same way: say it once
+        problems = [p for p in problems if "no internet" not in p] + [
+            "No source could be reached: your computer could not look up any website address. "
+            "Check your internet connection, VPN or proxy, then run the search again."]
     return new, problems
 
 
