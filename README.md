@@ -17,11 +17,11 @@ It never applies for you and never contacts companies. You stay in control of ev
 pip install stellenpilot
 stellenpilot serve
 ```
-Then open http://127.0.0.1:8765 . A setup guide walks you through the rest. Works on Windows, macOS and Linux with Python 3.11 or newer.
+Then open http://127.0.0.1:8765 . A short setup walks you through the rest. Works on Windows, macOS and Linux with Python 3.11 or newer.
 
 ## What it does
 
-* **Easy to set up, no files to edit.** A step by step setup guide in the dashboard: your CV, what you are looking for, the AI model and the job sources, with a check at the end. Everything can be changed later under **My CV** and **Settings**.
+* **Easy to set up, no files to edit.** Four short setup steps in the dashboard: drop your CV, say what jobs you want, pick who writes your documents, and switch on the daily search, with a check at the end. Everything can be changed later under **My CV** and **Settings**.
 * **Runs by itself every day.** Switch on **Automatic search** in Settings and pick a time; it sets up Task Scheduler on Windows or cron on macOS and Linux for you. Or press **Run search now** any time.
 * **Starts from your CV.** Drop it on the dashboard (or run `stellenpilot import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
 * **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys), plus remote roles from Jobicy and Remotive. It reads several pages per search, within each source's free limits. It removes duplicates across sources.
@@ -47,7 +47,7 @@ Then open http://127.0.0.1:8765 . A setup guide walks you through the rest. Work
 pip install stellenpilot
 mkdir my-hunt
 cd my-hunt
-stellenpilot serve      # open http://127.0.0.1:8765, the Setup guide walks you through the rest
+stellenpilot serve      # open http://127.0.0.1:8765, a short setup walks you through the rest
 ```
 
 **"stellenpilot is not recognized"?** pip put the command in a folder that is not on your PATH (it prints a yellow warning saying so). Start it with `python -m stellenpilot serve` instead (`python3` on macOS and Linux). That always works.
@@ -81,11 +81,14 @@ docker compose up -d      # http://127.0.0.1:8765
 
 See [docs/docker.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/docker.md) for daily runs and details.
 
-Then make it yours, all on the dashboard. The **Setup guide** opens by itself the first time and walks you through it:
+Then make it yours, all on the dashboard. Setup opens by itself the first time:
 
-1. **My CV**: drop your CV file, check the form, add anything missing, save. Bullets are copied word for word, so keep them short and true.
-2. **Settings**: job titles, city, job sources and their keys, and your AI model.
-3. **Run search now**.
+1. **Your CV**: drop the file. It is read and saved; check the details later under **My CV**. Bullets are copied word for word, so keep them short and true.
+2. **What jobs**: job titles, your city, how far you would travel, and your German level.
+3. **Who writes your documents**: a free AI on your computer (Ollama), Claude with an API key, or no AI for now.
+4. **Done**: switch on the daily search and press **Find my first jobs**.
+
+Extra job sources with free keys (Adzuna, TheirStack) and all other options are under **Settings**, which also has **Run setup again**.
 
 Prefer files? Everything is also in `profile.toml`, `config.toml` and `.env`, and `stellenpilot run` searches from the terminal. `stellenpilot doctor` checks the setup.
 

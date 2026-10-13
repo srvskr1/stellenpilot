@@ -136,7 +136,7 @@ stellenpilot serve
 ```
 Open http://127.0.0.1:8765 . Leave the terminal open while you use it; **Ctrl+C** stops it.
 
-The **Setup guide** opens by itself the first time and walks you through everything below, with instructions for each choice and a check at the end. You can open it again any time from the left menu. The steps below are the same thing in writing.
+A short setup opens by itself the first time: your CV, what jobs you want, who writes your documents, and the daily search, with a check at the end. You can run it again from the left menu or from **Settings**. Below is the longer version in writing, including the optional job sources.
 
 ### 1. My CV (5 minutes)
 

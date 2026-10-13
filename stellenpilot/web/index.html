@@ -196,33 +196,68 @@ tr:last-child td{border-bottom:none}
 .drop strong{font-size:.9375rem}
 .cvnotes{margin:0;padding-left:18px;color:var(--text-secondary);font-size:.8125rem;line-height:1.5}
 .addform textarea.input.cvtext{font:.8125rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:320px;resize:vertical}
-#guide .panel{padding:20px;display:flex;flex-direction:column;gap:16px}
-.gsteps{display:flex;gap:6px;flex-wrap:wrap;list-style:none;margin:0;padding:0}
-.gsteps button{font:600 .75rem var(--f-ui);min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-tertiary);cursor:pointer}
-.gsteps button.done{color:#059669;border-color:#05966955}
-.gsteps button.cur{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.gsteps button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.gbody h3{font:800 1.25rem/1.3 var(--f-ui);margin:0 0 6px}
-.gbody p{margin:0 0 8px;color:var(--text-secondary);max-width:72ch}
-.gbody ol,.gbody ul{margin:0 0 8px;padding-left:20px;color:var(--text-secondary);line-height:1.6}
-.gbody code{font:.8125rem var(--f-mono);background:var(--surface-alt);padding:1px 6px;border-radius:6px}
-.gbody a{color:var(--accent)}
-.gcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:8px}
-.gcard{border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--surface-alt)}
-.gcard strong{display:block;margin-bottom:4px}
-.gcard p,.gcard ol{font-size:.8125rem;margin:0}
-.gnav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:14px}
-.gnav .btn{width:auto}
-.checks{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
-.checks li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
-.checks .ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:800;color:#fff;background:#059669}
-.checks .bad .ic{background:#dc2626}.checks .opt .ic{background:var(--text-tertiary)}
-.checks .tx{flex:1}
-body.guiding .main>*:not(#guide):not(.inguide){display:none!important}
-body.guiding .main>.inguide{max-width:1080px;margin:24px auto 0}
-#guide,#cvPanel,#setPanel{max-width:1080px;margin:0 auto}
-body.guiding #setPanel fieldset[data-step]:not(.cur){display:none}
-body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
+#cvPanel,#setPanel{max-width:1080px;margin:0 auto}
+/* Setup wizard */
+.wiz{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:32px 16px 48px;display:flex;flex-direction:column;align-items:center}
+.wtop{width:100%;max-width:640px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.wtop .brand{padding:0}
+.wtop .right{display:flex;align-items:center;gap:16px;color:var(--text-tertiary);font-size:.9375rem}
+.wbar{width:100%;max-width:640px;height:6px;border-radius:999px;background:var(--border);margin-bottom:32px;flex:none}
+.wbar i{display:block;height:6px;border-radius:999px;background:var(--accent);transition:width .3s ease}
+.wcard{width:100%;max-width:640px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:clamp(22px,5vw,44px);display:flex;flex-direction:column;gap:24px}
+.wcard h1{margin:0;font-size:1.875rem;line-height:1.2;font-weight:700}
+.wcard .lead{margin:8px 0 0;color:var(--text-tertiary);font-size:1.0625rem}
+.wstep{display:flex;flex-direction:column;gap:22px}
+.wdrop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:44px 20px;border:2px dashed #B2C6F5;border-radius:16px;background:#F5F8FF;cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.wdrop:hover,.wdrop.over{background:var(--accent-soft);border-color:var(--accent)}
+.wdrop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wdrop svg{width:36px;height:36px;color:var(--accent)}
+.wdrop strong{font-size:1.125rem}
+.wdrop span{color:var(--text-tertiary);font-size:.9375rem}
+.wdrop.busy{pointer-events:none;opacity:.7}
+.wnote{padding:14px 16px;border-radius:12px;background:var(--surface-alt);color:var(--text-secondary);font-size:.9375rem}
+.wnote:empty{display:none}
+.wnote.ok{background:var(--ok-bg);color:var(--ok-fg)} .wnote.bad{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg)}
+.wnote ul{margin:6px 0 0;padding-left:20px}
+.wfield{display:flex;flex-direction:column;gap:8px;font-weight:600}
+.wfield .small{font-weight:400}
+.wchips{display:flex;flex-wrap:wrap;gap:8px}
+.wchip{display:inline-flex;align-items:center;gap:2px;padding:4px 4px 4px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.wchip button{font:inherit;font-size:1.125rem;border:0;background:none;color:inherit;cursor:pointer;width:32px;height:32px;border-radius:50%;display:grid;place-items:center}
+.wchip button:hover{background:#DBE6FE}
+.wchip button:focus-visible{outline:2px solid var(--accent)}
+.wideas{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-weight:400;font-size:.875rem;color:var(--text-tertiary)}
+.wideas button{font:inherit;min-height:32px;padding:0 10px;border-radius:999px;border:1px dashed var(--border-strong);background:var(--surface);color:var(--text-secondary);cursor:pointer}
+.wideas button:hover{border-color:var(--accent);color:var(--accent)}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.wgrid input[type=range]{min-height:44px;accent-color:var(--accent);width:100%;margin:0}
+.wopts{display:flex;flex-direction:column;gap:12px}
+.wopt{font:inherit;color:var(--text);display:flex;align-items:center;gap:16px;width:100%;padding:16px 18px;min-height:72px;border-radius:14px;cursor:pointer;background:var(--surface);border:2px solid var(--border);text-align:left}
+.wopt:hover{border-color:var(--border-strong)}
+.wopt[aria-checked="true"]{background:#F5F8FF;border-color:var(--accent)}
+.wopt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wopt .rad{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #98A2B3;display:grid;place-items:center}
+.wopt[aria-checked="true"] .rad{border-color:var(--accent)}
+.wopt[aria-checked="true"] .rad::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.wopt .t{flex:1;min-width:0}
+.wopt .t b{display:block;font-size:1.0625rem}
+.wopt .t span{display:block;color:var(--text-tertiary);font-size:.9375rem}
+.wopt .tag{flex:none;font-size:.8125rem;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--surface-alt);color:var(--text-secondary)}
+.wopt .tag.rec{background:var(--ok-bg);color:var(--ok-fg)}
+.whow{border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.whow ol{margin:0;padding-left:20px;color:var(--text-secondary);line-height:1.7}
+.whow code{white-space:nowrap;font:.875rem var(--f-mono);background:var(--surface-alt);padding:2px 6px;border-radius:6px;user-select:all}
+.whow .btnrow{gap:12px}
+.wchecks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.wchecks li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--border);border-radius:12px;color:var(--text-secondary)}
+.wchecks .ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700;color:#fff;background:#12B76A}
+.wchecks .bad .ic{background:#D92D20}.wchecks .opt .ic{background:#98A2B3}.wchecks .busy .ic{background:var(--accent)}
+.wnav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:4px}
+.wnav .btn{min-height:52px;padding:0 26px;font-size:1.0625rem}
+.wmsg{flex:1 1 100%;margin:0;font-size:.9375rem;color:var(--pill-rejected-fg)}
+.wmsg:empty{display:none}
+.wfoot{margin:20px 0 0;font-size:.875rem;color:var(--text-tertiary);text-align:center}
+body.wizopen{overflow:hidden}
 .fset{border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;margin:0}
 .fset legend{font:700 .875rem var(--f-ui);padding:0 6px}
 .fset .hint{margin:-6px 0 0;color:var(--text-tertiary);font-size:.8125rem}
@@ -397,19 +432,11 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
     </nav>
     <div class="sidefoot">
       <div id="lastrun"><div class="live"><i></i>Automatic search off</div></div>
-      <button class="linkbtn" id="guideBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>Setup guide</button>
+      <button class="linkbtn" id="guideBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>Run setup again</button>
     </div>
   </aside>
 
   <main class="main">
-    <section id="guide" aria-labelledby="g-h" hidden>
-      <div class="panel">
-        <div class="sechead"><h2 id="g-h">Setup guide</h2><button type="button" class="mini" id="gClose">Close guide</button></div>
-        <ol class="gsteps" id="gSteps"></ol>
-        <div class="gbody" id="gBody"></div>
-        <div class="gnav"><button type="button" class="mini" id="gBack">Back</button><span class="muted" id="gMsg" role="status"></span><button type="button" class="btn" id="gNext">Next</button></div>
-      </div>
-    </section>
     <section class="page-x" id="cvPanel" aria-labelledby="cv-h" hidden>
       <div class="sechead"><h2 id="cv-h">My CV</h2><span>Every job is scored and tailored from this profile</span></div>
       <div class="panel addform" style="margin-top:12px">
@@ -427,7 +454,7 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
       </div>
     </section>
     <section class="page-x" id="setPanel" aria-labelledby="set-h" hidden>
-      <div class="sechead"><h2 id="set-h">Settings</h2><span>What to search, where, and which AI model writes your documents</span></div>
+      <div class="sechead"><h2 id="set-h">Settings</h2><span>What to search, where, and which AI model writes your documents. <button class="linkbtn" type="button" data-setup>Run setup again</button></span></div>
       <form class="panel addform" id="setForm" style="margin-top:12px">
         <fieldset class="fset" data-step="search"><legend>What you are looking for</legend>
           <label>Job titles <span class="muted">(one per line)</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
@@ -595,6 +622,93 @@ body.guiding .inguide .sticky-save,body.guiding .inguide .sechead{display:none}
     </section>
   </main>
 </div>
+<div class="wiz" id="setup" role="dialog" aria-modal="true" aria-labelledby="wTitle" hidden>
+  <div class="wtop">
+    <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 20l8-4 8 4z"/></svg></span><b>Stellenpilot</b></div>
+    <div class="right"><span id="wCount">Step 1 of 4</span><button class="linkbtn" type="button" id="wLater">Finish later</button></div>
+  </div>
+  <div class="wbar" role="progressbar" aria-label="Setup progress" aria-valuemin="1" aria-valuemax="4" id="wBarBox"><i id="wBar" style="width:25%"></i></div>
+  <div class="wcard">
+    <div class="wstep" data-w="0">
+      <div><h1 id="wTitle">Let's start with your CV</h1><p class="lead">Stellenpilot reads it and fills in your profile. Nothing is invented, and it stays on this computer.</p></div>
+      <label class="wdrop" id="wDrop" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M20 16v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/></svg>
+        <strong>Drop your CV here</strong><span>or click to choose a file · PDF or Word</span>
+        <input type="file" id="wFile" accept=".pdf,.docx,.txt,.md" hidden>
+      </label>
+      <div class="wnote" id="wCvOut" role="status"></div>
+      <button class="linkbtn" type="button" id="wType" style="align-self:center">I don't have a file, let me type it in</button>
+    </div>
+
+    <div class="wstep" data-w="1" hidden>
+      <div><h1>What jobs are you looking for?</h1><p class="lead">Write them the way companies do. You can change this any time in Settings.</p></div>
+      <div class="wfield">Job titles
+        <div class="wchips" id="wChips"></div>
+        <input class="input" id="wTitleIn" placeholder="Type a title and press Enter" aria-label="Add a job title" style="font-weight:400">
+        <div class="wideas" id="wIdeas"></div>
+      </div>
+      <div class="wgrid">
+        <label class="wfield">Where do you live?<input class="input" id="wCity" placeholder="Essen" style="font-weight:400"></label>
+        <label class="wfield">How far would you travel?<input type="range" id="wKm" min="5" max="200" step="5" value="50"><span class="small muted" id="wKmOut"></span></label>
+      </div>
+      <label class="check"><input type="checkbox" id="wRemote" checked> Also show remote jobs anywhere in the country</label>
+      <div class="wgrid">
+        <label class="wfield">Your German level
+          <select class="input" id="wGerman" style="font-weight:400"><option value="">Take it from my CV</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select>
+          <span class="small muted">Jobs that ask for much more German than this are hidden, and letters stay in English below B2.</span></label>
+      </div>
+      <label class="check"><input type="checkbox" id="wWatch"> Also check the career pages of about 200 companies with offices in Germany (adds a minute or two to each search)</label>
+    </div>
+
+    <div class="wstep" data-w="2" hidden>
+      <div><h1>Who should write your documents?</h1><p class="lead">An AI reads each job ad, scores it against your CV and writes a CV and cover letter in natural language. It only uses facts from your CV.</p></div>
+      <div class="wopts" role="radiogroup" aria-label="AI choice" id="wOpts">
+        <button type="button" class="wopt" role="radio" data-ai="ollama"><span class="rad"></span><span class="t"><b>Free AI on this computer</b><span>Private and free, through the Ollama app. One download of about 3 GB.</span></span><span class="tag rec">Free</span></button>
+        <button type="button" class="wopt" role="radio" data-ai="anthropic"><span class="rad"></span><span class="t"><b>Claude</b><span>The best letters and fast. Needs an API key; a daily search costs a few cents.</span></span><span class="tag">Paid</span></button>
+        <button type="button" class="wopt" role="radio" data-ai="none"><span class="rad"></span><span class="t"><b>No AI for now</b><span>Keyword matching and simple template letters. You can add AI later.</span></span><span class="tag">Basic</span></button>
+      </div>
+      <div class="whow" data-how="ollama" hidden>
+        <ol>
+          <li>Download Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a> and install it like any app.</li>
+          <li>Open a terminal (on Windows: PowerShell) and paste <code id="wPull">ollama pull qwen3.5:4b</code> then wait for the download.</li>
+          <li>Press <b>Test</b>. It should say the model is ready.</li>
+        </ol>
+        <label class="wfield">Model<select class="input" id="wModel" style="font-weight:400">
+          <option value="qwen3.5:4b">qwen3.5:4b, good for most laptops (recommended)</option>
+          <option value="ministral-3:3b">ministral-3:3b, for older or slower computers</option>
+          <option value="qwen3.5:9b">qwen3.5:9b, better writing, needs 16 GB memory</option></select></label>
+        <div class="btnrow"><button type="button" class="btn sec" id="wTest">Test</button><span id="wTestMsg" role="status"></span></div>
+      </div>
+      <div class="whow" data-how="anthropic" hidden>
+        <ol>
+          <li>Sign in at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</li>
+          <li>Add a little credit under <b>Billing</b>. Five euros lasts months.</li>
+          <li>Open <b>API keys</b>, create a key and paste it here. It is saved only on this computer.</li>
+        </ol>
+        <label class="wfield">API key<input class="input" id="wKey" type="password" autocomplete="off" placeholder="sk-ant-..." style="font-weight:400"></label>
+      </div>
+      <p class="small">More choices, like OpenAI or LM Studio, are in Settings.</p>
+    </div>
+
+    <div class="wstep" data-w="3" hidden>
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--ok-bg);display:grid;place-items:center;color:var(--ok-fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div><h1>You're all set</h1><p class="lead">Here is what Stellenpilot will use. Anything with a red mark can be fixed later in Settings.</p></div>
+      <ul class="wchecks" id="wChecks"></ul>
+      <div class="wgrid" style="align-items:end">
+        <label class="check"><input type="checkbox" id="wAuto" checked> Search automatically every day</label>
+        <label class="wfield">At<input class="input" id="wTime" type="time" value="08:45" style="font-weight:400"></label>
+      </div>
+      <p class="small">Your computer needs to be on. A missed search runs when you next log in or open Stellenpilot.</p>
+    </div>
+
+    <div class="wnav">
+      <p class="wmsg" id="wMsg" role="alert"></p>
+      <button type="button" class="btn sec" id="wBack">Back</button>
+      <button type="button" class="btn" id="wNext">Continue</button>
+    </div>
+  </div>
+  <p class="wfoot">Stellenpilot never applies for you and never contacts companies.</p>
+</div>
 <div class="toast" id="toast" hidden></div>
 <footer class="credits">Job data from <a href="https://www.arbeitsagentur.de/jobsuche/" target="_blank" rel="noopener">Bundesagentur für Arbeit</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a>, <a href="https://www.adzuna.de" target="_blank" rel="noopener">The Adzuna API</a>, <a href="https://theirstack.com" target="_blank" rel="noopener">TheirStack</a>, <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a> and <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>, depending on which sources you enable.</footer>
 
@@ -605,7 +719,7 @@ let jobs=[], runs=[], filter=null, db=null, canWrite=true, firstName="";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"#";
-function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
+function toast(t,ms=2200){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,ms)}
 function fmtDate(s){if(!s)return"";const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}
 
 const ARROW=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>`;
@@ -772,8 +886,7 @@ function render(){renderPipe();renderList();renderHome();renderApps();renderInsi
 /* ---------- Pages ---------- */
 const PAGES={home:"page-home",jobs:"page-jobs",apps:"page-apps",cv:"cvPanel",settings:"setPanel"};
 function route(){
-  if(document.body.classList.contains("guiding"))return;
-  const k=(location.hash.slice(1)||"home").split("/")[0], page=PAGES[k]?k:"home";
+    const k=(location.hash.slice(1)||"home").split("/")[0], page=PAGES[k]?k:"home";
   Object.entries(PAGES).forEach(([n,id])=>{$(id).hidden=n!==page});
   document.querySelectorAll(".nav a").forEach(a=>{if(a.dataset.page===page)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
   if(page==="cv")loadCv();if(page==="settings")loadSettings();
@@ -1069,88 +1182,141 @@ $("setForm").addEventListener("submit",async e=>{
 let sched={enabled:false,time:"08:45"};
 const schedText=()=>sched.enabled?`Automatic search daily at <b>${esc(sched.time)}</b>.`:"Automatic search is off (Settings).";
 const renderSched=()=>{$("lastrun").innerHTML=sched.enabled?`<div class="live on"><i></i>Automatic search on</div><div>Every day at ${esc(sched.time)}</div>`:`<div class="live"><i></i>Automatic search off</div><div><a href="#settings">Turn it on in Settings</a></div>`};
-/* ---------- Setup guide ---------- */
-const GUIDE=[
- {id:"welcome",name:"Welcome",html:`<h3>Welcome! Let's get you set up</h3>
-  <p>This takes about 10 minutes. You will add your CV, say what jobs you want, choose how the documents are written, and pick where jobs come from. Then you run your first search.</p>
-  <ul><li>Everything stays on this computer, except what you send to an AI service if you choose one.</li>
-  <li>It never applies for you and never contacts companies. You decide what to send.</li>
-  <li>You can change every answer later under <b>My CV</b> and <b>Settings</b>, or open this guide again from the menu.</li></ul>`},
- {id:"cv",name:"Your CV",panel:"cvPanel",html:`<h3>Step 1: your CV</h3>
-  <p>Drop your CV on the box below. The form fills in by itself. Then read it through, fix what is wrong and add anything missing with the <b>+ Add</b> buttons.</p>
-  <ul><li>Bullets are copied word for word into your tailored CVs, so keep them short and true. Nothing is ever invented.</li>
-  <li>Put skills you are still learning in a group called <b>Learning</b>.</li>
-  <li>Write languages with a level, like <code>German (A2)</code>. Your German level decides which ads are skipped.</li>
-  <li>Without an AI model only your contact details and languages are filled in. Your CV text is shown so you can copy the rest. Tip: set up the AI model in step 3 first and come back here, it fills the whole form.</li></ul>`,
-  save:async()=>{cv=readCv();await api("POST","/api/cv/save",{profile:cv});lastState="";refresh()}},
- {id:"search",name:"What you want",panel:"setPanel",steps:["search"],html:`<h3>Step 2: what you are looking for</h3>
-  <p>Write each job title on its own line, the way companies write them, for example <code>Werkstudent Data</code> or <code>Junior Data Engineer</code>. Add your city and how far you would travel.</p>
-  <p>Below that you can set your German level and when documents are made. A match of 70 or more is a good start.</p>`,save:saveSettings},
- {id:"ai",name:"AI model",panel:"setPanel",steps:["ai"],html:`<h3>Step 3: who writes your documents</h3>
-  <p>Pick one option in the box below, then press <b>Test</b>. You can always start with None and add a model later.</p>
-  <div class="gcards">
-   <div class="gcard"><strong>None</strong><p>Free and offline. Jobs are scored by matching keywords and letters come from a template. Fine to try things out.</p></div>
-   <div class="gcard"><strong>Ollama (free, on your computer)</strong><ol><li>Download Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com</a> and install it.</li><li>Open a terminal and run <code>ollama pull qwen3.5:4b</code> (about 4 GB, once).</li><li>Choose Ollama below, model <code>qwen3.5:4b</code>.</li></ol><p>Needs about 16 GB RAM. Many German ads? Try <code>ministral-3:8b</code>. With 8 GB RAM use <code>ministral-3:3b</code>, results are rougher.</p></div>
-   <div class="gcard"><strong>Claude (best results, paid)</strong><ol><li>Sign in at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</li><li>Add a little credit under Billing.</li><li>Create a key under API keys and paste it below.</li></ol><p>A daily run usually costs a few cents.</p></div>
-   <div class="gcard"><strong>OpenAI (paid)</strong><ol><li>Sign in at <a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a>.</li><li>Create a key under API keys.</li><li>Paste it below with a model name.</li></ol></div>
-  </div>
-  <p style="margin-top:12px"><button type="button" class="mini" id="gTest">Test</button> <span id="gTestMsg" class="muted"></span></p>`,save:saveSettings},
- {id:"sources",name:"Job sources",panel:"setPanel",steps:["sources"],html:`<h3>Step 4: where jobs come from</h3>
-  <p>The Bundesagentur für Arbeit and Arbeitnow work right away with no key, and so do Jobicy and Remotive for remote jobs (when "Also remote jobs" is ticked in step 2). Two more sources are optional and free:</p>
-  <div class="gcards">
-   <div class="gcard"><strong>Adzuna</strong><ol><li>Sign up at <a href="https://developer.adzuna.com" target="_blank" rel="noopener">developer.adzuna.com</a>.</li><li>Open your dashboard and copy the App ID and App key.</li><li>Tick Adzuna below and paste both.</li></ol></div>
-   <div class="gcard"><strong>TheirStack</strong><ol><li>Sign up at <a href="https://theirstack.com" target="_blank" rel="noopener">theirstack.com</a>.</li><li>Copy your API key from the settings page.</li><li>Tick TheirStack below and paste it.</li></ol><p>200 free credits a month, one per job found.</p></div>
-  </div>
-  <p style="margin-top:8px">Your keys are saved in the <code>.env</code> file on this computer only. Never share them.</p>
-  <p>Tip: tick <b>Company watchlist</b> below to also check about 200 companies with offices in Germany directly on their own career pages.</p>`,save:saveSettings},
- {id:"finish",name:"Check and run",panel:"setPanel",steps:["schedule"],save:saveSettings,html:`<h3>Last step: check and run</h3><ul class="checks" id="gChecks"><li><span class="tx muted">Checking your setup…</span></li></ul>
-  <p><button type="button" class="btn" id="gRun" style="width:auto">Run my first search</button></p>
-  <p><b>Good to know</b></p>
-  <ul><li>The dashboard only works while <code>stellenpilot serve</code> is running in its terminal window.</li>
-  <li>Your documents land in the <code>output</code> folder inside your workspace. Read every one before you send it.</li>
-  <li>Want it to search every morning by itself? Switch on <b>Automatic search</b> below and press Finish.</li>
-  <li>Optional: install LibreOffice for PDF files, connect Gmail to update statuses (<code>docs/gmail.md</code>), or get a daily Telegram message (<code>docs/digest.md</code>).</li></ul>`}
-];
-let gStep=0;
-function guideOpen(on){
-  document.body.classList.toggle("guiding",on);$("guide").hidden=!on;
-  if(!on){document.querySelectorAll(".inguide").forEach(el=>{el.classList.remove("inguide");el.hidden=true});route();return}
-  if(!$("setForm").elements.city.value)loadSettings();
-  if(!cv)loadCv();
-  guideShow(gStep);
+/* ---------- Setup wizard ---------- */
+const wz={step:0,file:null,thin:false,hasCv:false,titles:[],ai:"none",prevAi:"none",aiOk:false,keySaved:false,rereading:false};
+const W=id=>$(id);
+function wMsg(t){W("wMsg").textContent=t||""}
+function wShow(i){
+  wz.step=i;wMsg("");
+  document.querySelectorAll("[data-w]").forEach(el=>el.hidden=+el.dataset.w!==i);
+  W("wCount").textContent=`Step ${i+1} of 4`;W("wBar").style.width=((i+1)*25)+"%";W("wBarBox").setAttribute("aria-valuenow",i+1);
+  W("wBack").style.visibility=i?"visible":"hidden";
+  W("wNext").textContent=i===3?"Find my first jobs":"Continue";W("wNext").disabled=false;
+  if(i===3)wChecks();
+  W("setup").scrollTo(0,0);const h=document.querySelector(`[data-w="${i}"] h1`);if(h){h.tabIndex=-1;h.focus({preventScroll:true})}
 }
-function guideShow(i){
-  gStep=i;const g=GUIDE[i];
-  $("gSteps").innerHTML=GUIDE.map((x,j)=>`<li><button type="button" data-g="${j}" class="${j===i?"cur":j<i?"done":""}">${j+1}. ${esc(x.name)}</button></li>`).join("");
-  $("gBody").innerHTML=g.html;$("gMsg").textContent="";
-  document.querySelectorAll(".inguide").forEach(el=>{el.classList.remove("inguide");el.hidden=true});
-  if(g.panel){const p=$(g.panel);p.hidden=false;p.classList.add("inguide")}
-  $("setForm").querySelectorAll("fieldset[data-step]").forEach(f=>f.classList.toggle("cur",!!g.steps&&g.steps.includes(f.dataset.step)));
-  $("gBack").style.visibility=i?"visible":"hidden";
-  $("gNext").textContent=i===0?"Start":i===GUIDE.length-1?"Finish":"Save and continue";
-  if(g.id==="finish")guideChecks();
-  $("guide").scrollIntoView({block:"start"});
+function wChipsRender(){
+  W("wChips").innerHTML=wz.titles.map((t,i)=>`<span class="wchip">${esc(t)}<button type="button" data-rmt="${i}" aria-label="Remove ${esc(t)}">×</button></span>`).join("");
+  const ideas=(wz.ideas||[]).filter(x=>!wz.titles.some(t=>t.toLowerCase()===x.toLowerCase())).slice(0,5);
+  W("wIdeas").innerHTML=ideas.length?`From your CV:`+ideas.map(x=>`<button type="button" data-idea="${esc(x)}">+ ${esc(x)}</button>`).join(""):"";
 }
-async function guideChecks(){
+function wKm(){W("wKmOut").textContent=`Up to ${W("wKm").value} km from your city`}
+function wAiRender(){
+  document.querySelectorAll(".wopt").forEach(b=>b.setAttribute("aria-checked",String(b.dataset.ai===wz.ai)));
+  document.querySelectorAll("[data-how]").forEach(el=>el.hidden=el.dataset.how!==wz.ai);
+  W("wPull").textContent="ollama pull "+W("wModel").value;
+  W("wKey").placeholder=wz.keySaved?"Saved. Type a new key to replace it":"sk-ant-...";
+}
+async function openSetup(){
+  document.body.classList.add("wizopen");W("setup").hidden=false;wShow(0);
   try{
-    const r=await api("GET","/api/check"),go={cv:1,search:2,ai:3,sources:4};
-    $("gChecks").innerHTML=r.checks.map(c=>`<li class="${c.optional?"opt":c.ok?"":"bad"}"><span class="ic">${c.ok&&!c.optional?"✓":c.optional?"i":"!"}</span><span class="tx">${esc(c.text)}</span>${!c.ok&&go[c.step]?`<button type="button" class="mini" data-g="${go[c.step]}">Fix</button>`:""}</li>`).join("");
-  }catch(e){$("gChecks").innerHTML=`<li class="bad"><span class="ic">!</span><span class="tx">${esc(e.message)}</span></li>`}
+    const [st,c]=await Promise.all([api("GET","/api/settings"),api("GET","/api/cv")]);
+    const s=st.search;wz.titles=c.isExample?[]:[...(s.keywords||[])];W("wCity").value=s.city||"";W("wKm").value=s.radius_km||50;W("wRemote").checked=!!s.include_remote;
+    W("wGerman").value=st.language.my_german_level||"";W("wWatch").checked=!!st.watch.starter_list;
+    wz.ai=wz.prevAi=["ollama","anthropic","none"].includes(st.llm.provider)?st.llm.provider:"none";
+    if(wz.ai==="ollama"&&[...W("wModel").options].some(o=>o.value===st.llm.model))W("wModel").value=st.llm.model;
+    wz.keySaved=!!st.keys.ANTHROPIC_API_KEY;W("wAuto").checked=st.schedule.enabled||!st.scheduleActive;W("wTime").value=st.schedule.time||"08:45";
+    W("wAuto").disabled=st.inDocker;
+    const p=c.profile||{},name=p.person&&p.person.name;
+    wz.hasCv=!c.isExample&&!!name;
+    wz.ideas=((p.person&&p.person.headlines)||[]).map(h=>String(h).split("|")[0].trim()).filter(Boolean);
+    if(wz.hasCv)wCvNote("ok",`Your CV for <b>${esc(name)}</b> is saved. Drop a new file to replace it, or press Continue.`);
+    wChipsRender();wKm();wAiRender();
+  }catch(e){wMsg(e.message)}
 }
-$("guide").addEventListener("click",async e=>{
-  const j=e.target.closest("[data-g]");if(j){guideShow(+j.dataset.g);return}
-  if(e.target.id==="gTest"){const m=$("gTestMsg");m.textContent="Saving and testing…";
-    try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.textContent=(c.ok?"✓ ":"✗ ")+c.text;m.style.color=c.ok?"#059669":"#dc2626"}catch(err){m.textContent=err.message}}
-  if(e.target.id==="gRun"){try{await saveSettings()}catch(err){$("gMsg").textContent=err.message;return}guideOpen(false);location.hash="#home";$("runBtn").click()}
-});
-$("gNext").addEventListener("click",async()=>{
-  const g=GUIDE[gStep],b=$("gNext");
-  if(g.save){b.disabled=true;$("gMsg").textContent="Saving…";try{await g.save()}catch(e){$("gMsg").textContent=e.message;b.disabled=false;return}b.disabled=false}
-  if(gStep<GUIDE.length-1)guideShow(gStep+1);else guideOpen(false);
-});
-$("gBack").addEventListener("click",()=>guideShow(Math.max(0,gStep-1)));
-$("gClose").addEventListener("click",()=>guideOpen(false));
-$("guideBtn").addEventListener("click",()=>{gStep=0;guideOpen(true)});
+function closeSetup(){W("setup").hidden=true;document.body.classList.remove("wizopen")}
+function wCvNote(kind,html){const o=W("wCvOut");o.className="wnote"+(kind?" "+kind:"");o.innerHTML=html}
+async function readFile(file){return new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=()=>bad(new Error("Could not read the file"));fr.readAsDataURL(file)})}
+async function importAndSave(file){
+  const r=await api("POST","/api/cv/import",{name:file.name,data:await readFile(file)});
+  await api("POST","/api/cv/save",{profile:r.profile});
+  cv=normCv(r.profile);if($("cvForm"))renderCv();
+  return r;
+}
+async function wImport(file){
+  if(!file)return;
+  if(!/\.(pdf|docx|txt|md)$/i.test(file.name)){wCvNote("bad","Use a PDF or Word file.");return}
+  if(file.size>10e6){wCvNote("bad","That file is over 10 MB.");return}
+  const d=W("wDrop");d.classList.add("busy");W("wNext").disabled=true;wMsg("");
+  wCvNote("",`Reading <b>${esc(file.name)}</b>… with an AI on this computer this can take a few minutes.`);
+  try{
+    const r=await importAndSave(file),p=r.profile;wz.file=file;wz.hasCv=true;
+    const n=k=>(p[k]||[]).length, sk=Object.values(p.skills||{}).flat().length;
+    wz.thin=!n("experience")&&!n("education");
+    wz.ideas=((p.person&&p.person.headlines)||[]).map(h=>String(h).split("|")[0].trim()).filter(Boolean);wChipsRender();
+    if(wz.thin)wCvNote("",`Saved your contact details${(p.person.languages||[]).length?" and languages":""}. Without an AI the rest of a CV can't be read reliably. <b>Pick an AI in step 3 and Stellenpilot reads your CV again by itself.</b> Or fill in the rest later under My CV.`);
+    else wCvNote("ok",`Read and saved: <b>${esc(p.person.name||"")}</b>, ${n("experience")} job${n("experience")===1?"":"s"}, ${n("education")} degree${n("education")===1?"":"s"}, ${sk} skills.${r.notes.length?`<ul>${r.notes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""} You can check every detail later under My CV.`);
+  }catch(e){wCvNote("bad",esc(e.message)+(/name/i.test(e.message)?" Use “let me type it in” below instead.":""))}
+  finally{d.classList.remove("busy");W("wNext").disabled=false;W("wFile").value=""}
+}
+async function wTest(){
+  const m=W("wTestMsg");m.textContent="Testing…";m.style.color="";
+  try{await api("POST","/api/settings",{llm:{provider:"ollama",model:W("wModel").value,...(wz.prevAi!=="ollama"?{base_url:""}:{})}});wz.prevAi="ollama";
+    const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");wz.aiOk=c.ok;
+    m.textContent=(c.ok?"✓ ":"")+c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,"");m.style.color=c.ok?"var(--ok-fg)":"var(--pill-rejected-fg)";return c.ok}
+  catch(e){m.textContent=e.message;m.style.color="var(--pill-rejected-fg)";return false}
+}
+async function wChecks(){
+  const ul=W("wChecks");ul.innerHTML=`<li class="opt"><span class="ic">…</span><span>Checking your setup</span></li>`;
+  let reread="";
+  if(wz.thin&&wz.file&&wz.ai!=="none"&&!wz.rereading){wz.rereading=true;W("wNext").disabled=true;W("wNext").textContent="Reading your CV…";
+    reread=`<li class="busy" id="wReread"><span class="ic">…</span><span>Reading your CV again with the AI so the whole profile is filled in. This can take a few minutes.</span></li>`;
+    importAndSave(wz.file).then(r=>{wz.thin=!(r.profile.experience||[]).length&&!(r.profile.education||[]).length;
+        const li=W("wReread");if(li){li.className=wz.thin?"bad":"";li.innerHTML=`<span class="ic">${wz.thin?"!":"✓"}</span><span>${wz.thin?"The AI could not read your jobs and degrees either. Add them under My CV after setup.":"Your full CV is now read and saved. Check it later under My CV."}</span>`}})
+      .catch(e=>{const li=W("wReread");if(li){li.className="bad";li.innerHTML=`<span class="ic">!</span><span>Could not read your CV again: ${esc(e.message)}</span>`}})
+      .finally(()=>{wz.rereading=false;if(wz.step===3){W("wNext").disabled=false;W("wNext").textContent="Find my first jobs"}})}
+  try{const r=await api("GET","/api/check");
+    ul.innerHTML=reread+r.checks.filter(c=>!(reread&&c.step==="cv")).map(c=>`<li class="${c.optional?"opt":c.ok?"":"bad"}"><span class="ic">${c.optional?"i":c.ok?"✓":"!"}</span><span>${esc(c.text)}</span></li>`).join("")}
+  catch(e){ul.innerHTML=reread+`<li class="bad"><span class="ic">!</span><span>${esc(e.message)}</span></li>`}
+}
+async function wNext(){
+  const b=W("wNext");wMsg("");
+  try{
+    if(wz.step===0){if(!wz.hasCv){wMsg("Drop your CV first, or choose “let me type it in”.");return}return wShow(1)}
+    if(wz.step===1){
+      const t=W("wTitleIn").value.trim();if(t){wz.titles.push(t);W("wTitleIn").value="";wChipsRender()}
+      if(!wz.titles.length){wMsg("Add at least one job title.");W("wTitleIn").focus();return}
+      if(!W("wCity").value.trim()){wMsg("Add the city you live in.");W("wCity").focus();return}
+      b.disabled=true;
+      await api("POST","/api/settings",{search:{keywords:wz.titles,city:W("wCity").value.trim(),radius_km:+W("wKm").value,include_remote:W("wRemote").checked},
+        language:{my_german_level:W("wGerman").value},watch:{starter_list:W("wWatch").checked}});
+      return wShow(2)}
+    if(wz.step===2){
+      b.disabled=true;
+      if(wz.ai==="ollama"){if(!(await wTest())){wMsg("The free AI is not ready yet. Follow the steps above and press Test, or choose No AI for now.");b.disabled=false;return}}
+      else if(wz.ai==="anthropic"){const k=W("wKey").value.trim();
+        if(!k&&!wz.keySaved){wMsg("Paste your Claude API key, or choose another option.");b.disabled=false;W("wKey").focus();return}
+        await api("POST","/api/settings",{llm:{provider:"anthropic",model:"claude-haiku-4-5-20251001",base_url:""},keys:k?{ANTHROPIC_API_KEY:k}:{}});wz.keySaved=true;W("wKey").value=""}
+      else await api("POST","/api/settings",{llm:{provider:"none"}});
+      wz.prevAi=wz.ai;return wShow(3)}
+    if(wz.step===3){
+      b.disabled=true;
+      try{const r=await api("POST","/api/settings",{schedule:{enabled:W("wAuto").checked,time:W("wTime").value||"08:45"}});if(r.scheduleNote)toast(r.scheduleNote,6000)}
+      catch(e){toast("Automatic search is not on: "+e.message,9000)}
+      closeSetup();location.hash="#home";lastState="";await refresh();$("runBtn").click()}
+  }catch(e){wMsg(e.message);b.disabled=false}
+}
+W("wNext").addEventListener("click",wNext);
+W("wBack").addEventListener("click",()=>wShow(Math.max(0,wz.step-1)));
+W("wLater").addEventListener("click",closeSetup);
+W("setup").addEventListener("keydown",e=>{if(e.key==="Escape")closeSetup()});
+W("wType").addEventListener("click",()=>{closeSetup();location.hash="#cv"});
+W("wFile").addEventListener("change",e=>wImport(e.target.files[0]));
+W("wDrop").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();W("wFile").click()}});
+["dragenter","dragover"].forEach(t=>W("wDrop").addEventListener(t,e=>{e.preventDefault();W("wDrop").classList.add("over")}));
+["dragleave","drop"].forEach(t=>W("wDrop").addEventListener(t,e=>{e.preventDefault();W("wDrop").classList.remove("over")}));
+W("wDrop").addEventListener("drop",e=>wImport(e.dataTransfer.files[0]));
+W("wTitleIn").addEventListener("keydown",e=>{if(e.key!=="Enter")return;e.preventDefault();const v=e.target.value.trim();
+  if(v&&!wz.titles.some(t=>t.toLowerCase()===v.toLowerCase()))wz.titles.push(v);e.target.value="";wChipsRender()});
+W("wChips").addEventListener("click",e=>{const b=e.target.closest("[data-rmt]");if(!b)return;wz.titles.splice(+b.dataset.rmt,1);wChipsRender();W("wTitleIn").focus()});
+W("wIdeas").addEventListener("click",e=>{const b=e.target.closest("[data-idea]");if(!b)return;wz.titles.push(b.dataset.idea);wChipsRender()});
+W("wKm").addEventListener("input",wKm);
+W("wOpts").addEventListener("click",e=>{const b=e.target.closest(".wopt");if(!b)return;wz.ai=b.dataset.ai;wMsg("");wAiRender()});
+W("wOpts").addEventListener("keydown",e=>{if(!["ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const o=[...document.querySelectorAll(".wopt")],i=o.findIndex(x=>x.dataset.ai===wz.ai),n=o[(i+(e.key==="ArrowDown"?1:o.length-1))%o.length];wz.ai=n.dataset.ai;wAiRender();n.focus()});
+W("wModel").addEventListener("change",()=>{wz.aiOk=false;W("wTestMsg").textContent="";wAiRender()});
+W("wTest").addEventListener("click",wTest);
+$("guideBtn").addEventListener("click",openSetup);
+document.addEventListener("click",e=>{if(e.target.closest("[data-setup]"))openSetup()});
 
 /* ---------- Run search ---------- */
 let wasRunning=false;
@@ -1185,7 +1351,7 @@ async function refresh(){
     jobs=st.jobs;runs=st.runs;weekly=st.weekly;
     $("gmailBtn").hidden=!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();
-    if(!st.profileReady&&!cvPrompted){cvPrompted=true;guideOpen(true)}
+    if(!st.profileReady&&!cvPrompted){cvPrompted=true;openSetup()}
     render();renderRuns();showRun(st.run);renderOffice();
   }catch(e){if(!jobs.length){$("strip").innerHTML=`<span class="ok bad">Cannot reach Stellenpilot. Start it again with: stellenpilot serve</span>`}}
 }
