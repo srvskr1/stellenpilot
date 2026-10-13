@@ -238,8 +238,6 @@ Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Job
 
 Use `--home PATH` to keep your files in another folder.
 
-Use `--home PATH` to keep your files in another folder.
-
 ## Project layout
 
 ```
