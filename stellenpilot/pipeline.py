@@ -114,6 +114,16 @@ def make_prep(job: dict, profile: dict, llm) -> str:
 
 def run(settings, *, tailor: bool = True) -> dict:
     db = DB(settings.db_path)
+    try:
+        return _run(settings, db, tailor)
+    finally:
+        db.conn.close()
+        if settings["llm"].get("provider") == "builtin":
+            from . import builtin
+            builtin.stop()  # free the memory right away; it starts again in seconds when needed
+
+
+def _run(settings, db: DB, tailor: bool) -> dict:
     profile = settings.profile
     if not profile:
         raise RuntimeError("profile.toml is missing. Run `stellenpilot init` and fill it in.")
