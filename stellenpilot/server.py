@@ -431,6 +431,9 @@ def make_handler(settings, port: int = 8765):
                     return self._send(400, {"error": f"Could not create the icon: {e}"})
                 return self._send(200, {"path": str(where), "shortcut": shortcut_status()})
             if self.path == "/api/gmail/install":
+                from .launch import frozen
+                if frozen():
+                    return self._send(400, {"error": "The Windows app already contains Gmail support. Update the app if this step still shows."})
                 try:
                     subprocess.run([sys.executable, "-m", "pip", "install", *GMAIL_PACKAGES],
                                    check=True, capture_output=True, text=True, timeout=900)

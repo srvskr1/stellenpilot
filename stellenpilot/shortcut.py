@@ -50,13 +50,15 @@ def desktop_dir() -> Path:
 def create(home: Path) -> Path:
     """Create or update the icon for the workspace `home`. Returns where it was put."""
     home = Path(home).resolve()
-    args = ["-m", "stellenpilot", "serve", "--home", str(home)]
+    from .launch import frozen
+    # The Windows app starts its dashboard when it gets only --home; Python needs the serve command.
+    args = ["--home", str(home)] if frozen() else ["-m", "stellenpilot", "serve", "--home", str(home)]
     if sys.platform.startswith("win"):
         target = desktop_dir() / f"{NAME}.lnk"
         arg_line = " ".join(f'"{a}"' if " " in a else a for a in args)
         _ps(f"$s=(New-Object -ComObject WScript.Shell).CreateShortcut({_q(str(target))});"
             f"$s.TargetPath={_q(_python())};$s.Arguments={_q(arg_line)};"
-            f"$s.WorkingDirectory={_q(str(home))};$s.IconLocation={_q(_icon('ico'))};"
+            f"$s.WorkingDirectory={_q(str(home))};$s.IconLocation={_q(sys.executable if frozen() else _icon('ico'))};"
             f"$s.WindowStyle=7;$s.Description='Start Stellenpilot, your local AI job assistant';$s.Save()")
         return target
     if sys.platform == "darwin":

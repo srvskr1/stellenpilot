@@ -1,0 +1,74 @@
+# Builds the Windows app and installer (no Python needed on the user's PC) and attaches them to a
+# GitHub release named after the version in pyproject.toml. Runs when that version changes on main,
+# and from the Actions tab ("Run workflow"). A release that already exists is left alone.
+name: windows app
+
+on:
+  push:
+    branches: [main]
+    paths: [pyproject.toml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: version
+        id: v
+        shell: bash
+        run: |
+          v=$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          if gh release view "v$v" >/dev/null 2>&1; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: build the app
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[gmail]" pyinstaller
+          pyinstaller --noconfirm --clean --windowed --name Stellenpilot --icon stellenpilot\web\icon.ico `
+            --collect-data stellenpilot --collect-submodules stellenpilot --collect-data googleapiclient `
+            --distpath dist --workpath build packaging\stellenpilot_app.py
+      - name: smoke test (command line and dashboard)
+        shell: pwsh
+        run: |
+          $ws = "$env:RUNNER_TEMP\ws"
+          $p = Start-Process dist\Stellenpilot\Stellenpilot.exe -ArgumentList "--home", $ws, "init" -Wait -PassThru
+          if (-not (Test-Path "$ws\config.toml")) { throw "init did not create config.toml (exit $($p.ExitCode))" }
+          $env:STELLENPILOT_NO_BROWSER = "1"
+          $app = Start-Process dist\Stellenpilot\Stellenpilot.exe -ArgumentList "--home", $ws -PassThru
+          $ok = $false
+          foreach ($i in 1..30) { Start-Sleep 1; try { if ((Invoke-WebRequest http://127.0.0.1:8765/api/state -UseBasicParsing).StatusCode -eq 200) { $ok = $true; break } } catch {} }
+          Stop-Process $app.Id -Force
+          if (-not $ok) { Get-Content "$ws\app.log" -ErrorAction SilentlyContinue; throw "dashboard did not answer" }
+          Write-Host "Dashboard answered."
+      - name: build the installer
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress; $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          & $iscc "/DAppVersion=${{ steps.v.outputs.version }}" packaging\installer.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
+          Compress-Archive -Path dist\Stellenpilot\* -DestinationPath "dist\Stellenpilot-Portable-${{ steps.v.outputs.version }}.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            dist/Stellenpilot-Setup-*.exe
+            dist/Stellenpilot-Portable-*.zip
+      - name: publish the release
+        if: steps.v.outputs.exists == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=${{ steps.v.outputs.version }}
+          gh release create "v$v" "dist/Stellenpilot-Setup-$v.exe" "dist/Stellenpilot-Portable-$v.zip" \
+            --title "Stellenpilot $v" --notes "Windows: download **Stellenpilot-Setup-$v.exe** and run it. No Python needed. Windows may warn that the app is from an unknown publisher (it is not code signed yet): click **More info**, then **Run anyway**. Python users: \`pip install -U stellenpilot\`."
