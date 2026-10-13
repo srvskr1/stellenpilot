@@ -1,58 +1,156 @@
 # Stellenpilot
 
+**Your local AI job assistant. Open source, private, and on autopilot.**
+
 [![PyPI](https://img.shields.io/pypi/v/stellenpilot)](https://pypi.org/project/stellenpilot/)
 [![Python](https://img.shields.io/pypi/pyversions/stellenpilot)](https://pypi.org/project/stellenpilot/)
 [![tests](https://github.com/srvskr1/stellenpilot/actions/workflows/tests.yml/badge.svg)](https://github.com/srvskr1/stellenpilot/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE)
 
-A local, open source job hunt assistant for Germany. Every day it collects fresh job ads from public APIs, scores them against your CV, writes a tailored CV and cover letter for the best matches, and shows everything on a dashboard in your browser. It runs on your own computer. Your CV and your data never leave it, except for the AI model you choose.
+Stellenpilot is an AI agent for your job search that runs on your own computer. Every morning it finds new jobs, an AI reads each one against your CV, tells you honestly how well it fits, and writes a tailored CV and cover letter for the best matches. When you open the dashboard, the work is done: you read, decide and send.
+
+It comes with its own **free built-in AI**, so you need no account, no API key and no cloud. Your CV never leaves your computer. Built for the job market in Germany, and it works in other countries too.
 
 ![Stellenpilot in about a minute: the four setup steps, Home, the agent office, Jobs, Applications and Settings](https://raw.githubusercontent.com/srvskr1/stellenpilot/main/docs/demo.gif)
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-It never applies for you and never contacts companies. You stay in control of every application.
-
 ```bash
 pip install stellenpilot
 stellenpilot serve
 ```
-Then open http://127.0.0.1:8765 . A short setup walks you through the rest. Works on Windows, macOS and Linux with Python 3.11 or newer.
 
-## What it does
+Open http://127.0.0.1:8765. Setup takes a few minutes, plus the one time AI download: drop your CV, say what you are looking for, press **Download** for the built-in AI, and switch on the daily search. Windows, macOS and Linux, Python 3.11 or newer.
 
-* **Easy to set up, no files to edit.** Four short setup steps in the dashboard: drop your CV, say what jobs you want, pick who writes your documents, and switch on the daily search, with a check at the end. Everything can be changed later under **My CV** and **Settings**.
-* **Runs by itself every day.** Switch on **Automatic search** in Settings and pick a time; it sets up Task Scheduler on Windows or cron on macOS and Linux for you. Or press **Search now** on Home any time.
-* **Starts from your CV.** Drop it on the dashboard (or run `stellenpilot import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
-* **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys), plus remote roles from Jobicy and Remotive. It reads several pages per search, within each source's free limits. It removes duplicates across sources.
-* **Watches companies directly.** Switch on the ready made watchlist of about 200 companies with offices in Germany (each checked to have a working job feed), and add your own dream companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters. Their new roles show up every day, often before they reach the job boards. `stellenpilot watch <careers link>` finds the right entry.
-* **Takes jobs you found yourself.** Paste a link or the ad text (from LinkedIn, a friend, anywhere) with `stellenpilot add` or the dashboard's "Add a job" panel. It gets scored and tailored like the rest.
-* **Understands German job ads.** It reads the German level an ad really asks for (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and gives you an English summary of German ads. It writes German cover letters only if your German is B2 or better, because a polished German letter from someone at A2 would suggest a level they do not have.
-* **Scores each job** from 0 to 100 against your profile, with a short reason and honest gaps. Ads that demand fluent German are flagged and skipped (you can switch that off).
-* **Learns your taste.** Mark jobs as a good match or not for you on the dashboard and the next run leans toward what you liked.
-* **Tailors your CV truthfully.** It reorders and selects facts from your profile. It never invents experience. A guard rejects generated text that mentions numbers, tools or language levels your profile does not back up, and falls back to safe text.
-* **Writes a cover letter** and a short report per job: what the ad asks for, what your CV covers, and which gaps to be honest about.
-* **Exports DOCX and PDF** (PDF needs LibreOffice).
-* **Optional Gmail sync** (read only) moves statuses forward when confirmations, interview invitations or rejections arrive.
-* **Daily digest to you** by Telegram or email: top new matches, CVs ready to send, interviews.
-* **Dashboard** with five calm pages. **Home**: what is ready to send, interviews coming up and the newest matches. **Jobs**: every job with why it fits, honest gaps, your documents, notes and interview prep. **Applications**: a board you drag cards across, plus reply rates by source, the skill gaps employers mention most and a weekly summary. **My CV** and **Settings**, including Gmail. A small 3D office shows what the search is doing right now.
+## How it works
+
+```mermaid
+flowchart LR
+    A["🔎 Collect<br/>6 job sources<br/>+ 200 company sites"] --> B["🧠 AI scores<br/>each job 0 to 100<br/>with reasons and gaps"]
+    B --> C["✍️ AI writes<br/>tailored CV and<br/>cover letter"]
+    C --> D["📬 Gmail tracks<br/>replies and moves<br/>statuses forward"]
+    D --> E["✅ You decide<br/>read, edit, send"]
+```
+
+Every day, by itself:
+
+1. **Collect.** Stellenpilot searches the Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy and Remotive, plus the career pages of about 200 companies with offices in Germany. Duplicates are removed.
+2. **Score.** The AI reads each ad against your CV and gives a match from 0 to 100, a short reason, and the honest gaps. It reads which German level the ad really asks for and skips ads far above yours.
+3. **Write.** For the best matches it writes a CV and a cover letter tailored to that job, using only facts from your CV, as Word files and PDF.
+4. **Track.** With Gmail connected, confirmations, interview invitations and rejections move each application forward on their own. Interviews get a prep pack.
+5. **Report.** The dashboard (and, if you like, a Telegram or email digest) shows what is ready to send today.
+
+**It never applies for you and never contacts a company.** The agent prepares; you stay in control of every application.
+
+## The AI
+
+### What the AI does for you
+
+* **Reads your CV.** Drop a PDF or Word file and the AI turns it into a structured profile. Every bullet is checked against your original, and anything left out or made up is flagged.
+* **Scores every job** from 0 to 100 with a one line reason and the honest gaps (for example "asks for dbt, which you are still learning").
+* **Understands German job ads.** It finds the German level an ad really needs (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and writes an English summary of every German ad.
+* **Tailors your CV.** It picks and orders the experience, projects and skills from your profile that matter most for this job, and chooses the best fitting headline.
+* **Writes the cover letter** in natural language for that company and role, plus a short report: what the ad asks for, what you cover, and which gaps to be honest about. German letters only if your German is B2 or better.
+* **Prepares interviews** with likely questions and questions to ask them.
+* **Learns your taste.** Mark jobs as a good match or not for you, and the next search leans toward what you liked.
+
+### Truthful by design
+
+A job assistant that invents experience gets people into trouble. Stellenpilot has a **truth guard**: any generated sentence that mentions a number, a tool or a language level your profile does not back up is rejected and replaced with safe text. Skills in a group called "Learning" are never presented as experience. The AI rephrases and selects; it never adds facts.
+
+### Choose your AI
+
+| | Built-in AI | Ollama, LM Studio, llama.cpp | Claude or OpenAI | No AI |
+|---|---|---|---|---|
+| Setup | one **Download** button | install the app, pull a model | paste an API key | nothing |
+| Cost | free | free | a few cents a day | free |
+| Privacy | stays on your computer | stays on your computer | CV and ads go to the provider | stays on your computer |
+| Writing | good | depends on the model | best | templates |
+| Speed | slower (see below) | depends on your computer | fast | instant |
+
+**Built-in AI** is the default for new users. Pick it in setup or in **Settings, AI model** and press **Download**. Stellenpilot downloads the [llama.cpp](https://github.com/ggml-org/llama.cpp) engine and an open Qwen3.5 model (Apache 2.0) once, into `~/.stellenpilot/ai`. It starts by itself when a search needs it and stops when the search is done.
+
+| model | download | memory | writing |
+|---|---|---|---|
+| Standard: Qwen3.5 4B (default) | 2.7 GB | about 6 GB free | better |
+| Light: Qwen3.5 2B | 1.3 GB | runs with 8 GB in total | simpler, about twice as fast |
+
+**How fast is it?** It runs on your processor, so it is slower than Claude, but free and private:
+
+* Standard on a typical laptop: about 20 to 40 seconds to score one job, and 1 to 2 minutes for a CV with its cover letter. Light is about twice as fast.
+* To keep searches short, an AI on your own computer reads the 20 most promising new jobs of each search (picked by keywords); the others keep a keyword score. Change it with `max_ai_jobs` under `[llm]`.
+* A daily search with the AI takes about 10 to 20 minutes with Standard, or 5 to 10 with Light, in the background. Without AI it takes a minute or two.
+* Measured on our small test server with only 2 processor cores: Standard needed 67 seconds per job and 2 minutes per CV and letter; Light 32 seconds and about 1 minute. Older laptops can be that slow; newer ones and Macs with Apple chips are faster.
+* After the download, **Test speed** in Settings measures your own computer.
+
+The laptop figures are estimates from published CPU benchmarks for these model sizes, not measured on every computer.
+
+<details>
+<summary><b>Using your own local model or a cloud API</b></summary>
+
+Set `[llm]` in `config.toml`, or choose it in **Settings, AI model**:
+
+| provider | what you need | notes |
+|---|---|---|
+| `builtin` | press Download once in Settings | Local and free, set up by Stellenpilot. `model = "standard"` or `"light"`. |
+| `ollama` | Ollama running, a pulled model | Local and free. |
+| `lmstudio` | LM Studio with its server started | Local and free. |
+| `llamacpp`, `vllm`, `local` | a running server | Any OpenAI compatible local server. |
+| `anthropic` | `ANTHROPIC_API_KEY` in `.env` | Claude through the Anthropic API. |
+| `openai` | `OPENAI_API_KEY` in `.env` | OpenAI API. |
+| `none` | nothing | Keyword scoring and template letters. |
+
+Which local model for Ollama or LM Studio? Pick an instruction tuned version, because the tool asks for JSON answers.
+
+| your computer | try | download |
+|---|---|---|
+| 8 GB RAM, no GPU | `ministral-3:3b` or `qwen3.5:2b`. Expect rougher scores and shorter letters. | about 3 GB |
+| 16 GB RAM, or a GPU with 8 GB | `qwen3.5:4b` (default pick), or `ministral-3:8b` if many of your ads are in German | 4 to 6 GB |
+| GPU with 16 GB or more | `qwen3.5:9b` or `gemma4:12b` | 7 to 9 GB |
+
+Why these (checked on their model cards, October 2026): all are Apache 2.0, run in Ollama, and handle JSON well. Qwen3.5 covers 201 languages; Ministral 3 lists German among its main languages and is built for JSON output; Gemma 4 is Google's newest small family. Qwen3.5 and Gemma 4 can "think" before answering, which makes them slow; Stellenpilot switches that off for Ollama (set `think = true` under `[llm]` to turn it back on).
+
+What we saw in testing with a very small model (Qwen2.5 1.5B on 2 CPU cores): the pipeline worked end to end, the German check and the truth guard did their job, and the cover letter stayed truthful. But the model gave every job the same score and wrote a two sentence letter, and each answer took about a minute. Small models are fine for trying the setup, not for real use.
+
+Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/local-llm.md). Run `stellenpilot doctor` to check that your model server is reachable and the model is installed.
+
+</details>
+
+## Automation
+
+* **Daily autopilot.** Switch on **Automatic search** in Settings and pick a time. Stellenpilot sets up Task Scheduler on Windows or cron on macOS and Linux for you. The dashboard does not need to be open. A search missed because the computer was off runs when you log in or open Stellenpilot. Doing it by hand: [docs/scheduling.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/scheduling.md).
+* **Company watchlist.** Switch on the ready made list of about 200 companies with offices in Germany, or add your dream companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters. Their new roles often appear here before they reach the job boards.
+* **Gmail sync.** Read only. Connect it in **Settings, Gmail** in three steps, and statuses move forward as replies arrive. It never sends, deletes or labels mail. Details: [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail.md).
+* **Daily digest** to Telegram or email: top new matches, documents ready to send, interviews. See [docs/digest.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/digest.md).
+* **Jobs you found yourself.** Paste a link or the ad text from LinkedIn, a friend or anywhere, and the AI scores and tailors it like the rest.
+
+## The dashboard
+
+Five calm pages, in your browser, on your computer:
+
+* **Home**: what is ready to apply, interviews coming up, the newest matches, and a small 3D office where you can watch the agent work.
+* **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep.
+* **Applications**: a board you drag cards across (Applied, Interview, Offer, Rejected), with reply rates by source, the skill gaps employers mention most, and a weekly summary.
+* **My CV**: your profile, with tips to improve your matches.
+* **Settings**: job sources, the AI, the daily search and Gmail, with step by step help for every key.
 
 ## Install
 
 **New to Python or the terminal?** Follow [INSTALL.md](https://github.com/srvskr1/stellenpilot/blob/main/INSTALL.md): step by step for Windows, macOS, Linux and Docker, from installing Python to your first search.
 
-**With pip** (recommended):
-
 ```bash
 pip install stellenpilot
 mkdir my-hunt
 cd my-hunt
-stellenpilot serve      # open http://127.0.0.1:8765, a short setup walks you through the rest
+stellenpilot serve      # open http://127.0.0.1:8765, setup opens by itself
 ```
 
-**"stellenpilot is not recognized"?** pip put the command in a folder that is not on your PATH (it prints a yellow warning saying so). Start it with `python -m stellenpilot serve` instead (`python3` on macOS and Linux). That always works.
+**"stellenpilot is not recognized"?** pip put the command in a folder that is not on your PATH. Use `python -m stellenpilot serve` instead (`python3` on macOS and Linux). That always works.
 
-Update later with `pip install -U stellenpilot`. Your files in `my-hunt` are never touched by an update.
+Update with `pip install -U stellenpilot`. Your files in `my-hunt` are never touched by an update.
+
+<details>
+<summary><b>From source, or with Docker</b></summary>
 
 **From the source code** instead: you need Python 3.11 or newer (or Docker, see below). Works on Windows, macOS and Linux. On Debian or Ubuntu also install `python3-venv`. On Windows use `python` where the commands below say `python`; on macOS and Linux it may be `python3`.
 
@@ -81,69 +179,9 @@ docker compose up -d      # http://127.0.0.1:8765
 
 See [docs/docker.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/docker.md) for daily runs and details.
 
-Then make it yours, all on the dashboard. Setup opens by itself the first time:
+</details>
 
-1. **Your CV**: drop the file. It is read and saved; check the details later under **My CV**. Bullets are copied word for word, so keep them short and true.
-2. **What jobs**: job titles, your city, how far you would travel, and your German level.
-3. **Who writes your documents**: the free **Built-in AI** (one download, then it runs on your computer), Claude with an API key, Ollama, or no AI for now.
-4. **Done**: switch on the daily search and press **Find my first jobs**.
-
-Extra job sources with free keys (Adzuna, TheirStack) and all other options are under **Settings**, which also has **Run setup again**.
-
-Prefer files? Everything is also in `profile.toml`, `config.toml` and `.env`, and `stellenpilot run` searches from the terminal. `stellenpilot doctor` checks the setup.
-
-To start fresh after the demo, delete `jobhunt.db`.
-
-## Choosing an AI model
-
-### Built-in AI (easiest, free)
-
-Pick **Built-in AI** in setup or in **Settings, AI model** and press **Download**. Stellenpilot downloads the [llama.cpp](https://github.com/ggml-org/llama.cpp) engine and a small open model once, into `~/.stellenpilot/ai`, then runs everything on your computer. No account, no key, nothing to install by hand. It starts by itself when a search needs it and stops a few minutes later to free the memory.
-
-| model | download | memory | writing |
-|---|---|---|---|
-| Standard: Qwen3.5 4B (default) | 2.7 GB | about 6 GB free | better |
-| Light: Qwen3.5 2B | 1.3 GB | runs with 8 GB in total | simpler, about twice as fast |
-
-**How fast is it?** It runs on the processor, so it is slower than Claude:
-
-* Standard on a typical laptop: about 20 to 40 seconds to score one job, and 1 to 2 minutes for a CV with its cover letter. Light is about twice as fast.
-* To keep searches short, an AI on your own computer reads the 20 most promising new jobs of each search (picked by keywords); the others keep a keyword score. Change it with `max_ai_jobs` under `[llm]`.
-* A daily search with the AI takes about 10 to 20 minutes with Standard, or 5 to 10 with Light. It runs in the background. Without AI it takes a minute or two.
-* Measured on our small test server with only 2 processor cores: Standard needed 67 seconds per job and 2 minutes per CV and letter; Light 32 seconds and about 1 minute. Older laptops can be that slow; newer ones and Macs with Apple chips are faster.
-* After the download, **Test speed** in Settings measures your own computer.
-
-The laptop figures are estimates from published CPU benchmarks for these model sizes, not measured on every computer.
-
-### All options
-
-Set `[llm]` in `config.toml`:
-
-| provider | what you need | notes |
-|---|---|---|
-| `none` | nothing | Keyword scoring and template letters. Works offline, less precise. |
-| `builtin` | press Download once in Settings | Local and free, set up by Stellenpilot. `model = "standard"` or `"light"`. |
-| `ollama` | Ollama running, a pulled model | Local and free. Nothing leaves your computer. |
-| `lmstudio` | LM Studio with its server started | Local and free. |
-| `llamacpp`, `vllm`, `local` | a running server | Any OpenAI compatible local server. |
-| `anthropic` | `ANTHROPIC_API_KEY` in `.env` | Claude through the Anthropic API. |
-| `openai` | `OPENAI_API_KEY` in `.env` | OpenAI API. |
-
-### Which local model?
-
-Pick an instruction tuned version ("instruct" or "chat"), because the tool asks for JSON answers.
-
-| your computer | try | download |
-|---|---|---|
-| 8 GB RAM, no GPU | `ministral-3:3b` or `qwen3.5:2b`. Expect rougher scores and shorter letters. | about 3 GB |
-| 16 GB RAM, or a GPU with 8 GB | `qwen3.5:4b` (default pick), or `ministral-3:8b` if many of your ads are in German | 4 to 6 GB |
-| GPU with 16 GB or more | `qwen3.5:9b` or `gemma4:12b` | 7 to 9 GB |
-
-Why these (checked on their model cards, October 2026): all are Apache 2.0, run in Ollama, and handle JSON well. Qwen3.5 covers 201 languages; Ministral 3 lists German among its main languages and is built for JSON output; Gemma 4 is Google's newest small family. Qwen3.5 and Gemma 4 can "think" before answering, which makes them slow; Stellenpilot switches that off for Ollama (set `think = true` under `[llm]` to turn it back on).
-
-What we saw in testing with a very small model (Qwen2.5 1.5B on 2 CPU cores): the pipeline worked end to end, the German check and the truth guard did their job, and the cover letter stayed truthful. But the model gave every job the same score and wrote a two sentence letter, and each answer took about a minute. Small models are fine for trying the setup, not for real use.
-
-Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/local-llm.md). Run `stellenpilot doctor` to check that your model server is reachable and the model is installed.
+Prefer files to the dashboard? Everything also lives in `profile.toml`, `config.toml` and `.env`, `stellenpilot run` searches from the terminal, and `stellenpilot doctor` checks the setup.
 
 ## Job sources
 
@@ -158,21 +196,14 @@ Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips an
 
 There is no LinkedIn, StepStone or Indeed scraper on purpose. LinkedIn's and StepStone's terms forbid scraping, and Indeed has no public job search API. See [docs/sources.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/sources.md) for the details and links.
 
-## Run it every day
+Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Jobicy and Remotive cover remote roles open to your country, TheirStack and the company watchlist cover any country, and the Bundesagentur and Arbeitnow cover Germany only.
 
-Switch on **Automatic search** in the dashboard's Settings and pick a time. It sets up Task Scheduler on Windows or cron on macOS and Linux for you. Doing it by hand: [docs/scheduling.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/scheduling.md).
+## Privacy and safety
 
-## Daily digest (optional)
-
-See [docs/digest.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/digest.md) for Telegram (two minutes) or email.
-
-## Other countries
-
-Set `country` in `config.toml`. Adzuna covers 19 countries, Jobicy and Remotive cover remote roles open to your country, TheirStack and the company watchlist cover any country, and the Bundesagentur and Arbeitnow cover Germany only (they are skipped elsewhere).
-
-## Gmail status sync (optional)
-
-See [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail.md). It uses read only access with your own Google Cloud OAuth client.
+* **Local first.** Everything is stored in `jobhunt.db` and the `output` folder next to your config, on your computer. With the built-in AI or another local model, nothing about you leaves it.
+* With Claude or OpenAI, your profile and the job ads are sent to that provider.
+* The dashboard listens on 127.0.0.1 only, and write requests need a custom header, so other websites cannot change your data through your browser.
+* Read every document before you send it. The truth guard checks digits and the tools it knows (see `VOCAB` in `stellenpilot/score.py`). It cannot judge spelled out numbers or vague claims, so you are the final check.
 
 ## Commands
 
@@ -194,13 +225,7 @@ See [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail
 
 Use `--home PATH` to keep your files in another folder.
 
-## Privacy and safety
-
-* Everything is stored in `jobhunt.db` and the `output` folder next to your config. Both are ignored by git, together with `config.toml`, `profile.toml`, `.env` and Gmail tokens.
-* The dashboard listens on 127.0.0.1 only. Write requests need a custom header, so other websites cannot change your data through your browser.
-* Your profile and job ads are sent to the AI provider you configure. Choose `none` or a local model if you want nothing to leave your machine.
-* Read every tailored document before you send it. The truth guard checks digits and the tools it knows (see `VOCAB` in `stellenpilot/score.py`). It cannot judge spelled out numbers or vague claims, so you are the final check.
-* Skills in a profile group named "Learning" are never presented as experience; documents may only say you are learning them.
+Use `--home PATH` to keep your files in another folder.
 
 ## Project layout
 
@@ -251,4 +276,4 @@ Issues and pull requests are welcome. New sources should use an official or clea
 
 ## Credits and license
 
-MIT, see [LICENSE](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE). Credits for ideas and data are in [NOTICE.md](https://github.com/srvskr1/stellenpilot/blob/main/NOTICE.md).
+MIT, see [LICENSE](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE). Credits for ideas and data are in [NOTICE.md](https://github.com/srvskr1/stellenpilot/blob/main/NOTICE.md). The built-in AI uses [llama.cpp](https://github.com/ggml-org/llama.cpp) (MIT) and [Qwen3.5](https://huggingface.co/Qwen) models (Apache 2.0), downloaded from their official sources.
