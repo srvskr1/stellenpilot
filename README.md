@@ -20,7 +20,7 @@ pip install stellenpilot
 stellenpilot serve
 ```
 
-Open http://127.0.0.1:8765. Setup takes a few minutes, plus the one time AI download: drop your CV, say what you are looking for, press **Download** for the built-in AI, and switch on the daily search. Windows, macOS and Linux, Python 3.11 or newer.
+Your browser opens Stellenpilot by itself. Setup takes a few minutes, plus the one time AI download: drop your CV, say what you are looking for, press **Download** for the built-in AI, and switch on the daily search. It also puts a **Stellenpilot icon on your desktop**: from then on you just double click it, no commands. Windows, macOS and Linux, Python 3.11 or newer.
 
 ## How it works
 
@@ -142,8 +142,10 @@ Five calm pages, in your browser, on your computer:
 pip install stellenpilot
 mkdir my-hunt
 cd my-hunt
-stellenpilot serve      # open http://127.0.0.1:8765, setup opens by itself
+stellenpilot serve      # the browser opens by itself, and so does setup
 ```
+
+**Starting it again later:** double click the **Stellenpilot** icon on your desktop. Setup offers to create it; you can also do it under **Settings, Desktop icon** or with `stellenpilot shortcut`. Keep the small window it opens running while you use Stellenpilot, and close it when you are done. The daily search does not need it.
 
 **"stellenpilot is not recognized"?** pip put the command in a folder that is not on your PATH. Use `python -m stellenpilot serve` instead (`python3` on macOS and Linux). That always works.
 
@@ -213,7 +215,8 @@ Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Job
 | `stellenpilot doctor` | check the setup and keys |
 | `stellenpilot run` | search, score, tailor, and sync Gmail if enabled |
 | `stellenpilot run --no-tailor` | search and score only |
-| `stellenpilot serve` | start the dashboard on 127.0.0.1:8765 |
+| `stellenpilot serve` | start the dashboard on 127.0.0.1:8765 and open it in the browser (`--no-browser` to skip) |
+| `stellenpilot shortcut` | put a Stellenpilot icon on the desktop that starts this workspace |
 | `stellenpilot gmail` | sync statuses from Gmail once |
 | `stellenpilot demo` | load fictional sample jobs |
 | `stellenpilot import cv.pdf` | turn your CV into `profile.imported.toml` to review |

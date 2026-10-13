@@ -138,6 +138,16 @@ def gmail_status(settings) -> dict:
             "connected": (home / "token.json").exists()}
 
 
+def shortcut_status() -> dict:
+    from . import shortcut
+    if schedule.in_docker():
+        return {"supported": False, "exists": False}
+    try:
+        return {"supported": True, "exists": shortcut.exists()}
+    except Exception:
+        return {"supported": True, "exists": False}
+
+
 def check_credentials(text: str) -> str:
     """Validate a Google OAuth client file; return it unchanged. Raises ValueError in plain words."""
     try:
@@ -170,6 +180,7 @@ def make_handler(settings, port: int = 8765):
     lock = threading.Lock()  # one SQLite connection, so one request at a time touches it
 
     page = resources.files("stellenpilot").joinpath("web/index.html").read_bytes()
+    icon = resources.files("stellenpilot").joinpath("web/icon.png").read_bytes()
     out_root = (settings.home / settings["tailor"]["output_dir"]).resolve()
 
     def subtitle():
@@ -261,6 +272,8 @@ def make_handler(settings, port: int = 8765):
         def _get(self):
             if self.path in ("/", "/index.html"):
                 return self._send(200, page, "text/html; charset=utf-8")
+            if self.path == "/icon.png":
+                return self._send(200, icon, "image/png")
             if self.path == "/api/state":
                 jobs = db.jobs()
                 return self._send(200, {
@@ -279,7 +292,8 @@ def make_handler(settings, port: int = 8765):
                                         "keys": {k: bool(settings.secret(k)) for k in SECRETS},
                                         "scheduleActive": schedule.is_enabled(settings.home),
                                         "inDocker": schedule.in_docker(),
-                                        "gmail": gmail_status(settings)})
+                                        "gmail": gmail_status(settings),
+                                        "shortcut": shortcut_status()})
             if self.path == "/api/builtin":
                 from . import builtin
                 return self._send(200, builtin.status(settings["llm"].get("model") or "standard"))
@@ -409,6 +423,13 @@ def make_handler(settings, port: int = 8765):
                     builtin.remove()
                     return self._send(200, builtin.status(key))
                 return self._send(404, {"error": "not found"})
+            if self.path == "/api/shortcut":
+                from . import shortcut
+                try:
+                    where = shortcut.create(settings.home)
+                except Exception as e:
+                    return self._send(400, {"error": f"Could not create the icon: {e}"})
+                return self._send(200, {"path": str(where), "shortcut": shortcut_status()})
             if self.path == "/api/gmail/install":
                 try:
                     subprocess.run([sys.executable, "-m", "pip", "install", *GMAIL_PACKAGES],
@@ -520,11 +541,31 @@ def make_handler(settings, port: int = 8765):
     return Handler
 
 
-def serve(settings, port: int = 8765, host: str = "127.0.0.1") -> None:
+def _already_running(port: int) -> bool:
+    import urllib.request
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/state", timeout=3) as r:  # noqa: S310
+            return r.status == 200 and b'"jobs"' in r.read(200)
+    except OSError:
+        return False
+
+
+def serve(settings, port: int = 8765, host: str = "127.0.0.1", open_browser: bool = True) -> None:
     # The Host header check below still only accepts 127.0.0.1 and localhost, so even when
     # Docker listens on all interfaces inside the container, only your own browser gets in.
+    import webbrowser
+    url = f"http://127.0.0.1:{port}"
+    open_browser = open_browser and not os.environ.get("STELLENPILOT_NO_BROWSER") and not schedule.in_docker()
     handler = make_handler(settings, port)
-    httpd = ThreadingHTTPServer((host, port), handler)
+    try:
+        httpd = ThreadingHTTPServer((host, port), handler)
+    except OSError:
+        if _already_running(port):  # double clicked the icon twice: just show the open one
+            print(f"Stellenpilot is already running at {url}. Opening it in your browser.", flush=True)
+            if open_browser:
+                webbrowser.open(url)
+            return
+        raise SystemExit(f"Port {port} is used by another program. Start with: stellenpilot serve --port {port + 1}") from None
 
     def watch():
         while True:
@@ -539,7 +580,9 @@ def serve(settings, port: int = 8765, host: str = "127.0.0.1") -> None:
             schedule.enable(settings.home, settings["schedule"]["time"])
         except Exception as e:
             print(f"Note: could not refresh the automatic search ({e}). Open Settings and save to fix it.", flush=True)
-    print(f"Stellenpilot running at http://127.0.0.1:{port}  (Ctrl+C to stop)", flush=True)
+    print(f"Stellenpilot running at {url}  (close this window or press Ctrl+C to stop)", flush=True)
+    if open_browser:
+        threading.Timer(0.8, webbrowser.open, [url]).start()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

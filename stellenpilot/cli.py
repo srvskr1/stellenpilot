@@ -147,8 +147,10 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--no-tailor", action="store_true", help="skip CV and letter generation")
     s = sub.add_parser("serve", help="open the local dashboard")
     s.add_argument("--port", type=int, default=8765)
+    s.add_argument("--no-browser", action="store_true", help="do not open the browser")
     s.add_argument("--host", default=os.environ.get("JOBHUNT_HOST", "127.0.0.1"),
                    help="address to listen on; keep 127.0.0.1 unless you run inside Docker")
+    sub.add_parser("shortcut", help="put a Stellenpilot icon on the desktop that starts this workspace")
     sub.add_parser("gmail", help="sync statuses from Gmail once")
     sub.add_parser("demo", help="load fictional sample jobs to try the dashboard without any keys")
     sub.add_parser("notify-test", help="send a test digest by email or Telegram")
@@ -184,7 +186,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "serve":
         from .server import serve
-        serve(settings, a.port, a.host)
+        serve(settings, a.port, a.host, open_browser=not a.no_browser)
+        return 0
+    if a.cmd == "shortcut":
+        from .shortcut import create
+        print(f"Created {create(settings.home)}. Double click it to start Stellenpilot.")
         return 0
     if a.cmd == "gmail":
         from .db import DB

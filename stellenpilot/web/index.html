@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stellenpilot</title>
+<link rel="icon" type="image/png" href="/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;600&display=swap">
 <style>
@@ -586,7 +587,7 @@ body.wizopen{overflow:hidden}
       <div class="setwrap">
         <nav class="setnav" aria-label="Settings sections">
           <a href="#settings" data-sec="s-search">Job search</a><a href="#settings" data-sec="s-sources">Job sources</a><a href="#settings" data-sec="s-ai">AI model</a>
-          <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-gmail">Gmail</a>
+          <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-icon">Desktop icon</a><a href="#settings" data-sec="s-gmail">Gmail</a>
         </nav>
         <div class="setcol">
         <form class="addform setform" id="setForm">
@@ -689,6 +690,10 @@ body.wizopen{overflow:hidden}
             <div class="g3"><label>At <input class="input" name="time" type="time" value="08:45"></label></div>
             <p class="state" id="schedState"></p>
             <p class="hint">Your computer must be on. On Windows a missed search runs when you log in; on Mac and Linux it runs when you open Stellenpilot.</p>
+          </section>
+          <section class="box scard" id="s-icon"><h2>Desktop icon</h2><p class="hint">Start Stellenpilot with a double click, no commands. It opens in your browser; keep the small window it opens running while you use it.</p>
+            <p class="state" id="iconState"></p>
+            <div class="btnrow"><button type="button" class="btn sec" id="iconBtn">Put the icon on my desktop</button></div>
           </section>
           <div class="savebar" id="saveBar"><span id="setMsg" role="status">No changes yet.</span><button class="btn" type="submit" id="setSave">Save changes</button></div>
         </form>
@@ -878,6 +883,7 @@ body.wizopen{overflow:hidden}
         <label class="wfield">At<input class="input" id="wTime" type="time" value="08:45" style="font-weight:400"></label>
       </div>
       <p class="small">Your computer needs to be on. A missed search runs when you next log in or open Stellenpilot.</p>
+      <label class="check" id="wIconRow" hidden><input type="checkbox" id="wIcon" checked> Put a Stellenpilot icon on my desktop, so next time I just double click it</label>
     </div>
 
     <div class="wnav">
@@ -1329,7 +1335,7 @@ async function loadSettings(){
     const ss=$("schedState");
     ss.textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"Switched on here, but the task is missing on your computer. Press Save changes to create it again.":r.scheduleActive?`✓ On: every day at ${r.schedule.time}.`:"Off right now.";
     ss.className="state"+(r.scheduleActive?" ok":r.schedule.enabled?" bad":"");
-    f.elements.enabled.disabled=r.inDocker;renderGmail(r.gmail);setDirty(false);
+    f.elements.enabled.disabled=r.inDocker;renderGmail(r.gmail);renderIcon(r.shortcut);setDirty(false);
   }catch(e){$("setMsg").textContent=e.message}
 }
 
@@ -1379,6 +1385,11 @@ $("gmCheck").addEventListener("click",()=>{location.hash="#apps";checkGmail()});
 $("gmCred").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
   if(f.size>100e3){$("gmMsg").className="state bad";$("gmMsg").textContent="That file is too big to be the Google key file.";return}
   await gmailDo("/api/gmail/credentials",null,"",{text:await f.text()})});
+
+function renderIcon(sc){const card=$("s-icon"),st=$("iconState");if(!sc||!sc.supported){card.hidden=true;return}card.hidden=false;
+  st.className="state"+(sc.exists?" ok":"");st.textContent=sc.exists?"✓ The icon is on your desktop.":"";$("iconBtn").textContent=sc.exists?"Create it again":"Put the icon on my desktop"}
+$("iconBtn").addEventListener("click",async()=>{const b=$("iconBtn");b.disabled=true;
+  try{const r=await api("POST","/api/shortcut");renderIcon(r.shortcut);toast("Done. Look for Stellenpilot on your desktop.",5000)}catch(e){$("iconState").className="state bad";$("iconState").textContent=e.message}finally{b.disabled=false}});
 
 /* ---------- Built-in AI ---------- */
 let bi=null,biKey="standard",biPoll=null,biSpeed=null,biOpen=false;
@@ -1455,6 +1466,7 @@ async function openSetup(){
     if(wz.ai==="ollama"&&[...W("wModel").options].some(o=>o.value===st.llm.model))W("wModel").value=st.llm.model;
     wz.keySaved=!!st.keys.ANTHROPIC_API_KEY;W("wAuto").checked=st.schedule.enabled||!st.scheduleActive;W("wTime").value=st.schedule.time||"08:45";
     W("wAuto").disabled=st.inDocker;
+    W("wIconRow").hidden=!(st.shortcut&&st.shortcut.supported&&!st.shortcut.exists);
     const p=c.profile||{},name=p.person&&p.person.name;
     wz.hasCv=!c.isExample&&!!name;
     wz.ideas=((p.person&&p.person.headlines)||[]).map(h=>String(h).split("|")[0].trim()).filter(Boolean);
@@ -1534,6 +1546,7 @@ async function wNext(){
       b.disabled=true;
       try{const r=await api("POST","/api/settings",{schedule:{enabled:W("wAuto").checked,time:W("wTime").value||"08:45"}});if(r.scheduleNote)toast(r.scheduleNote,6000)}
       catch(e){toast("Automatic search is not on: "+e.message,9000)}
+      if(!W("wIconRow").hidden&&W("wIcon").checked){try{await api("POST","/api/shortcut");toast("Icon added to your desktop. Next time, just double click it.",6000)}catch(e){toast(e.message,8000)}}
       closeSetup();location.hash="#home";lastState="";await refresh();$("runBtn").click()}
   }catch(e){wMsg(e.message);b.disabled=false}
 }

@@ -134,7 +134,9 @@ Everything from here happens in your browser. In your workspace folder (`my-hunt
 ```bash
 stellenpilot serve
 ```
-Open http://127.0.0.1:8765 . Leave the terminal open while you use it; **Ctrl+C** stops it.
+Your browser opens http://127.0.0.1:8765 by itself (if not, type that address). Leave the terminal open while you use it; **Ctrl+C** stops it.
+
+**From the second time on you don't need the terminal.** In the last setup step, leave **Put a Stellenpilot icon on my desktop** ticked (or later: **Settings, Desktop icon**). Then just double click **Stellenpilot** on your desktop. A small window opens (keep it open while you use Stellenpilot) and your browser shows the dashboard. Double clicking again while it runs simply shows the open dashboard.
 
 A short setup opens by itself the first time: your CV, what jobs you want, who writes your documents, and the daily search, with a check at the end. You can run it again from the left menu or from **Settings**. Below is the longer version in writing, including the optional job sources.
 
@@ -216,7 +218,7 @@ Turn off **Automatic search** in Settings first, then remove the program and del
 | "running scripts is disabled" in PowerShell | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, once. |
 | `error: externally-managed-environment` on Linux | You are outside the virtual environment. Run `source .venv/bin/activate` first. |
 | `No module named venv` on Linux | `sudo apt install python3-venv` |
-| The dashboard does not open | `stellenpilot serve` must keep running in its terminal. Use http://127.0.0.1:8765 , not https. |
+| The dashboard does not open | The small Stellenpilot window (or `stellenpilot serve` in its terminal) must keep running. Use http://127.0.0.1:8765 , not https. |
 | Port 8765 is already in use | `stellenpilot serve --port 8800`, then open http://127.0.0.1:8800 |
 | No PDFs, only DOCX | Install LibreOffice; `stellenpilot doctor` shows whether it is found. |
 | `stellenpilot import` says the PDF has almost no text | Your PDF is a scanned image. Export your CV from Word or Google Docs as DOCX and import that. |
