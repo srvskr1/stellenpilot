@@ -3,8 +3,9 @@
 Rules that keep it honest:
 * Bullets are copied verbatim from profile.toml. Tailoring only reorders and selects them.
 * Generated text (summary, cover letter) passes a truth guard: numbers and known tools must
-  appear in your real experience. A tool you do not have yet is allowed only in a sentence
-  that clearly says you are learning it, and only if the job ad or your Learning list names it.
+  appear in your real experience. A tool you do not have yet is allowed only in an honest
+  sentence: "I have not used X yet" or "I would like to learn X" for a tool the ad names, and
+  "I am learning X" only for a tool in your Learning list. A sentence that also claims use never passes.
 * "Covered" and "missing" requirements are always computed by the program, never taken from the LLM.
 Limits of the guard: it knows the tools in score.VOCAB and digits. It cannot judge spelled out
 numbers ("twelve") or vague claims, so read every document before sending it.
@@ -23,16 +24,38 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt, RGBColor
 
 from .score import RE_CACHE, _mentioned, learning_items, profile_text
+from .llm import job_ad
 
 # ---------------------------------------------------------------- truth guard
 
 _NUM = re.compile(r"\d+(?:[.,]\d+)?(?:\s?%|[kKmM]\b)?")
-# Phrases that clearly mark a tool as something you are learning, not something you used.
+# A tool you do not have may appear only in an honest sentence, and which honest sentences are allowed
+# depends on the tool:
+# * _GAP: you say you have NOT used it yet, or would like to learn it. True for any tool the ad names.
+# * _STUDY: you say you ARE learning it now. True only for tools in your Learning list.
+# A sentence that also says you used, built or ran something never counts (see _USED), so
+# "I used Snowflake daily, a great learning experience" is rejected.
 # "machine learning" and "deep learning" do not count; neither do loose words like "not yet" or "vertiefen".
-_LEARNING = re.compile(r"(?<!machine )(?<!deep )(?<!reinforcement )\b(learning|eager to learn|keen to learn|want to learn|would like to learn|looking forward to learning"
-                       r"|not used \w+ yet|have not (?:yet )?(?:used|worked with)|no (?:professional |practical |hands on )?experience (?:yet )?(?:with|in)|new to me|currently studying|still building"
-                       r"|lerne\w*|arbeite\w*\s+(?:ich\s+)?mich\b[^.]{0,40}\bein|einarbeiten|einzuarbeiten|einarbeitung|aneignen|anzueignen|noch keine (?:praktische |berufliche )?erfahrung|noch nicht (?:gearbeitet|eingesetzt|genutzt|verwendet))\b", re.I)
+_GAP = re.compile(r"\b(eager to learn|keen to learn|want to learn|would (?:like|love) to learn|glad to learn|happy to learn|looking forward to learning"
+                  r"|not used \w+ yet|(?:haven't|have not|have never|never) (?:yet )?(?:used|worked with)|no (?:professional |practical |hands on )?experience (?:yet )?(?:with|in)|new to me"
+                  r"|lerne\w*\s+(?:\w+\s+){0,3}gerne?\b|einzuarbeiten|einarbeiten|aneignen|anzueignen"
+                  r"|noch keine (?:praktische |berufliche )?erfahrung|noch nicht (?:gearbeitet|eingesetzt|genutzt|verwendet))\b", re.I)
+_STUDY = re.compile(r"(?<!machine )(?<!deep )(?<!reinforcement )\b(learning|currently studying|still building"
+                    r"|lerne\w*|arbeite\w*\s+(?:ich\s+)?mich\b[^.]{0,40}\bein|einarbeitung)\b", re.I)
+_USED = re.compile(r"\b(used|using|built|building|worked|working with|developed|deployed|implemented|designed|maintained|managed"
+                   r"|created|wrote|written|ran|running|operated|migrated|automated|delivered|production|professionally|daily"
+                   r"|years? of|eingesetzt|genutzt|verwendet|entwickelt|gebaut|umgesetzt|gearbeitet|betreut|einsetze|nutze)\b", re.I)
 _SENTENCE = re.compile(r"[^.!?\n]+[.!?]?")
+
+
+def _honest_kind(sentence: str) -> str:
+    """'gap', 'study' or '' for a sentence that mentions a tool you do not have."""
+    gap = bool(_GAP.search(sentence))
+    rest = _GAP.sub(" ", sentence)
+    study = bool(_STUDY.search(rest))
+    if _USED.search(_STUDY.sub(" ", rest)):
+        return ""
+    return "gap" if gap else "study" if study else ""
 
 
 def _num_tokens(text: str) -> set[str]:
@@ -53,13 +76,15 @@ def unsupported_claims(text: str, profile: dict, job: dict | None = None) -> lis
         if claimed and (not mine or LEVELS.index(claimed) > LEVELS.index(mine)):
             bad.append(f"{lang} {claimed} (your profile: {mine or 'not stated'})")
     have = _mentioned(facts)
-    learnable = _mentioned(" ".join(learning_items(profile)))
-    if job:
-        learnable |= _mentioned(job.get("title", "") + "\n" + job.get("description", ""))
+    studying = _mentioned(" ".join(learning_items(profile)))
+    in_ad = _mentioned(job.get("title", "") + "\n" + job.get("description", "")) if job else set()
     for sentence in _SENTENCE.findall(text):
-        for tool in _mentioned(sentence) - have:
-            if not (tool in learnable and _LEARNING.search(sentence)):
-                bad.append(tool)
+        unknown = _mentioned(sentence) - have
+        if not unknown:
+            continue
+        kind = _honest_kind(sentence)
+        allowed = studying | in_ad if kind == "gap" else studying if kind == "study" else set()
+        bad += [t for t in unknown if t not in allowed]
     return list(dict.fromkeys(bad))
 
 
@@ -153,7 +178,7 @@ def _valid_plan(plan: dict, profile: dict) -> dict:
 def make_plan(job: dict, profile: dict, llm=None) -> dict:
     plan = keyword_plan(job, profile)
     if llm and llm.enabled:
-        user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nINDEXED ITEMS\n{_indexed_profile(profile)}\n\nJOB AD\n{job['title']} at {job['company']}\n{job['description'][:llm.max_chars]}"
+        user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nINDEXED ITEMS\n{_indexed_profile(profile)}\n\nJOB AD\n{job['title']} at {job['company']}\n{job_ad(job['description'], llm.max_chars)}"
         try:
             got = llm.complete_json(PLAN_SYSTEM, user, max_tokens=1200)
             plan.update({k: got[k] for k in ("headline_index", "summary", "skill_groups", "experience", "projects") if k in got})
@@ -269,7 +294,7 @@ def build_cv(profile: dict, plan: dict, path: Path) -> None:
 LETTER_SYSTEM = """Write a short, warm, specific cover letter body (3 short paragraphs, under 230 words) for the candidate.
 Use ONLY facts from the candidate profile. No new numbers, tools, employers or achievements.
 Skills under "Currently learning" may only be described as being learned.
-Be honest about one gap and say the candidate is learning it, if a gap exists.
+If the ad names a tool the candidate lacks, mention one gap honestly: "currently learning" only for skills under "Currently learning", otherwise say plainly they have not used it yet and would like to learn it.
 Write like a person, not a template. Never state language levels or fluency (no 'fluent German', no 'C1'). Do not use hyphens or dashes as punctuation. No greeting line and no sign off.
 Return JSON: {"body": "..."}"""
 
@@ -277,9 +302,30 @@ Return JSON: {"body": "..."}"""
 LETTER_SYSTEM_DE = """Schreibe den Hauptteil eines kurzen, persönlichen Anschreibens auf Deutsch (3 kurze Absätze, unter 230 Wörter).
 Nutze NUR Fakten aus dem Profil der Person. Keine neuen Zahlen, Tools, Arbeitgeber oder Erfolge.
 Punkte unter "Currently learning" dürfen nur als "lerne ich gerade" beschrieben werden.
-Sprich eine Lücke ehrlich an und sage, dass die Person sie gerade lernt, falls es eine gibt.
+Sprich eine Lücke ehrlich an, falls es eine gibt: "lerne ich gerade" nur für Punkte unter "Currently learning", sonst sage klar, dass die Person damit noch nicht gearbeitet hat und es gern lernen möchte.
 Schreibe natürlich, nicht wie eine Vorlage, in einfachem, korrektem Deutsch. Keine Gedankenstriche. Nenne niemals Sprachniveaus (kein "fließend", kein "C1"). Keine Anrede und keine Grußformel.
 Antworte mit JSON: {"body": "..."}"""
+
+
+def _gap_sentence(plan: dict) -> str:
+    """Learning list tools are 'currently learning'; other gaps are 'not used yet'. Never more."""
+    learning, missing = plan.get("learning", [])[:2], plan.get("missing", [])[:2]
+    parts = []
+    if learning:
+        parts.append(f"I am currently learning {', '.join(learning)}.")
+    if missing and len(learning) < 2:
+        parts.append(f"I have not worked with {', '.join(missing[:2 - len(learning)])} yet and would be glad to learn it on the job.")
+    return " ".join(parts)
+
+
+def _gap_sentence_de(plan: dict) -> str:
+    learning, missing = plan.get("learning", [])[:2], plan.get("missing", [])[:2]
+    parts = []
+    if learning:
+        parts.append(f"In {', '.join(learning)} arbeite ich mich gerade ein.")
+    if missing and len(learning) < 2:
+        parts.append(f"Mit {', '.join(missing[:2 - len(learning)])} habe ich noch nicht gearbeitet, lerne es aber gern im Job.")
+    return " ".join(parts)
 
 
 def template_letter_de(job: dict, plan: dict) -> str:
@@ -289,7 +335,7 @@ def template_letter_de(job: dict, plan: dict) -> str:
     p2 = (f"In Ihrer Ausschreibung nennen Sie {covered}. Damit habe ich in meiner bisherigen Arbeit und in Projekten gearbeitet. " if covered
           else "Die Aufgaben passen gut zu dem, was ich bisher in meiner Arbeit und in Projekten gemacht habe. ")
     if gaps:
-        p2 += f"In {', '.join(gaps[:2])} arbeite ich mich gerade ein und lerne gern im Job dazu."
+        p2 += _gap_sentence_de(plan)
     p3 = "Über die Möglichkeit eines persönlichen Gesprächs freue ich mich sehr."
     return "\n\n".join([p1, p2.strip(), p3])
 
@@ -301,7 +347,7 @@ def template_letter(job: dict, plan: dict) -> str:
     para2 = (f"Your ad mentions {covered}, which I have used in my work and projects. " if covered else
              "The role fits the work I have done in my previous positions and projects. ")
     if gaps:
-        para2 += f"I am still building experience with {', '.join(gaps[:2])} and I am glad to learn it on the job."
+        para2 += _gap_sentence(plan)
     para3 = "I would be happy to talk about how I can help your team. Thank you for your time."
     return "\n\n".join([para1, para2.strip(), para3])
 
@@ -323,7 +369,7 @@ def letter_body(job: dict, profile: dict, plan: dict, llm=None, lang: str = "en"
     if not (llm and llm.enabled):
         return template, "Template letter (no LLM configured)."
     name = (profile.get("person") or {}).get("name", "")
-    user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job['description'][:llm.max_chars]}\n\nCandidate name: {name}"
+    user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job_ad(job['description'], llm.max_chars)}\n\nCandidate name: {name}"
     bad: list[str] = []
     for _ in range(2):
         try:
@@ -333,7 +379,7 @@ def letter_body(job: dict, profile: dict, plan: dict, llm=None, lang: str = "en"
         bad = unsupported_claims(body, profile, job)
         if body and not bad:
             return body, ""
-        user += f"\n\nYour previous draft mentioned {bad}, which are not backed by the profile. Remove them or frame them as learning."
+        user += f"\n\nYour previous draft mentioned {bad}, which are not backed by the profile. Remove them. Only if the ad asks for one, you may say plainly that the candidate has not used it yet."
     return template, f"LLM drafts mentioned things not in your experience ({bad}), so a template letter was used."
 
 
@@ -369,12 +415,21 @@ def find_soffice() -> str | None:
 
 
 def to_pdf(paths: list[Path]) -> list[Path]:
+    """PDF copies next to the .docx files. Never fails the tailoring: no LibreOffice, a crash or a
+    timeout just means no PDF. Each call uses its own LibreOffice profile, because a LibreOffice
+    window that is already open otherwise swallows the request and no PDF appears."""
+    import tempfile
     exe = find_soffice()
     if not exe:
         return []
     outdir = paths[0].parent
-    subprocess.run([exe, "--headless", "--convert-to", "pdf", "--outdir", str(outdir), *map(str, paths)],
-                   check=False, capture_output=True, timeout=180)
+    with tempfile.TemporaryDirectory(prefix="stellenpilot-lo-", ignore_cleanup_errors=True) as profile:
+        try:
+            subprocess.run([exe, f"-env:UserInstallation={Path(profile).as_uri()}", "--headless", "--convert-to", "pdf",
+                            "--outdir", str(outdir), *map(str, paths)],
+                           check=False, capture_output=True, timeout=180)
+        except (subprocess.TimeoutExpired, OSError):
+            pass
     return [p.with_suffix(".pdf") for p in paths if p.with_suffix(".pdf").exists()]
 
 

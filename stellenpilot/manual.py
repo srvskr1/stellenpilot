@@ -15,6 +15,7 @@ import urllib.request
 
 from .http import USER_AGENT
 from .text import dedupe_key, strip_html
+from .llm import job_ad
 
 # Sites whose terms forbid automated access. Matched against the host, on the first link and every redirect.
 NO_FETCH = ("linkedin.com", "lnkd.in", "stepstone.", "indeed.", "xing.com", "glassdoor.")
@@ -154,7 +155,7 @@ def job_from_jsonld(page: str) -> dict:
 def _guess_with_llm(llm, text: str) -> dict:
     try:
         out = llm.complete_json("Extract facts from a job ad. Return JSON with keys title, company, location. Use \"\" when unknown.",
-                                text[:4000], max_tokens=200)
+                                job_ad(text, 4000), max_tokens=200)
     except Exception:  # model down or broken JSON: the user can still type title and company
         return {"title": "", "company": "", "location": ""}
     return {k: _txt(out.get(k)).strip() for k in ("title", "company", "location")}
@@ -196,7 +197,7 @@ def build_job(*, url: str = "", text: str = "", title: str = "", company: str = 
         raise AddError("Could not tell the job title and company. Add them with --title and --company "
                        "(or the fields in the dashboard).")
     key = url or job["description"]
-    job.update({"id": "me-" + hashlib.sha1(key.encode()).hexdigest()[:12], "source": SOURCE,
+    job.update({"id": "me-" + hashlib.sha1(key.encode(), usedforsecurity=False).hexdigest()[:12], "source": SOURCE,
                 "dedupe_key": dedupe_key(job["company"], job["title"])})
     return job
 

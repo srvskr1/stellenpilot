@@ -93,7 +93,7 @@ def enable(home: Path, time: str) -> str:
     from .launch import cli_command
     line = (f"{minute} {hour} * * * cd {shlex.quote(str(home))} && {' '.join(shlex.quote(c) for c in cli_command())} "
             f"--home {shlex.quote(str(home))} run >> {shlex.quote(str(log))} 2>&1 {MARK} {home}")
-    _write_crontab([ln for ln in _read_crontab() if not _ours(ln, home)] + [line])
+    _write_crontab([ln for ln in _read_crontab() if not _ours(ln, home)] + [_cron_escape(line)])
     return f"Every day at {hour:02d}:{minute:02d} while the computer is awake. Missed runs happen when you open the dashboard."
 
 
@@ -126,8 +126,14 @@ def is_enabled(home: Path) -> bool:
         return False
 
 
+def _cron_escape(text: str) -> str:
+    # cron turns an unescaped % into a line break, which would cut a path like /home/me/100%/hunt.
+    return text.replace("%", "\\%")
+
+
 def _ours(line: str, home: Path) -> bool:
-    return line.rstrip().endswith(f"{MARK} {home}")
+    end = line.rstrip()
+    return end.endswith(f"{MARK} {home}") or end.endswith(_cron_escape(f"{MARK} {home}"))
 
 
 def _read_crontab() -> list[str]:

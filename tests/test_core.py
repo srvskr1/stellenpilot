@@ -73,7 +73,33 @@ class TruthGuardTests(unittest.TestCase):
         de_job = {**JOB, "description": "Kafka, Snowflake"}
         self.assertIn("Kafka", unsupported_claims("Dabei konnte ich meine Kenntnisse in Kafka vertiefen.", PROFILE, de_job))
         self.assertIn("Kafka", unsupported_claims("I used Kafka for machine learning features.", PROFILE, de_job))
-        self.assertEqual(unsupported_claims("In Snowflake arbeite ich mich gerade ein.", PROFILE, de_job), [])
+        self.assertEqual(unsupported_claims("In Kafka arbeite ich mich gerade ein.", PROFILE, de_job), [])
+        self.assertEqual(unsupported_claims("Mit Snowflake habe ich noch nicht gearbeitet, lerne es aber gern.", PROFILE, de_job), [])
+
+    def test_learning_words_never_cover_a_claim_of_use(self):
+        # Audit finding B1: a learning word used to unlock any tool the ad named.
+        snow_job = {**JOB, "description": JOB["description"] + " You use Snowflake daily."}
+        self.assertIn("Snowflake", unsupported_claims("I used Snowflake daily at my last job, a great learning experience.", PROFILE, snow_job))
+        self.assertIn("Kafka", unsupported_claims("I built pipelines in Kafka while learning.", PROFILE, snow_job))
+        self.assertIn("Snowflake", unsupported_claims("I have not used dbt yet, but I built Snowflake pipelines.", PROFILE, snow_job))
+        self.assertIn("Snowflake", unsupported_claims("I have used Snowflake a lot.", PROFILE, snow_job))
+
+    def test_currently_learning_only_for_the_learning_list(self):
+        snow_job = {**JOB, "description": JOB["description"] + " Snowflake and Kafka."}
+        self.assertIn("Snowflake", unsupported_claims("I am learning Snowflake.", PROFILE, snow_job))
+        self.assertIn("Snowflake", unsupported_claims("In Snowflake arbeite ich mich gerade ein.", PROFILE, snow_job))
+        self.assertEqual(unsupported_claims("I am currently learning Kafka.", PROFILE, snow_job), [])
+        self.assertEqual(unsupported_claims("I have not worked with Snowflake yet and would like to learn it.", PROFILE, snow_job), [])
+        self.assertEqual(unsupported_claims("I have no experience with Snowflake yet.", PROFILE, snow_job), [])
+        # a tool the ad does not name cannot be dropped in, even as a gap
+        self.assertIn("Snowflake", unsupported_claims("I have not used Snowflake yet.", PROFILE, JOB))
+
+    def test_template_letters_pass_their_own_guard(self):
+        from stellenpilot.tailor import keyword_plan, template_letter, template_letter_de
+        job = {**JOB, "description": JOB["description"] + " Snowflake and Kafka."}
+        plan = keyword_plan(job, PROFILE)
+        for letter in (template_letter(job, plan), template_letter_de(job, plan)):
+            self.assertEqual(unsupported_claims(letter, PROFILE, job), [], letter)
 
     def test_learning_skills_are_not_experience(self):
         self.assertIn("dbt", unsupported_claims("I built dbt models in production.", PROFILE, JOB))

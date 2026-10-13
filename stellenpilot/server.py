@@ -181,6 +181,8 @@ def make_handler(settings, port: int = 8765):
 
     page = resources.files("stellenpilot").joinpath("web/index.html").read_bytes()
     icon = resources.files("stellenpilot").joinpath("web/icon.png").read_bytes()
+    fonts = {f"/fonts/{n}": resources.files("stellenpilot").joinpath(f"web/fonts/{n}").read_bytes()
+             for n in ("Geist-Variable.woff2", "GeistMono-Variable.woff2")}
     out_root = (settings.home / settings["tailor"]["output_dir"]).resolve()
 
     def subtitle():
@@ -274,6 +276,8 @@ def make_handler(settings, port: int = 8765):
                 return self._send(200, page, "text/html; charset=utf-8")
             if self.path == "/icon.png":
                 return self._send(200, icon, "image/png")
+            if self.path in fonts:
+                return self._send(200, fonts[self.path], "font/woff2")
             if self.path == "/api/state":
                 jobs = db.jobs()
                 return self._send(200, {
@@ -387,7 +391,9 @@ def make_handler(settings, port: int = 8765):
                     body = self._body()
                     updates = clean_settings(body)
                     keys = body.get("keys") if isinstance(body.get("keys"), dict) else {}
-                    save_secrets(settings.home, {k: str(keys.get(k) or "") for k in SECRETS})
+                    clear = body.get("clear_keys") if isinstance(body.get("clear_keys"), list) else []
+                    save_secrets(settings.home, {k: str(keys.get(k) or "") for k in SECRETS},
+                                 clear=[k for k in clear if k in SECRETS])
                     note = ""
                     want = {**settings["schedule"], **updates.get("schedule", {})}
                     if "schedule" in updates:
@@ -405,7 +411,10 @@ def make_handler(settings, port: int = 8765):
                 return self._cv_save()
             if self.path.startswith("/api/builtin/"):
                 from . import builtin
-                key = str(self._body().get("model") or "standard")
+                try:
+                    key = str(self._body().get("model") or "standard")
+                except (ValueError, TypeError) as e:
+                    return self._send(400, {"error": str(e)})
                 if key not in builtin.MODELS:
                     return self._send(400, {"error": "unknown model"})
                 action = self.path[len("/api/builtin/"):]
@@ -420,7 +429,10 @@ def make_handler(settings, port: int = 8765):
                 if action == "remove":
                     if run_state["running"]:
                         return self._send(409, {"error": "Wait until the search is finished."})
-                    builtin.remove()
+                    try:
+                        builtin.remove()
+                    except RuntimeError as e:
+                        return self._send(409, {"error": str(e)})
                     return self._send(200, builtin.status(key))
                 return self._send(404, {"error": "not found"})
             if self.path == "/api/shortcut":
@@ -449,7 +461,8 @@ def make_handler(settings, port: int = 8765):
                     text = check_credentials(str(self._body().get("text") or ""))
                 except ValueError as e:
                     return self._send(400, {"error": str(e)})
-                (settings.home / "credentials.json").write_text(text, encoding="utf-8")
+                from .config import write_private
+                write_private(settings.home / "credentials.json", text)
                 (settings.home / "token.json").unlink(missing_ok=True)  # a new client needs a new consent
                 return self._send(200, {"gmail": gmail_status(settings)})
             if self.path == "/api/gmail/connect":
@@ -532,13 +545,15 @@ def make_handler(settings, port: int = 8765):
 
     def catch_up():
         # A laptop asleep at the scheduled time misses the run; do it once the dashboard is open.
-        if run_state["running"]:
-            return
+        # Check and claim under the same lock as Search now, so the two can never start two runs at once.
         with lock:
+            if run_state["running"]:
+                return
             last = max((r["date"] for r in db.runs()), default=None)
-        if schedule.missed_today(settings, last):
+            if not schedule.missed_today(settings, last):
+                return
             run_state.update(running=True, result=None, error="")
-            threading.Thread(target=background_run, daemon=True).start()
+        threading.Thread(target=background_run, daemon=True).start()
 
     Handler.catch_up = staticmethod(catch_up)
     return Handler

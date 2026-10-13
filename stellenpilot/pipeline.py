@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import logging
 import urllib.error
+import urllib.parse
 import urllib.request
 
 from . import sources
 from .http import friendly_error
 from .db import DB, today
-from .llm import LLM
+from .llm import LLM, job_ad
 from .http import USER_AGENT
 from .score import profile_text, score_job, taste_summary
 from .tailor import tailor_job, unsupported_claims
@@ -72,13 +73,22 @@ def my_german_level(settings) -> str:
 
 def check_closed(db: DB, limit: int = 15) -> int:
     """Mark jobs whose posting now returns 404 or 410. Other errors are ignored (could be temporary)."""
+    import random
+    from .manual import _OPENER, NO_FETCH, AddError, check_url
     closed = 0
-    for job in db.jobs("status IN ('new', 'ready') AND closed = 0 AND url != ''")[:limit]:
-        if not job["url"].lower().startswith(("http://", "https://")):
+    open_jobs = db.jobs("status IN ('new', 'ready') AND closed = 0 AND url != ''")
+    # A different sample each run, so every posting gets checked over time, not only the top matches.
+    for job in random.sample(open_jobs, min(limit, len(open_jobs))):
+        host = (urllib.parse.urlsplit(job["url"]).hostname or "").lower()
+        if any(b in host for b in NO_FETCH):
+            continue  # sites that forbid automated access are never fetched, not even to check
+        try:
+            check_url(job["url"])  # public http(s) pages only, also on every redirect (_OPENER)
+        except AddError:
             continue
         req = urllib.request.Request(job["url"], headers={"User-Agent": USER_AGENT})
         try:
-            urllib.request.urlopen(req, timeout=15).close()
+            _OPENER.open(req, timeout=15).close()
         except urllib.error.HTTPError as e:
             if e.code in (404, 410):
                 db.update_job(job["id"], {"closed": 1, "closed_at": today()})
@@ -96,7 +106,7 @@ Return JSON: {"prep": "..."}"""
 
 
 def make_prep(job: dict, profile: dict, llm) -> str:
-    user = f"CANDIDATE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job.get('description', '')[:llm.max_chars]}"
+    user = f"CANDIDATE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job_ad(job.get('description', ''), llm.max_chars)}"
     text = str(llm.complete_json(PREP_SYSTEM, user, max_tokens=1800).get("prep") or "")
     # Stories must be true: drop story lines the truth guard rejects.
     out, in_stories, dropped = [], False, 0

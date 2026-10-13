@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 
 from .text import ad_language, german_too_high, required_german_level
+from .llm import job_ad
 
 # Tools and skills commonly named in data job ads. Used for keyword scoring and gap tags.
 VOCAB = [
@@ -95,7 +96,7 @@ def llm_score(llm, job: dict, profile: dict, taste: str = "") -> dict:
     user = (f"CANDIDATE\n{profile_text(profile)}\n\n"
             + (f"CANDIDATE TASTE (from their thumbs up and down)\n{taste}\nAdjust match by at most 10 points toward this taste.\n\n" if taste else "")
             + f"JOB\nTitle: {job['title']}\nCompany: {job['company']}\nLocation: {job['location']}\n"
-            f"Description:\n{job['description'][:llm.max_chars]}")
+            f"Description:\n{job_ad(job['description'], llm.max_chars)}")
     out = llm.complete_json(SYSTEM, user, max_tokens=600)
     try:
         match = int(out.get("match") or 0)
@@ -132,7 +133,7 @@ Only use facts from the ad. Plain text, no lists."""
 def english_summary(llm, job: dict) -> str:
     """A separate small request: small local models often skip optional fields in a bigger JSON answer."""
     try:
-        text = llm.complete(SUMMARY_SYSTEM, f"{job['title']} at {job['company']}\n{job['description'][:llm.max_chars]}", max_tokens=250)
+        text = llm.complete(SUMMARY_SYSTEM, f"{job['title']} at {job['company']}\n{job_ad(job['description'], llm.max_chars)}", max_tokens=250)
     except Exception:
         return ""
     return " ".join(text.split())[:800]

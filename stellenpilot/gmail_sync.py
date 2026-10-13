@@ -70,7 +70,8 @@ def _service(home: Path):
             if not creds_file.exists():
                 raise RuntimeError("credentials.json not found. See docs/gmail.md")
             creds = InstalledAppFlow.from_client_secrets_file(str(creds_file), SCOPES).run_local_server(port=0)
-        token.write_text(creds.to_json(), encoding="utf-8")
+        from .config import write_private
+        write_private(token, creds.to_json())  # gives read access to your mailbox: only you may read it
     return build("gmail", "v1", credentials=creds, cache_discovery=False)
 
 

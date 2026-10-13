@@ -20,4 +20,4 @@ Job ads shown by this tool come from the sources you enable, and remain the prop
 
 ## Fonts
 
-The dashboard loads Plus Jakarta Sans and JetBrains Mono from Google Fonts (SIL Open Font License).
+The dashboard ships Geist and Geist Mono by Vercel (version 1.7.2, SIL Open Font License 1.1, see stellenpilot/web/fonts/OFL.txt). They are served from your own computer; the dashboard does not contact Google or any font service.

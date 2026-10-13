@@ -6,8 +6,10 @@ workspaces). The engine is started when a search needs it and stopped after a fe
 from __future__ import annotations
 
 import atexit
+import hashlib
 import os
 import platform
+import secrets
 import shutil
 import socket
 import subprocess
@@ -24,12 +26,26 @@ from .http import USER_AGENT
 # Pinned so every user gets the same, tested engine. Update together with a test run.
 LLAMA_BUILD = "b11602"
 RELEASES = f"https://github.com/ggml-org/llama.cpp/releases/download/{LLAMA_BUILD}/"
+# SHA-256 of every engine download, as GitHub publishes them for this release. A file that does not
+# match is deleted and never run. Update together with LLAMA_BUILD.
+ENGINE_SHA256 = {
+    f"llama-{LLAMA_BUILD}-bin-macos-arm64.tar.gz": "e56b49f658ffe6f1ec67af07728ecbd80618e532eaf5849df7f3593fe9dec846",
+    f"llama-{LLAMA_BUILD}-bin-macos-x64.tar.gz": "b545554acc1e2554890483b6c26b78c2ea815aeb4983edfd5e437dfd5ab57827",
+    f"llama-{LLAMA_BUILD}-bin-ubuntu-arm64.tar.gz": "442ddd53f40d7d84c996abe2c9f41829bfacf1a84f535d7964e56d62495cbcc1",
+    f"llama-{LLAMA_BUILD}-bin-ubuntu-x64.tar.gz": "3dd92047a04a69c331fb3674d0b381b0234eadb2794b7496f6e315fa940b6ae6",
+    f"llama-{LLAMA_BUILD}-bin-win-cpu-arm64.zip": "ae948d97623572f1a9a937a53c7e0cc1491fab4528f1ed0ee4d612895062bbf4",
+    f"llama-{LLAMA_BUILD}-bin-win-cpu-x64.zip": "4f3da792ec5eee550eca467807bfc5f8bc3e30836870587fdd73dc4a4ea24a5f",
+}
+# Models are pinned to one commit of their Hugging Face repo (not "main", which can change) and checked
+# against the SHA-256 Hugging Face lists for that file.
 MODELS = {
     "standard": {"label": "Standard: Qwen3.5 4B", "file": "Qwen3.5-4B-Q4_K_M.gguf", "gb": 2.7,
-                 "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf",
+                 "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q4_K_M.gguf",
+                 "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
                  "note": "Better writing. Needs about 6 GB of free memory."},
     "light": {"label": "Light: Qwen3.5 2B", "file": "Qwen3.5-2B-Q4_K_M.gguf", "gb": 1.3,
-              "url": "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf",
+              "url": "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/f6d5376be1edb4d416d56da11e5397a961aca8ae/Qwen3.5-2B-Q4_K_M.gguf",
+              "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
               "note": "About twice as fast, simpler writing. For older computers or 8 GB of memory."},
 }
 CONTEXT = 8192
@@ -80,18 +96,27 @@ def status(key: str = "standard") -> dict:
 _dl = {"active": False, "step": "", "done": 0, "total": 0, "error": ""}
 
 
-def _fetch(url: str, dest: Path, step: str) -> None:
+def _fetch(url: str, dest: Path, step: str, sha256: str) -> None:
+    """Download to a .part file and keep it only if its SHA-256 matches the pinned value."""
+    if not sha256:
+        raise RuntimeError(f"No checksum is known for {dest.name}. Please report this as a bug.")
     dest.parent.mkdir(parents=True, exist_ok=True)
     part = dest.with_name(dest.name + ".part")
+    digest = hashlib.sha256()
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=60) as r, open(part, "wb") as f:  # noqa: S310 (fixed https URLs)
         _dl.update(step=step, done=0, total=int(r.headers.get("Content-Length") or 0))
         while chunk := r.read(1 << 20):
             f.write(chunk)
+            digest.update(chunk)
             _dl["done"] += len(chunk)
     if _dl["total"] and part.stat().st_size != _dl["total"]:
         part.unlink(missing_ok=True)
         raise OSError("The download was cut off. Try again.")
+    if digest.hexdigest() != sha256.lower():
+        part.unlink(missing_ok=True)
+        raise OSError(f"The downloaded {step} did not match its checksum, so it was deleted. Try again; "
+                      "if it keeps happening, please report it.")
     part.replace(dest)
 
 
@@ -124,7 +149,7 @@ def install_engine() -> Path:
         raise RuntimeError(f"There is no ready made AI engine for {platform.system()} on {platform.machine()}. "
                            "Use Ollama or an API key instead.")
     archive = ai_dir() / asset
-    _fetch(RELEASES + asset, archive, "engine")
+    _fetch(RELEASES + asset, archive, "engine", ENGINE_SHA256.get(asset, ""))
     _dl["step"] = "unpack"
     target = ai_dir() / "engine"
     shutil.rmtree(target, ignore_errors=True)
@@ -143,11 +168,11 @@ def install_engine() -> Path:
 def download(key: str = "standard") -> None:
     """Engine plus model. Blocking; the dashboard runs it in a thread and reads _dl for progress."""
     key = key if key in MODELS else "standard"
-    _dl.update(active=True, error="", step="", done=0, total=0)
+    _dl.update(active=True, error="", step="", done=0, total=0)  # start_download sets this first; the CLI path needs it too
     try:
         install_engine()
         if not model_path(key).exists():
-            _fetch(MODELS[key]["url"], model_path(key), "model")
+            _fetch(MODELS[key]["url"], model_path(key), "model", MODELS[key]["sha256"])
         _dl["step"] = "done"
     except Exception as e:
         _dl["error"] = _plain(e)
@@ -156,16 +181,35 @@ def download(key: str = "standard") -> None:
         _dl["active"] = False
 
 
+_dl_lock = threading.Lock()
+
+
 def start_download(key: str) -> bool:
-    if _dl["active"]:
-        return False
+    # Check and set in one step, so two quick clicks never start two downloads into the same file.
+    with _dl_lock:
+        if _dl["active"]:
+            return False
+        _dl.update(active=True, error="", step="", done=0, total=0)
     threading.Thread(target=lambda: _quiet(download, key), daemon=True).start()
     return True
 
 
 def remove() -> None:
+    """Delete only what Stellenpilot put there, never the whole folder: STELLENPILOT_AI_DIR may point
+    at a folder that holds other files too."""
+    if _dl["active"]:
+        raise RuntimeError("Wait until the download is finished.")
     stop()
-    shutil.rmtree(ai_dir(), ignore_errors=True)
+    root = ai_dir()
+    shutil.rmtree(root / "engine", ignore_errors=True)
+    for f in [root / "engine.log", *[model_path(k) for k in MODELS],
+              *root.glob("llama-*-bin-*"), *(root / "models").glob("*.part")]:
+        f.unlink(missing_ok=True)
+    for d in (root / "models", root):
+        try:
+            d.rmdir()  # only if empty
+        except OSError:
+            pass
 
 
 def _quiet(fn, *a):
@@ -187,6 +231,8 @@ def _plain(e: Exception) -> str:
 # ------------------------------------------------------------------ engine process
 
 _proc: subprocess.Popen | None = None
+_log = None
+_token = ""
 _port = 0
 _key = ""
 _last = 0.0
@@ -213,7 +259,7 @@ def _healthy(port: int) -> bool:
 
 def ensure_running(key: str = "standard") -> str:
     """Start the engine if needed and return its OpenAI compatible base URL."""
-    global _proc, _port, _key, _last
+    global _proc, _port, _key, _last, _log, _token
     key = key if key in MODELS else "standard"
     with _lock:
         _last = time.time()
@@ -224,11 +270,13 @@ def ensure_running(key: str = "standard") -> str:
         if not exe or not model.exists():
             raise RuntimeError("The built-in AI is not downloaded yet. Open Settings, AI model, and press Download.")
         port = _free_port()
-        log = open(ai_dir() / "engine.log", "ab")  # noqa: SIM115 (kept open for the process)
+        _log = open(ai_dir() / "engine.log", "ab")  # noqa: SIM115 (kept open for the process, closed in stop)
+        # A fresh key per start, so other programs and web pages on this computer cannot use the engine.
+        _token = secrets.token_urlsafe(24)
         flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
         _proc = subprocess.Popen([str(exe), "-m", str(model), "--host", "127.0.0.1", "--port", str(port),
-                                  "-c", str(CONTEXT), "--reasoning-budget", "0"],
-                                 stdout=log, stderr=log, stdin=subprocess.DEVNULL, cwd=str(exe.parent),
+                                  "-c", str(CONTEXT), "--reasoning-budget", "0", "--api-key", _token],
+                                 stdout=_log, stderr=_log, stdin=subprocess.DEVNULL, cwd=str(exe.parent),
                                  creationflags=flags)
         _port, _key = port, key
         deadline = time.time() + 180  # loading a model from a slow disk can take a while
@@ -254,7 +302,8 @@ def speed_test(key: str = "standard") -> dict:
     body = {"model": key, "max_tokens": 160, "temperature": 0.2, "chat_template_kwargs": {"enable_thinking": False},
             "messages": [{"role": "system", "content": "You help a job seeker. Answer in plain English."},
                          {"role": "user", "content": ad + "\n\nIn about 100 words, say who would fit this job."}]}
-    data = request_json(f"{base}/chat/completions", method="POST", timeout=600, body=body, retries=0)
+    data = request_json(f"{base}/chat/completions", method="POST", timeout=600, body=body, retries=0,
+                        headers=auth_headers())
     touch()
     t = data.get("timings") or {}
     pp, tg = float(t.get("prompt_per_second") or 0), float(t.get("predicted_per_second") or 0)
@@ -269,13 +318,18 @@ def speed_test(key: str = "standard") -> dict:
             "minutes_daily": round((20 * job + 5 * doc) / 60)}  # 20 jobs read by the AI, up to 5 CVs a run
 
 
+def auth_headers() -> dict:
+    """Header the engine expects; empty when it is not running."""
+    return {"Authorization": f"Bearer {_token}"} if _token else {}
+
+
 def touch() -> None:
     global _last
     _last = time.time()
 
 
 def stop(locked: bool = False) -> None:
-    global _proc
+    global _proc, _log
     if not locked:
         with _lock:
             return stop(locked=True)
@@ -287,6 +341,9 @@ def stop(locked: bool = False) -> None:
             except subprocess.TimeoutExpired:
                 _proc.kill()
         _proc = None
+    if _log is not None:
+        _log.close()
+        _log = None
 
 
 _watching = False

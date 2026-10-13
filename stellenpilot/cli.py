@@ -45,7 +45,8 @@ def cmd_init(home: Path) -> None:
             print(f"made  {dst}")
     env = home / ".env"
     if not env.exists():
-        env.write_text(ENV_TEMPLATE, encoding="utf-8")
+        from .config import write_private
+        write_private(env, ENV_TEMPLATE)  # it will hold API keys and passwords
         print("made  .env (put your API keys here)")
     print("\nNext: edit profile.toml with your real CV facts, check config.toml, then run `stellenpilot doctor`.")
 

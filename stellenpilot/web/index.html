@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stellenpilot</title>
 <link rel="icon" type="image/png" href="/icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;600&display=swap">
 <style>
+/* Fonts ship with the app (SIL Open Font License, see fonts/OFL.txt), so opening the dashboard contacts no one. */
+@font-face{font-family:"Geist";src:url("/fonts/Geist-Variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url("/fonts/GeistMono-Variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
 /* Layout: sticky sidebar (pipeline, filters, Gmail) | main (KPI tiles, job cards, run log). Single mid tone light look on purpose, see DESIGN.md */
 :root{
   --bg:#F6F7F9; --bg-rgb:246,247,249; --surface:#FFFFFF; --surface-alt:#F2F4F7; --surface-hover:#F9FAFB;
@@ -227,6 +228,7 @@ tr:last-child td{border-bottom:none}
 #setPanel .srcrow:first-of-type{padding-top:4px}
 .keyset{font-weight:600;color:var(--ok-fg);font-size:.75rem;background:var(--ok-bg);border-radius:999px;padding:1px 8px;margin-left:4px}
 .keyset:empty{display:none}
+.keyset:not(:empty){display:inline-flex;width:fit-content;align-items:center;gap:6px}.keyset .linkbtn{font-size:.75rem;padding:0;min-height:0}
 #setPanel .keyhelp{background:var(--surface-alt);border:0;border-radius:12px;padding:12px 16px;font-size:.875rem}
 #setPanel .keyhelp summary{color:var(--accent);min-height:32px}
 .howto{border-radius:12px;background:var(--surface-alt);padding:14px 18px;font-size:.875rem;color:var(--text-secondary)}
@@ -1322,6 +1324,9 @@ let cvPrompted=false;
 const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,.keyhelp,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
+$("setForm").addEventListener("click",async e=>{const b=e.target.closest("[data-clear-key]");if(!b)return;e.preventDefault();
+  if(!confirm("Remove this saved key from this computer?"))return;
+  try{await api("POST","/api/settings",{clear_keys:[b.dataset.clearKey]});await loadSettings()}catch(err){$("setMsg").textContent=err.message}});
 function showProvider(){const f=$("setForm"),pv=f.provider.value;f.querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));f.model.closest("label").hidden=pv==="none"||pv==="builtin";
   if(pv==="builtin"){if(!["standard","light"].includes(f.model.value))f.model.value="standard";biLoad()}}
 async function loadSettings(){
@@ -1329,7 +1334,7 @@ async function loadSettings(){
   try{
     const r=await api("GET","/api/settings");
     for(const [sec,keys] of Object.entries(SETF))for(const k of keys){const el=f.elements[k],v=r[sec][k];if(el.type==="checkbox")el.checked=!!v;else el.value=Array.isArray(v)?v.join("\n"):v??""}
-    f.querySelectorAll(".keyset").forEach(el=>el.textContent=r.keys[el.dataset.key]?"Key saved":"");
+    f.querySelectorAll(".keyset").forEach(el=>el.innerHTML=r.keys[el.dataset.key]?`Key saved <button type="button" class="linkbtn" data-clear-key="${esc(el.dataset.key)}">Remove</button>`:"");
     f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";if(el.dataset.ph===undefined)el.dataset.ph=el.placeholder;el.placeholder=r.keys[el.name]?"saved, type to replace":el.dataset.ph});
     showProvider();showKeys();
     const ss=$("schedState");

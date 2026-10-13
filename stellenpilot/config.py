@@ -44,6 +44,42 @@ def _merge(base: dict, over: dict) -> dict:
     return out
 
 
+PRIVATE_FILES = (".env", "credentials.json", "token.json")
+
+
+def write_private(path: Path, text: str) -> None:
+    """Write a file only you can read (API keys, passwords, the Gmail token). On Windows the
+    user folder is already private; on macOS and Linux files are otherwise readable by everyone."""
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+    if os.name != "nt":
+        os.chmod(path, 0o600)  # an existing file keeps its old mode through os.open
+
+
+def tighten_private_files(home: Path) -> None:
+    """Fix files saved by older versions with mode 644."""
+    if os.name == "nt":
+        return
+    for name in PRIVATE_FILES:
+        f = home / name
+        try:
+            if f.exists() and f.stat().st_mode & 0o077:
+                os.chmod(f, 0o600)
+        except OSError:
+            pass
+
+
+def _dotenv_value(v: str) -> str:
+    """Quote a value when load_dotenv would otherwise cut it (spaces, #, quotes)."""
+    if v and not any(c in v for c in " \t#'\""):
+        return v
+    for q in ('"', "'"):
+        if q not in v:
+            return f"{q}{v}{q}"
+    raise ValueError("A key cannot contain both kinds of quotes.")
+
+
 def load_dotenv(path: Path) -> None:
     """Minimal .env reader: KEY=value lines, existing env vars win."""
     if not path.exists():
@@ -64,6 +100,7 @@ def load_dotenv(path: Path) -> None:
 class Settings:
     def __init__(self, home: Path):
         self.home = home
+        tighten_private_files(home)
         load_dotenv(home / ".env")
         cfg_path = home / "config.toml"
         user = tomllib.loads(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
@@ -119,10 +156,12 @@ def save_user_config(home: Path, updates: dict) -> dict:
     return _merge(DEFAULTS, user)
 
 
-def save_secrets(home: Path, secrets: dict) -> None:
-    """Set keys in .env, keeping every other line. Empty values are ignored (keep the old key)."""
-    secrets = {k: v.strip() for k, v in secrets.items() if v and v.strip()}
-    if not secrets:
+def save_secrets(home: Path, secrets: dict, clear: tuple[str, ...] | list[str] = ()) -> None:
+    """Set keys in .env, keeping every other line. Empty values are ignored (keep the old key);
+    names in `clear` are removed. The file is readable only by you."""
+    secrets = {k: v.strip() for k, v in secrets.items() if v and v.strip() and k not in clear}
+    clear = [k for k in clear if k]
+    if not secrets and not clear:
         return
     for v in secrets.values():
         if "\n" in v or "\r" in v:
@@ -130,10 +169,17 @@ def save_secrets(home: Path, secrets: dict) -> None:
     path = home / ".env"
     lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
     left = dict(secrets)
-    for i, ln in enumerate(lines):
+    out = []
+    for ln in lines:
         name = ln.split("=", 1)[0].strip()
-        if "=" in ln and not ln.lstrip().startswith("#") and name in left:
-            lines[i] = f"{name}={left.pop(name)}"
-    lines += [f"{k}={v}" for k, v in left.items()]
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        if "=" in ln and not ln.lstrip().startswith("#"):
+            if name in clear:
+                continue
+            if name in left:
+                ln = f"{name}={_dotenv_value(left.pop(name))}"
+        out.append(ln)
+    out += [f"{k}={_dotenv_value(v)}" for k, v in left.items()]
+    write_private(path, "\n".join(out) + "\n")
     os.environ.update(secrets)
+    for k in clear:
+        os.environ.pop(k, None)
