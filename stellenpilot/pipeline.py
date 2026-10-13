@@ -130,9 +130,18 @@ def run(settings, *, tailor: bool = True) -> dict:
     lang_cfg = settings["language"]
     skip_de = lang_cfg.get("skip_if_german_too_high", lang_cfg.get("skip_if_fluent_german_required", True))
     my_de, tol = my_german_level(settings), int(lang_cfg.get("german_tolerance", 1))
-    for job in new:
+    ai_ids = None
+    if llm.enabled and llm.ai_job_limit and len(new) > llm.ai_job_limit:
+        from .score import keyword_score
+        ranked = sorted(new, key=lambda j: keyword_score(j, profile)["match"], reverse=True)
+        ai_ids = {j["id"] for j in ranked[:llm.ai_job_limit]}
+        db.stage("score", f"Scoring {len(new)} new jobs; the AI reads the {llm.ai_job_limit} most promising")
+    for i, job in enumerate(new, 1):
+        use = llm if ai_ids is None or job["id"] in ai_ids else None
+        if use and llm.local and i % 5 == 0:
+            db.stage("score", f"Scoring new jobs with the AI on this computer ({i} of {len(new)})")
         try:
-            job.update(score_job(job, profile, llm, taste, skip_de, my_de, tol))
+            job.update(score_job(job, profile, use, taste, skip_de, my_de, tol))
         except Exception as e:
             problems.append(f"scoring {job['id']}: {e}")
             continue

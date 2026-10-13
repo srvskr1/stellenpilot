@@ -19,6 +19,7 @@ LOCAL_PRESETS = {
     "llamacpp": "http://localhost:8080/v1",   # llama.cpp server or llama-cpp-python server
     "vllm": "http://localhost:8000/v1",
     "local": "",                              # any OpenAI compatible server: set base_url
+    "builtin": "",                            # Stellenpilot's own llama.cpp engine, started on demand
 }
 CLOUD = {"anthropic", "openai"}
 
@@ -29,7 +30,7 @@ class LLM:
         self.provider = (c.get("provider") or "none").lower()
         if self.provider not in CLOUD | set(LOCAL_PRESETS) | {"none"}:
             raise RuntimeError(f"Unknown llm.provider '{self.provider}'. Use one of: none, anthropic, openai, {', '.join(LOCAL_PRESETS)}")
-        self.model = c.get("model") or ("claude-haiku-4-5-20251001" if self.provider == "anthropic" else "")
+        self.model = c.get("model") or {"anthropic": "claude-haiku-4-5-20251001", "builtin": "standard"}.get(self.provider, "")
         self.local = self.provider in LOCAL_PRESETS
         # JOBHUNT_LLM_BASE_URL overrides the config, handy in Docker (host.docker.internal).
         base = os.environ.get("JOBHUNT_LLM_BASE_URL") or c.get("base_url") or LOCAL_PRESETS.get(self.provider, "")
@@ -46,6 +47,10 @@ class LLM:
             raise RuntimeError("llm.provider is anthropic but ANTHROPIC_API_KEY is not set")
         if self.provider == "openai" and not settings.secret("OPENAI_API_KEY") and not self.base_url:
             raise RuntimeError("llm.provider is openai but OPENAI_API_KEY is not set")
+        if self.provider == "builtin":
+            from . import builtin
+            self.model = self.model if self.model in builtin.MODELS else "standard"
+            self.base_url = ""  # set when the engine starts
         if self.provider == "local" and not self.base_url:
             raise RuntimeError("llm.provider is local: set llm.base_url, e.g. http://localhost:8080/v1")
         if self.enabled and not self.model:
@@ -90,12 +95,17 @@ class LLM:
         return self._openai_compatible(system, user, max_tokens, want_json)
 
     def _openai_compatible(self, system: str, user: str, max_tokens: int, want_json: bool) -> str:
+        if self.provider == "builtin":
+            from . import builtin
+            self.base_url = builtin.ensure_running(self.model)
         base = self.base_url or "https://api.openai.com/v1"
         key = self.settings.secret("OPENAI_API_KEY")
         body = {"model": self.model, "max_tokens": max_tokens, "temperature": self.temperature,
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
         if want_json and self.json_mode:
             body["response_format"] = {"type": "json_object"}
+        if self.provider == "builtin":
+            body["chat_template_kwargs"] = {"enable_thinking": self.think}  # Qwen3.5 thinks by default; slow on a CPU
         headers = {"Authorization": f"Bearer {key}"} if key and not self.local else {}
         try:
             data = request_json(f"{base}/chat/completions", method="POST", timeout=self.timeout,
@@ -109,6 +119,9 @@ class LLM:
                                     headers=headers, body=body, retries=0)
             else:
                 raise
+        if self.provider == "builtin":
+            from . import builtin
+            builtin.touch()
         return strip_thinking(data["choices"][0]["message"]["content"] or "")
 
     def complete_json(self, system: str, user: str, max_tokens: int = 1500) -> dict:
@@ -123,6 +136,15 @@ class LLM:
             return parse_json(text)
 
     # ------------------------------------------------------------ setup checks
+
+    @property
+    def ai_job_limit(self) -> int:
+        """How many new jobs per run the AI scores. A model on your own CPU is slow, so it reads the most
+        promising ones (by keyword score) and the rest keep their keyword score. 0 means no limit."""
+        c = self.settings["llm"]
+        if "max_ai_jobs" in c:
+            return max(0, int(c["max_ai_jobs"]))
+        return 20 if self.local else 0
 
     def list_models(self) -> list[str]:
         """Models the local server offers. Raises if the server cannot be reached."""

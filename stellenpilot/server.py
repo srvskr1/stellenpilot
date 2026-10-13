@@ -23,7 +23,7 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
          "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
-SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import", "/api/gmail/install", "/api/gmail/connect"}
+SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import", "/api/gmail/install", "/api/gmail/connect", "/api/builtin/test"}
 # What the Settings page may change. Types come from config.DEFAULTS.
 EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remote", "max_age_days", "exclude_title_words"),
             "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack", "jobicy", "remotive"),
@@ -32,7 +32,7 @@ EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remo
             "tailor": ("min_match", "letter_language"),
             "schedule": ("enabled", "time"),
             "watch": ("starter_list",)}
-CHOICES = {("llm", "provider"): {"none", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
+CHOICES = {("llm", "provider"): {"none", "builtin", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
            ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
            ("tailor", "letter_language"): {"auto", "en", "de"}}
 SECRETS = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ADZUNA_APP_ID", "ADZUNA_APP_KEY", "THEIRSTACK_API_KEY")
@@ -280,6 +280,9 @@ def make_handler(settings, port: int = 8765):
                                         "scheduleActive": schedule.is_enabled(settings.home),
                                         "inDocker": schedule.in_docker(),
                                         "gmail": gmail_status(settings)})
+            if self.path == "/api/builtin":
+                from . import builtin
+                return self._send(200, builtin.status(settings["llm"].get("model") or "standard"))
             if self.path == "/api/cv":
                 return self._send(200, {"profile": settings.profile,
                                         "isExample": settings.profile.get("person", {}).get("name") == "Alex Example"})
@@ -386,6 +389,26 @@ def make_handler(settings, port: int = 8765):
                 return self._cv_import()
             if self.path == "/api/cv/save":
                 return self._cv_save()
+            if self.path.startswith("/api/builtin/"):
+                from . import builtin
+                key = str(self._body().get("model") or "standard")
+                if key not in builtin.MODELS:
+                    return self._send(400, {"error": "unknown model"})
+                action = self.path[len("/api/builtin/"):]
+                if action == "download":
+                    builtin.start_download(key)
+                    return self._send(200, builtin.status(key))
+                if action == "test":
+                    try:
+                        return self._send(200, {"speed": builtin.speed_test(key)})
+                    except Exception as e:
+                        return self._send(400, {"error": str(e)})
+                if action == "remove":
+                    if run_state["running"]:
+                        return self._send(409, {"error": "Wait until the search is finished."})
+                    builtin.remove()
+                    return self._send(200, builtin.status(key))
+                return self._send(404, {"error": "not found"})
             if self.path == "/api/gmail/install":
                 try:
                     subprocess.run([sys.executable, "-m", "pip", "install", *GMAIL_PACKAGES],

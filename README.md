@@ -85,7 +85,7 @@ Then make it yours, all on the dashboard. Setup opens by itself the first time:
 
 1. **Your CV**: drop the file. It is read and saved; check the details later under **My CV**. Bullets are copied word for word, so keep them short and true.
 2. **What jobs**: job titles, your city, how far you would travel, and your German level.
-3. **Who writes your documents**: a free AI on your computer (Ollama), Claude with an API key, or no AI for now.
+3. **Who writes your documents**: the free **Built-in AI** (one download, then it runs on your computer), Claude with an API key, Ollama, or no AI for now.
 4. **Done**: switch on the daily search and press **Find my first jobs**.
 
 Extra job sources with free keys (Adzuna, TheirStack) and all other options are under **Settings**, which also has **Run setup again**.
@@ -96,11 +96,33 @@ To start fresh after the demo, delete `jobhunt.db`.
 
 ## Choosing an AI model
 
+### Built-in AI (easiest, free)
+
+Pick **Built-in AI** in setup or in **Settings, AI model** and press **Download**. Stellenpilot downloads the [llama.cpp](https://github.com/ggml-org/llama.cpp) engine and a small open model once, into `~/.stellenpilot/ai`, then runs everything on your computer. No account, no key, nothing to install by hand. It starts by itself when a search needs it and stops a few minutes later to free the memory.
+
+| model | download | memory | writing |
+|---|---|---|---|
+| Standard: Qwen3.5 4B (default) | 2.7 GB | about 6 GB free | better |
+| Light: Qwen3.5 2B | 1.3 GB | runs with 8 GB in total | simpler, about twice as fast |
+
+**How fast is it?** It runs on the processor, so it is slower than Claude:
+
+* Standard on a typical laptop: about 20 to 40 seconds to score one job, and 1 to 2 minutes for a CV with its cover letter. Light is about twice as fast.
+* To keep searches short, an AI on your own computer reads the 20 most promising new jobs of each search (picked by keywords); the others keep a keyword score. Change it with `max_ai_jobs` under `[llm]`.
+* A daily search with the AI takes about 10 to 20 minutes with Standard, or 5 to 10 with Light. It runs in the background. Without AI it takes a minute or two.
+* Measured on our small test server with only 2 processor cores: Standard needed 67 seconds per job and 2 minutes per CV and letter; Light 32 seconds and about 1 minute. Older laptops can be that slow; newer ones and Macs with Apple chips are faster.
+* After the download, **Test speed** in Settings measures your own computer.
+
+The laptop figures are estimates from published CPU benchmarks for these model sizes, not measured on every computer.
+
+### All options
+
 Set `[llm]` in `config.toml`:
 
 | provider | what you need | notes |
 |---|---|---|
 | `none` | nothing | Keyword scoring and template letters. Works offline, less precise. |
+| `builtin` | press Download once in Settings | Local and free, set up by Stellenpilot. `model = "standard"` or `"light"`. |
 | `ollama` | Ollama running, a pulled model | Local and free. Nothing leaves your computer. |
 | `lmstudio` | LM Studio with its server started | Local and free. |
 | `llamacpp`, `vllm`, `local` | a running server | Any OpenAI compatible local server. |
@@ -211,14 +233,15 @@ Do these steps in order. Steps 1 and 2 matter most: they stop the daily search b
 * Installed from source: delete the `stellenpilot` folder you cloned or unzipped (the environment `.venv` is inside it).
 * Docker: in the project folder run `docker compose down`, then `docker rmi ghcr.io/srvskr1/stellenpilot` (and `docker image prune` to free the space of any self built image).
 
-**4. Delete your data.** Your workspace folder (`my-hunt`, or `data` for Docker) holds everything personal: your CV profile, `.env` with your API keys, the job database, the generated CVs and cover letters, `run.log`, backups and the Gmail `token.json`. Delete the whole folder. Nothing is stored anywhere else on your computer.
+**4. Delete your data.** Your workspace folder (`my-hunt`, or `data` for Docker) holds everything personal: your CV profile, `.env` with your API keys, the job database, the generated CVs and cover letters, `run.log`, backups and the Gmail `token.json`. Delete the whole folder. The only other place is the Built-in AI folder `.stellenpilot` in your home folder, if you downloaded it (see step 5).
 
 **5. Close your accounts and keys** (optional, but good practice):
 
 * API keys you created for it: delete them at Adzuna, TheirStack, Anthropic or OpenAI.
 * Gmail sync: remove access at https://myaccount.google.com/permissions and delete the Google Cloud project you made for it.
 * Telegram digest: send `/deletebot` to @BotFather.
-* Local AI model: `ollama rm qwen3.5:4b` (or the model you pulled), and uninstall Ollama or LM Studio if you only used them for this.
+* Built-in AI: press **Remove the AI files** in Settings, or delete the folder `.stellenpilot` in your home folder (`C:\Users\<you>\.stellenpilot` on Windows). It holds the engine and the model, about 1.5 to 4 GB.
+* Ollama model: `ollama rm qwen3.5:4b` (or the model you pulled), and uninstall Ollama or LM Studio if you only used them for this.
 
 LibreOffice and Python stay installed; remove them like any other app if you no longer need them.
 

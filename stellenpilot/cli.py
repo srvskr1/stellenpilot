@@ -82,6 +82,13 @@ def cmd_doctor(settings: Settings) -> int:
 def llm_status(settings: Settings) -> tuple[bool, str]:
     from .llm import LLM
     prov = settings["llm"]["provider"]
+    if prov == "builtin":
+        from . import builtin
+        st = builtin.status(settings["llm"].get("model") or "standard")
+        label = builtin.MODELS[st["model"]]["label"]
+        if st["ready"]:
+            return True, f"built-in AI ({label}), downloaded and ready"
+        return False, "the built-in AI is not downloaded yet. Open Settings, AI model, and press Download."
     try:
         llm = LLM(settings)
     except RuntimeError as e:

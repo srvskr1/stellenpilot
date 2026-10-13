@@ -293,6 +293,23 @@ label.btn{cursor:pointer}
 .col .none{font-size:.875rem;color:var(--text-tertiary);padding:8px 4px}
 @media (max-width:1000px){.board{grid-template-columns:repeat(4,minmax(240px,82vw));overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}.col{scroll-snap-align:start}}
 
+/* Built-in AI */
+.bi{display:flex;flex-direction:column;gap:14px}
+.bi .models{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.bi .mopt{font:inherit;text-align:left;color:var(--text);background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.bi .mopt[aria-checked="true"]{border-color:var(--accent);background:#F5F8FF}
+.bi .mopt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bi .mopt b{font-size:.9375rem}
+.bi .mopt span{font-size:.8125rem;color:var(--text-tertiary)}
+.bi .mopt em{font-style:normal;font-size:.75rem;font-weight:600;color:var(--ok-fg)}
+.bi .bar{height:8px;border-radius:999px;background:var(--border);overflow:hidden}
+.bi .bar i{display:block;height:100%;background:var(--accent);transition:width .4s ease}
+.bi .speed{font-size:.875rem;color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.bi .speed summary{cursor:pointer;font-weight:600;color:var(--text)}
+.bi .speed ul{margin:8px 0 0;padding-left:18px;line-height:1.6}
+.bi .meas{font-size:.9375rem;color:var(--text)}
+.bi .meas b{font-variant-numeric:tabular-nums}
+
 /* Setup wizard */
 .wiz{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:32px 16px 48px;display:flex;flex-direction:column;align-items:center}
 .wtop{width:100%;max-width:640px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
@@ -622,8 +639,9 @@ body.wizopen{overflow:hidden}
               <label>Who writes your documents
                 <select class="input" name="provider">
                   <option value="none">No AI (keywords and templates)</option>
-                  <option value="ollama">Free AI on this computer (Ollama)</option>
-                  <option value="lmstudio">Free AI on this computer (LM Studio)</option>
+                  <option value="builtin">Built-in AI (free, runs on this computer)</option>
+                  <option value="ollama">Ollama (free, on this computer)</option>
+                  <option value="lmstudio">LM Studio (free, on this computer)</option>
                   <option value="anthropic">Claude (API key)</option>
                   <option value="openai">OpenAI (API key)</option>
                   <option value="llamacpp">llama.cpp server</option>
@@ -633,6 +651,7 @@ body.wizopen{overflow:hidden}
               <label>Model <input class="input" name="model" list="modelList" placeholder="e.g. qwen3.5:4b"></label>
               <datalist id="modelList"><option value="qwen3.5:4b"><option value="ministral-3:8b"><option value="ministral-3:3b"><option value="qwen3.5:9b"><option value="gemma4:12b"><option value="claude-haiku-4-5-20251001"><option value="claude-sonnet-5-5"></datalist>
             </div>
+            <div class="howto bi" data-for="builtin" id="biSettings"></div>
             <div class="howto" data-for="ollama"><b>Set up Ollama</b><ol>
               <li>Download Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a> and install it like any app.</li>
               <li>Open a terminal (on Windows: PowerShell) and run <code>ollama pull qwen3.5:4b</code>. On an older computer use <code>ministral-3:3b</code>; with 16 GB memory or more, <code>qwen3.5:9b</code> writes better.</li>
@@ -821,10 +840,12 @@ body.wizopen{overflow:hidden}
     <div class="wstep" data-w="2" hidden>
       <div><h1>Who should write your documents?</h1><p class="lead">An AI reads each job ad, scores it against your CV and writes a CV and cover letter in natural language. It only uses facts from your CV.</p></div>
       <div class="wopts" role="radiogroup" aria-label="AI choice" id="wOpts">
-        <button type="button" class="wopt" role="radio" data-ai="ollama"><span class="rad"></span><span class="t"><b>Free AI on this computer</b><span>Private and free, through the Ollama app. One download of about 3 GB.</span></span><span class="tag rec">Free</span></button>
+        <button type="button" class="wopt" role="radio" data-ai="builtin"><span class="rad"></span><span class="t"><b>Built-in AI</b><span>Free and private. Downloaded once, then it runs on this computer. No account, no key.</span></span><span class="tag rec">Recommended</span></button>
         <button type="button" class="wopt" role="radio" data-ai="anthropic"><span class="rad"></span><span class="t"><b>Claude</b><span>The best letters and fast. Needs an API key; a daily search costs a few cents.</span></span><span class="tag">Paid</span></button>
+        <button type="button" class="wopt" role="radio" data-ai="ollama"><span class="rad"></span><span class="t"><b>Ollama</b><span>Free on this computer, if you already use the Ollama app.</span></span><span class="tag">Free</span></button>
         <button type="button" class="wopt" role="radio" data-ai="none"><span class="rad"></span><span class="t"><b>No AI for now</b><span>Keyword matching and simple template letters. You can add AI later.</span></span><span class="tag">Basic</span></button>
       </div>
+      <div class="whow bi" data-how="builtin" hidden id="biSetup"></div>
       <div class="whow" data-how="ollama" hidden>
         <ol>
           <li>Download Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a> and install it like any app.</li>
@@ -1295,7 +1316,8 @@ let cvPrompted=false;
 const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,.keyhelp,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
-function showProvider(){const pv=$("setForm").provider.value;$("setForm").querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));$("setForm").model.closest("label").hidden=pv==="none"}
+function showProvider(){const f=$("setForm"),pv=f.provider.value;f.querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));f.model.closest("label").hidden=pv==="none"||pv==="builtin";
+  if(pv==="builtin"){if(!["standard","light"].includes(f.model.value))f.model.value="standard";biLoad()}}
 async function loadSettings(){
   const f=$("setForm");
   try{
@@ -1358,6 +1380,43 @@ $("gmCred").addEventListener("change",async e=>{const f=e.target.files[0];e.targ
   if(f.size>100e3){$("gmMsg").className="state bad";$("gmMsg").textContent="That file is too big to be the Google key file.";return}
   await gmailDo("/api/gmail/credentials",null,"",{text:await f.text()})});
 
+/* ---------- Built-in AI ---------- */
+let bi=null,biKey="standard",biPoll=null,biSpeed=null,biOpen=false;
+const SPEED_TEXT=()=>`<details class="speed" ${biOpen?"open":""}><summary>How fast is it?</summary><ul>
+  <li>It runs on your computer's processor, so it is slower than Claude, but free and private. You can keep working while it runs.</li>
+  <li><b>Standard</b> on a typical laptop: about 20 to 40 seconds to score one job, and 1 to 2 minutes for a CV with its cover letter.</li>
+  <li><b>Light</b> is about twice as fast, with simpler writing.</li>
+  <li>To keep searches short, the AI reads the 20 most promising new jobs of each search. The others get a keyword score.</li>
+  <li>A daily search with the AI takes about 10 to 20 minutes with Standard, or 5 to 10 minutes with Light. Without the AI it takes a minute or two.</li>
+  <li>Measured on our small test server with only 2 processor cores: Standard needed 67 seconds per job and 2 minutes per CV and letter; Light 32 seconds and about 1 minute. Older laptops can be that slow. Newer ones and Macs with Apple chips are faster.</li>
+  <li>After the download, press <b>Test speed</b> to measure your own computer.</li></ul></details>`;
+function biHtml(){
+  if(!bi)return `<p class="small">Checking…</p>`;
+  if(!bi.supported)return `<p class="state bad">There is no ready made AI engine for this kind of computer. Choose Claude or Ollama instead.</p>`;
+  const d=bi.download,ready=bi.engine&&bi.models[biKey].ready,pct=d.total?Math.round(d.done/d.total*100):0;
+  const models=Object.entries(bi.models).map(([k,m])=>`<button type="button" class="mopt" role="radio" data-bikey="${k}" aria-checked="${k===biKey}"><b>${esc(m.label)}</b><span>${m.gb} GB download. ${esc(m.note)}</span>${m.ready?"<em>✓ Downloaded</em>":""}</button>`).join("");
+  let action;
+  if(d.active)action=`<div class="bar"><i style="width:${pct}%"></i></div><p class="small">${d.step==="engine"?"Downloading the AI engine":d.step==="unpack"?"Unpacking the engine":"Downloading the AI model"}${d.total?`: ${Math.round(d.done/1e6)} of ${Math.round(d.total/1e6)} MB`:"…"}. You can keep using Stellenpilot.</p>`;
+  else if(ready)action=`<p class="state ok">✓ Ready. It starts by itself when a search needs it.</p><div class="btnrow"><button type="button" class="btn sec" data-bitest>Test speed</button><button type="button" class="linkbtn" data-biremove>Remove the AI files</button></div>`;
+  else action=`<div class="btnrow"><button type="button" class="btn" data-bidl>Download (${bi.models[biKey].gb} GB)</button></div><p class="small">Downloaded once from llama.cpp on GitHub and Qwen on Hugging Face, then everything runs offline.</p>`;
+  const err=d.error?`<p class="state bad">${esc(d.error)}</p>`:"";
+  const meas=biSpeed?(biSpeed.error?`<p class="state bad">${esc(biSpeed.error)}</p>`:biSpeed.busy?`<p class="small">Starting the AI and measuring. The first start can take a minute…</p>`
+    :`<p class="meas">On this computer: about <b>${biSpeed.seconds_per_job} seconds</b> to score a job and <b>${biSpeed.minutes_per_document} minutes</b> for a CV with cover letter. A daily search takes about <b>${biSpeed.minutes_daily} minutes</b>.</p>`):"";
+  const quick=`<p class="small">Speed on a typical laptop: ${biKey==="light"?"30 to 60 seconds per CV with cover letter, and 5 to 10 minutes":"1 to 2 minutes per CV with cover letter, and 10 to 20 minutes"} for a daily search with the AI. It runs in the background.</p>`;
+  return `<div class="models" role="radiogroup" aria-label="AI model size">${models}</div>${quick}${action}${err}${meas}${SPEED_TEXT()}`;
+}
+function biRender(){["biSetup","biSettings"].forEach(id=>{const el=$(id);if(el&&!el.hidden)el.innerHTML=biHtml()})}
+async function biLoad(){try{bi=await api("GET","/api/builtin");if(!biKeySet&&bi.models[bi.model])biKey=bi.model;biRender();
+  clearTimeout(biPoll);if(bi.download.active)biPoll=setTimeout(biLoad,1000)}catch(e){}}
+let biKeySet=false;
+document.addEventListener("toggle",e=>{if(e.target.matches&&e.target.matches("details.speed"))biOpen=e.target.open},true);
+document.addEventListener("click",async e=>{
+  const m=e.target.closest("[data-bikey]");if(m){biKey=m.dataset.bikey;biKeySet=true;biSpeed=null;if($("setForm").provider.value==="builtin"){$("setForm").model.value=biKey;setDirty(true)}biRender();return}
+  if(e.target.closest("[data-bidl]")){try{bi=await api("POST","/api/builtin/download",{model:biKey});biRender();setTimeout(biLoad,800)}catch(err){toast(err.message)}return}
+  if(e.target.closest("[data-bitest]")){biSpeed={busy:true};biRender();try{const r=await api("POST","/api/builtin/test",{model:biKey});biSpeed=r.speed}catch(err){biSpeed={error:err.message}}biRender();return}
+  if(e.target.closest("[data-biremove]")){try{bi=await api("POST","/api/builtin/remove",{model:biKey});biSpeed=null;biRender();toast("The AI files were removed")}catch(err){toast(err.message)}return}
+});
+
 /* ---------- Setup wizard ---------- */
 const wz={step:0,file:null,thin:false,hasCv:false,titles:[],ai:"none",prevAi:"none",aiOk:false,keySaved:false,rereading:false};
 const W=id=>$(id);
@@ -1382,6 +1441,7 @@ function wAiRender(){
   document.querySelectorAll("[data-how]").forEach(el=>el.hidden=el.dataset.how!==wz.ai);
   W("wPull").textContent="ollama pull "+W("wModel").value;
   W("wKey").placeholder=wz.keySaved?"Saved. Type a new key to replace it":"sk-ant-...";
+  if(wz.ai==="builtin")biLoad();
 }
 async function openSetup(){
   document.body.classList.add("wizopen");W("setup").hidden=false;wShow(0);
@@ -1389,7 +1449,9 @@ async function openSetup(){
     const [st,c]=await Promise.all([api("GET","/api/settings"),api("GET","/api/cv")]);
     const s=st.search;wz.titles=c.isExample?[]:[...(s.keywords||[])];W("wCity").value=s.city||"";W("wKm").value=s.radius_km||50;W("wRemote").checked=!!s.include_remote;
     W("wGerman").value=st.language.my_german_level||"";W("wWatch").checked=!!st.watch.starter_list;
-    wz.ai=wz.prevAi=["ollama","anthropic","none"].includes(st.llm.provider)?st.llm.provider:"none";
+    wz.prevAi=["builtin","ollama","anthropic","none"].includes(st.llm.provider)?st.llm.provider:"none";
+    wz.ai=c.isExample&&wz.prevAi==="none"?"builtin":wz.prevAi;  // first setup: suggest the Built-in AI
+    if(st.llm.provider==="builtin"&&["standard","light"].includes(st.llm.model))biKey=st.llm.model;
     if(wz.ai==="ollama"&&[...W("wModel").options].some(o=>o.value===st.llm.model))W("wModel").value=st.llm.model;
     wz.keySaved=!!st.keys.ANTHROPIC_API_KEY;W("wAuto").checked=st.schedule.enabled||!st.scheduleActive;W("wTime").value=st.schedule.time||"08:45";
     W("wAuto").disabled=st.inDocker;
@@ -1459,7 +1521,10 @@ async function wNext(){
       return wShow(2)}
     if(wz.step===2){
       b.disabled=true;
-      if(wz.ai==="ollama"){if(!(await wTest())){wMsg("The free AI is not ready yet. Follow the steps above and press Test, or choose No AI for now.");b.disabled=false;return}}
+      if(wz.ai==="builtin"){await biLoad();
+        if(!(bi&&bi.engine&&bi.models[biKey].ready)){wMsg(bi&&bi.download.active?"The AI is still downloading. Wait until it is finished, or choose No AI for now and switch later in Settings.":"Press Download first, or choose No AI for now and switch later in Settings.");b.disabled=false;return}
+        await api("POST","/api/settings",{llm:{provider:"builtin",model:biKey,base_url:""}})}
+      else if(wz.ai==="ollama"){if(!(await wTest())){wMsg("The free AI is not ready yet. Follow the steps above and press Test, or choose No AI for now.");b.disabled=false;return}}
       else if(wz.ai==="anthropic"){const k=W("wKey").value.trim();
         if(!k&&!wz.keySaved){wMsg("Paste your Claude API key, or choose another option.");b.disabled=false;W("wKey").focus();return}
         await api("POST","/api/settings",{llm:{provider:"anthropic",model:"claude-haiku-4-5-20251001",base_url:""},keys:k?{ANTHROPIC_API_KEY:k}:{}});wz.keySaved=true;W("wKey").value=""}

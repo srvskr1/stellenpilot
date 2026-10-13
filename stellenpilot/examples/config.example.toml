@@ -68,6 +68,8 @@ max_age_days = 30
 [llm]
 # provider:
 #   "none"       keyword scoring and template letters, no AI
+#   "builtin"    Stellenpilot's own AI: downloaded once from the dashboard (Settings, AI model), runs on
+#                this computer, no account or key. model = "standard" (Qwen3.5 4B) or "light" (Qwen3.5 2B)
 #   "ollama"     local model through Ollama (default http://localhost:11434)
 #   "lmstudio"   local model through LM Studio's server (default http://localhost:1234/v1)
 #   "llamacpp"   llama.cpp server (default http://localhost:8080/v1)
@@ -89,6 +91,8 @@ base_url = ""
 # json_mode = true       # ask the server for strict JSON; turned off automatically if unsupported
 # temperature = 0.2
 # think = false         # Qwen3.5 and Gemma 4 can reason before answering; slower, rarely needed here
+# max_ai_jobs = 20       # AIs on your own computer read only this many new jobs per search (the most
+#                        # promising by keywords); the rest keep a keyword score. 0 = all. Cloud: all.
 
 [tailor]
 # Jobs at or above this match get a tailored CV and cover letter.

@@ -2,7 +2,19 @@
 
 With a local model, scoring, CV planning, cover letters and interview prep run on your own computer. Nothing is sent to an AI company and there is no API cost. The truth guard checks local output exactly like cloud output, so a weaker model can make your documents plainer, but not less honest.
 
-## Option 1: Ollama (easiest)
+## Option 0: Built-in AI (easiest)
+
+In the dashboard choose **Built-in AI** (in setup, or Settings, AI model) and press **Download**. That is all.
+
+* What it downloads, once: the llama.cpp server, CPU build `b11602` for your system (Windows, macOS or Linux, x64 or ARM), from the official llama.cpp releases on GitHub, and a Qwen3.5 model in GGUF format (Apache 2.0) from Hugging Face: Standard 4B (2.7 GB) or Light 2B (1.3 GB).
+* Where: `~/.stellenpilot/ai` (set `STELLENPILOT_AI_DIR` to use another folder). Shared by all your workspaces.
+* How it runs: Stellenpilot starts the engine on 127.0.0.1 at a free port when an AI answer is needed and stops it after 10 idle minutes or when Stellenpilot exits. The engine's log is `engine.log` in that folder.
+* Thinking is switched off (Qwen3.5 would otherwise reason at length before every answer, which is slow on a CPU).
+* From the terminal: `python -m stellenpilot.builtin standard` (or `light`) downloads the same files, then set `provider = "builtin"` and `model = "standard"` under `[llm]`.
+
+Speed is described in the README under "Built-in AI". In short: on a typical laptop the Standard model needs about 20 to 40 seconds per job and 1 to 2 minutes per CV and cover letter, and an AI on your own computer reads only the 20 most promising new jobs per search (`max_ai_jobs`), so a daily search takes about 10 to 20 minutes. **Test speed** in Settings measures your computer.
+
+## Option 1: Ollama
 
 1. Install Ollama from https://ollama.com (Windows, macOS, Linux).
 2. Download a model, for example:
