@@ -4,10 +4,26 @@ This guide takes you from nothing to your first real job search in about 15 minu
 
 | way | best for | you need |
 |---|---|---|
-| [A. Python](#a-install-with-python) | most people, uses the least disk space | Python 3.11 or newer |
+| [W. Windows app](#w-windows-app-easiest) | **Windows, the easiest way** | nothing, Python is included |
+| [A. Python](#a-install-with-python) | macOS and Linux, or if you like the terminal | Python 3.11 or newer |
 | [B. Docker](#b-install-with-docker) | if you already use Docker, or Python gives you trouble | Docker Desktop (Windows, Mac) or Docker Engine (Linux) |
 
-After installing, continue with [First day setup](#first-day-setup). It is the same for both ways.
+After installing, continue with [First day setup](#first-day-setup). It is the same for every way.
+
+---
+
+## W. Windows app (easiest)
+
+1. Open [the latest release](https://github.com/srvskr1/stellenpilot/releases/latest) and download **Stellenpilot-Setup-X.Y.Z.exe** (about 26 MB).
+2. Run it. Windows may show **"Windows protected your PC"**, because the app is not code signed yet (signing costs money every year). Click **More info**, then **Run anyway**. The code is open, and the installer is built by GitHub from this repository (see `.github/workflows/windows.yml`).
+3. Click through: it installs for your user only, no administrator rights needed. Leave **Put a Stellenpilot icon on the desktop** ticked.
+4. Stellenpilot starts and opens in your browser. A small window says it is running; keep it open while you use Stellenpilot.
+
+From then on: double click **Stellenpilot** on the desktop or in the Start menu. Your files live in **Documents\Stellenpilot**.
+
+**Update:** download and run the newest installer. Your files are kept. **Uninstall:** Windows Settings, Apps, Stellenpilot, Uninstall. This also removes the daily search task. Your files in Documents\Stellenpilot stay until you delete them.
+
+Prefer a version without installing? The release also has **Stellenpilot-Portable-X.Y.Z.zip**: unzip it anywhere and double click `Stellenpilot.exe`.
 
 ---
 

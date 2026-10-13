@@ -15,6 +15,8 @@ It comes with its own **free built-in AI**, so you need no account, no API key a
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
+**Windows:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed. **Everyone else:**
+
 ```bash
 pip install stellenpilot
 stellenpilot serve
@@ -135,6 +137,14 @@ Five calm pages, in your browser, on your computer:
 * **Settings**: job sources, the AI, the daily search and Gmail, with step by step help for every key.
 
 ## Install
+
+### Windows: download the app (easiest)
+
+**[Download Stellenpilot for Windows](https://github.com/srvskr1/stellenpilot/releases/latest)** (the file `Stellenpilot-Setup-X.Y.Z.exe`, about 26 MB). Python is included, nothing else to install. Run it, then double click **Stellenpilot** on your desktop.
+
+Windows may say "Windows protected your PC" because the app is not code signed yet. Click **More info**, then **Run anyway**. The installer is built by GitHub straight from this repository.
+
+### With Python (Windows, macOS, Linux)
 
 **New to Python or the terminal?** Follow [INSTALL.md](https://github.com/srvskr1/stellenpilot/blob/main/INSTALL.md): step by step for Windows, macOS, Linux and Docker, from installing Python to your first search.
 
@@ -257,6 +267,7 @@ Do these steps in order. Steps 1 and 2 matter most: they stop the daily search b
 
 **3. Remove the program.**
 
+* Windows app: Windows Settings, Apps, Stellenpilot, Uninstall. It also removes the daily search task. Your files in `Documents\Stellenpilot` stay; delete that folder too if you want everything gone.
 * Installed with pip: activate the environment you installed it in, then `pip uninstall stellenpilot`. Delete that environment folder too if you made one just for it (for example `stellenpilot-env` or `.venv`).
 * Installed from source: delete the `stellenpilot` folder you cloned or unzipped (the environment `.venv` is inside it).
 * Docker: in the project folder run `docker compose down`, then `docker rmi ghcr.io/srvskr1/stellenpilot` (and `docker image prune` to free the space of any self built image).
