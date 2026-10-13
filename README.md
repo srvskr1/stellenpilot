@@ -7,7 +7,7 @@
 
 A local, open source job hunt assistant for Germany. Every day it collects fresh job ads from public APIs, scores them against your CV, writes a tailored CV and cover letter for the best matches, and shows everything on a dashboard in your browser. It runs on your own computer. Your CV and your data never leave it, except for the AI model you choose.
 
-![Stellenpilot in 60 seconds: setup guide, CV import, settings, a daily run and the matched jobs](https://raw.githubusercontent.com/srvskr1/stellenpilot/main/docs/demo.gif)
+![Stellenpilot in about a minute: the four setup steps, Home, the agent office, Jobs, Applications and Settings](https://raw.githubusercontent.com/srvskr1/stellenpilot/main/docs/demo.gif)
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
@@ -22,20 +22,20 @@ Then open http://127.0.0.1:8765 . A short setup walks you through the rest. Work
 ## What it does
 
 * **Easy to set up, no files to edit.** Four short setup steps in the dashboard: drop your CV, say what jobs you want, pick who writes your documents, and switch on the daily search, with a check at the end. Everything can be changed later under **My CV** and **Settings**.
-* **Runs by itself every day.** Switch on **Automatic search** in Settings and pick a time; it sets up Task Scheduler on Windows or cron on macOS and Linux for you. Or press **Run search now** any time.
+* **Runs by itself every day.** Switch on **Automatic search** in Settings and pick a time; it sets up Task Scheduler on Windows or cron on macOS and Linux for you. Or press **Search now** on Home any time.
 * **Starts from your CV.** Drop it on the dashboard (or run `stellenpilot import cv.pdf`) and it turns your existing CV (PDF, DOCX or text) into a profile. Every bullet is checked against your original, and anything the AI left out or made up is flagged.
 * **Collects jobs** from the Bundesagentur für Arbeit, Arbeitnow, Adzuna and TheirStack (the last two with your own free keys), plus remote roles from Jobicy and Remotive. It reads several pages per search, within each source's free limits. It removes duplicates across sources.
 * **Watches companies directly.** Switch on the ready made watchlist of about 200 companies with offices in Germany (each checked to have a working job feed), and add your own dream companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters. Their new roles show up every day, often before they reach the job boards. `stellenpilot watch <careers link>` finds the right entry.
 * **Takes jobs you found yourself.** Paste a link or the ad text (from LinkedIn, a friend, anywhere) with `stellenpilot add` or the dashboard's "Add a job" panel. It gets scored and tailored like the rest.
 * **Understands German job ads.** It reads the German level an ad really asks for (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and gives you an English summary of German ads. It writes German cover letters only if your German is B2 or better, because a polished German letter from someone at A2 would suggest a level they do not have.
 * **Scores each job** from 0 to 100 against your profile, with a short reason and honest gaps. Ads that demand fluent German are flagged and skipped (you can switch that off).
-* **Learns your taste.** Give jobs a thumbs up or down on the dashboard and the next run leans toward what you liked.
+* **Learns your taste.** Mark jobs as a good match or not for you on the dashboard and the next run leans toward what you liked.
 * **Tailors your CV truthfully.** It reorders and selects facts from your profile. It never invents experience. A guard rejects generated text that mentions numbers, tools or language levels your profile does not back up, and falls back to safe text.
 * **Writes a cover letter** and a short report per job: what the ad asks for, what your CV covers, and which gaps to be honest about.
 * **Exports DOCX and PDF** (PDF needs LibreOffice).
 * **Optional Gmail sync** (read only) moves statuses forward when confirmations, interview invitations or rejections arrive.
 * **Daily digest to you** by Telegram or email: top new matches, CVs ready to send, interviews.
-* **Dashboard**: a Today list of what to do next, a pipeline you can filter, notes per job, interview prep, reply rates by source, the skill gaps employers mention most, a weekly summary, and a small animated office that shows what the run is doing.
+* **Dashboard** with five calm pages. **Home**: what is ready to send, interviews coming up and the newest matches. **Jobs**: every job with why it fits, honest gaps, your documents, notes and interview prep. **Applications**: a board you drag cards across, plus reply rates by source, the skill gaps employers mention most and a weekly summary. **My CV** and **Settings**, including Gmail. A small 3D office shows what the search is doing right now.
 
 ## Install
 
@@ -200,7 +200,7 @@ Do these steps in order. Steps 1 and 2 matter most: they stop the daily search b
 
 **1. Stop the dashboard.** Press **Ctrl+C** in the terminal where `stellenpilot serve` runs (Docker: `docker compose down`).
 
-**2. Remove the automatic daily search**, if you switched it on. Easiest: in the dashboard open **Settings**, untick **Automatic search** and save. If the dashboard is already gone:
+**2. Remove the automatic daily search**, if you switched it on. Easiest: in the dashboard open **Settings**, switch off **Search every day** under Automatic search and press **Save changes**. If the dashboard is already gone:
 
 * Windows (PowerShell): `schtasks /Delete /TN "Stellenpilot daily search" /F`
 * macOS and Linux: run `crontab -e` and delete the line that ends with `# jobhunt-daily`

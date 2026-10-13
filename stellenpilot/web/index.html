@@ -249,6 +249,50 @@ tr:last-child td{border-bottom:none}
 .gsteps3>li.done>div>p{display:none}
 label.btn{cursor:pointer}
 @media (max-width:900px){.setwrap{grid-template-columns:1fr}.setnav{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none}.setnav a{white-space:nowrap}}
+/* My CV */
+#cvPanel{max-width:1080px}
+#cvPanel .phead{margin-bottom:20px}
+.cvstat{padding:18px 22px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:4px}
+.cvstat .nums{display:flex;gap:24px}
+.cvstat .nums div{display:flex;flex-direction:column}
+.cvstat .nums b{font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.cvstat .nums span{font-size:.8125rem;color:var(--text-tertiary)}
+.cvstat p{flex:1 1 280px;margin:0;color:var(--text-secondary);font-size:.9375rem}
+.cvstat p.ok{color:var(--ok-fg);font-weight:500}
+#cvPanel #cvMsg{margin-top:12px}
+#cvPanel .wnote,#cvPanel .cvsrc{margin-top:12px}
+#cvForm .item{background:var(--surface-alt);border:0;border-radius:12px;padding:16px}
+#cvForm .itemhead{font-size:.875rem}
+#cvForm label{font-size:.875rem}
+#cvForm label .muted{font-weight:400}
+#cvForm textarea.input.lines{min-height:96px}
+#cvForm .mini{min-height:40px;font-size:.875rem}
+#drop.over{background:var(--accent-soft);border-color:var(--accent)}
+
+.insights .panel{border-radius:14px;padding:20px}
+.brow{grid-template-columns:minmax(0,1fr) 72px minmax(0,auto);font-size:.875rem}
+.brow .nm{font:500 .8125rem var(--f-ui);color:var(--text-tertiary)}
+.wk .nums b{font:700 1.375rem var(--f-ui)}
+/* Applications board */
+.board{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:16px;align-items:start}
+.col{background:var(--surface-alt);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:160px;transition:background .15s ease,box-shadow .15s ease}
+.col.over{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.colhead{display:flex;align-items:center;gap:8px;padding:4px 4px 2px;font-weight:600}
+.colhead i{width:8px;height:8px;border-radius:50%;background:var(--pill-fg)}
+.colhead span{margin-left:auto;color:var(--text-tertiary);font-weight:500;font-variant-numeric:tabular-nums}
+.acard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;cursor:grab;box-shadow:var(--shadow-1)}
+.acard:hover{border-color:var(--border-strong)}
+.acard.dragging{opacity:.5}
+.acard button.open{font:inherit;text-align:left;background:none;border:0;padding:0;color:var(--text);font-weight:600;cursor:pointer;line-height:1.35}
+.acard button.open:hover{color:var(--accent)}
+.acard button.open:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.acard .co{font-size:.875rem;color:var(--text-tertiary)}
+.acard .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.8125rem;color:var(--text-tertiary)}
+.acard select{font:inherit;font-size:.8125rem;min-height:32px;margin-left:auto;padding:0 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);cursor:pointer}
+.acard .gm{font-weight:600;color:var(--accent)}
+.col .none{font-size:.875rem;color:var(--text-tertiary);padding:8px 4px}
+@media (max-width:1000px){.board{grid-template-columns:repeat(4,minmax(240px,82vw));overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}.col{scroll-snap-align:start}}
+
 /* Setup wizard */
 .wiz{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:32px 16px 48px;display:flex;flex-direction:column;align-items:center}
 .wtop{width:100%;max-width:640px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
@@ -257,6 +301,7 @@ label.btn{cursor:pointer}
 .wbar{width:100%;max-width:640px;height:6px;border-radius:999px;background:var(--border);margin-bottom:32px;flex:none}
 .wbar i{display:block;height:6px;border-radius:999px;background:var(--accent);transition:width .3s ease}
 .wcard{width:100%;max-width:640px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:clamp(22px,5vw,44px);display:flex;flex-direction:column;gap:24px}
+.wcard h1:focus{outline:none}
 .wcard h1{margin:0;font-size:1.875rem;line-height:1.2;font-weight:700}
 .wcard .lead{margin:8px 0 0;color:var(--text-tertiary);font-size:1.0625rem}
 .wstep{display:flex;flex-direction:column;gap:22px}
@@ -421,52 +466,60 @@ body.wizopen{overflow:hidden}
   .tools{justify-content:stretch}.tools .input[type=search]{max-width:none;flex-basis:100%}
 }
 
-/* Agent office: smooth SVG scene, cubicles for each step plus a break room. Colours via --o-* tokens */
-:root{
-  --o-wall:#E4E9F0;--o-wall2:#F2E9DD;--o-floor-a:#D5DCE6;--o-floor-b:#C7D0DC;--o-floor2-a:#E9DCCB;--o-floor2-b:#DCCBB5;
-  --o-panel:#B9C6D6;--o-panel-d:#9CACC1;--o-desk:#CFA77D;--o-desk-d:#A9825C;--o-mon:#2B3647;--o-screen:#0F2744;
-  --o-skin:#E5B48F;--o-hair:#3B2A20;--o-shirt:#2563EB;--o-shirt-d:#1D4ED8;--o-pants:#334155;--o-shoe:#1E293B;
-  --o-sofa:#5B7DB1;--o-sofa-d:#46679A;--o-plant:#3FA36B;--o-plant-d:#2E7D52;--o-pot:#C76B3E;--o-white:#FFFFFF;
-  --o-steel:#CBD5E1;--o-steel-d:#94A3B8;--o-amber:#F59E0B;--o-green:#10B981;--o-red:#E5484D;--o-blue:#60A5FA;
-  --o-sky-day-a:#BFDBFE;--o-sky-day-b:#E0F2FE;--o-sky-night-a:#1E293B;--o-sky-night-b:#334155;}
-.office{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow-1);background:var(--o-wall)}
-.oscroll{overflow-x:auto;scrollbar-width:thin}
-.oinner{position:relative;min-width:820px}
-.scene{display:block;width:100%;height:auto}
-.office:not([data-night]){--sky-a:var(--o-sky-day-a);--sky-b:var(--o-sky-day-b)}
-.office[data-night]{--sky-a:var(--o-sky-night-a);--sky-b:var(--o-sky-night-b)}
-.scr{opacity:.45;transition:opacity .4s ease}
-.stn.on .scr{opacity:1;animation:scr 2.4s ease-in-out infinite}
-@keyframes scr{50%{opacity:.82}}
-.plate rect{fill:var(--o-white);transition:fill .3s ease}
-.plate text{font:600 13px var(--f-ui);fill:var(--text-secondary);letter-spacing:.02em}
-.plate .dot{fill:var(--o-green);opacity:0}
-.stn.on .plate rect{fill:var(--accent)} .stn.on .plate text{fill:var(--on-accent)}
-.stn.done .plate .dot{opacity:1}
-#chr{transition:transform var(--walk,1s) cubic-bezier(.45,0,.55,1)}
-#chr .leg,#chr .arm{transform-box:fill-box;transform-origin:50% 0}
-#chr.walk .leg.l,#chr.walk .arm.r{animation:swing .5s ease-in-out infinite alternate}
-#chr.walk .leg.r,#chr.walk .arm.l{animation:swing .5s ease-in-out infinite alternate-reverse}
-#chr.walk .torso{animation:bob .25s ease-in-out infinite alternate}
-@keyframes swing{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}
-@keyframes bob{to{transform:translateY(-2px)}}
-#chr .face,#chr .mug{transition:opacity .2s}
-#chr.back .face{opacity:0}
-#chr:not(.back) .hairback{opacity:0}
-#chr.work .arm.l{animation:typeL .3s ease-in-out infinite alternate}
-#chr.work .arm.r{animation:typeR .3s ease-in-out infinite alternate-reverse}
-@keyframes typeL{from{transform:rotate(12deg)}to{transform:rotate(24deg)}}
-@keyframes typeR{from{transform:rotate(-12deg)}to{transform:rotate(-24deg)}}
-#chr:not(.rest) .mug{opacity:0}
-#chr.rest .arm.r{transform:rotate(50deg)}
-#chr.rest .torso{animation:breathe 3s ease-in-out infinite}
-@keyframes breathe{50%{transform:translateY(-1px)}}
-.steam{animation:steam 2.6s ease-in-out infinite;opacity:0}
-.steam.s2{animation-delay:1.3s}
-@keyframes steam{0%{opacity:0;transform:translateY(4px)}40%{opacity:.6}100%{opacity:0;transform:translateY(-10px)}}
-.bub{position:absolute;bottom:39%;transform:translateX(var(--bx,-50%));transition:left var(--walk,1s) cubic-bezier(.45,0,.55,1);z-index:3;width:max-content;max-width:300px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 12px;font:500 .8125rem/1.4 var(--f-ui);color:var(--text);box-shadow:var(--shadow-2)}
-.bub::after{content:"";position:absolute;left:var(--ax,50%);bottom:-6px;width:12px;height:12px;background:var(--surface);border-right:1px solid var(--border);border-bottom:1px solid var(--border);transform:translateX(-50%) rotate(45deg)}
-.bub.warn{border-color:var(--warning);border-width:2px}
+/* Agent office: an isometric room built from CSS 3D planes. One desk per step, a Gmail desk and a sofa for breaks. */
+.office{position:relative;height:clamp(320px,44vw,480px);border-radius:16px;background:#EDF1F6;border:1px solid var(--border);overflow:hidden;--sc:.84}
+.office[data-night]{background:#E3E8F0}
+.room{position:absolute;z-index:0;left:50%;top:60%;width:520px;height:520px;margin:-260px 0 0 -260px;transform:rotateX(58deg) rotateZ(-45deg) scale(var(--sc));transform-style:preserve-3d}
+.room *{box-sizing:border-box}
+.room .p{position:absolute;transform-style:preserve-3d}
+.room .floor{inset:0;border-radius:8px;background-color:#E6ECF3;background-image:repeating-linear-gradient(0deg,transparent 0 51px,#DCE3EC 51px 52px),repeating-linear-gradient(90deg,transparent 0 51px,#DCE3EC 51px 52px)}
+.room .rug{left:318px;top:318px;width:190px;height:190px;border-radius:16px;background:#DCE6F9;transform:translateZ(1px)}
+.room .wallb{left:0;top:0;width:520px;height:130px;background:#DDE4EE;transform-origin:top;transform:rotateX(90deg)}
+.room .wallr{left:520px;top:0;width:130px;height:520px;background:#CFD8E6;transform-origin:left;transform:rotateY(-90deg)}
+.room .win{position:absolute;border-radius:6px;background:var(--sky,#BFD7F5);border:5px solid #F8FAFC}
+.office[data-night] .room{--sky:#334155}
+.room .trim{position:absolute;background:#CBD5E1}
+.room .clock{position:absolute;left:78px;top:40px;width:34px;height:34px;border-radius:50%;background:#F8FAFC;border:3px solid #94A3B8}
+.room .clock::before,.room .clock::after{content:"";position:absolute;left:13px;top:5px;width:2px;height:10px;background:#475569;transform-origin:bottom}
+.room .clock::after{transform:rotate(90deg);height:8px;top:7px}
+/* a box: top + front + side */
+.room .bx>i{position:absolute;display:block}
+.room .bx>.t{inset:0;transform:translateZ(var(--h))}
+.room .bx>.f{left:0;top:100%;width:100%;height:var(--h);transform-origin:top;transform:rotateX(90deg)}
+.room .bx>.s{left:100%;top:0;width:var(--h);height:100%;transform-origin:left;transform:rotateY(-90deg)}
+.room .desk>.t{background:#EAD7BC;border-radius:3px}.room .desk>.f{background:#CFB08A}.room .desk>.s{background:#B8956A}
+.room .chair>.t{background:#64748B;border-radius:6px}.room .chair>.f{background:#475569}.room .chair>.s{background:#334155}
+.room .sofa>.t{background:#6E8BE0;border-radius:8px}.room .sofa>.f{background:#4F6DC8}.room .sofa>.s{background:#3B57A6}
+.room .sofab>.t{background:#5B7BD5;border-radius:6px}.room .sofab>.f{background:#4A69C2}.room .sofab>.s{background:#3B57A6}
+.room .scr{position:absolute;border-radius:4px;background:#334155;border:3px solid #1E293B;transition:background .4s ease}
+.room .stn.on .scr{background:#3B82F6;animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{50%{opacity:.8}}
+.room .up{position:absolute;transform:rotateZ(45deg) rotateX(-58deg);transform-origin:bottom center}
+.room .tag{position:absolute;width:1px;height:1px;transform-style:preserve-3d}
+.room .tag>div{position:absolute;left:-70px;top:-14px;width:140px;text-align:center;transform:translateZ(var(--z)) rotateZ(45deg) rotateX(-58deg)}
+.room .tag span{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--f-ui);padding:4px 10px;border-radius:999px;background:#fff;color:var(--text-secondary);border:1px solid var(--border);transition:background .3s ease,color .3s ease}
+.room .tag.rest{opacity:0}
+.room .tag.on span{background:var(--accent);color:#fff;border-color:var(--accent)}
+.room .tag.done span::before{content:"✓";color:var(--ok-fg);font-weight:700}
+#chr{position:absolute;width:1px;height:1px;transform-style:preserve-3d;transition:left var(--walk,1s) ease-in-out,top var(--walk,1s) ease-in-out}
+#chr .shadow{position:absolute;left:-18px;top:-9px;width:36px;height:18px;border-radius:50%;background:rgba(15,23,42,.18);transform:translateZ(1px)}
+#chr .body{left:-24px;top:-96px;width:48px;height:96px}
+#chr.work .bob,#chr.walk .bob{animation:bob .9s ease-in-out infinite}
+#chr.walk .bob{animation-duration:.45s}
+@keyframes bob{50%{transform:translateY(-4px)}}
+#chr .mug{opacity:0;transition:opacity .3s}
+#chr.rest .mug{opacity:1}
+#chr{transition:left var(--walk,1s) ease-in-out,top var(--walk,1s) ease-in-out,transform .4s ease}
+#chr.rest{transform:translateZ(22px)}
+.bub{position:absolute;z-index:2;width:max-content;max-width:240px;transform:translate(-50%,-100%) translateZ(0);will-change:transform;pointer-events:none}
+.bub div{background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 12px;font:500 13px/1.35 var(--f-ui);color:var(--text);text-align:center;box-shadow:0 6px 16px rgba(15,23,42,.10)}
+.bub.warn div{border:2px solid var(--warning)}
+.offpill{display:inline-flex;align-items:center;gap:8px;font-size:.875rem;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--ok-bg);color:var(--ok-fg)}
+.offpill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.offpill.work{background:var(--accent-soft);color:var(--accent)} .offpill.warn{background:var(--pill-interview-bg);color:var(--pill-interview-fg)}
+#off-note{margin:-8px 0 12px;color:var(--text-tertiary);font-size:.9375rem}
+@media (max-width:900px){.office{--sc:.7}}
+@media (max-width:600px){.office{--sc:.5;height:320px}.room{top:64%}.bub{max-width:190px}.bub div{font-size:12px}}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -490,19 +543,22 @@ body.wizopen{overflow:hidden}
 
   <main class="main">
     <section class="page-x" id="cvPanel" aria-labelledby="cv-h" hidden>
-      <div class="sechead"><h2 id="cv-h">My CV</h2><span>Every job is scored and tailored from this profile</span></div>
-      <div class="panel addform" style="margin-top:12px">
-        <label class="drop" id="drop" tabindex="0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg>
-          <strong>Drop your CV here, or click to choose</strong>
-          <span class="muted">PDF, DOCX or TXT. It stays on this computer, apart from the AI model you chose.</span>
-          <input type="file" id="cvFile" accept=".pdf,.docx,.txt,.md" hidden>
-        </label>
-        <span class="muted" id="cvMsg" role="status"></span>
-        <div id="cvNotesBox" hidden><strong style="font-size:.8125rem">Check these before saving</strong><ul class="cvnotes" id="cvNotes"></ul></div>
-        <details class="cvsrc" id="cvSrc" hidden><summary>Your CV text, to copy from</summary><pre id="cvSrcText"></pre></details>
-        <div id="cvForm"></div>
-        <div class="addrow end sticky-save"><span class="muted" id="cvSaveMsg" role="status"></span><button class="btn" type="button" id="cvSave" style="width:auto">Save my CV</button></div>
+      <header class="phead">
+        <div><h1 id="cv-h">My CV</h1><p>Every score, CV and cover letter is made from this. Nothing else is ever added.</p></div>
+        <label class="btn sec" tabindex="0" id="drop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M20 16v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/></svg>Upload a new CV<input type="file" id="cvFile" accept=".pdf,.docx,.txt,.md" hidden></label>
+      </header>
+      <div class="box cvstat" id="cvStat"></div>
+      <p class="state" id="cvMsg" role="status"></p>
+      <div class="wnote" id="cvNotesBox" hidden><b>Check these before saving</b><ul class="cvnotes" id="cvNotes"></ul></div>
+      <details class="cvsrc" id="cvSrc" hidden><summary>Your CV text, to copy from</summary><pre id="cvSrcText"></pre></details>
+      <div class="setwrap" style="margin-top:20px">
+        <nav class="setnav" aria-label="CV sections" id="cvNav">
+          <a href="#cv" data-sec="c-person">About you</a><a href="#cv" data-sec="c-skills">Skills</a><a href="#cv" data-sec="c-exp">Experience</a><a href="#cv" data-sec="c-prj">Projects</a><a href="#cv" data-sec="c-edu">Education</a>
+        </nav>
+        <div class="setcol addform" id="cvCol" style="padding:0">
+          <div id="cvForm" class="setcol"></div>
+          <div class="savebar" id="cvBar"><span id="cvSaveMsg" role="status">No changes yet.</span><button class="btn" type="button" id="cvSave">Save my CV</button></div>
+        </div>
       </div>
     </section>
     <section class="page-x" id="setPanel" aria-labelledby="set-h" hidden>
@@ -660,8 +716,9 @@ body.wizopen{overflow:hidden}
         <div class="panel" id="today"></div>
       </section>
       <section aria-labelledby="off-h">
-        <div class="sechead"><h2 id="off-h">Agent office</h2><span id="off-state">Loading</span></div>
-        <div class="office" id="office" role="img" aria-label="Office scene showing what the job hunt agent is doing"></div>
+        <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
+        <p id="off-note"></p>
+        <div class="office" id="office" role="img" aria-label="Agent office"></div>
       </section>
       <details class="history"><summary>Search history</summary>
         <div class="runs"><table>
@@ -711,7 +768,7 @@ body.wizopen{overflow:hidden}
         <a href="#settings" id="gmHint" data-goto="s-gmail" hidden>Connect Gmail to update statuses by itself</a>
       </header>
       <div class="gmailbox" id="gmailBox" hidden></div>
-      <section aria-labelledby="sent-h"><div class="sechead"><h2 id="sent-h">Sent</h2><span id="gm-count"></span></div><div class="box rows" id="sentList"></div></section>
+      <section aria-labelledby="sent-h"><div class="sechead"><h2 id="sent-h">Your applications</h2><span id="gm-count"></span></div><div class="board" id="board"></div></section>
       <section aria-labelledby="ins-h">
         <div class="sechead"><h2 id="ins-h">Insights</h2><span>What works and what to learn next</span></div>
         <div class="insights">
@@ -957,11 +1014,17 @@ function renderToday(){
   $("todaySec").hidden=!items.length;$("today-count").textContent=items.length?`${items.length} to do`:"";
   $("today").innerHTML=items.map(i=>`<div class="todo ${i.c}"><span class="ic">${i.ic}</span><div class="tx">${i.t}<small>${i.s}</small></div><div class="acts">${i.a}</div></div>`).join("");
 }
+const COLS=["applied","interview","offer","rejected"];
 function renderApps(){
   const sent=jobs.filter(j=>SENT.includes(j.status)).sort((a,b)=>String(b.statusUpdatedAt||"").localeCompare(String(a.statusUpdatedAt||"")));
-  $("gm-count").textContent=sent.length?`${sent.length} in total`:"";
-  $("sentList").innerHTML=sent.length?sent.map(j=>`<button type="button" class="rowlink" data-go="${esc(j._id)}"><span class="tx"><b>${esc(j.title)}</b><span>${esc(j.company)}${j.statusUpdatedAt?" · updated "+fmtDate(j.statusUpdatedAt):""}</span></span>${pill(j.status)}${ARROW}</button>`).join("")
-    :`<div class="empty" style="border:0">Nothing sent yet. When you press I applied on a job, it moves here.</div>`;
+  $("gm-count").textContent=sent.length?`${sent.length} sent. Drag a card to move it, or use its menu.`:"";
+  if(!sent.length){$("board").innerHTML=`<div class="empty" style="grid-column:1/-1">Nothing sent yet. When you press I applied on a job, it shows up here, and Gmail can move it forward by itself.</div>`;return}
+  $("board").innerHTML=COLS.map(k=>{const list=sent.filter(j=>j.status===k);
+    return `<div class="col" data-col="${k}" style="--pill-fg:var(--pill-${k}-fg)" aria-label="${LABEL[k]}"><div class="colhead"><i></i>${LABEL[k]}<span>${list.length}</span></div>
+      ${list.map(j=>`<article class="acard" draggable="${canWrite}" data-drag="${esc(j._id)}">
+        <button class="open" data-go="${esc(j._id)}">${esc(j.title)}</button><div class="co">${esc(j.company)}</div>
+        <div class="row">${j.status==="interview"&&j.interviewAt?`<span>${fmtWhen(j.interviewAt)}</span>`:`<span>${j.statusUpdatedAt?fmtDate(j.statusUpdatedAt):""}</span>`}${j.statusSource==="gmail"?`<span class="gm" title="Moved here by Gmail">Gmail</span>`:""}
+        <select data-id="${esc(j._id)}" aria-label="Move ${esc(j.title)}" ${canWrite?"":"disabled"}>${[...COLS,"skipped"].map(c=>`<option value="${c}" ${c===j.status?"selected":""}>${c===j.status?LABEL[c]:"Move to "+LABEL[c]}</option>`).join("")}</select></div></article>`).join("")||`<div class="none">None</div>`}</div>`}).join("");
 }
 const SRCLINK={Adzuna:"https://www.adzuna.de",Arbeitnow:"https://www.arbeitnow.com",TheirStack:"https://theirstack.com",Jobicy:"https://jobicy.com",Remotive:"https://remotive.com","Bundesagentur für Arbeit":"https://www.arbeitsagentur.de/jobsuche/"};
 const srcChip=s=>SRCLINK[s]?`<a class="chip" href="${SRCLINK[s]}" target="_blank" rel="noopener">${esc(s)}</a>`:`<span class="chip">${esc(s)}</span>`;
@@ -983,6 +1046,15 @@ function renderInsights(){
   if(w)$("weekly").innerHTML=`<p class="hint">Week of ${esc(fmtDate(w.weekOf))}</p><div class="nums"><div><b>${esc(w.applied??0)}</b><span>applied</span></div><div><b>${esc(w.replies??0)}</b><span>replies</span></div><div><b>${esc(w.interviews??0)}</b><span>interviews</span></div></div>${w.topGap?`<p>Top gap: <b>${esc(w.topGap)}</b></p>`:""}${w.summary?`<p>${esc(w.summary)}</p>`:""}`;
 }
 function render(){renderPipe();renderList();renderHome();renderApps();renderInsights()}
+
+/* ---------- Board drag and drop ---------- */
+$("board").addEventListener("dragstart",e=>{const c=e.target.closest(".acard");if(!c)return;e.dataTransfer.setData("text/plain",c.dataset.drag);e.dataTransfer.effectAllowed="move";c.classList.add("dragging")});
+$("board").addEventListener("dragend",e=>{e.target.closest?.(".acard")?.classList.remove("dragging");document.querySelectorAll(".col.over").forEach(c=>c.classList.remove("over"))});
+$("board").addEventListener("dragover",e=>{const c=e.target.closest(".col");if(!c)return;e.preventDefault();document.querySelectorAll(".col.over").forEach(x=>x!==c&&x.classList.remove("over"));c.classList.add("over")});
+$("board").addEventListener("drop",async e=>{const c=e.target.closest(".col");if(!c)return;e.preventDefault();c.classList.remove("over");
+  const id=e.dataTransfer.getData("text/plain"),j=jobs.find(x=>x._id===id);if(!j||j.status===c.dataset.col)return;
+  j.status=c.dataset.col;renderApps();
+  try{await api("PATCH","/api/jobs/"+encodeURIComponent(id),{status:c.dataset.col});toast("Moved to "+LABEL[c.dataset.col]);lastState="";refresh()}catch(err){toast(err.message);lastState="";refresh()}});
 
 /* ---------- Pages ---------- */
 const PAGES={home:"page-home",jobs:"page-jobs",apps:"page-apps",cv:"cvPanel",settings:"setPanel"};
@@ -1028,108 +1100,67 @@ main.addEventListener("change",async e=>{
 });
 
 /* ---------- Agent office ---------- */
-const OFF=[["collect","Job boards",120],["score","Scoring",320],["tailor","CV + letters",520],["gmail","Gmail",720],["break","Break room",962]];
-const OFF_NOTE={collect:"Searching your job sources",score:"Scoring jobs against your CV",tailor:"Tailoring CVs and cover letters",gmail:"Reading Gmail for application replies"};
-const V=n=>`var(--o-${n})`;
-const ICON={
- collect:`<circle cx="0" cy="0" r="11" fill="none" stroke="${V("blue")}" stroke-width="2"/><ellipse cx="0" cy="0" rx="5" ry="11" fill="none" stroke="${V("blue")}" stroke-width="1.5"/><path d="M-11 0H11M-9 -6H9M-9 6H9" stroke="${V("blue")}" stroke-width="1.2"/><circle cx="12" cy="9" r="5" fill="none" stroke="${V("amber")}" stroke-width="2"/><path d="M15.5 12.5l4 4" stroke="${V("amber")}" stroke-width="2.4" stroke-linecap="round"/>`,
- score:`<rect x="-20" y="2" width="7" height="10" rx="1.5" fill="${V("blue")}"/><rect x="-10" y="-4" width="7" height="16" rx="1.5" fill="${V("blue")}"/><rect x="0" y="-9" width="7" height="21" rx="1.5" fill="${V("green")}"/><rect x="10" y="-13" width="7" height="25" rx="1.5" fill="${V("amber")}"/>`,
- tailor:`<rect x="-12" y="-14" width="24" height="29" rx="2" fill="${V("white")}"/><path d="M-7 -8H7M-7 -3H7M-7 2H4M-7 7H6" stroke="${V("steel-d")}" stroke-width="1.6" stroke-linecap="round"/><path d="M10 10l9-9 3 3-9 9h-3z" fill="${V("amber")}"/>`,
- gmail:`<rect x="-16" y="-10" width="32" height="22" rx="3" fill="${V("white")}"/><path d="M-15 -8L0 3L15 -8" fill="none" stroke="${V("red")}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="15" cy="-10" r="6" fill="${V("red")}"/><text x="15" y="-6.5" text-anchor="middle" font-size="9" font-weight="700" fill="${V("white")}" font-family="sans-serif">1</text>`};
-function cubicle(k,l,cx){return `<g class="stn" id="stn-${k}">
- <rect x="${cx-92}" y="118" width="184" height="150" rx="8" fill="${V("panel")}"/>
- <rect x="${cx-92}" y="118" width="184" height="7" rx="3.5" fill="${V("panel-d")}"/>
- <rect x="${cx-98}" y="122" width="12" height="190" rx="5" fill="${V("panel-d")}"/><rect x="${cx+86}" y="122" width="12" height="190" rx="5" fill="${V("panel-d")}"/>
- <g class="plate"><rect x="${cx-58}" y="132" width="116" height="24" rx="12"/><circle class="dot" cx="${cx-44}" cy="144" r="4"/><text x="${cx+(0)}" y="148.5" text-anchor="middle">${l}</text></g>
- <rect x="${cx-6}" y="222" width="12" height="16" fill="${V("mon")}"/><rect x="${cx-18}" y="234" width="36" height="5" rx="2.5" fill="${V("mon")}"/>
- <rect x="${cx-40}" y="170" width="80" height="54" rx="6" fill="${V("mon")}"/>
- <rect class="scr" x="${cx-35}" y="175" width="70" height="44" rx="3" fill="${V("screen")}"/>
- <g class="scr" transform="translate(${cx} 197)">${ICON[k]}</g>
- <rect x="${cx-84}" y="238" width="168" height="12" rx="4" fill="${V("desk")}"/>
- <rect x="${cx-78}" y="250" width="156" height="44" rx="3" fill="${V("desk-d")}"/>
- <rect x="${cx+48}" y="226" width="12" height="12" rx="3" fill="${V("white")}"/><path d="M60 229a4 4 0 0 1 0 6" transform="translate(${cx} 0)" fill="none" stroke="${V("white")}" stroke-width="2"/>
- <rect x="${cx-74}" y="232" width="26" height="6" rx="1" fill="${V("white")}" transform="rotate(-4 ${cx-61} 235)"/>
-</g>`}
-function breakRoom(){return `<g id="stn-break" class="stn">
- <rect x="884" y="0" width="316" height="172" fill="${V("wall2")}"/>
- <rect x="884" y="172" width="316" height="148" fill="url(#fl2)"/>
- <rect x="872" y="0" width="16" height="320" fill="${V("panel-d")}"/>
- <g class="plate"><rect x="972" y="20" width="132" height="26" rx="13"/><text x="1038" y="37.5" text-anchor="middle">Break room</text></g>
- <rect x="1050" y="64" width="62" height="44" rx="4" fill="${V("white")}" stroke="${V("desk-d")}" stroke-width="3"/><path d="M1056 102l16-20 12 13 8-8 14 15z" fill="${V("plant")}" opacity=".7"/><circle cx="1098" cy="78" r="5" fill="${V("amber")}"/>
- <ellipse cx="1065" cy="300" rx="110" ry="12" fill="${V("sofa")}" opacity=".18"/>
- <rect x="900" y="196" width="104" height="100" rx="5" fill="${V("desk")}"/><rect x="896" y="190" width="112" height="9" rx="3" fill="${V("desk-d")}"/>
- <path d="M952 214v66M906 246h92" stroke="${V("desk-d")}" stroke-width="2"/>
- <rect x="912" y="146" width="40" height="44" rx="6" fill="${V("mon")}"/><rect x="920" y="154" width="24" height="10" rx="2" fill="${V("blue")}" opacity=".7"/><rect x="924" y="172" width="16" height="4" rx="2" fill="${V("steel-d")}"/>
- <rect x="924" y="178" width="14" height="12" rx="3" fill="${V("white")}"/>
- <path class="steam" d="M928 174c-3-5 3-7 0-12" stroke="${V("steel-d")}" fill="none" stroke-width="1.6" stroke-linecap="round"/>
- <path class="steam s2" d="M934 174c-3-5 3-7 0-12" stroke="${V("steel-d")}" fill="none" stroke-width="1.6" stroke-linecap="round"/>
- <rect x="962" y="178" width="11" height="12" rx="3" fill="${V("red")}"/><rect x="978" y="178" width="11" height="12" rx="3" fill="${V("amber")}"/>
- <rect x="1026" y="214" width="120" height="44" rx="14" fill="${V("sofa")}"/>
- <rect x="1022" y="244" width="128" height="34" rx="10" fill="${V("sofa-d")}"/>
- <rect x="1016" y="230" width="18" height="50" rx="9" fill="${V("sofa")}"/><rect x="1138" y="230" width="18" height="50" rx="9" fill="${V("sofa")}"/>
- <rect x="1030" y="278" width="6" height="12" rx="2" fill="${V("desk-d")}"/><rect x="1136" y="278" width="6" height="12" rx="2" fill="${V("desk-d")}"/>
- <rect x="1036" y="226" width="22" height="18" rx="6" fill="${V("amber")}" transform="rotate(-8 1047 235)"/>
- <rect x="1162" y="120" width="34" height="178" rx="6" fill="${V("steel")}"/><path d="M1162 182h34" stroke="${V("steel-d")}" stroke-width="2"/><rect x="1167" y="140" width="4" height="26" rx="2" fill="${V("steel-d")}"/><rect x="1167" y="192" width="4" height="30" rx="2" fill="${V("steel-d")}"/>
- <path d="M1180 300h-12v-2h12z" fill="${V("steel-d")}"/>
- <rect x="1062" y="286" width="48" height="5" rx="2" fill="${V("desk-d")}"/>
- <g transform="translate(1012 300)"><path d="M-12 0h24l-3 -22h-18z" fill="${V("pot")}"/><path d="M0 -22c-14-10-18-30-6-44 2 16 6 28 6 44z" fill="${V("plant")}"/><path d="M0 -22c12-14 26-20 34-18-8 10-20 18-34 18z" fill="${V("plant-d")}"/><path d="M0 -22c-10-4-24-2-30 6 12 2 22 0 30-6z" fill="${V("plant")}"/></g>
-</g>`}
-function person(){return `<g id="chr" style="transform:translate(962px,312px)">
- <ellipse cx="0" cy="0" rx="20" ry="4.5" fill="${V("shoe")}" opacity=".18"/>
- <g class="leg l"><rect x="-10" y="-40" width="9" height="37" rx="4.5" fill="${V("pants")}"/><ellipse cx="-6" cy="-3" rx="7" ry="4" fill="${V("shoe")}"/></g>
- <g class="leg r"><rect x="1" y="-40" width="9" height="37" rx="4.5" fill="${V("pants")}"/><ellipse cx="6" cy="-3" rx="7" ry="4" fill="${V("shoe")}"/></g>
- <g class="torso">
-  <g class="arm l"><rect x="-21" y="-76" width="8" height="30" rx="4" fill="${V("shirt-d")}"/><circle cx="-17" cy="-45" r="4.2" fill="${V("skin")}"/></g>
-  <rect x="-14" y="-78" width="28" height="42" rx="11" fill="${V("shirt")}"/>
-  <rect x="-4" y="-84" width="8" height="8" rx="3" fill="${V("skin")}"/>
-  <circle cx="0" cy="-94" r="13" fill="${V("skin")}"/>
-  <path class="hairfront" d="M-13 -96c0-11 7-17 14-17s13 5 13 14c-6-5-16-6-27 3z" fill="${V("hair")}"/>
-  <circle class="hairback" cx="0" cy="-95" r="13.4" fill="${V("hair")}"/>
-  <g class="face"><circle cx="-4.5" cy="-93" r="1.6" fill="${V("shoe")}"/><circle cx="4.5" cy="-93" r="1.6" fill="${V("shoe")}"/><path d="M-3.5 -87.5q3.5 3 7 0" stroke="${V("shoe")}" stroke-width="1.4" fill="none" stroke-linecap="round"/></g>
-  <g class="arm r"><rect x="13" y="-76" width="8" height="30" rx="4" fill="${V("shirt-d")}"/><circle cx="17" cy="-45" r="4.2" fill="${V("skin")}"/><g class="mug"><rect x="12" y="-44" width="11" height="12" rx="3" fill="${V("white")}"/></g></g>
- </g>
-</g>`}
+// Each step has a spot in the room (x, y on the 520px floor) where the agent stands.
+const OFF=[["collect","Job boards",95,128],["score","Scoring",245,128],["tailor","CV + letters",395,128],["gmail","Gmail",398,206],["break","Break room",422,452]];
+const OFF_NOTE={collect:"Searching your job sources",score:"Scoring jobs against your CV",tailor:"Writing CVs and cover letters",gmail:"Reading Gmail for replies"};
+const box=(cls,x,y,w,d,h,extra="")=>`<div class="p bx ${cls}" style="left:${x}px;top:${y}px;width:${w}px;height:${d}px;--h:${h}px"><i class="t"></i><i class="f"></i><i class="s"></i>${extra}</div>`;
+const tag=(k,l,x,y,z)=>`<div class="tag" id="tag-${k}" style="left:${x}px;top:${y}px;--z:${z}px"><div><span>${l}</span></div></div>`;
 function buildOffice(){
-  const o=$("office"),hr=+new Date().toLocaleString("en-GB",{hour:"2-digit",hour12:false});
-  if(hr<7||hr>=19)o.dataset.night="";
-  o.innerHTML=`<div class="oscroll" id="oscroll"><div class="oinner"><svg class="scene" viewBox="0 0 1200 320" aria-hidden="true">
-  <defs><linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${V("floor-a")}"/><stop offset="1" stop-color="${V("floor-b")}"/></linearGradient>
-  <linearGradient id="fl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${V("floor2-a")}"/><stop offset="1" stop-color="${V("floor2-b")}"/></linearGradient>
-  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky-a)"/><stop offset="1" style="stop-color:var(--sky-b)"/></linearGradient></defs>
-  <rect width="884" height="172" fill="${V("wall")}"/><rect y="172" width="884" height="148" fill="url(#fl)"/>
-  ${[200,560].map(x=>`<rect x="${x}" y="22" width="130" height="78" rx="8" fill="url(#sky)" stroke="${V("white")}" stroke-width="6"/><path d="M${x+65} 22v78" stroke="${V("white")}" stroke-width="4"/>`).join("")}
-  ${OFF.slice(0,4).map(([k,l,x])=>cubicle(k,l,x)).join("")}${breakRoom()}${person()}</svg>
-  <div class="bub" id="bub" style="left:${962/12}%">Starting up</div></div></div>`;
+  const o=$("office"),hr=new Date().getHours();if(hr<7||hr>=19)o.dataset.night="";
+  const desk=(k,x)=>`<div class="p stn" id="stn-${k}" style="left:${x}px;top:36px;width:110px;height:56px">${box("desk",0,0,110,56,34,`<div class="scr" style="left:25px;top:10px;width:60px;height:40px;transform-origin:top;transform:translateZ(34px) rotateX(90deg)"></div>`)}${box("chair",40,74,30,28,18)}</div>`;
+  o.innerHTML=`<div class="room" aria-hidden="true">
+    <div class="p floor"></div><div class="p rug"></div>
+    <div class="p wallb"><div class="win" style="left:60px;top:48px;width:120px;height:58px"></div><div class="win" style="left:250px;top:48px;width:120px;height:58px"></div><div class="trim" style="left:0;top:0;width:520px;height:8px"></div></div>
+    <div class="p wallr"><div class="trim" style="left:0;top:0;width:8px;height:520px;background:#BAC6D6"></div><div class="win" style="left:60px;top:330px;width:52px;height:130px"></div><div class="clock"></div></div>
+    ${desk("collect",40)}${desk("score",190)}${desk("tailor",340)}
+    <div class="p stn" id="stn-gmail" style="left:432px;top:150px;width:56px;height:110px">${box("desk",0,0,56,110,34,`<div class="scr" style="left:10px;top:25px;width:40px;height:60px;transform-origin:left;transform:translateZ(34px) rotateY(-90deg)"></div>`)}</div>
+    <div class="p stn" id="stn-break">${box("sofab",360,412,124,16,54)}${box("sofa",360,428,124,50,26)}${box("chair",470,322,36,32,62)}</div>
+    <div class="p" style="left:340px;top:340px;width:1px;height:1px"><div class="up" style="left:-24px;top:-70px;width:48px;height:70px"><svg width="48" height="70" viewBox="0 0 48 70"><ellipse cx="24" cy="22" rx="18" ry="16" fill="#3F9D63"/><ellipse cx="14" cy="30" rx="11" ry="10" fill="#2F8552"/><ellipse cx="34" cy="30" rx="11" ry="10" fill="#4FB274"/><path d="M12 44h24l-3 24H15z" fill="#C2785C"/><rect x="10" y="40" width="28" height="6" rx="2" fill="#A9634A"/></svg></div></div>
+    ${tag("collect","Job boards",95,64,120)}${tag("score","Scoring",245,64,120)}${tag("tailor","CV + letters",395,64,120)}${tag("gmail","Gmail",460,205,120)}${tag("break","Break room",300,470,40)}
+    <div id="chr" style="left:422px;top:452px"><div class="shadow"></div>
+      <div class="up body"><div class="bob"><svg width="48" height="96" viewBox="0 0 48 96">
+        <defs><linearGradient id="shirt" x1="0" x2="1"><stop offset="0" stop-color="#2E63E6"/><stop offset="1" stop-color="#1A45B8"/></linearGradient><radialGradient id="face" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#F7D3B6"/><stop offset="1" stop-color="#E0AE8C"/></radialGradient></defs>
+        <rect x="15" y="62" width="8" height="30" rx="4" fill="#1E293B"/><rect x="25" y="62" width="8" height="30" rx="4" fill="#0F172A"/>
+        <rect x="9" y="30" width="30" height="38" rx="12" fill="url(#shirt)"/><rect x="5" y="34" width="8" height="24" rx="4" fill="#1A45B8"/><rect x="35" y="34" width="8" height="24" rx="4" fill="#2E63E6"/>
+        <g class="mug"><rect x="36" y="50" width="10" height="11" rx="3" fill="#fff" stroke="#CBD5E1"/></g>
+        <circle cx="24" cy="18" r="13" fill="url(#face)"/><path d="M11 16c0-9 7-13 13-13s13 4 13 12c-4-3-9-5-14-5-5 0-9 2-12 6z" fill="#3B2A20"/>
+        <circle cx="19" cy="20" r="1.6" fill="#1E293B"/><circle cx="29" cy="20" r="1.6" fill="#1E293B"/><path d="M20 25c2 2 6 2 8 0" stroke="#9A5B3F" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></div></div>
+    </div></div><div class="bub" id="bub"><div>Starting up</div></div>`;
 }
-let offX=962,offTimer=null,localGmail=false;
+let offX=422,offY=452,offTimer=null,localGmail=false;
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function officeState(){
   if(localGmail)return{st:"gmail",note:"Checking your Gmail right now"};
   const r=[...runs].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
-  if(!r)return{st:"break",note:"Waiting for the first search. Press Run search now in the menu."};
+  if(!r)return{st:"break",note:"Waiting for the first search. Press Search now at the top."};
   if(r.stage&&r.stage!=="done"&&OFF_NOTE[r.stage]){
     const age=Date.now()-Date.parse(r.stageAt||r.date);
-    if(age>3*3600e3)return{st:"break",warn:true,note:`The ${r.date} run stopped at "${OFF.find(s=>s[0]===r.stage)[1]}". Was the PC on?`};
+    if(age>3*3600e3)return{st:"break",warn:true,note:`The ${r.date} search stopped at "${OFF.find(s=>s[0]===r.stage)[1]}". Was the computer switched off?`};
     return{st:r.stage,note:r.stageNote||OFF_NOTE[r.stage],since:r.stageAt};
   }
-  return{st:"break",note:`Done for ${r.date===new Date().toLocaleDateString("en-CA")?"today":r.date}: ${r.shortlisted??0} shortlisted, ${r.docsMade??0} docs made. Back at the next run.`};
+  return{st:"break",note:`Done for ${r.date===new Date().toLocaleDateString("en-CA")?"today":r.date}: ${r.shortlisted??0} good matches, ${r.docsMade??0} CVs and letters. Back at the next search.`};
 }
 function renderOffice(){
   if(!$("chr"))buildOffice();
-  const s=officeState(),idx=OFF.findIndex(o=>o[0]===s.st),x=OFF[idx][2],working=s.st!=="break";
-  OFF.forEach(([k],i)=>{const g=$("stn-"+k);g.classList.toggle("on",i===idx);g.classList.toggle("done",working&&!localGmail&&i<idx&&k!=="break")});
-  $("off-state").textContent=s.warn?"Run interrupted":working?`Working: ${OFF[idx][1]}${s.since?", since "+new Date(s.since).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):""}`:"On a break";
-  const bub=$("bub"),chr=$("chr");bub.textContent=s.note;bub.classList.toggle("warn",!!s.warn);
-  const walkMs=reduce?0:Math.min(2600,Math.abs(x-offX)*3.2);
-  clearTimeout(offTimer);
-  chr.style.setProperty("--walk",walkMs+"ms");bub.style.setProperty("--walk",walkMs+"ms");
-  chr.style.transform=`translate(${x}px,312px)`;bub.style.left=(x/12)+"%";
-  const side=x<=150?["-20%","20%"]:["-50%","50%"];bub.style.setProperty("--bx",side[0]);bub.style.setProperty("--ax",side[1]);
-  const settle=()=>{chr.classList.remove("walk");chr.classList.toggle("work",working&&!reduce);chr.classList.toggle("back",working);chr.classList.toggle("rest",!working)};
-  if(walkMs>0){chr.classList.add("walk");chr.classList.remove("work","back","rest");offTimer=setTimeout(settle,walkMs)}else settle();
-  offX=x;
-  const sc=$("oscroll");if(sc.scrollWidth>sc.clientWidth)sc.scrollTo({left:x/1200*sc.scrollWidth-sc.clientWidth/2,behavior:reduce?"auto":"smooth"});
+  const s=officeState(),idx=OFF.findIndex(o=>o[0]===s.st),[,name,x,y]=OFF[idx],working=s.st!=="break";
+  OFF.forEach(([k],i)=>{$("stn-"+k).classList.toggle("on",i===idx&&working);const t=$("tag-"+k);t.classList.toggle("on",i===idx);t.classList.toggle("rest",i===idx&&!working);t.classList.toggle("done",working&&!localGmail&&i<idx&&k!=="break")});
+  const pill=$("off-state");pill.className="offpill"+(s.warn?" warn":working?" work":"");
+  pill.textContent=s.warn?"Search interrupted":working?`Working: ${name}`:"On a break";
+  $("off-note").textContent=working&&s.since?`${OFF_NOTE[s.st]||name}, since ${new Date(s.since).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`:"";
+  const bub=$("bub"),chr=$("chr");bub.firstElementChild.textContent=s.note;bub.classList.toggle("warn",!!s.warn);
+  $("office").setAttribute("aria-label","Agent office: "+s.note);
+  const dist=Math.hypot(x-offX,y-offY),walkMs=reduce?0:Math.min(2400,dist*5);
+  clearTimeout(offTimer);chr.style.setProperty("--walk",walkMs+"ms");chr.style.left=x+"px";chr.style.top=y+"px";
+  const settle=()=>{chr.classList.remove("walk");chr.classList.toggle("work",working&&!reduce);chr.classList.toggle("rest",!working)};
+  if(walkMs>0){chr.classList.add("walk");chr.classList.remove("work","rest");offTimer=setTimeout(settle,walkMs)}else settle();
+  offX=x;offY=y;followBub(walkMs+500);
 }
+// The bubble is a flat layer above the 3D room, so walls and screens never cut through it.
+function placeBub(){const o=$("office"),b=$("bub"),h=$("chr")&&$("chr").querySelector(".body");if(!h||!o.offsetParent)return;
+  const r=h.getBoundingClientRect(),q=o.getBoundingClientRect(),half=b.offsetWidth/2+8;
+  b.style.left=Math.max(half,Math.min(q.width-half,r.left+r.width/2-q.left))+"px";b.style.top=Math.max(b.offsetHeight+8,r.top-q.top-6)+"px"}
+function followBub(ms){const end=performance.now()+ms;const f=()=>{placeBub();if(performance.now()<end)requestAnimationFrame(f)};requestAnimationFrame(f)}
+addEventListener("resize",placeBub);addEventListener("hashchange",()=>setTimeout(placeBub,60));
 async function checkGmail(){
   localGmail=true;renderOffice();
   const btn=$("gmailBtn"),box=$("gmailBox");btn.disabled=true;btn.querySelector("span").textContent="Checking Gmail…";
@@ -1180,17 +1211,18 @@ function renderCv(){
   const edu=cv.education.map((e,i)=>`<div class="item" data-sec="education"><div class="itemhead">Degree ${i+1}${rm("education",i)}</div>
     <div class="g3"><label>Degree ${inp("degree",e.degree,"M.Sc. Data Science")}</label><label>School ${inp("school",e.school)}</label><label>Dates ${inp("dates",e.dates,"2023 to now")}</label></div></div>`).join("");
   const sk=Object.entries(cv.skills).map(([g,items],i)=>`<div class="skillrow" data-sec="skills">${inp("group",g,"Group, e.g. Cloud")}${inp("items",(items||[]).join(", "),"AWS S3, Glue, Athena")}${rm("skills",i)}</div>`).join("");
-  $("cvForm").innerHTML=`<div style="display:flex;flex-direction:column;gap:14px">
-  <fieldset class="fset" data-sec="person"><legend>About you</legend>
+  const card=(id,title,hint,body,extra="")=>`<section class="box scard" id="${id}" ${extra}><h2>${title}</h2>${hint?`<p class="hint">${hint}</p>`:""}${body}</section>`;
+  $("cvForm").innerHTML=card("c-person","About you","",`
     <div class="g2"><label>Full name ${inp("name",p.name)}</label><label>Email ${inp("email",p.email,"","email")}</label><label>Phone ${inp("phone",p.phone)}</label><label>City ${inp("location",p.location,"Essen, Germany")}</label></div>
-    <div class="g2"><label>Languages <span class="muted">(one per line, with level)</span>${area("languages",p.languages,"English (C1)\nGerman (A2)")}</label>
-    <label>Links <span class="muted">(one per line)</span>${area("links",p.links,"linkedin.com/in/you\ngithub.com/you")}</label></div>
-    <label>Headlines <span class="muted">(one per line; the best fit is picked for each job)</span>${area("headlines",p.headlines,"Data Engineering Working Student | Python, SQL, AWS")}</label>
-    <label>Short summary ${area("summary",p.summary,"Two or three true sentences about you")}</label></fieldset>
-  <fieldset class="fset"><legend>Skills</legend><p class="hint">A group named <b>Learning</b> is never presented as experience, only as something you are learning.</p>${sk}<button type="button" class="mini" data-add="skills">+ Add skill group</button></fieldset>
-  <fieldset class="fset"><legend>Work experience</legend>${exp||'<p class="hint" style="margin:0">No jobs yet.</p>'}<button type="button" class="mini" data-add="experience">+ Add job</button></fieldset>
-  <fieldset class="fset"><legend>Projects</legend>${prj||'<p class="hint" style="margin:0">No projects yet.</p>'}<button type="button" class="mini" data-add="projects">+ Add project</button></fieldset>
-  <fieldset class="fset"><legend>Education</legend>${edu||'<p class="hint" style="margin:0">No degrees yet.</p>'}<button type="button" class="mini" data-add="education">+ Add degree</button></fieldset></div>`;
+    <div class="g2"><label>Languages <span class="muted">One per line, with a level like German (A2).</span>${area("languages",p.languages,"English (C1)\nGerman (A2)")}</label>
+    <label>Links <span class="muted">One per line.</span>${area("links",p.links,"linkedin.com/in/you\ngithub.com/you")}</label></div>
+    <label>Headlines <span class="muted">One per line. The best fit is picked for each job.</span>${area("headlines",p.headlines,"Data Engineering Working Student | Python, SQL, AWS")}</label>
+    <label>Short summary ${area("summary",p.summary,"Two or three true sentences about you")}</label>`,'data-sec="person"')
+  +card("c-skills","Skills","Put skills you are still learning in a group called <b>Learning</b>. They are never shown as experience.",`${sk}<button type="button" class="mini" data-add="skills">+ Add skill group</button>`)
+  +card("c-exp","Work experience","Each point is copied word for word into your tailored CVs, so keep them short and true.",`${exp||'<p class="small">No jobs yet.</p>'}<button type="button" class="mini" data-add="experience">+ Add job</button>`)
+  +card("c-prj","Projects","",`${prj||'<p class="small">No projects yet.</p>'}<button type="button" class="mini" data-add="projects">+ Add project</button>`)
+  +card("c-edu","Education","",`${edu||'<p class="small">No degrees yet.</p>'}<button type="button" class="mini" data-add="education">+ Add degree</button>`);
+  cvStat();
 }
 function readCv(){
   const v=(el,k)=>el.querySelector(`[data-k="${k}"]`).value.trim();
@@ -1208,9 +1240,21 @@ $("cvForm").addEventListener("click",e=>{
   cv=readCv();
   if(add){const s=add.dataset.add;if(s==="skills")cv.skills[""]=[];else cv[s].push({})}
   else{const s=del.dataset.rm,i=+del.dataset.i;if(s==="skills"){const k=Object.keys(cv.skills);delete cv.skills[k[i]]}else cv[s].splice(i,1)}
-  renderCv();
+  renderCv();cvDirty(true);
   if(add){const items=$("cvForm").querySelectorAll(`[data-sec="${add.dataset.add}"]`);items[items.length-1]?.querySelector("input")?.focus()}
 });
+function cvStat(){
+  const c=cv,n=(c.experience||[]).length,ed=(c.education||[]).length,sk=Object.values(c.skills||{}).flat().length,langs=c.person.languages||[];
+  const de=langs.find(l=>/german|deutsch/i.test(l)),tips=[];
+  if(!c.person.name)tips.push("Add your name");if(!n)tips.push("Add at least one job or internship");if(!sk)tips.push("Add your skills");
+  if(!de)tips.push("Add German with a level, like German (A2), so ads asking for more are handled right");if(!(c.person.headlines||[]).length)tips.push("Add a headline");
+  $("cvStat").innerHTML=`<div class="nums"><div><b>${n}</b><span>job${n===1?"":"s"}</span></div><div><b>${sk}</b><span>skills</span></div><div><b>${(c.projects||[]).length}</b><span>projects</span></div><div><b>${ed}</b><span>degree${ed===1?"":"s"}</span></div><div><b>${esc(de?(de.match(/\b[ABC][12]\b/)||["?"])[0]:"?")}</b><span>German</span></div></div>
+    <p class="${tips.length?"":"ok"}">${tips.length?"To get better matches: "+tips.map(esc).join(". ")+".":"✓ Your CV looks complete."}</p>`;
+}
+function cvDirty(on){$("cvBar").classList.toggle("dirty",on);if(on)$("cvSaveMsg").textContent="You have unsaved changes.";else if(/unsaved/.test($("cvSaveMsg").textContent))$("cvSaveMsg").textContent="No changes yet."}
+$("cvForm").addEventListener("input",()=>cvDirty(true));
+$("cvNav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
+  document.querySelectorAll("#cvNav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
 async function loadCv(){
   if(cv)return;
   try{const r=await api("GET","/api/cv");cv=r.isExample?blankCv():normCv(r.profile);renderCv()}catch(e){$("cvMsg").textContent=e.message}
@@ -1221,7 +1265,7 @@ async function importCv(file){
   if(!file)return;
   if(!/\.(pdf|docx|txt|md)$/i.test(file.name)){msg.textContent="Use a PDF, DOCX or TXT file.";return}
   if(file.size>10e6){msg.textContent="That file is over 10 MB.";return}
-  msg.textContent=`Reading ${file.name}… with a local AI model this can take a few minutes.`;$("drop").style.pointerEvents="none";
+  msg.className="state";msg.textContent=`Reading ${file.name}… with an AI on this computer this can take a few minutes.`;$("drop").style.pointerEvents="none";
   try{
     const data=await new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=()=>bad(new Error("Could not read the file"));fr.readAsDataURL(file)});
     const r=await api("POST","/api/cv/import",{name:file.name,data});
@@ -1229,7 +1273,7 @@ async function importCv(file){
     $("cvNotes").innerHTML=r.notes.map(n=>`<li>${esc(n)}</li>`).join("");$("cvNotesBox").hidden=!r.notes.length;
     $("cvSrcText").textContent=r.cvText||"";$("cvSrc").hidden=!r.cvText;
     const thin=!cv.experience.length&&!cv.education.length;$("cvSrc").open=thin;
-    msg.textContent=thin?"Your contact details and languages are filled in. Add your jobs, skills and degrees below; your CV text is there to copy from.":"Done. Check every field below, fix anything wrong, then save.";
+    msg.textContent=thin?"Your contact details and languages are filled in. Add your jobs, skills and degrees below; your CV text is there to copy from. Then press Save my CV.":"Read. Check every field below, fix anything wrong, then press Save my CV.";cvDirty(true);
   }catch(e){msg.textContent=e.message}
   finally{$("drop").style.pointerEvents="";$("cvFile").value=""}
 }
@@ -1238,9 +1282,11 @@ $("drop").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.prev
 ["dragenter","dragover"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.add("over")}));
 ["dragleave","drop"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.remove("over")}));
 $("drop").addEventListener("drop",e=>importCv(e.dataTransfer.files[0]));
+$("cvPanel").addEventListener("dragover",e=>{if(e.dataTransfer.types.includes("Files"))e.preventDefault()});
+$("cvPanel").addEventListener("drop",e=>{if(!e.dataTransfer.files.length)return;e.preventDefault();importCv(e.dataTransfer.files[0])});
 $("cvSave").addEventListener("click",async()=>{
   const m=$("cvSaveMsg"),b=$("cvSave");b.disabled=true;m.textContent="";
-  try{cv=readCv();await api("POST","/api/cv/save",{profile:cv});m.textContent="Saved. The next search uses your CV.";lastState="";refresh()}
+  try{cv=readCv();await api("POST","/api/cv/save",{profile:cv});cvDirty(false);cvStat();m.textContent="Saved. The next search uses your CV.";lastState="";refresh()}
   catch(e){m.textContent=e.message}finally{b.disabled=false}
 });
 let cvPrompted=false;
