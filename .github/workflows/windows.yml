@@ -57,6 +57,24 @@ jobs:
           & $iscc "/DAppVersion=${{ steps.v.outputs.version }}" packaging\installer.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
           Compress-Archive -Path dist\Stellenpilot\* -DestinationPath "dist\Stellenpilot-Portable-${{ steps.v.outputs.version }}.zip"
+      - name: install test (silent install, start, uninstall)
+        shell: pwsh
+        run: |
+          $setup = Get-Item "dist\Stellenpilot-Setup-*.exe"
+          Start-Process $setup.FullName -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/TASKS=desktopicon" -Wait
+          $exe = "$env:LOCALAPPDATA\Programs\Stellenpilot\Stellenpilot.exe"
+          if (-not (Test-Path $exe)) { throw "not installed at $exe" }
+          if (-not (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Stellenpilot.lnk")) { throw "no Start menu entry" }
+          $env:STELLENPILOT_NO_BROWSER = "1"
+          $app = Start-Process $exe -ArgumentList "--home", "$env:RUNNER_TEMP\ws2" -PassThru
+          $ok = $false
+          foreach ($i in 1..30) { Start-Sleep 1; try { if ((Invoke-WebRequest http://127.0.0.1:8765/api/state -UseBasicParsing).StatusCode -eq 200) { $ok = $true; break } } catch {} }
+          Stop-Process $app.Id -Force
+          if (-not $ok) { throw "installed app did not answer" }
+          Start-Process "$env:LOCALAPPDATA\Programs\Stellenpilot\unins000.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES" -Wait
+          Start-Sleep 3
+          if (Test-Path $exe) { throw "uninstall left the app behind" }
+          Write-Host "Installed, started and uninstalled."
       - uses: actions/upload-artifact@v4
         with:
           name: windows
