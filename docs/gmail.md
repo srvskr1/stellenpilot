@@ -2,7 +2,17 @@
 
 The sync reads recent mail about your applications and moves statuses forward: confirmation of receipt to Applied, an invitation to Interview, a rejection to Rejected, an offer to Offer. It never moves a status backwards, never sends, deletes or labels mail, and only asks for the read only scope `https://www.googleapis.com/auth/gmail.readonly`.
 
-## One time setup (about 10 minutes)
+## The easy way: in the dashboard
+
+Open **Settings** and scroll to **Gmail**. Three steps, once:
+
+1. **Install Gmail support** with one button.
+2. **Create your own Google key file** (the steps are shown there, and below in steps 2 to 5) and choose the downloaded file.
+3. **Connect Gmail**. A Google page opens; allow read only access.
+
+After that every search also checks your Gmail, and **Applications** has a **Check Gmail** button.
+
+## One time setup by hand (about 10 minutes)
 
 1. Install the extra packages: `pip install -e ".[gmail]"`
 2. Go to https://console.cloud.google.com , create a project (any name).

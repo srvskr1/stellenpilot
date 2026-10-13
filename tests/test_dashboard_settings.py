@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from stellenpilot.config import DEFAULTS, dump_toml, save_secrets, save_user_config
-from stellenpilot.server import clean_settings, find_doc
+from stellenpilot.server import check_credentials, clean_settings, find_doc
 
 
 class SettingsTest(unittest.TestCase):
@@ -58,6 +58,16 @@ class FindDocTest(unittest.TestCase):
             self.assertIsNone(find_doc(job, "report", out))
             self.assertIsNone(find_doc({"folder": d}, "cv", out))  # outside the output folder
             self.assertIsNone(find_doc({"folder": ""}, "cv", out))
+
+
+class CredentialsTest(unittest.TestCase):
+    def test_only_desktop_clients(self):
+        ok = '{"installed": {"client_id": "x.apps.googleusercontent.com", "client_secret": "s"}}'
+        self.assertEqual(check_credentials(ok), ok)
+        for bad, word in (("hello", "json"), ('{"web": {"client_id": "x"}}', "Desktop"), ("{}", "Desktop"), ("[]", "Desktop")):
+            with self.assertRaises(ValueError) as cm:
+                check_credentials(bad)
+            self.assertIn(word, str(cm.exception))
 
 
 if __name__ == "__main__":

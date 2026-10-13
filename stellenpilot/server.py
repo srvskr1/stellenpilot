@@ -23,7 +23,7 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
          "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
-SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import"}
+SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import", "/api/gmail/install", "/api/gmail/connect"}
 # What the Settings page may change. Types come from config.DEFAULTS.
 EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remote", "max_age_days", "exclude_title_words"),
             "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack", "jobicy", "remotive"),
@@ -124,6 +124,32 @@ def open_in_file_manager(path: str) -> None:
         subprocess.Popen(["open", path])
     else:
         subprocess.Popen(["xdg-open", path])
+
+
+GMAIL_PACKAGES = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2"]
+
+
+def gmail_status(settings) -> dict:
+    from importlib.util import find_spec
+    home = Path(settings.home)
+    return {"enabled": bool(settings["gmail"].get("enabled")),
+            "packages": bool(find_spec("googleapiclient") and find_spec("google_auth_oauthlib")),
+            "credentials": (home / "credentials.json").exists(),
+            "connected": (home / "token.json").exists()}
+
+
+def check_credentials(text: str) -> str:
+    """Validate a Google OAuth client file; return it unchanged. Raises ValueError in plain words."""
+    try:
+        data = json.loads(text)
+    except ValueError:
+        raise ValueError("That is not the file from Google. It should be a .json file.") from None
+    client = data.get("installed") if isinstance(data, dict) else None
+    if not isinstance(client, dict) or not client.get("client_id") or not client.get("client_secret"):
+        if isinstance(data, dict) and "web" in data:
+            raise ValueError("This is a Web application client. Create one of type Desktop app instead.")
+        raise ValueError("This file is not a Google OAuth client of type Desktop app.")
+    return text
 
 
 def find_doc(job, kind: str, out_root: Path) -> Path | None:
@@ -252,7 +278,8 @@ def make_handler(settings, port: int = 8765):
                 return self._send(200, {**{sec: {k: settings[sec][k] for k in keys} for sec, keys in EDITABLE.items()},
                                         "keys": {k: bool(settings.secret(k)) for k in SECRETS},
                                         "scheduleActive": schedule.is_enabled(settings.home),
-                                        "inDocker": schedule.in_docker()})
+                                        "inDocker": schedule.in_docker(),
+                                        "gmail": gmail_status(settings)})
             if self.path == "/api/cv":
                 return self._send(200, {"profile": settings.profile,
                                         "isExample": settings.profile.get("person", {}).get("name") == "Alex Example"})
@@ -359,9 +386,42 @@ def make_handler(settings, port: int = 8765):
                 return self._cv_import()
             if self.path == "/api/cv/save":
                 return self._cv_save()
+            if self.path == "/api/gmail/install":
+                try:
+                    subprocess.run([sys.executable, "-m", "pip", "install", *GMAIL_PACKAGES],
+                                   check=True, capture_output=True, text=True, timeout=900)
+                except subprocess.CalledProcessError as e:
+                    return self._send(500, {"error": "Install failed: " + (e.stderr or e.stdout or "")[-400:].strip()})
+                except (OSError, subprocess.TimeoutExpired) as e:
+                    return self._send(500, {"error": f"Install failed: {e}"})
+                import importlib
+                importlib.invalidate_caches()
+                return self._send(200, {"gmail": gmail_status(settings)})
+            if self.path == "/api/gmail/credentials":
+                try:
+                    text = check_credentials(str(self._body().get("text") or ""))
+                except ValueError as e:
+                    return self._send(400, {"error": str(e)})
+                (settings.home / "credentials.json").write_text(text, encoding="utf-8")
+                (settings.home / "token.json").unlink(missing_ok=True)  # a new client needs a new consent
+                return self._send(200, {"gmail": gmail_status(settings)})
+            if self.path == "/api/gmail/connect":
+                from .config import save_user_config
+                from .gmail_sync import _service
+                try:
+                    _service(settings.home)  # opens Google's consent page in the browser on this computer
+                except Exception as e:
+                    return self._send(400, {"error": f"Could not connect Gmail: {e}"})
+                settings.cfg = save_user_config(settings.home, {"gmail": {"enabled": True}})
+                return self._send(200, {"gmail": gmail_status(settings)})
+            if self.path == "/api/gmail/disconnect":
+                from .config import save_user_config
+                (settings.home / "token.json").unlink(missing_ok=True)
+                settings.cfg = save_user_config(settings.home, {"gmail": {"enabled": False}})
+                return self._send(200, {"gmail": gmail_status(settings)})
             if self.path == "/api/gmail":
                 if not settings["gmail"].get("enabled"):
-                    return self._send(400, {"error": "Gmail sync is off. See docs/gmail.md"})
+                    return self._send(400, {"error": "Gmail is not connected. Connect it under Settings, Gmail."})
                 try:
                     from .gmail_sync import sync
                     return self._send(200, {"changes": _sync_closing(sync, settings)})

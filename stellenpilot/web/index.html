@@ -197,6 +197,58 @@ tr:last-child td{border-bottom:none}
 .cvnotes{margin:0;padding-left:18px;color:var(--text-secondary);font-size:.8125rem;line-height:1.5}
 .addform textarea.input.cvtext{font:.8125rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:320px;resize:vertical}
 #cvPanel,#setPanel{max-width:1080px;margin:0 auto}
+/* Settings */
+#setPanel{max-width:1080px}
+#setPanel .phead{margin-bottom:28px}
+.setwrap{display:grid;grid-template-columns:180px minmax(0,1fr);gap:32px;align-items:start}
+.setnav{position:sticky;top:24px;display:flex;flex-direction:column;gap:2px}
+.setnav a{display:flex;align-items:center;min-height:40px;padding:0 12px;border-radius:8px;color:var(--text-secondary);font-weight:500}
+.setnav a:hover{background:var(--surface-alt);text-decoration:none;color:var(--text)}
+.setnav a.on{color:var(--accent);background:var(--accent-soft);font-weight:600}
+.setcol{display:flex;flex-direction:column;gap:20px;min-width:0}
+#setForm.setform{padding:0;gap:20px}
+.scard{padding:24px;display:flex;flex-direction:column;gap:16px;scroll-margin-top:24px}
+.scard h2{font-size:1.125rem}
+.scard .hint{margin:-10px 0 0;color:var(--text-tertiary);font-size:.9375rem}
+.scard .hint+*{margin-top:4px}
+.setform label,.scard label{font-size:.875rem}
+#setForm textarea.input.lines{min-height:120px}
+.setform label .muted{font-weight:400}
+.check.sw{align-items:flex-start;gap:14px;min-height:auto;cursor:pointer}
+.check.sw input{appearance:none;flex:none;width:40px;height:24px;border-radius:999px;background:#D0D5DD;position:relative;cursor:pointer;margin:0;transition:background .15s ease}
+.check.sw input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.2);transition:transform .15s ease}
+.check.sw input:checked{background:var(--accent)}
+.check.sw input:checked::after{transform:translateX(16px)}
+.check.sw input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.check.sw .t b{display:block;color:var(--text);font-size:.9375rem;font-weight:600}
+.check.sw .t span{display:block;color:var(--text-tertiary);font-size:.875rem;font-weight:400}
+#setPanel .srcrow{padding:16px 0;gap:12px}
+#setPanel .srcrow:first-of-type{padding-top:4px}
+.keyset{font-weight:600;color:var(--ok-fg);font-size:.75rem;background:var(--ok-bg);border-radius:999px;padding:1px 8px;margin-left:4px}
+.keyset:empty{display:none}
+#setPanel .keyhelp{background:var(--surface-alt);border:0;border-radius:12px;padding:12px 16px;font-size:.875rem}
+#setPanel .keyhelp summary{color:var(--accent);min-height:32px}
+.howto{border-radius:12px;background:var(--surface-alt);padding:14px 18px;font-size:.875rem;color:var(--text-secondary)}
+.howto b{color:var(--text)}
+.howto ol{margin:6px 0 0;padding-left:20px;line-height:1.7}
+.howto code,.scard code{font:.8125rem var(--f-mono);background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:6px;white-space:nowrap}
+.state{margin:0;font-size:.9375rem;font-weight:500;color:var(--text-secondary)}
+.state:empty{display:none}
+.state.ok{color:var(--ok-fg)} .state.bad{color:var(--pill-rejected-fg)}
+.savebar{position:sticky;bottom:16px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 12px 12px 20px;border-radius:14px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-2);color:var(--text-tertiary);font-size:.9375rem}
+.savebar.dirty{border-color:var(--accent);color:var(--text)}
+.gsteps3{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.gsteps3>li{display:flex;gap:14px;padding:16px 0;border-top:1px solid var(--surface-alt)}
+.gsteps3>li:first-child{border-top:0;padding-top:4px}
+.gsteps3 .ic{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.8125rem;font-weight:700;border:2px solid var(--border-strong);color:var(--text-tertiary)}
+.gsteps3>li.done .ic{background:#12B76A;border-color:#12B76A;color:#fff}
+.gsteps3>li.cur .ic{border-color:var(--accent);color:var(--accent)}
+.gsteps3>li>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.gsteps3>li>div>p{margin:0;color:var(--text-tertiary);font-size:.9375rem}
+.gsteps3>li:not(.cur) .btnrow,.gsteps3>li:not(.cur) details{display:none}
+.gsteps3>li.done>div>p{display:none}
+label.btn{cursor:pointer}
+@media (max-width:900px){.setwrap{grid-template-columns:1fr}.setnav{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none}.setnav a{white-space:nowrap}}
 /* Setup wizard */
 .wiz{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:32px 16px 48px;display:flex;flex-direction:column;align-items:center}
 .wtop{width:100%;max-width:640px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
@@ -454,91 +506,139 @@ body.wizopen{overflow:hidden}
       </div>
     </section>
     <section class="page-x" id="setPanel" aria-labelledby="set-h" hidden>
-      <div class="sechead"><h2 id="set-h">Settings</h2><span>What to search, where, and which AI model writes your documents. <button class="linkbtn" type="button" data-setup>Run setup again</button></span></div>
-      <form class="panel addform" id="setForm" style="margin-top:12px">
-        <fieldset class="fset" data-step="search"><legend>What you are looking for</legend>
-          <label>Job titles <span class="muted">(one per line)</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
-          <div class="g3">
-            <label>City <input class="input" name="city" placeholder="Essen"></label>
-            <label>Distance from the city (km) <input class="input" name="radius_km" type="number" min="0" max="1000"></label>
-            <label>Country code <input class="input" name="country" maxlength="2" placeholder="de"></label>
-          </div>
-          <label class="check"><input type="checkbox" name="include_remote"> Also remote jobs anywhere in the country</label>
-          <div class="g2">
-            <label>Only ads from the last ... days <input class="input" name="max_age_days" type="number" min="1" max="60"></label>
-            <label>Skip titles with these words <span class="muted">(one per line)</span><textarea class="input lines" name="exclude_title_words" placeholder="senior&#10;lead"></textarea></label>
-          </div>
-        </fieldset>
-        <fieldset class="fset" data-step="sources"><legend>Job sources</legend>
-          <div class="srcrow"><label class="check"><input type="checkbox" name="arbeitsagentur"> Bundesagentur für Arbeit <span class="muted">free, no key</span></label></div>
-          <div class="srcrow"><label class="check"><input type="checkbox" name="arbeitnow"> Arbeitnow <span class="muted">free, no key</span></label></div>
-          <div class="srcrow"><label class="check"><input type="checkbox" name="adzuna"> Adzuna <span class="muted">free key from developer.adzuna.com</span></label>
-            <details class="keyhelp"><summary>How to get your free Adzuna keys (about 3 minutes)</summary>
-              <ol>
-                <li>Open <a href="https://developer.adzuna.com/signup" target="_blank" rel="noopener">developer.adzuna.com</a> and register. It is free; any website field can be your GitHub or LinkedIn profile.</li>
-                <li>Confirm the email Adzuna sends you, then log in.</li>
-                <li>On your Adzuna developer dashboard you see two values: <b>Application ID</b> (short, 8 characters) and <b>Application Key</b> (long, 32 characters).</li>
-                <li>Copy the Application ID into <b>App ID</b> below and the Application Key into <b>App key</b>, then press <b>Save settings</b>.</li>
-              </ol>
-              <p>The free plan allows 250 searches a day; Stellenpilot uses at most 20 per run. Never share these keys or paste them in chats.</p>
-            </details>
-            <div class="g2"><label>App ID <span class="keyset" data-key="ADZUNA_APP_ID"></span><input class="input" name="ADZUNA_APP_ID" autocomplete="off" placeholder="Application ID, e.g. 1a2b3c4d"></label>
-            <label>App key <span class="keyset" data-key="ADZUNA_APP_KEY"></span><input class="input" name="ADZUNA_APP_KEY" type="password" autocomplete="off" placeholder="Application Key, 32 characters"></label></div></div>
-          <div class="srcrow"><label class="check"><input type="checkbox" name="theirstack"> TheirStack <span class="muted">free key from theirstack.com, 200 credits a month</span></label>
-            <details class="keyhelp"><summary>How to get your free TheirStack key (about 2 minutes)</summary>
-              <ol>
-                <li>Open <a href="https://theirstack.com" target="_blank" rel="noopener">theirstack.com</a> and sign up for free (Google sign in works).</li>
-                <li>Open your account settings and find the <b>API key</b> section.</li>
-                <li>Copy the key (a long text) into <b>API key</b> below and press <b>Save settings</b>.</li>
-              </ol>
-              <p>The free plan has 200 credits a month, one credit per job found. Stellenpilot asks for 6 jobs a run, which lasts a month of daily searches. Keys are personal, so never share yours.</p>
-            </details>
-            <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off" placeholder="Paste your TheirStack API key"></label></div>
-          <div class="srcrow"><label class="check"><input type="checkbox" name="jobicy"> Jobicy <span class="muted">free, no key, remote jobs only</span></label></div>
-          <div class="srcrow"><label class="check"><input type="checkbox" name="remotive"> Remotive <span class="muted">free, no key, remote jobs only, small feed</span></label></div>
-          <div class="srcrow"><label class="check"><input type="checkbox" name="starter_list"> Company watchlist: also check about 200 companies with offices in Germany <span class="muted">their own career feeds, often before the job boards; adds a minute or two per run</span></label></div>
-          <p class="hint" style="margin:0">Saved keys are not shown again. Leave a key box empty to keep the saved one.</p>
-        </fieldset>
-        <fieldset class="fset" data-step="ai"><legend>AI model</legend>
-          <p class="hint" style="margin:0">Without a model, jobs are scored by keywords and letters come from a template. With one, scores, CVs and letters are much better.</p>
-          <div class="g2">
-            <label>Model service
-              <select class="input" name="provider">
-                <option value="none">None (keywords and templates)</option>
-                <option value="ollama">Ollama, free on your computer</option>
-                <option value="lmstudio">LM Studio, free on your computer</option>
-                <option value="anthropic">Claude (Anthropic API key)</option>
-                <option value="openai">OpenAI (API key)</option>
-                <option value="llamacpp">llama.cpp server</option>
-                <option value="vllm">vLLM server</option>
-                <option value="local">Other local server</option>
-              </select></label>
-            <label>Model name <input class="input" name="model" list="modelList" placeholder="e.g. qwen3.5:4b"></label>
-            <datalist id="modelList"><option value="qwen3.5:4b"><option value="ministral-3:8b"><option value="ministral-3:3b"><option value="qwen3.5:9b"><option value="gemma4:12b"><option value="claude-haiku-4-5-20251001"><option value="claude-sonnet-5-5"></datalist>
-          </div>
-          <label data-for="anthropic">Anthropic API key <span class="keyset" data-key="ANTHROPIC_API_KEY"></span><input class="input" name="ANTHROPIC_API_KEY" type="password" autocomplete="off"></label>
-          <label data-for="openai">OpenAI API key <span class="keyset" data-key="OPENAI_API_KEY"></span><input class="input" name="OPENAI_API_KEY" type="password" autocomplete="off"></label>
-          <label data-for="local llamacpp vllm lmstudio ollama">Server address <span class="muted">(leave empty for the usual one)</span><input class="input" name="base_url" placeholder="http://localhost:11434"></label>
-          <p class="hint" style="margin:0" data-for="ollama">Install Ollama from ollama.com, then run <code>ollama pull qwen3.5:4b</code> once.</p>
-        </fieldset>
-        <fieldset class="fset" data-step="search"><legend>Documents and German</legend>
-          <div class="g3">
-            <label>My German level
-              <select class="input" name="my_german_level"><option value="">From my CV</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></label>
-            <label>Make documents for matches from (0 to 100) <input class="input" name="min_match" type="number" min="0" max="100"></label>
-            <label>Cover letter language
-              <select class="input" name="letter_language"><option value="auto">Automatic</option><option value="en">Always English</option><option value="de">Always German</option></select></label>
-          </div>
-          <p class="hint" style="margin:0">Automatic writes German letters only if your German is B2 or better.</p>
-        </fieldset>
-        <fieldset class="fset" data-step="schedule"><legend>Automatic search</legend>
-          <label class="check"><input type="checkbox" name="enabled"> Search for new jobs automatically every day</label>
-          <div class="g3"><label>At <input class="input" name="time" type="time" value="08:45"></label></div>
-          <p class="hint" style="margin:0" id="schedState"></p>
-          <p class="hint" style="margin:0">Your computer must be on. On Windows a missed search runs when you log in; on Mac and Linux it runs when you open the dashboard. The dashboard does not need to be open for the daily search.</p>
-        </fieldset>
-        <div class="addrow end sticky-save"><span class="muted" id="setMsg" role="status"></span><button class="btn" type="submit" id="setSave" style="width:auto">Save settings</button></div>
-      </form>
+      <header class="phead">
+        <div><h1 id="set-h">Settings</h1><p>What to search, where, and who writes your documents.</p></div>
+        <button class="btn sec" type="button" data-setup>Run setup again</button>
+      </header>
+      <div class="setwrap">
+        <nav class="setnav" aria-label="Settings sections">
+          <a href="#settings" data-sec="s-search">Job search</a><a href="#settings" data-sec="s-sources">Job sources</a><a href="#settings" data-sec="s-ai">AI model</a>
+          <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-gmail">Gmail</a>
+        </nav>
+        <div class="setcol">
+        <form class="addform setform" id="setForm">
+          <section class="box scard" id="s-search"><h2>Job search</h2><p class="hint">What you are looking for and where.</p>
+            <label>Job titles <span class="muted">One per line, written the way companies write them.</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
+            <div class="g3">
+              <label>City <input class="input" name="city" placeholder="Essen"></label>
+              <label>Distance from the city (km) <input class="input" name="radius_km" type="number" min="0" max="1000"></label>
+              <label>Country code <input class="input" name="country" maxlength="2" placeholder="de"></label>
+            </div>
+            <label class="check"><input type="checkbox" name="include_remote"> Also remote jobs anywhere in the country</label>
+            <div class="g2">
+              <label>Only ads from the last ... days <input class="input" name="max_age_days" type="number" min="1" max="60"></label>
+              <label>Skip titles with these words <span class="muted">One per line.</span><textarea class="input lines" name="exclude_title_words" placeholder="senior&#10;lead"></textarea></label>
+            </div>
+          </section>
+
+          <section class="box scard" id="s-sources"><h2>Job sources</h2><p class="hint">Where jobs come from. The first two work without any key. Saved keys are never shown again; leave a key box empty to keep it.</p>
+            <div class="srcrow"><label class="check sw"><input type="checkbox" name="arbeitsagentur"><span class="t"><b>Bundesagentur für Arbeit</b><span>The biggest German job board. Free, no key.</span></span></label></div>
+            <div class="srcrow"><label class="check sw"><input type="checkbox" name="arbeitnow"><span class="t"><b>Arbeitnow</b><span>Many English speaking jobs in Germany. Free, no key.</span></span></label></div>
+            <div class="srcrow"><label class="check sw"><input type="checkbox" name="adzuna"><span class="t"><b>Adzuna</b><span>Collects ads from many sites. Free key, about 3 minutes to get.</span></span></label>
+              <details class="keyhelp"><summary>How to get your free Adzuna keys</summary>
+                <ol>
+                  <li>Open <a href="https://developer.adzuna.com/signup" target="_blank" rel="noopener">developer.adzuna.com</a> and register. It is free; for the website field your GitHub or LinkedIn profile is fine.</li>
+                  <li>Confirm the email Adzuna sends you, then log in.</li>
+                  <li>Your developer dashboard shows two values: <b>Application ID</b> (short, 8 characters) and <b>Application Key</b> (long, 32 characters).</li>
+                  <li>Paste them into the two boxes below and press <b>Save changes</b>.</li>
+                </ol>
+                <p>The free plan allows 250 searches a day; Stellenpilot uses at most 20 per search. Never share these keys.</p>
+              </details>
+              <div class="g2"><label>App ID <span class="keyset" data-key="ADZUNA_APP_ID"></span><input class="input" name="ADZUNA_APP_ID" autocomplete="off" placeholder="Application ID, e.g. 1a2b3c4d"></label>
+              <label>App key <span class="keyset" data-key="ADZUNA_APP_KEY"></span><input class="input" name="ADZUNA_APP_KEY" type="password" autocomplete="off" placeholder="Application Key, 32 characters"></label></div></div>
+            <div class="srcrow"><label class="check sw"><input type="checkbox" name="theirstack"><span class="t"><b>TheirStack</b><span>Finds ads from company career sites. Free key with 200 credits a month.</span></span></label>
+              <details class="keyhelp"><summary>How to get your free TheirStack key</summary>
+                <ol>
+                  <li>Open <a href="https://theirstack.com" target="_blank" rel="noopener">theirstack.com</a> and sign up for free. Google sign in works.</li>
+                  <li>Open your account settings and find the <b>API key</b> section.</li>
+                  <li>Copy the key (a long text), paste it below and press <b>Save changes</b>.</li>
+                </ol>
+                <p>One credit per job found. Stellenpilot asks for 6 jobs a search, so the free credits last a month of daily searches.</p>
+              </details>
+              <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off" placeholder="Paste your TheirStack API key"></label></div>
+            <div class="srcrow"><label class="check sw"><input type="checkbox" name="jobicy"><span class="t"><b>Jobicy</b><span>Remote jobs only. Free, no key.</span></span></label></div>
+            <div class="srcrow"><label class="check sw"><input type="checkbox" name="remotive"><span class="t"><b>Remotive</b><span>Remote jobs only, a small feed. Free, no key.</span></span></label></div>
+            <div class="srcrow"><label class="check sw"><input type="checkbox" name="starter_list"><span class="t"><b>Company watchlist</b><span>Checks the career pages of about 200 companies with offices in Germany, often before the job boards. Adds a minute or two to each search.</span></span></label></div>
+          </section>
+
+          <section class="box scard" id="s-ai"><h2>AI model</h2><p class="hint">The AI scores each job against your CV and writes your CV and cover letter. It only uses facts from your CV. Without one, scoring uses keywords and letters come from a template.</p>
+            <div class="g2">
+              <label>Who writes your documents
+                <select class="input" name="provider">
+                  <option value="none">No AI (keywords and templates)</option>
+                  <option value="ollama">Free AI on this computer (Ollama)</option>
+                  <option value="lmstudio">Free AI on this computer (LM Studio)</option>
+                  <option value="anthropic">Claude (API key)</option>
+                  <option value="openai">OpenAI (API key)</option>
+                  <option value="llamacpp">llama.cpp server</option>
+                  <option value="vllm">vLLM server</option>
+                  <option value="local">Other local server</option>
+                </select></label>
+              <label>Model <input class="input" name="model" list="modelList" placeholder="e.g. qwen3.5:4b"></label>
+              <datalist id="modelList"><option value="qwen3.5:4b"><option value="ministral-3:8b"><option value="ministral-3:3b"><option value="qwen3.5:9b"><option value="gemma4:12b"><option value="claude-haiku-4-5-20251001"><option value="claude-sonnet-5-5"></datalist>
+            </div>
+            <div class="howto" data-for="ollama"><b>Set up Ollama</b><ol>
+              <li>Download Ollama from <a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a> and install it like any app.</li>
+              <li>Open a terminal (on Windows: PowerShell) and run <code>ollama pull qwen3.5:4b</code>. On an older computer use <code>ministral-3:3b</code>; with 16 GB memory or more, <code>qwen3.5:9b</code> writes better.</li>
+              <li>Put the same name in <b>Model</b> above, then press <b>Save and test</b>.</li></ol></div>
+            <div class="howto" data-for="lmstudio"><b>Set up LM Studio</b><ol>
+              <li>Install LM Studio from <a href="https://lmstudio.ai" target="_blank" rel="noopener">lmstudio.ai</a> and download a model inside it, for example Qwen3.5 4B.</li>
+              <li>Open the <b>Developer</b> tab and start the server.</li>
+              <li>Put the model name in <b>Model</b> above, then press <b>Save and test</b>.</li></ol></div>
+            <div class="howto" data-for="anthropic"><b>Get a Claude API key</b><ol>
+              <li>Sign in at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</li>
+              <li>Add a little credit under <b>Billing</b>. A daily search usually costs a few cents.</li>
+              <li>Open <b>API keys</b>, create a key, paste it below and press <b>Save and test</b>. Model <code>claude-haiku-4-5-20251001</code> is fast and cheap.</li></ol></div>
+            <div class="howto" data-for="openai"><b>Get an OpenAI API key</b><ol>
+              <li>Sign in at <a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a> and add a little credit under <b>Billing</b>.</li>
+              <li>Open <b>API keys</b>, create a key, paste it below with a model name, and press <b>Save and test</b>.</li></ol></div>
+            <label data-for="anthropic">Anthropic API key <span class="keyset" data-key="ANTHROPIC_API_KEY"></span><input class="input" name="ANTHROPIC_API_KEY" type="password" autocomplete="off" placeholder="sk-ant-..."></label>
+            <label data-for="openai">OpenAI API key <span class="keyset" data-key="OPENAI_API_KEY"></span><input class="input" name="OPENAI_API_KEY" type="password" autocomplete="off" placeholder="sk-..."></label>
+            <label data-for="local llamacpp vllm lmstudio ollama">Server address <span class="muted">Leave empty for the usual one.</span><input class="input" name="base_url" placeholder="http://localhost:11434"></label>
+            <div class="btnrow" data-for="ollama lmstudio anthropic openai llamacpp vllm local"><button type="button" class="btn sec" id="aiTest">Save and test</button><span id="aiTestMsg" role="status"></span></div>
+          </section>
+
+          <section class="box scard" id="s-docs"><h2>Documents and German</h2><p class="hint">When CVs and letters are made, and in which language.</p>
+            <div class="g3">
+              <label>My German level
+                <select class="input" name="my_german_level"><option value="">From my CV</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></label>
+              <label>Make documents for matches from <input class="input" name="min_match" type="number" min="0" max="100"></label>
+              <label>Cover letter language
+                <select class="input" name="letter_language"><option value="auto">Automatic</option><option value="en">Always English</option><option value="de">Always German</option></select></label>
+            </div>
+            <p class="hint">Match goes from 0 to 100. Automatic writes German letters only if your German is B2 or better.</p>
+          </section>
+
+          <section class="box scard" id="s-auto"><h2>Automatic search</h2><p class="hint">Search for new jobs every day without opening Stellenpilot.</p>
+            <label class="check sw"><input type="checkbox" name="enabled"><span class="t"><b>Search every day</b><span>The dashboard does not need to be open.</span></span></label>
+            <div class="g3"><label>At <input class="input" name="time" type="time" value="08:45"></label></div>
+            <p class="state" id="schedState"></p>
+            <p class="hint">Your computer must be on. On Windows a missed search runs when you log in; on Mac and Linux it runs when you open Stellenpilot.</p>
+          </section>
+          <div class="savebar" id="saveBar"><span id="setMsg" role="status">No changes yet.</span><button class="btn" type="submit" id="setSave">Save changes</button></div>
+        </form>
+
+        <section class="box scard" id="s-gmail" aria-labelledby="gm-h2"><h2 id="gm-h2">Gmail</h2>
+          <p class="hint">Stellenpilot can read your application emails and move jobs forward by itself: a confirmation to Applied, an invitation to Interview, a rejection to Rejected. It only reads. It never sends, deletes or labels mail.</p>
+          <p class="state" id="gmState">Checking…</p>
+          <ol class="gsteps3" id="gmSteps">
+            <li data-g="packages"><span class="ic"></span><div><b>Install Gmail support</b><p>A small add on from Google, installed once.</p><div class="btnrow"><button type="button" class="btn sec" id="gmInstall">Install</button></div></div></li>
+            <li data-g="credentials"><span class="ic"></span><div><b>Create your own Google key file</b><p>Google wants every app that reads Gmail to have its own key. It takes about 10 minutes, once.</p>
+              <details class="keyhelp"><summary>Show me how</summary><ol>
+                <li>Open <a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a> and create a project. Any name works, for example Stellenpilot.</li>
+                <li>Go to <b>APIs and Services</b>, <b>Library</b>, search for <b>Gmail API</b> and press <b>Enable</b>.</li>
+                <li>Go to <b>OAuth consent screen</b>. Choose <b>External</b>, fill in an app name and your email, and add your own Gmail address as a <b>test user</b>. Leave the app in <b>Testing</b>.</li>
+                <li>Go to <b>Credentials</b>, <b>Create credentials</b>, <b>OAuth client ID</b>, type <b>Desktop app</b>. Press <b>Download JSON</b>.</li>
+                <li>Choose that downloaded file with the button below.</li></ol></details>
+              <div class="btnrow"><label class="btn sec">Choose the downloaded file<input type="file" id="gmCred" accept=".json,application/json" hidden></label></div></div></li>
+            <li data-g="connected"><span class="ic"></span><div><b>Connect your Gmail</b><p>A Google page opens in your browser. Pick your account and allow read only access. Google warns that the app is not verified, because it is your own private app: press <b>Advanced</b>, then continue. In Testing mode Google asks again about once a week.</p>
+              <div class="btnrow"><button type="button" class="btn" id="gmConnect">Connect Gmail</button></div></div></li>
+          </ol>
+          <div class="btnrow" id="gmDone" hidden><button type="button" class="btn sec" id="gmCheck">Check Gmail now</button><button type="button" class="linkbtn" id="gmOff">Disconnect</button></div>
+          <p class="state" id="gmMsg" role="status"></p>
+        </section>
+        </div>
+      </div>
     </section>
     <section class="page" id="page-home" aria-labelledby="hello" hidden>
       <header class="phead">
@@ -608,6 +708,7 @@ body.wizopen{overflow:hidden}
       <header class="phead">
         <div><h1 id="apps-h">Applications</h1><p>Everything you sent, and how it is going</p></div>
         <button class="btn sec" id="gmailBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>Check Gmail</span></button>
+        <a href="#settings" id="gmHint" data-goto="s-gmail" hidden>Connect Gmail to update statuses by itself</a>
       </header>
       <div class="gmailbox" id="gmailBox" hidden></div>
       <section aria-labelledby="sent-h"><div class="sechead"><h2 id="sent-h">Sent</h2><span id="gm-count"></span></div><div class="box rows" id="sentList"></div></section>
@@ -892,7 +993,8 @@ function route(){
   if(page==="cv")loadCv();if(page==="settings")loadSettings();
   document.title=(page==="home"?"":document.querySelector(`.nav a[data-page="${page}"]`).textContent.replace(/\d+$/,"").trim()+" · ")+"Stellenpilot";
 }
-addEventListener("hashchange",()=>{route();scrollTo(0,0)});
+addEventListener("hashchange",()=>{route();scrollTo(0,0);if(goto){const t=goto;goto="";setTimeout(()=>$(t).scrollIntoView({block:"start"}),50)}});
+let goto="";document.addEventListener("click",e=>{const a=e.target.closest("a[data-goto]");if(a)goto=a.dataset.goto});
 
 $("pipe").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;filter=b.dataset.k||null;render()});
 $("q").addEventListener("input",renderList);$("minm").addEventListener("change",renderList);
@@ -1153,11 +1255,13 @@ async function loadSettings(){
   try{
     const r=await api("GET","/api/settings");
     for(const [sec,keys] of Object.entries(SETF))for(const k of keys){const el=f.elements[k],v=r[sec][k];if(el.type==="checkbox")el.checked=!!v;else el.value=Array.isArray(v)?v.join("\n"):v??""}
-    f.querySelectorAll(".keyset").forEach(el=>el.textContent=r.keys[el.dataset.key]?"saved":"");
+    f.querySelectorAll(".keyset").forEach(el=>el.textContent=r.keys[el.dataset.key]?"Key saved":"");
     f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";if(el.dataset.ph===undefined)el.dataset.ph=el.placeholder;el.placeholder=r.keys[el.name]?"saved, type to replace":el.dataset.ph});
     showProvider();showKeys();
-    $("schedState").textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"⚠ Switched on here, but the task is missing on your computer. Save again to recreate it.":r.scheduleActive?`✓ Active: every day at ${r.schedule.time}.`:"Off. Tick the box and save to switch it on.";
-    f.elements.enabled.disabled=r.inDocker;
+    const ss=$("schedState");
+    ss.textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"Switched on here, but the task is missing on your computer. Press Save changes to create it again.":r.scheduleActive?`✓ On: every day at ${r.schedule.time}.`:"Off right now.";
+    ss.className="state"+(r.scheduleActive?" ok":r.schedule.enabled?" bad":"");
+    f.elements.enabled.disabled=r.inDocker;renderGmail(r.gmail);setDirty(false);
   }catch(e){$("setMsg").textContent=e.message}
 }
 
@@ -1174,7 +1278,7 @@ $("setForm").addEventListener("submit",async e=>{
   for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
   f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
   b.disabled=true;m.textContent="";
-  try{const r=await api("POST","/api/settings",body);m.textContent="Saved. "+(r.scheduleNote?"Automatic search: "+r.scheduleNote:"Press Run search now to try it.");await loadSettings();lastState="";refresh()}
+  try{const r=await api("POST","/api/settings",body);await loadSettings();m.textContent="Saved. "+(r.scheduleNote?"Automatic search: "+r.scheduleNote:"The next search uses these settings.");lastState="";refresh()}
   catch(err){m.textContent=err.message}finally{b.disabled=false}
 });
 
@@ -1182,6 +1286,32 @@ $("setForm").addEventListener("submit",async e=>{
 let sched={enabled:false,time:"08:45"};
 const schedText=()=>sched.enabled?`Automatic search daily at <b>${esc(sched.time)}</b>.`:"Automatic search is off (Settings).";
 const renderSched=()=>{$("lastrun").innerHTML=sched.enabled?`<div class="live on"><i></i>Automatic search on</div><div>Every day at ${esc(sched.time)}</div>`:`<div class="live"><i></i>Automatic search off</div><div><a href="#settings">Turn it on in Settings</a></div>`};
+/* ---------- Settings extras ---------- */
+function setDirty(on){$("saveBar").classList.toggle("dirty",on);if(on)$("setMsg").textContent="You have unsaved changes.";else if(/unsaved/.test($("setMsg").textContent))$("setMsg").textContent="No changes yet."}
+$("setForm").addEventListener("input",()=>setDirty(true));$("setForm").addEventListener("change",()=>setDirty(true));
+document.querySelector(".setnav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
+  document.querySelectorAll(".setnav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
+$("aiTest").addEventListener("click",async()=>{const m=$("aiTestMsg"),b=$("aiTest");b.disabled=true;m.className="state";m.textContent="Saving and testing…";
+  try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.className="state "+(c.ok?"ok":"bad");m.textContent=(c.ok?"✓ ":"")+c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,"")}
+  catch(e){m.className="state bad";m.textContent=e.message}finally{b.disabled=false}});
+function renderGmail(g){if(!g)return;
+  const done={packages:g.packages,credentials:g.credentials,connected:g.connected&&g.enabled},order=["packages","credentials","connected"],cur=order.find(k=>!done[k]);
+  document.querySelectorAll("#gmSteps > li").forEach((li,i)=>{const k=li.dataset.g;li.className=done[k]?"done":k===cur?"cur":"";li.querySelector(".ic").textContent=done[k]?"✓":i+1});
+  $("gmDone").hidden=!!cur;
+  const st=$("gmState");st.className="state"+(cur?"":" ok");
+  st.textContent=cur?(g.connected&&!g.enabled?"Not connected. Press Connect Gmail to switch it back on.":"Not connected yet. Three steps, once."):"✓ Connected. Every search also checks your Gmail, and you can check now on Applications.";
+}
+async function gmailDo(path,btn,busy,body){const m=$("gmMsg"),t=btn&&btn.textContent;if(btn){btn.disabled=true;btn.textContent=busy}m.className="state";m.textContent="";
+  try{const r=await api("POST",path,body);renderGmail(r.gmail);lastState="";refresh();return r}
+  catch(e){m.className="state bad";m.textContent=e.message}finally{if(btn){btn.disabled=false;btn.textContent=t}}}
+$("gmInstall").addEventListener("click",e=>gmailDo("/api/gmail/install",e.currentTarget,"Installing, this can take a minute…"));
+$("gmConnect").addEventListener("click",async e=>{$("gmMsg").textContent="";const r=await gmailDo("/api/gmail/connect",e.currentTarget,"Waiting for you in the Google page…");if(r){$("gmMsg").className="state ok";$("gmMsg").textContent="Gmail is connected."}});
+$("gmOff").addEventListener("click",e=>gmailDo("/api/gmail/disconnect",null,""));
+$("gmCheck").addEventListener("click",()=>{location.hash="#apps";checkGmail()});
+$("gmCred").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+  if(f.size>100e3){$("gmMsg").className="state bad";$("gmMsg").textContent="That file is too big to be the Google key file.";return}
+  await gmailDo("/api/gmail/credentials",null,"",{text:await f.text()})});
+
 /* ---------- Setup wizard ---------- */
 const wz={step:0,file:null,thin:false,hasCv:false,titles:[],ai:"none",prevAi:"none",aiOk:false,keySaved:false,rereading:false};
 const W=id=>$(id);
@@ -1349,7 +1479,7 @@ async function refresh(){
     if(sig===lastState)return;
     lastState=sig;
     jobs=st.jobs;runs=st.runs;weekly=st.weekly;
-    $("gmailBtn").hidden=!st.gmailEnabled;
+    $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();
     if(!st.profileReady&&!cvPrompted){cvPrompted=true;openSetup()}
     render();renderRuns();showRun(st.run);renderOffice();
