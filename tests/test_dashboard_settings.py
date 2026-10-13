@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from stellenpilot.config import DEFAULTS, dump_toml, save_secrets, save_user_config
-from stellenpilot.server import clean_settings
+from stellenpilot.server import clean_settings, find_doc
 
 
 class SettingsTest(unittest.TestCase):
@@ -42,6 +42,22 @@ class SettingsTest(unittest.TestCase):
                 save_secrets(home, {"X": "a\nEVIL=1"})
             os.environ.pop("THEIRSTACK_API_KEY", None)
             os.environ.pop("ADZUNA_APP_ID", None)
+
+
+class FindDocTest(unittest.TestCase):
+    def test_pdf_first_and_stays_in_output(self):
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d).resolve() / "output"
+            f = out / "2026-10-13" / "Acme__Data"
+            f.mkdir(parents=True)
+            for n in ("Jo_CV_Acme.docx", "Jo_CV_Acme.pdf", "Jo_Anschreiben_Acme.docx", "report.md"):
+                (f / n).write_text("x")
+            job = {"folder": str(f)}
+            self.assertEqual(find_doc(job, "cv", out).name, "Jo_CV_Acme.pdf")
+            self.assertEqual(find_doc(job, "letter", out).name, "Jo_Anschreiben_Acme.docx")
+            self.assertIsNone(find_doc(job, "report", out))
+            self.assertIsNone(find_doc({"folder": d}, "cv", out))  # outside the output folder
+            self.assertIsNone(find_doc({"folder": ""}, "cv", out))
 
 
 if __name__ == "__main__":

@@ -221,12 +221,22 @@ def add_job(settings, db, *, tailor: bool = False, **kw) -> dict:
     db.insert_job(job)
     result = {"job": db.job(job["id"]), "status": "added"}
     if tailor:
-        from pathlib import Path
-        from .tailor import tailor_job
-        t = settings["tailor"]
-        res = tailor_job(job, settings.profile, (Path(settings.home) / t["output_dir"]).resolve(), llm,
-                         t.get("make_pdf", True), t.get("letter_language", "auto"), my_german_level(settings))
-        db.mark_ready(job["id"], res["folder"], f"Your experience shows {res['coverage']}% of the tools the ad names")
-        result["tailored"] = res
+        result["tailored"] = make_docs(settings, db, job["id"], llm)
         result["job"] = db.job(job["id"])
     return result
+
+
+def make_docs(settings, db, job_id: str, llm=None) -> dict:
+    """Write the tailored CV and cover letter for one stored job and mark it ready."""
+    from pathlib import Path
+    from .llm import LLM
+    from .pipeline import my_german_level
+    from .tailor import tailor_job
+    job = db.job(job_id)
+    if not job:
+        raise AddError("Unknown job")
+    t = settings["tailor"]
+    res = tailor_job(job, settings.profile, (Path(settings.home) / t["output_dir"]).resolve(), llm or LLM(settings),
+                     t.get("make_pdf", True), t.get("letter_language", "auto"), my_german_level(settings))
+    db.mark_ready(job_id, res["folder"], f"Your experience shows {res['coverage']}% of the tools the ad names")
+    return res

@@ -126,6 +126,18 @@ def open_in_file_manager(path: str) -> None:
         subprocess.Popen(["xdg-open", path])
 
 
+def find_doc(job, kind: str, out_root: Path) -> Path | None:
+    """The CV or cover letter in a job's folder, PDF first. Only inside the output folder."""
+    if not job or not job["folder"] or kind not in ("cv", "letter"):
+        return None
+    folder = Path(job["folder"]).resolve()
+    if not folder.is_dir() or out_root not in folder.parents:
+        return None
+    marks = ("_CV_",) if kind == "cv" else ("_Cover_Letter_", "_Anschreiben_")
+    found = [f for f in folder.iterdir() if any(m in f.name for m in marks) and f.suffix in (".pdf", ".docx")]
+    return min(found, key=lambda f: f.suffix != ".pdf", default=None)
+
+
 def make_handler(settings, port: int = 8765):
     db = DB(settings.db_path)
     run_state = {"running": False, "result": None, "error": ""}
@@ -213,7 +225,7 @@ def make_handler(settings, port: int = 8765):
         def do_POST(self):
             if not self._guard():
                 return
-            if self.path in SLOW_POSTS:
+            if self.path in SLOW_POSTS or self.path.startswith("/api/docs/"):
                 # Adding a job (fetch, AI scoring, maybe tailoring) and Gmail sync can take minutes with a
                 # local model. They use their own database connection so the dashboard stays responsive.
                 return self._post()
@@ -231,6 +243,7 @@ def make_handler(settings, port: int = 8765):
                     "weekly": weekly_summary(jobs),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
                     "subtitle": subtitle(),
+                    "firstName": (str(settings.profile.get("person", {}).get("name") or "").split() or [""])[0],
                     "run": run_state,
                     "schedule": settings["schedule"],
                     "profileReady": bool(settings.profile) and settings.profile.get("person", {}).get("name") != "Alex Example",
@@ -283,6 +296,25 @@ def make_handler(settings, port: int = 8765):
                 if not folder or not folder.is_dir() or out_root not in folder.parents:
                     return self._send(400, {"error": "No document folder for this job yet"})
                 open_in_file_manager(str(folder))
+                return self._send(200, {"ok": True})
+            if self.path.startswith("/api/open-doc/"):
+                job_id, _, kind = unquote(self.path[len("/api/open-doc/"):]).rpartition("/")
+                doc = find_doc(db.job(job_id), kind, out_root)
+                if not doc:
+                    return self._send(400, {"error": "This document is not there yet"})
+                open_in_file_manager(str(doc))
+                return self._send(200, {"ok": True})
+            if self.path.startswith("/api/docs/"):
+                from .manual import AddError, make_docs
+                own = DB(settings.db_path)
+                try:
+                    make_docs(settings, own, unquote(self.path[len("/api/docs/"):]))
+                except AddError as e:
+                    return self._send(400, {"error": str(e)})
+                except Exception as e:
+                    return self._send(500, {"error": f"Could not make the documents: {e}"})
+                finally:
+                    own.conn.close()
                 return self._send(200, {"ok": True})
             if self.path == "/api/add":
                 from .manual import AddError, add_job
