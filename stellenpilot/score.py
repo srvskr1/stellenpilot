@@ -51,6 +51,23 @@ def profile_text(profile: dict, include_learning: bool = True) -> str:
     return "\n".join(lines)
 
 
+def profile_gaps(profile: dict) -> str:
+    """Empty if the profile can be scored against, else one sentence saying what is missing.
+    An import without AI saves only contact details, and keyword scoring then compares every ad
+    against nothing: all jobs get the same score and nobody is told why."""
+    if not profile:
+        return ""  # a missing profile has its own message
+    skills = [i for g, items in (profile.get("skills") or {}).items() if not is_learning_group(g) for i in items or []]
+    work = (profile.get("experience") or []) + (profile.get("projects") or [])
+    if not skills and not work:
+        return ("Your profile has no skills, jobs or projects yet, so every job gets about the same score. "
+                "Fill it in under My CV, or turn on an AI and let it read your CV again.")
+    if not work:
+        return ("Your profile lists skills but no jobs or projects, so the AI has little to compare and your "
+                "tailored CVs will be thin. Add them under My CV, or turn on an AI and let it read your CV again.")
+    return ""
+
+
 def _mentioned(text: str) -> set[str]:
     return {v for v, rx in RE_CACHE.items() if rx.search(text or "")}
 

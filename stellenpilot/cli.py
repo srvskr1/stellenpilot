@@ -61,7 +61,9 @@ def cmd_doctor(settings: Settings) -> int:
     elif settings.profile.get("person", {}).get("name") == "Alex Example":
         print("profile.toml: still the example profile. Replace it with your own facts.")
     else:
-        print("profile.toml: ok")
+        from .score import profile_gaps
+        gaps = profile_gaps(settings.profile)
+        print(f"profile.toml: PROBLEM: {gaps}" if gaps else "profile.toml: ok")
     for name, mod in REGISTRY.items():
         on = settings["sources"].get(name)
         need = [k for k in getattr(mod, "NEEDS", ()) if not settings.secret(k)]
@@ -120,8 +122,10 @@ def setup_checks(settings: Settings) -> list[dict]:
     from .tailor import find_soffice
     out = []
     name = settings.profile.get("person", {}).get("name") if settings.profile else ""
-    out.append({"step": "cv", "ok": bool(name) and name != "Alex Example",
-                "text": f"CV saved for {name}" if name and name != "Alex Example" else "Your CV is not saved yet"})
+    from .score import profile_gaps
+    gaps = profile_gaps(settings.profile) if name and name != "Alex Example" else ""
+    out.append({"step": "cv", "ok": bool(name) and name != "Alex Example" and not gaps,
+                "text": gaps or (f"CV saved for {name}" if name and name != "Alex Example" else "Your CV is not saved yet")})
     out.append({"step": "search", "ok": bool(settings["search"]["keywords"]),
                 "text": f"Looking for {', '.join(settings['search']['keywords'][:3])} near {settings['search']['city']}"})
     ok, msg = llm_status(settings)

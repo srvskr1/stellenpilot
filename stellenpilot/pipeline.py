@@ -143,6 +143,9 @@ def _run(settings, db: DB, tailor: bool) -> dict:
     db.stage("collect", "Starting the daily search")
 
     new, problems = collect(settings, db)
+    from .score import profile_gaps
+    if gaps := profile_gaps(profile):
+        problems.insert(0, gaps)
 
     db.stage("score", f"Scoring {len(new)} new jobs against your CV")
     taste = taste_summary(db.jobs("rating IS NOT NULL"))

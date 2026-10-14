@@ -23,7 +23,7 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
          "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
-SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import", "/api/gmail/install", "/api/gmail/connect", "/api/builtin/test"}
+SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import", "/api/cv/reread", "/api/gmail/install", "/api/gmail/connect", "/api/builtin/test"}
 # What the Settings page may change. Types come from config.DEFAULTS.
 EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remote", "max_age_days", "exclude_title_words"),
             "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack", "jobicy", "remotive"),
@@ -172,6 +172,15 @@ def find_doc(job, kind: str, out_root: Path) -> Path | None:
     marks = ("_CV_",) if kind == "cv" else ("_Cover_Letter_", "_Anschreiben_")
     found = [f for f in folder.iterdir() if any(m in f.name for m in marks) and f.suffix in (".pdf", ".docx")]
     return min(found, key=lambda f: f.suffix != ".pdf", default=None)
+
+
+def reread_offer(settings) -> bool:
+    """True when an AI is on, the profile has no jobs or projects, and the CV text is still on disk."""
+    from .importer import saved_cv_text
+    p = settings.profile or {}
+    return ((settings["llm"].get("provider") or "none") != "none"
+            and not (p.get("experience") or p.get("projects"))
+            and bool(saved_cv_text(settings.home).strip()))
 
 
 def make_handler(settings, port: int = 8765):
@@ -404,11 +413,13 @@ def make_handler(settings, port: int = 8765):
                     settings.cfg = save_user_config(settings.home, updates)
                 except (ValueError, schedule.ScheduleError) as e:
                     return self._send(400, {"error": str(e)})
-                return self._send(200, {"ok": True, "scheduleNote": note})
+                return self._send(200, {"ok": True, "scheduleNote": note, "rereadOffer": reread_offer(settings)})
             if self.path == "/api/cv/import":
                 return self._cv_import()
             if self.path == "/api/cv/save":
                 return self._cv_save()
+            if self.path == "/api/cv/reread":
+                return self._cv_reread()
             if self.path.startswith("/api/builtin/"):
                 from . import builtin
                 try:
@@ -517,6 +528,38 @@ def make_handler(settings, port: int = 8765):
                     return self._send(500, {"error": f"Import failed: {e.__class__.__name__}: {e}"})
             import tomllib
             return self._send(200, {"profile": tomllib.loads(out.read_text(encoding="utf-8")), "notes": notes, "cvText": cv_text})
+
+        def _cv_reread(self):
+            """Read the saved CV again with the AI that was just turned on. Only replaces a profile
+            that has no jobs or projects yet, so nothing you typed under My CV is lost."""
+            import tomllib
+            from .importer import import_text, saved_cv_text
+            from .llm import LLM
+            if not reread_offer(settings):
+                return self._send(400, {"error": "Nothing to read again: turn on an AI first, and this only works "
+                                                 "while your profile has no jobs or projects."})
+            try:
+                if not LLM(settings).enabled:
+                    raise RuntimeError("Turn on an AI first.")
+                out, notes = import_text(saved_cv_text(settings.home), settings)
+            except RuntimeError as e:
+                return self._send(400, {"error": str(e)})
+            except OSError as e:
+                return self._send(502, {"error": f"Could not reach the AI model ({e}). Is it running? Check with: stellenpilot doctor"})
+            except Exception as e:
+                return self._send(500, {"error": f"Reading the CV failed: {e.__class__.__name__}: {e}"})
+            profile = tomllib.loads(out.read_text(encoding="utf-8"))
+            if not (profile.get("experience") or profile.get("projects")):
+                return self._send(422, {"error": "The AI could not read your jobs or projects either. Add them under My CV.",
+                                        "notes": notes})
+            from .importer import to_toml
+            with lock:
+                prof = settings.home / "profile.toml"
+                if prof.exists():
+                    prof.replace(settings.home / "profile.backup.toml")
+                prof.write_text(to_toml(profile, None), encoding="utf-8")
+                settings.profile = tomllib.loads(prof.read_text(encoding="utf-8"))
+            return self._send(200, {"profile": settings.profile, "notes": notes})
 
         def _cv_save(self):
             import tomllib

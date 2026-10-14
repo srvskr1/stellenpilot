@@ -10,6 +10,7 @@ token.json
 *.db-shm
 output/
 profile.imported.toml
+cv_source.txt
 profile.backup.toml
 config.backup.toml
 run.log
