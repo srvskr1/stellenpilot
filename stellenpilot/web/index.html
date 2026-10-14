@@ -591,7 +591,7 @@ body.wizopen{overflow:hidden}
         <button class="btn sec" type="button" data-setup>Run setup again</button>
       </header>
       <div class="setwrap">
-        <nav class="setnav" aria-label="Settings sections">
+        <nav class="setnav" aria-label="Settings sections" id="setNav">
           <a href="#settings" data-sec="s-search">Job search</a><a href="#settings" data-sec="s-sources">Job sources</a><a href="#settings" data-sec="s-ai">AI model</a>
           <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-icon">Desktop icon</a><a href="#settings" data-sec="s-gmail">Gmail</a>
         </nav>
@@ -1380,8 +1380,9 @@ const renderSched=()=>{$("lastrun").innerHTML=sched.enabled?`<div class="live on
 /* ---------- Settings extras ---------- */
 function setDirty(on){$("saveBar").classList.toggle("dirty",on);if(on)$("setMsg").textContent="You have unsaved changes.";else if(/unsaved/.test($("setMsg").textContent))$("setMsg").textContent="No changes yet."}
 $("setForm").addEventListener("input",()=>setDirty(true));$("setForm").addEventListener("change",()=>setDirty(true));
-document.querySelector(".setnav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
-  document.querySelectorAll(".setnav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
+/* The Settings side menu. My CV has its own (#cvNav); querySelector(".setnav") used to find that one first. */
+$("setNav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
+  document.querySelectorAll("#setNav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
 $("aiTest").addEventListener("click",async()=>{const m=$("aiTestMsg"),b=$("aiTest");b.disabled=true;m.className="state";m.textContent="Saving and testing…";
   try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.className="state "+(c.ok?"ok":"bad");m.textContent=(c.ok?"✓ ":"")+c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,"")}
   catch(e){m.className="state bad";m.textContent=e.message}finally{b.disabled=false}});
