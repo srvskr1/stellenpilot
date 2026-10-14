@@ -15,7 +15,7 @@ It comes with its own **free built-in AI**, so you need no account, no API key a
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-**Windows:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed. **Everyone else:**
+**Windows and Mac:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed (Mac: [first start](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md)). **Everyone else:**
 
 ```bash
 pip install stellenpilot
@@ -147,6 +147,12 @@ Five calm pages, in your browser, on your computer:
 **[Download Stellenpilot for Windows](https://github.com/srvskr1/stellenpilot/releases/latest)** (the file `Stellenpilot-Setup-X.Y.Z.exe`, about 26 MB). Python is included, nothing else to install. Run it, then double click **Stellenpilot** on your desktop.
 
 Windows may say "Windows protected your PC" because the app is not code signed yet. Click **More info**, then **Run anyway**. The installer is built by GitHub straight from this repository.
+
+### Mac: download the app
+
+**[Download Stellenpilot for Mac](https://github.com/srvskr1/stellenpilot/releases/latest)** (the file `Stellenpilot-X.Y.Z-mac.dmg`, for Macs with an Apple chip). Open it and drag Stellenpilot into Applications.
+
+The app is not signed by Apple yet, so macOS stops it the first time: on macOS 15 and newer, open **System Settings, Privacy & Security** and click **Open Anyway**. Step by step, with the fix for older macOS and for a "damaged" message: [docs/mac.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md). The disk image is built by GitHub straight from this repository.
 
 ### With Python (Windows, macOS, Linux)
 
