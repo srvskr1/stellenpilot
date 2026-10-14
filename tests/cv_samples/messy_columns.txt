@@ -1,0 +1,6 @@
+ANNA TESTER  anna@example.org  +49 160 5555555
+SKILLS  WORK
+Python  Data Scientist  Bonn Analytics GmbH  2021 – 2024
+SQL  Trained churn models with scikit-learn on customer data.
+Spark  Presented results to the sales team every month.
+EDUCATION  M.Sc. Statistics  University of Bonn  2019 – 2021

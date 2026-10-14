@@ -1,0 +1,25 @@
+Lena Beispiel
+Datenanalystin
+Dortmund · lena.beispiel@example.de · +49 170 1234567 · github.com/lena-beispiel
+
+Profil
+Datenanalystin mit zwei Jahren Erfahrung in SQL, Python und Power BI.
+
+Berufserfahrung
+Werkstudentin Data Analytics, Ruhr Energie GmbH          seit 10/2024
+- Aufbau von Power BI Berichten für den Vertrieb auf Basis von SQL Server.
+- Automatisierung der monatlichen Datenaufbereitung mit Python und Pandas,
+  wodurch der Aufwand deutlich sank.
+Praktikantin Business Intelligence, Westfalen Handel AG          03/2023 – 08/2023
+- Analyse von Verkaufsdaten mit SQL und Excel.
+
+Ausbildung
+M.Sc. Wirtschaftsinformatik, Universität Duisburg-Essen          10/2023 – heute
+B.Sc. Wirtschaftsinformatik, TU Dortmund          10/2019 – 09/2023
+
+Kenntnisse
+Programmierung: Python, SQL, R
+BI: Power BI, Tableau, Excel
+
+Sprachen
+Deutsch (Muttersprache), Englisch (C1)

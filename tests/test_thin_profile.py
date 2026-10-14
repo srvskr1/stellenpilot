@@ -79,9 +79,12 @@ class ImportWithoutAITests(unittest.TestCase):
             (home / "cv.txt").write_text(CV, encoding="utf-8")
             out, notes = importer.import_cv(home / "cv.txt", Settings(home))
             prof = tomllib.loads(out.read_text(encoding="utf-8"))
-            self.assertIn("Python", prof["skills"]["Skills"])
-            self.assertEqual(prof["skills"]["Learning"], ["dbt", "Kafka", "Terraform"])
-            self.assertIn("tool names", notes[0])
+            used = [i for g, items in prof["skills"].items() if g != "Learning" for i in items]
+            self.assertTrue(any("Python" in i for i in used))
+            self.assertEqual(prof["skills"]["Learning"], ["dbt", "Apache Kafka", "Terraform"])
+            self.assertFalse(any("Terraform" in i for i in used))  # never presented as experience
+            self.assertIn("Sorted without an AI", notes[0])  # no education heading: a partial result, said so
+            self.assertEqual(prof["experience"][0]["company"], "Techmak Technology")
             src = home / importer.CV_SOURCE
             self.assertEqual(src.read_text(encoding="utf-8"), CV)
             if os.name != "nt":

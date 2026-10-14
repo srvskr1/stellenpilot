@@ -53,7 +53,7 @@ def profile_text(profile: dict, include_learning: bool = True) -> str:
 
 def profile_gaps(profile: dict) -> str:
     """Empty if the profile can be scored against, else one sentence saying what is missing.
-    An import without AI saves only contact details, and keyword scoring then compares every ad
+    A CV whose layout could not be sorted without AI leaves the profile nearly empty, and keyword scoring then compares every ad
     against nothing: all jobs get the same score and nobody is told why."""
     if not profile:
         return ""  # a missing profile has its own message

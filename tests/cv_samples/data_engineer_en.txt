@@ -1,0 +1,67 @@
+ALEX KUMAR 
+Data Engineer | Cloud Data Pipelines (AWS & Azure) | ETL/ELT | Analytics 
+Essen, Germany | alex.kumar@example.com | +49 157 0000 0000 | linkedin.com/in/alex-example | github.com/alex-example  
+Professional Summary 
+Data professional with 3+ years of experience in analytics, Python and SQL data processing, and reporting, now 
+focused on data engineering. Built end to end cloud pipelines on AWS and Azure as self directed projects, using data 
+lake and medallion architecture, PySpark, and Apache Airflow orchestration. Completing an M.Sc. in Data Science at 
+TU Example. Seeking Werkstudent or full time Data Engineer roles in Germany, available immediately.  
+Technical Skills 
+Cloud & Data Engineering: AWS (S3, Glue, Athena, Lake Formation, IAM, CloudTrail), Azure (ADLS Gen2, Data 
+Factory, Databricks, Azure SQL, Blob Storage), Data Lake & Medallion Architecture, ETL/ELT Pipelines, Parquet, 
+Delta Lake, Data Partitioning, Schema Discovery 
+Orchestration & Workflow: Apache Airflow (TaskFlow API), Azure Data Factory, Docker, Git, CI/CD (GitHub Actions)  
+Programming & Query: Python (Pandas, NumPy, PySpark), SQL, AWS CLI, Azure CLI 
+Databases: MySQL, PostgreSQL, SQL Server, Azure SQL, MongoDB  
+Data Visualization & BI: Power BI, DAX, Tableau, Data Modeling (star schema), Matplotlib, Seaborn, KPI Tracking  
+Currently Learning: dbt, Apache Kafka, Terraform 
+Professional Experience 
+ICQA Associate, Example Retail   Jul 2024 to Present 
+• Monitor live system data and dashboards across an automated robotic sortation floor so production keeps 
+running without errors. 
+• Respond to faults and stoppages flagged by the system, diagnose root causes, and coordinate fast recovery to 
+protect throughput. 
+Junior Data Analyst, Example Tech    Sep 2020 to Sep 2023 
+• Built and automated recurring data processing pipelines in Python (Pandas, NumPy) and SQL, turning raw 
+operational data into clean, analysis ready tables used as the standard input for reporting.  
+• Designed and maintained interactive Power BI and Tableau dashboards that replaced manual spreadsheet 
+reporting for KPI tracking and daily decisions. 
+• Delivered predictive models and statistical analyses for business decisions, working directly with stakeholders 
+to turn unclear requirements into actionable insights. 
+Data Engineering Projects 
+German Train Delays: Azure Data Pipeline    2026 
+github.com/alex-example/db-delays-azure-pipeline 
+Azure Data Factory · ADLS Gen2 · Databricks (PySpark) · Unity Catalog · Delta Lake · Azure SQL  
+• Designed an end to end pipeline on live Deutsche Bahn Timetables API data using a medallion architecture 
+(raw, curated, serving). 
+• Built hourly triggered Azure Data Factory pipelines to ingest planned and real time schedule change feeds into 
+an ADLS Gen2 data lake. 
+• Parsed and joined XML feeds in Databricks under Unity Catalog governance, wrote curated Delta tables, and 
+loaded an Azure SQL star schema for delay analysis.  
+NYC Taxi: AWS Serverless Data Pipeline   2025 
+github.com/alex-example/nyc-taxi-aws-pipeline 
+AWS S3 · Glue · Athena · Lake Formation · IAM · Python · PySpark · Power BI  
+• Built an end to end serverless pipeline (S3, Glue, Athena, Power BI) over 2.96 million taxi trip records stored as 
+Parquet. 
+• Automated schema discovery with Glue crawlers and modeled a zone dimension table for SQL joins on pickup 
+and dropoff locations. 
+• Applied S3 versioning, Glacier lifecycle policies, and Hive style date partitioning to cut Athena scan cost and 
+query time. 
+• Implemented least privilege IAM with custom scoped policies and Lake Formation governance, then delivered a 
+live Power BI dashboard over Athena (ODBC) with DAX measures and a star schema model.  
+Weather ETL: Airflow Orchestration, Personal Project    2025 to 2026 
+Apache Airflow (TaskFlow API) · Docker Compose · Open Meteo API · Azure Blob Storage  
+• Built a scheduled ETL DAG (extract, transform, load) against the Open Meteo API with sensor based triggering 
+and tested failure and success paths. 
+• Extending the load stage to Azure Blob Storage, with GitHub Actions CI/CD and Terraform provisioning planned.  
+Education 
+M.Sc. in Data Science, Technical University of Example, Germany    Oct 2023 to Present 
+• Coursework: Advanced Machine Learning, Deep Learning, Big Data Analytics, Data Mining, Applied Statistics & 
+Linear Models, IT Security & Cryptography. 
+B.Sc. in Software Engineering, Example International University, Bangladesh    Sep 2016 to Jan 2020 
+• Object oriented programming (Java, C++), algorithms and data structures, database systems, agile 
+development. Final project: IoT based Intelligent Health Monitoring System.  
+Certification 
+• AWS Certified Data Engineer, Associate: exam planned for December 2026  
+Languages 
+Bengali (Native) · English (C1) · German (A2, actively improving)  
