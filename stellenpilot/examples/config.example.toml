@@ -18,6 +18,9 @@ include_remote = true
 max_age_days = 3
 # Drop ads whose title contains any of these words (case insensitive).
 exclude_title_words = ["senior", "lead", "head of", "principal", "sales", "ausbildung"]
+# The same company and job title seen again after this many days counts as a new posting
+# (companies repost Werkstudent roles every semester). 0 means never show a repeated title again.
+repost_after_days = 45
 
 [language]
 # Your German level, A1 to C2. Leave empty to read it from profile.toml ("German (A2)").

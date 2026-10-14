@@ -88,8 +88,20 @@ class DB:
     def job_ids(self) -> set[str]:
         return {r[0] for r in self.conn.execute("SELECT id FROM jobs")}
 
-    def dedupe_keys(self) -> set[str]:
-        return {r[0] for r in self.conn.execute("SELECT dedupe_key FROM jobs") if r[0]}
+    def dedupe_keys(self, since: str | None = None) -> set[str]:
+        """Company plus title keys already on the board. With `since` (an ISO date) only keys found on
+        or after that day count, so a role the company posts again months later is not dropped."""
+        if since:
+            rows = self.conn.execute("SELECT dedupe_key FROM jobs WHERE found_at >= ?", (since,))
+        else:
+            rows = self.conn.execute("SELECT dedupe_key FROM jobs")
+        return {r[0] for r in rows if r[0]}
+
+    def last_seen(self, key: str) -> dict | None:
+        """The most recent earlier job with this company plus title key, if any."""
+        row = self.conn.execute("SELECT found_at, status FROM jobs WHERE dedupe_key = ? "
+                                "ORDER BY found_at DESC LIMIT 1", (key,)).fetchone()
+        return dict(row) if row else None
 
     def insert_job(self, job: dict) -> bool:
         """Insert a new job. Returns False if the id already exists."""

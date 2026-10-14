@@ -15,6 +15,7 @@ DEFAULTS = {
         "include_remote": True,
         "max_age_days": 3,
         "exclude_title_words": ["senior", "lead", "head of", "principal"],
+        "repost_after_days": 45,
     },
     "language": {"skip_if_german_too_high": True, "my_german_level": "", "german_tolerance": 1},
     "sources": {

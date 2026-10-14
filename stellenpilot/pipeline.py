@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import urllib.error
+from datetime import date, timedelta
 import urllib.parse
 import urllib.request
 
@@ -20,9 +21,20 @@ log = logging.getLogger("stellenpilot")
 ORDER = ["watchlist", "arbeitsagentur", "theirstack", "arbeitnow", "adzuna", "jobicy", "remotive"]
 
 
+def repost_since(settings) -> str | None:
+    """First day that still counts for duplicates. A company plus title seen before this day is treated
+    as a new posting (companies repost the same Werkstudent role every semester). None: never repost."""
+    try:
+        days = int(settings["search"].get("repost_after_days", 45))
+    except (TypeError, ValueError):
+        days = 45
+    return (date.today() - timedelta(days=days)).isoformat() if days > 0 else None
+
+
 def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
     enabled = [n for n in ORDER if settings["sources"].get(n) or (n == "watchlist" and (settings["watch"].get("companies") or settings["watch"].get("starter_list")))]
-    known_ids, known_keys = db.job_ids(), db.dedupe_keys()
+    since = repost_since(settings)
+    known_ids, known_keys = db.job_ids(), db.dedupe_keys(since)
     excl = settings["search"].get("exclude_title_words", [])
     new, problems = [], []
     country = settings["search"]["country"].lower()
@@ -47,6 +59,9 @@ def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
             known_ids.add(job["id"])
             known_keys.add(key)
             job["dedupe_key"] = key
+            prev = db.last_seen(key) if since else None
+            if isinstance(prev, dict):
+                job["status_note"] = f"Posted again. You first saw this role on {prev['found_at']} (status then: {prev['status']})."
             new.append(job)
     offline = [p for p in problems if "no internet" in p]
     if not new and len(offline) >= 2:  # every reachable source failed the same way: say it once

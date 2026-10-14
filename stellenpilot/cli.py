@@ -1,4 +1,4 @@
-"""Command line: stellenpilot init | doctor | run | serve | gmail | demo"""
+"""Command line: stellenpilot init | doctor | run | serve | gmail | demo | eval"""
 from __future__ import annotations
 
 import argparse
@@ -169,6 +169,18 @@ def main(argv: list[str] | None = None) -> int:
     ad.add_argument("--company", default="")
     ad.add_argument("--location", default="")
     ad.add_argument("--tailor", action="store_true", help="also make the CV and cover letter now")
+    ev = sub.add_parser("eval", help="measure how well scoring ranks the jobs you labeled",
+                        description="Compare the stored score, keyword scoring and AI models against your labels: "
+                                    "thumbs up and down and interviews from the dashboard, or a CSV you fill in.")
+    ev.add_argument("--labels", type=Path, help="CSV with columns id and label (0/1 or a grade like 0 to 3)")
+    ev.add_argument("--make-sheet", nargs="?", const=100, type=int, metavar="N",
+                    help="write eval/labels.csv with N jobs (default 100) spread over all scores, to label by hand")
+    ev.add_argument("--provider", action="append", default=[], metavar="NAME[:MODEL]",
+                    help="also score with this AI, e.g. builtin:light, ollama:qwen3.5:4b, anthropic. Repeatable.")
+    ev.add_argument("--no-llm", action="store_true", help="skip the AI from config.toml (stored and keyword scores only)")
+    ev.add_argument("--include-rejected", action="store_true", help="count rejections as bad matches")
+    ev.add_argument("--limit", type=int, default=0, help="score at most this many labeled jobs (saves time and API cost)")
+    ev.add_argument("--k", type=int, default=10, help="k for precision at k (default 10)")
     w = sub.add_parser("watch", help="find the watchlist entry for a company's careers page")
     w.add_argument("url", help="careers page or job link, or an entry like greenhouse:trivago")
     a = ap.parse_args(argv)
@@ -294,6 +306,36 @@ def main(argv: list[str] | None = None) -> int:
         for j in hits[:8]:
             print(f"  * {j['title']}  ({j['location']})")
         print(f'\nAdd this to [watch] companies in config.toml:  "{entry}"')
+        return 0
+    if a.cmd == "eval":
+        from .evaluate import default_out_dir, evaluate, format_report, make_sheet
+        from .db import DB
+        if a.make_sheet is not None:
+            path = home / "eval" / "labels.csv"
+            if path.exists():
+                print(f"{path} already exists. Rename or delete it first, so your labels are not overwritten.")
+                return 1
+            db = DB(settings.db_path)
+            n = make_sheet(db, path, a.make_sheet)
+            db.conn.close()
+            if not n:
+                path.unlink(missing_ok=True)
+                print("No scored jobs with an ad text yet. Run a search first: stellenpilot run")
+                return 1
+            print(f"Wrote {n} jobs to {path}. Put 1 (good match for you) or 0 (not) in the label column, "
+                  f"or a grade from 0 to 3. Then run: stellenpilot eval --labels {path}")
+            return 0
+        def progress(name, i, n):
+            if name not in ("stored", "keyword") and (i == 1 or i % 5 == 0 or i == n):
+                print(f"  {name}: {i} of {n}", file=sys.stderr, flush=True)
+        try:
+            report = evaluate(settings, labels_csv=a.labels, providers=a.provider, use_config_llm=not a.no_llm,
+                              include_rejected=a.include_rejected, limit=a.limit, k=a.k,
+                              out_dir=default_out_dir(home), progress=progress)
+        except (ValueError, RuntimeError, OSError) as e:
+            print(f"Eval failed: {e}")
+            return 1
+        print(format_report(report))
         return 0
     if a.cmd == "demo":
         from .demo import load_demo
