@@ -358,7 +358,11 @@ def import_text(text: str, settings) -> tuple[Path, list[str]]:
     llm = LLM(settings)
     contact = contact_facts(text)
     if llm.enabled:
+        from . import progress
+        # The answer is the CV again as JSON: about as long as the CV text, plus the field names.
+        progress.stage("Reading your CV and writing your profile", expect=int(len(text[:12000]) * 1.15) + 400)
         data = structure_with_llm(text, llm)
+        progress.stage("Checking every line against your CV")
         model_person = data.get("person") if isinstance(data, dict) and isinstance(data.get("person"), dict) else {}
         # The plain text reader is exact for email, phone and links, so it wins over the model there.
         person = {**{k: v for k, v in model_person.items() if v}, **{k: v for k, v in contact.items() if v and k != "name"}}

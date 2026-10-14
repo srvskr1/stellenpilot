@@ -48,6 +48,23 @@ def request_json(url: str, *, params: dict | None = None, headers: dict | None =
     raise RuntimeError("unreachable")
 
 
+def stream_lines(url: str, *, headers: dict | None = None, body: dict | None = None, timeout: float = 600):
+    """POST JSON and yield the response line by line as it arrives (server sent events or NDJSON).
+    Used to show live progress while a model on this computer writes a long answer."""
+    data = json.dumps(body).encode() if body is not None else None
+    hdrs = {"User-Agent": USER_AGENT, "Content-Type": "application/json", **(headers or {})}
+    req = urllib.request.Request(url, data=data, headers=hdrs, method="POST")
+    try:
+        resp = urllib.request.urlopen(req, timeout=timeout)
+    except urllib.error.HTTPError as e:
+        raise HttpError(e.code, e.read().decode("utf-8", "replace")) from None
+    with resp:
+        for raw in resp:
+            line = raw.decode("utf-8", "replace").strip()
+            if line:
+                yield line
+
+
 def friendly_error(e: Exception) -> str:
     """Plain words for network errors, so people know what to check."""
     text = str(e)

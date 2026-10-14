@@ -10,7 +10,8 @@ import json
 import os
 import re
 
-from .http import HttpError, request_json
+from . import progress
+from .http import HttpError, request_json, stream_lines
 
 # provider -> default base URL. All except ollama speak the OpenAI chat completions API.
 LOCAL_PRESETS = {
@@ -94,6 +95,11 @@ class LLM:
                 # Qwen3/3.5 and Gemma 4 think before answering by default; for short JSON tasks that
                 # only costs time and output tokens. llm.think = true turns it back on.
                 body["think"] = self.think
+            if progress.current():
+                try:
+                    return strip_thinking(self._stream(f"{self.base_url}/api/chat", {}, body, ollama=True))
+                except HttpError:
+                    pass  # the plain request below handles options this model rejects
             try:
                 data = request_json(f"{self.base_url}/api/chat", method="POST", timeout=self.timeout, body=body, retries=0)
             except HttpError as e:
@@ -111,7 +117,11 @@ class LLM:
     def _openai_compatible(self, system: str, user: str, max_tokens: int, want_json: bool) -> str:
         if self.provider == "builtin":
             from . import builtin
-            self.base_url = builtin.ensure_running(self.model)
+            if builtin._running() and builtin._key == self.model:
+                self.base_url = builtin.ensure_running(self.model)
+            else:
+                with progress.aside("Starting the built-in AI (loading the model into memory)"):
+                    self.base_url = builtin.ensure_running(self.model)
         base = self.base_url or "https://api.openai.com/v1"
         key = self.settings.secret("OPENAI_API_KEY")
         body = {"model": self.model, "max_tokens": max_tokens, "temperature": self.temperature,
@@ -124,6 +134,15 @@ class LLM:
         if self.provider == "builtin":
             from . import builtin
             headers = builtin.auth_headers()  # the engine is started with a fresh key each time
+        if self.local and progress.current():
+            try:
+                text = self._stream(f"{base}/chat/completions", headers, body)
+                if self.provider == "builtin":
+                    from . import builtin
+                    builtin.touch()
+                return strip_thinking(text)
+            except HttpError:
+                pass  # e.g. a server that rejects json_object while streaming: the plain request below retries
         try:
             data = request_json(f"{base}/chat/completions", method="POST", timeout=self.timeout,
                                 headers=headers, body=body, retries=0 if self.local else 2)
@@ -141,6 +160,32 @@ class LLM:
             builtin.touch()
         return strip_thinking(data["choices"][0]["message"]["content"] or "")
 
+    def _stream(self, url: str, headers: dict, body: dict, ollama: bool = False) -> str:
+        """The same request, streamed, reporting the text written so far to the progress table."""
+        parts: list[str] = []
+        for line in stream_lines(url, headers=headers, body={**body, "stream": True}, timeout=self.timeout):
+            if not ollama:
+                if not line.startswith("data:"):
+                    continue
+                line = line[5:].strip()
+                if line == "[DONE]":
+                    break
+            try:
+                chunk = json.loads(line)
+            except ValueError:
+                continue
+            if ollama:
+                piece = (chunk.get("message") or {}).get("content") or ""
+            else:
+                choice = (chunk.get("choices") or [{}])[0]
+                piece = (choice.get("delta") or {}).get("content") or ""
+            if piece:
+                parts.append(piece)
+                progress.writing("".join(parts))
+            if ollama and chunk.get("done"):
+                break
+        return "".join(parts)
+
     def complete_json(self, system: str, user: str, max_tokens: int = 1500) -> dict:
         system = system + "\nReply with one JSON object and nothing else."
         text = self.complete(system, user, max_tokens, want_json=True)
@@ -148,6 +193,7 @@ class LLM:
             return parse_json(text)
         except ValueError:
             # Small models sometimes wrap or break the JSON. One retry with a firm reminder.
+            progress.stage("The answer was not complete. Asking the AI once more")
             text = self.complete(system, user + "\n\nYour last reply was not valid JSON. Reply with ONLY the JSON object.",
                                  max_tokens, want_json=True)
             return parse_json(text)
