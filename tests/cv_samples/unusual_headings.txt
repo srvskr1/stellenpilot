@@ -1,0 +1,15 @@
+Priya Nair
+priya.nair@example.com | +49 176 2222222 | Düsseldorf
+
+Where I have worked
+Analytics Engineer, Kölner Mobil GmbH    Jan 2023 – Present
+• Modeled ride data in dbt on BigQuery and cut dashboard load times for the operations team.
+• Wrote Airflow DAGs that load partner data every hour.
+Data Analyst, Rheinland Versicherung    Aug 2020 – Dec 2022
+• Built Looker dashboards for claims handling.
+
+What I studied
+M.Sc. Data Science, Heinrich Heine University Düsseldorf    2018 – 2020
+
+Toolbox
+SQL, Python, dbt, BigQuery, Airflow, Looker

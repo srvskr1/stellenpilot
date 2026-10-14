@@ -1,0 +1,16 @@
+Max Mustermann
+Data Engineer
+Köln | max@example.com | +49 151 9876543
+
+Experience
+Data Engineer at Rhein Logistics, 2022 - Present
+Built batch pipelines in Airflow and dbt that load shipment data into Snowflake every night. Owned data quality checks with Great Expectations.
+
+Junior BI Developer at Domstadt Retail, 2020 - 2022
+Created Tableau dashboards for store managers and maintained the SQL Server data warehouse.
+
+Education
+B.Sc. Computer Science, University of Cologne, 2016 - 2020
+
+Skills
+Python, SQL, Airflow, dbt, Snowflake, Tableau, Docker

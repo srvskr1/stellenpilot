@@ -2,9 +2,10 @@
 
 The AI only sorts your CV into sections. Every bullet and skill it returns is checked against
 your original text; anything that is not in your CV is dropped and listed for you to check.
-Without an AI model, the contact details and the tool names your CV mentions are filled in, and
-your CV text is placed in the file as comments so you can copy the rest across by hand. The CV
-text is also kept in cv_source.txt, so it can be read again once you turn on an AI.
+A CV with clear headings is sorted without any AI (see cv_parse.py); otherwise the AI points at line
+numbers, and only as a last resort copies the CV. When nothing fits and there is no AI, your CV
+text is placed in the file as comments to copy from. The CV text is also kept in cv_source.txt, so
+it can be read again once you turn on an AI.
 """
 from __future__ import annotations
 
@@ -352,35 +353,80 @@ def import_cv(path: Path, settings) -> tuple[Path, list[str]]:
     return import_text(text, settings)
 
 
+def _full_ai(text: str, llm, contact: dict) -> dict:
+    """Last resort: the AI writes the whole profile. Slow on a laptop (it copies the CV), but it
+    copes with layouts that neither the headings nor the line numbers made sense of."""
+    from . import progress
+    progress.stage("Reading your CV and writing your profile", expect=int(len(text[:12000]) * 1.15) + 400)
+    data = structure_with_llm(text, llm)
+    model_person = data.get("person") if isinstance(data, dict) and isinstance(data.get("person"), dict) else {}
+    # The plain text reader is exact for email, phone and links, so it wins over the model there.
+    person = {**{k: v for k, v in model_person.items() if v}, **{k: v for k, v in contact.items() if v and k != "name"}}
+    person.setdefault("name", contact.get("name", ""))
+    data = data if isinstance(data, dict) else {}
+    data["person"] = person
+    return data
+
+
+def sort_cv(text: str, llm=None) -> tuple[dict, str, str]:
+    """The profile from CV text, the way it was found ("rules", "ai-lines", "ai-full" or "rules-partial")
+    and, for a partial result, why the rules were unsure. Fastest way first:
+    1. headings, dates and bullets: instant, and enough for most clean CVs;
+    2. the AI answers with line numbers only: a minute or two on a laptop;
+    3. the AI copies the CV into the profile: slow, for layouts the first two could not sort."""
+    from . import cv_parse, progress
+    contact = contact_facts(text)
+    progress.stage("Sorting your CV by its headings")
+    sections = cv_parse.by_rules(text)
+    profile = cv_parse.build(sections, contact)
+    ok, why = cv_parse.good_enough(profile, sections, text)
+    if ok:
+        return profile, "rules", ""
+    if not (llm and llm.enabled):
+        return profile, "rules-partial", why
+    lines = cv_parse.numbered(text[:16000])
+    # The answer is a few line ranges: about 40 characters per job, project or degree plus the frame.
+    # The answer is a short list of line numbers, a few characters per CV line at most.
+    progress.stage("Finding where your jobs, projects and degrees start (AI)",
+                   expect=40 + 2 * sum(1 for ln in text.splitlines() if ln.strip()))
+    try:
+        answer = llm.complete_json(cv_parse.LINES_SYSTEM, lines, max_tokens=900)
+        s2, e2 = cv_parse.by_line_numbers(answer, text)
+        p2 = cv_parse.build(s2, contact, e2)
+        complete = (all(e["title"] and e["company"] for e in p2["experience"])
+                    and all(e["degree"] and e["school"] for e in p2["education"]))
+        if (p2["experience"] or p2["projects"]) and complete:
+            if not p2["skills"]:
+                p2["skills"] = profile["skills"]
+            return p2, "ai-lines", ""
+    except Exception:  # broken JSON or nonsense ranges: the slow way below still works
+        pass
+    return _full_ai(text, llm, contact), "ai-full", ""
+
+
 def import_text(text: str, settings) -> tuple[Path, list[str]]:
     import tomllib
+    from . import progress
     from .llm import LLM
     llm = LLM(settings)
-    contact = contact_facts(text)
-    if llm.enabled:
-        from . import progress
-        # The answer is the CV again as JSON: about as long as the CV text, plus the field names.
-        progress.stage("Reading your CV and writing your profile", expect=int(len(text[:12000]) * 1.15) + 400)
-        data = structure_with_llm(text, llm)
-        progress.stage("Checking every line against your CV")
-        model_person = data.get("person") if isinstance(data, dict) and isinstance(data.get("person"), dict) else {}
-        # The plain text reader is exact for email, phone and links, so it wins over the model there.
-        person = {**{k: v for k, v in model_person.items() if v}, **{k: v for k, v in contact.items() if v and k != "name"}}
-        person.setdefault("name", contact.get("name", ""))
-        data = data if isinstance(data, dict) else {}
-        data["person"] = person
-        profile, notes = verify(data, text)
-        body = to_toml(profile, notes)
-    else:
-        skills = rule_skills(text)
-        profile = {"person": contact, "skills": skills, "experience": [], "projects": [], "education": []}
-        found = len(skills.get("Skills", []))
-        notes = [f"No AI model configured, so contact details{f' and {found} tool names from your CV' if found else ''} "
-                 "were filled in. Copy your experience, projects and education from the CV text at the bottom, "
-                 "or turn on an AI and let it read your CV again."]
-        if skills.get("Learning"):
-            notes.append(f"Listed as still learning, never as experience: {', '.join(skills['Learning'])}.")
-        body = to_toml(profile, notes, source_text=text)
+    data, how, why = sort_cv(text, llm)
+    if not data.get("skills"):
+        data["skills"] = rule_skills(text)
+    progress.stage("Checking every line against your CV")
+    profile, notes = verify(data, text)
+    keep_text = False
+    if how == "rules-partial":
+        keep_text = True
+        found = [k for k, label in (("experience", "jobs"), ("projects", "projects"), ("education", "degrees")) if profile[k]]
+        notes.insert(0, "Sorted without an AI by the headings of your CV, but not everything fit "
+                        f"({why}). Check every section, copy what is missing from the CV text at the bottom, "
+                        "or turn on an AI and let it read your CV again." if found else
+                        "No AI model configured, and the headings of your CV did not show where your jobs and "
+                        "projects are. Contact details and tool names were filled in. Copy the rest from the CV "
+                        "text at the bottom, or turn on an AI and let it read your CV again.")
+    if profile["skills"].get("Learning"):
+        notes.append(f"Listed as still learning, never as experience: {', '.join(profile['skills']['Learning'])}.")
+    body = to_toml(profile, notes, source_text=text if keep_text else None)
     tomllib.loads(body)  # never write a file that would not load
     out = settings.home / "profile.imported.toml"
     out.write_text(body, encoding="utf-8")

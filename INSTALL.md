@@ -160,7 +160,7 @@ A short setup opens by itself the first time: your CV, what jobs you want, who w
 
 The **My CV** panel opens by itself the first time.
 1. Drop your CV file (PDF, DOCX or TXT) on the box, or click it to choose the file.
-2. The form fills in. Without an AI model only your name, contact details and languages are filled; your CV text is shown above the form so you can copy the rest in.
+2. The form fills in. A CV with clear headings (Experience, Projects, Education, Skills) is sorted in about a second, even without an AI model. If the headings are unclear and no AI is on, only your contact details and skills are filled; your CV text is shown above the form so you can copy the rest in.
 3. Check every field. Add jobs, projects and degrees with the **+ Add** buttons. Keep bullets short and true: they are copied word for word into your tailored CVs.
 4. Put skills you are still learning in a group called `Learning`. They are never presented as experience.
 5. Click **Save my CV**.
