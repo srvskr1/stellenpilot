@@ -39,6 +39,22 @@ CHOICES = {("llm", "provider"): {"none", "builtin", "ollama", "lmstudio", "llama
 SECRETS = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ADZUNA_APP_ID", "ADZUNA_APP_KEY", "THEIRSTACK_API_KEY")
 
 
+_TRUE, _FALSE = {"true", "1", "yes", "on"}, {"false", "0", "no", "off", ""}
+
+
+def _as_bool(v, name: str) -> bool:
+    """bool("false") is True in Python, so text is read by its meaning. Anything else is refused."""
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, int) and v in (0, 1):
+        return bool(v)
+    if isinstance(v, str) and v.strip().lower() in _TRUE | _FALSE:
+        return v.strip().lower() in _TRUE
+    if v is None:
+        return False
+    raise ValueError(f"{name.replace('_', ' ')} must be on or off")
+
+
 def clean_settings(body: dict) -> dict:
     """Keep only editable fields, with the type the default has. Raises ValueError with a friendly message."""
     from .config import DEFAULTS
@@ -52,7 +68,7 @@ def clean_settings(body: dict) -> dict:
                 continue
             want, v = DEFAULTS[section][k], given[k]
             if isinstance(want, bool):
-                v = bool(v)
+                v = _as_bool(v, k)
             elif isinstance(want, int):
                 try:
                     v = int(v)
@@ -353,7 +369,7 @@ def make_handler(settings, port: int = 8765):
                 if "notes" in body:
                     fields["notes"] = str(body["notes"])[:5000]
                 if "closed" in body:
-                    fields["closed"] = int(bool(body["closed"]))
+                    fields["closed"] = int(_as_bool(body["closed"], "closed"))
                 if fields:
                     db.update_job(job_id, fields, by_user=True)
             except (ValueError, TypeError, OverflowError) as e:
@@ -398,7 +414,7 @@ def make_handler(settings, port: int = 8765):
                     body = self._body()
                     own = DB(settings.db_path)
                     try:
-                        res = add_job(settings, own, tailor=bool(body.get("tailor")),
+                        res = add_job(settings, own, tailor=_as_bool(body.get("tailor"), "tailor"),
                                       **{k: str(body.get(k) or "") for k in ("url", "text", "title", "company", "location")})
                     finally:
                         own.conn.close()
@@ -570,7 +586,7 @@ def make_handler(settings, port: int = 8765):
                     with progress.track("cv", "Reading your CV"):
                         out, notes = import_cv(path, settings)
                     cv_text = read_cv_text(path)
-                except progress.Busy as e:
+                except progress.Busy:
                     return self._send(409, {"error": "Your CV is already being read. Wait until it is finished."})
                 except (RuntimeError, ValueError) as e:
                     return self._send(400, {"error": str(e)})

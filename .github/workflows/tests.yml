@@ -44,3 +44,38 @@ jobs:
         run: python -m pip install ".[gmail]" pip-audit
       - name: Check dependencies for known vulnerabilities
         run: pip-audit --skip-editable
+
+  online:
+    # The unit tests never touch the internet. This job checks the safe link fetch against real sites:
+    # a public https page with a redirect works, and an internal address is refused. Informational,
+    # so a flaky network does not block a merge.
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install .
+      - name: Fetch real pages through the checked address
+        shell: bash
+        run: |
+          python - <<'PY'
+          from stellenpilot.manual import AddError, open_public
+          url, body = open_public("http://github.com/srvskr1/stellenpilot")  # http, redirects to https
+          assert url.startswith("https://github.com/") and b"Stellenpilot" in body, (url, body[:200])
+          print("public page with redirect: ok,", url)
+          url, body = open_public("https://example.com/")
+          assert b"Example Domain" in body
+          print("plain https page: ok")
+          for bad in ("http://169.254.169.254/latest/meta-data/", "http://127.0.0.1:8765/", "http://localhost/"):
+              try:
+                  open_public(bad)
+                  raise SystemExit(f"NOT refused: {bad}")
+              except AddError:
+                  print("refused:", bad)
+          PY

@@ -25,9 +25,39 @@ def read_cv_text(path: Path) -> str:
     return text
 
 
+# A CV is a few pages. These limits stop a small file that unpacks into gigabytes (a "zip bomb")
+# from filling the memory: Word files are zip archives, and PDF pages are compressed streams.
+MAX_DOCX_UNPACKED = 50_000_000      # all parts of a .docx together, after unpacking
+MAX_DOCX_PART = 25_000_000          # one part (the text, or one picture)
+MAX_DOCX_PARTS = 1_000
+MAX_PDF_PAGES = 20
+MAX_PDF_STREAM = 20_000_000         # one decompressed PDF stream
+MAX_TEXT_BYTES = 2_000_000          # a .txt or .md CV
+MAX_CV_CHARS = 200_000              # text kept from any CV
+
+
+def _check_docx(path: Path) -> None:
+    import zipfile
+    try:
+        with zipfile.ZipFile(path) as z:
+            infos = z.infolist()
+    except zipfile.BadZipFile:
+        raise RuntimeError("This is not a valid Word file. Save it again as .docx, or export a PDF.") from None
+    # The sizes in the zip directory are an upper bound: zipfile refuses to unpack more than they say.
+    if (len(infos) > MAX_DOCX_PARTS or sum(i.file_size for i in infos) > MAX_DOCX_UNPACKED
+            or any(i.file_size > MAX_DOCX_PART for i in infos)):
+        raise RuntimeError("This Word file unpacks to far more than a CV ever needs, so it was not opened. "
+                           "Save your CV again as .docx or PDF.")
+
+
 def _read_any(path: Path) -> str:
+    return _read_limited(path)[:MAX_CV_CHARS]
+
+
+def _read_limited(path: Path) -> str:
     suffix = path.suffix.lower()
     if suffix == ".docx":
+        _check_docx(path)
         doc = Document(str(path))
         parts = [p.text for p in doc.paragraphs]
         for table in doc.tables:
@@ -41,15 +71,40 @@ def _read_any(path: Path) -> str:
             raise RuntimeError("Reading PDFs needs pypdf: pip install pypdf") from e
         from pypdf.errors import PyPdfError
         try:
-            reader = PdfReader(str(path))
-            if reader.is_encrypted and not reader.decrypt(""):
-                raise RuntimeError("This PDF is password protected. Save an unprotected copy or export as DOCX.")
-            return "\n".join((page.extract_text() or "") for page in reader.pages)
+            with _pdf_limits():
+                reader = PdfReader(str(path))
+                if reader.is_encrypted and not reader.decrypt(""):
+                    raise RuntimeError("This PDF is password protected. Save an unprotected copy or export as DOCX.")
+                out, size = [], 0
+                for page in reader.pages[:MAX_PDF_PAGES]:
+                    text = page.extract_text() or ""
+                    out.append(text)
+                    size += len(text)
+                    if size > MAX_CV_CHARS:
+                        break
+                return "\n".join(out)
         except PyPdfError as e:
             raise RuntimeError(f"Could not read this PDF ({e.__class__.__name__}). Export your CV as DOCX or text instead.") from None
     if suffix in (".txt", ".md"):
-        return path.read_text(encoding="utf-8", errors="replace")
+        with open(path, "rb") as f:
+            return f.read(MAX_TEXT_BYTES).decode("utf-8", "replace")
     raise RuntimeError(f"Unsupported file type {suffix}. Use PDF, DOCX, TXT or MD.")
+
+
+def _pdf_limits():
+    """Lower pypdf's decompression limits (75 MB per stream by default) while reading a CV."""
+    import contextlib
+    try:
+        from pypdf import apply_configuration
+    except ImportError:  # older pypdf: its own default limits still apply
+        return contextlib.nullcontext()
+    caps = {k: MAX_PDF_STREAM for k in (
+        "zlib_maximum_output_length", "lzw_maximum_output_length", "run_length_maximum_output_length",
+        "brotli_maximum_output_length", "jbig2_maximum_output_length", "array_based_stream_maximum_output_length",
+        "maximum_declared_stream_length", "image_maximum_buffer_size")}
+    from pypdf import Configuration
+    known = set(getattr(Configuration, "__dataclass_fields__", {}))
+    return apply_configuration(**{k: v for k, v in caps.items() if k in known})
 
 
 # ---------------------------------------------------------------- facts without an LLM

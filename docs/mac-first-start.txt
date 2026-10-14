@@ -1,0 +1,22 @@
+STELLENPILOT FOR MAC: FIRST START
+
+1. Drag Stellenpilot onto the Applications folder in this window.
+
+2. The app is not signed by Apple yet, so macOS stops it the first time.
+
+   macOS 15 (Sequoia) and newer:
+   - Double click Stellenpilot in Applications. Click "Done" in the message.
+   - Open System Settings, then Privacy & Security.
+   - Scroll down to Security, click "Open Anyway" next to Stellenpilot.
+   - Enter your Mac password and click "Open Anyway" again.
+
+   macOS 14 and older:
+   - Hold Control, click Stellenpilot in Applications, choose Open, then Open.
+
+3. From then on it opens with a double click.
+
+Says "damaged"? Open Terminal and run:
+   xattr -dr com.apple.quarantine /Applications/Stellenpilot.app
+
+Your files go to the folder "Stellenpilot" in your home folder.
+More help: https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md

@@ -96,9 +96,9 @@ class ClosedCheckTests(unittest.TestCase):  # S4, B8
                                 {"id": "2", "url": "http://192.168.1.1/admin"},
                                 {"id": "3", "url": "http://127.0.0.1:8765/"}]
         from stellenpilot import manual
-        with mock.patch.object(manual._OPENER, "open") as opener:
+        with mock.patch.object(manual.socket, "create_connection") as connect:
             pipeline.check_closed(db)
-        opener.assert_not_called()
+        connect.assert_not_called()
 
 
 class PromptTests(unittest.TestCase):  # S5

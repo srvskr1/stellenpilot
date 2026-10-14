@@ -35,6 +35,7 @@ def _examples_dir() -> Path:
 
 
 def cmd_init(home: Path) -> None:
+    home.mkdir(parents=True, exist_ok=True)  # `--home NEW_FOLDER init` must work, not only an existing folder
     ex = _examples_dir()
     for src, dst in (("config.example.toml", "config.toml"), ("profile.example.toml", "profile.toml")):
         target = home / dst
