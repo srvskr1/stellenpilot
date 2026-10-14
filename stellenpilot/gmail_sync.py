@@ -1,9 +1,11 @@
-"""Optional Gmail status sync. Read only (gmail.readonly scope), never sends or changes mail.
+"""Optional email status sync. Read only, never sends or changes mail.
 
-Setup (docs/gmail.md): create your own Google Cloud project and OAuth client, save it as
-credentials.json next to config.toml, then run `stellenpilot gmail`. A browser window asks for
-consent once; the token is stored in token.json (ignored by git). Apps in Google's Testing
-mode need re-consent about every 7 days.
+Two ways to read (docs/gmail.md):
+* method "imap" (the simple one): your address and an app password; see mail_imap.py.
+* method "oauth": your own Google Cloud project and OAuth client saved as credentials.json, with
+  the gmail.readonly scope. The token is stored in token.json (ignored by git). Apps in Google's
+  Testing mode need re-consent about every 7 days.
+Both hand the same {"sender", "subject", "snippet"} messages to apply(), which moves statuses.
 """
 from __future__ import annotations
 
@@ -75,12 +77,11 @@ def _service(home: Path):
     return build("gmail", "v1", credentials=creds, cache_discovery=False)
 
 
-def sync(db, home: Path, lookback_days: int = 3) -> list[dict]:
-    """Move job statuses forward based on recent mail. Never moves a status backwards."""
+def _gmail_api_messages(home: Path, lookback_days: int) -> list[dict]:
     svc = _service(home)
     q = f"newer_than:{lookback_days}d {QUERY}"
     threads = svc.users().threads().list(userId="me", q=q, maxResults=50).execute().get("threads", [])
-    changes = []
+    out = []
     for th in threads:
         full = svc.users().threads().get(userId="me", id=th["id"], format="metadata",
                                          metadataHeaders=["From", "Subject", "Date"]).execute()
@@ -89,10 +90,18 @@ def sync(db, home: Path, lookback_days: int = 3) -> list[dict]:
             continue
         last = received[-1]
         hdr = {h["name"]: h["value"] for h in last["payload"].get("headers", [])}
-        sender, subject = hdr.get("From", ""), hdr.get("Subject", "")
+        out.append({"sender": hdr.get("From", ""), "subject": hdr.get("Subject", ""), "snippet": last.get("snippet", "")})
+    return out
+
+
+def apply(db, messages: list[dict]) -> list[dict]:
+    """Move job statuses forward based on the messages. Never moves a status backwards."""
+    changes = []
+    for msg in messages:
+        sender, subject = msg.get("sender", ""), msg.get("subject", "")
         if ALERT.search(sender + " " + subject):
             continue
-        text = " ".join([sender, subject, last.get("snippet", "")])
+        text = " ".join([sender, subject, msg.get("snippet", "")])
         status = classify(text)
         if not status:
             continue
@@ -101,7 +110,7 @@ def sync(db, home: Path, lookback_days: int = 3) -> list[dict]:
         hit = _pick([j for j in db.jobs() if _company_matches(j["company"], text_norm, domain)])
         if not hit:
             continue
-        current = db.job(hit["id"])["status"]  # fresh read: earlier threads may have changed it
+        current = db.job(hit["id"])["status"]  # fresh read: earlier messages may have changed it
         if current in ("rejected", "offer") or RANK[status] <= RANK.get(current, 0):
             continue
         note = {"applied": "Receipt confirmed", "interview": "Interview invitation",
@@ -109,3 +118,21 @@ def sync(db, home: Path, lookback_days: int = 3) -> list[dict]:
         db.set_status(hit["id"], status, source="gmail", note=f"{note}: {subject[:80]}")
         changes.append({"id": hit["id"], "company": hit["company"], "from": current, "to": status})
     return changes
+
+
+def sync(db, home: Path, lookback_days: int = 3, settings=None) -> list[dict]:
+    """Read recent mail the way the person connected it, then move statuses forward."""
+    if settings is None:
+        from .config import Settings
+        settings = Settings(home)
+    cfg = settings["gmail"]
+    if cfg.get("method") == "imap":
+        from . import mail_imap
+        password = settings.secret(mail_imap.SECRET)
+        if not password or not cfg.get("address"):
+            raise RuntimeError("Email is not connected: the address or app password is missing. Connect it again under Settings, Email.")
+        messages = mail_imap.fetch(mail_imap.host_for(cfg["address"], cfg.get("imap_host", "")),
+                                   cfg["address"], password, lookback_days)
+    else:
+        messages = _gmail_api_messages(home, lookback_days)
+    return apply(db, messages)

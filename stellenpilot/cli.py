@@ -156,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--host", default=os.environ.get("JOBHUNT_HOST", "127.0.0.1"),
                    help="address to listen on; keep 127.0.0.1 unless you run inside Docker")
     sub.add_parser("shortcut", help="put a Stellenpilot icon on the desktop that starts this workspace")
-    sub.add_parser("gmail", help="sync statuses from Gmail once")
+    sub.add_parser("gmail", help="sync statuses from your email once")
     sub.add_parser("demo", help="load fictional sample jobs to try the dashboard without any keys")
     sub.add_parser("notify-test", help="send a test digest by email or Telegram")
     sub.add_parser("telegram-id", help="show your Telegram chat id after you messaged your bot")
@@ -212,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "gmail":
         from .db import DB
         from .gmail_sync import sync
-        changes = sync(DB(settings.db_path), home, settings["gmail"].get("lookback_days", 3))
+        changes = sync(DB(settings.db_path), home, settings["gmail"].get("lookback_days", 3), settings=settings)
         print(f"{len(changes)} status changes")
         return 0
     if a.cmd == "notify-test":

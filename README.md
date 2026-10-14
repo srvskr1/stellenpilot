@@ -126,7 +126,7 @@ Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips an
 
 * **Daily autopilot.** Switch on **Automatic search** in Settings and pick a time. Stellenpilot sets up Task Scheduler on Windows or cron on macOS and Linux for you. The dashboard does not need to be open. A search missed because the computer was off runs when you log in or open Stellenpilot. Doing it by hand: [docs/scheduling.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/scheduling.md).
 * **Company watchlist.** Switch on the ready made list of about 200 companies with offices in Germany, or add your dream companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters. Their new roles often appear here before they reach the job boards.
-* **Gmail sync.** Read only. Connect it in **Settings, Gmail** in three steps, and statuses move forward as replies arrive. It never sends, deletes or labels mail. Details: [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail.md).
+* **Email sync.** Read only. Connect Gmail (or GMX, web.de and others) in **Settings, Email** with your address and an app password, in about 2 minutes, and statuses move forward as replies arrive. It never sends, deletes, moves or labels mail. Details: [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail.md).
 * **Daily digest** to Telegram or email: top new matches, documents ready to send, interviews. See [docs/digest.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/digest.md).
 * **Jobs you found yourself.** Paste a link or the ad text from LinkedIn, a friend or anywhere, and the AI scores and tailors it like the rest.
 
