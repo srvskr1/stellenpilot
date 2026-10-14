@@ -210,7 +210,9 @@ def add_job(settings, db, *, tailor: bool = False, **kw) -> dict:
     from .sources import job_type_from_title
     llm = LLM(settings)
     job = build_job(llm=llm, **kw)
-    existing = db.job(job["id"]) or next(iter(db.jobs("dedupe_key = ?", (job["dedupe_key"],))), None)
+    from .pipeline import repost_since
+    since = repost_since(settings) or "0000-00-00"
+    existing = db.job(job["id"]) or next(iter(db.jobs("dedupe_key = ? AND found_at >= ?", (job["dedupe_key"], since))), None)
     if existing:
         return {"job": existing, "status": "exists"}
     job["job_type"] = job_type_from_title(job["title"])
