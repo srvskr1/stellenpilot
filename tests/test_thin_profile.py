@@ -149,6 +149,8 @@ class RereadServerTests(unittest.TestCase):
                 self.assertEqual(e.exception.code, 400)
                 r = self._post(base, "/api/settings", {"llm": {"provider": "ollama", "model": "fake"}})
                 self.assertTrue(r["rereadOffer"])
+                page = json.load(urllib.request.urlopen(f"{base}/api/settings", timeout=10))
+                self.assertTrue(page["rereadOffer"])  # shown when Settings opens, not only right after a save
                 with mock.patch("stellenpilot.llm.LLM", FakeLLM):
                     r = self._post(base, "/api/cv/reread", {})
                 self.assertEqual(r["profile"]["experience"][0]["company"], "Techmak Technology")

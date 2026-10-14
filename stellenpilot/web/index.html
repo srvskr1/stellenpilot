@@ -674,6 +674,7 @@ body.wizopen{overflow:hidden}
             <label data-for="openai">OpenAI API key <span class="keyset" data-key="OPENAI_API_KEY"></span><input class="input" name="OPENAI_API_KEY" type="password" autocomplete="off" placeholder="sk-..."></label>
             <label data-for="local llamacpp vllm lmstudio ollama">Server address <span class="muted">Leave empty for the usual one.</span><input class="input" name="base_url" placeholder="http://localhost:11434"></label>
             <div class="btnrow" data-for="ollama lmstudio anthropic openai llamacpp vllm local"><button type="button" class="btn sec" id="aiTest">Save and test</button><span id="aiTestMsg" role="status"></span></div>
+            <div id="rereadBox" hidden><div class="btnrow" style="margin-top:12px;align-items:center"><span id="rereadMsg" role="status">Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.</span><button type="button" class="btn sec" id="rereadBtn">Read my CV again</button></div></div>
           </section>
 
           <section class="box scard" id="s-docs"><h2>Documents and German</h2><p class="hint">When CVs and letters are made, and in which language.</p>
@@ -698,7 +699,6 @@ body.wizopen{overflow:hidden}
             <div class="btnrow"><button type="button" class="btn sec" id="iconBtn">Put the icon on my desktop</button></div>
           </section>
           <div class="savebar" id="saveBar"><span id="setMsg" role="status">No changes yet.</span><button class="btn" type="submit" id="setSave">Save changes</button></div>
-          <div id="rereadBox" hidden><div class="btnrow" style="margin-top:12px;align-items:center"><span id="rereadMsg" role="status">Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.</span><button type="button" class="btn sec" id="rereadBtn">Read my CV again</button></div></div>
         </form>
 
         <section class="box scard" id="s-gmail" aria-labelledby="gm-h2"><h2 id="gm-h2">Gmail</h2>
@@ -1333,7 +1333,7 @@ function showProvider(){const f=$("setForm"),pv=f.provider.value;f.querySelector
 async function loadSettings(){
   const f=$("setForm");
   try{
-    const r=await api("GET","/api/settings");
+    const r=await api("GET","/api/settings");$("rereadBox").hidden=!r.rereadOffer;
     for(const [sec,keys] of Object.entries(SETF))for(const k of keys){const el=f.elements[k],v=r[sec][k];if(el.type==="checkbox")el.checked=!!v;else el.value=Array.isArray(v)?v.join("\n"):v??""}
     f.querySelectorAll(".keyset").forEach(el=>el.innerHTML=r.keys[el.dataset.key]?`Key saved <button type="button" class="linkbtn" data-clear-key="${esc(el.dataset.key)}">Remove</button>`:"");
     f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";if(el.dataset.ph===undefined)el.dataset.ph=el.placeholder;el.placeholder=r.keys[el.name]?"saved, type to replace":el.dataset.ph});
