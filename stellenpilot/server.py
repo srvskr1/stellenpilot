@@ -306,7 +306,8 @@ def make_handler(settings, port: int = 8765):
                                         "scheduleActive": schedule.is_enabled(settings.home),
                                         "inDocker": schedule.in_docker(),
                                         "gmail": gmail_status(settings),
-                                        "shortcut": shortcut_status()})
+                                        "shortcut": shortcut_status(),
+                                        "rereadOffer": reread_offer(settings)})
             if self.path == "/api/builtin":
                 from . import builtin
                 return self._send(200, builtin.status(settings["llm"].get("model") or "standard"))
