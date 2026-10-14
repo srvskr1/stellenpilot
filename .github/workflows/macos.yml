@@ -1,0 +1,95 @@
+# Builds the Mac app (Apple chip) as a .dmg and attaches it to the GitHub release named after the
+# version in pyproject.toml. Runs when that version changes on main, on pull requests that touch the
+# app or its packaging (build and test only), and from the Actions tab ("Run workflow").
+# The app is not signed with an Apple Developer ID yet; docs/mac.md tells people how to open it.
+name: mac app
+
+on:
+  push:
+    branches: [main]
+    paths: [pyproject.toml]
+  pull_request:
+    paths: [".github/workflows/macos.yml", "packaging/**", "stellenpilot/app.py", "stellenpilot/launch.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest  # Apple chip (arm64)
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+      - name: version
+        id: v
+        run: |
+          v=$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - name: check that the window toolkit is there
+        # The app shows a small window with Open and Stop. Without Tk it still runs, but has no window.
+        run: python -c "import tkinter; tkinter.Tcl(); print('Tk', tkinter.TkVersion)"
+      - name: build the app
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[gmail]" pyinstaller pillow
+          pyinstaller --noconfirm --clean --windowed --name Stellenpilot \
+            --osx-bundle-identifier io.github.srvskr1.stellenpilot \
+            --icon stellenpilot/web/icon.png \
+            --collect-data stellenpilot --collect-submodules stellenpilot --collect-data googleapiclient \
+            --distpath dist --workpath build packaging/stellenpilot_app.py
+          test -x dist/Stellenpilot.app/Contents/MacOS/Stellenpilot
+          # Apple chips only run signed code; PyInstaller signs ad hoc. Show it, fail if missing.
+          codesign --verify --deep --verbose=2 dist/Stellenpilot.app
+      - name: smoke test (command line and dashboard)
+        run: |
+          app=dist/Stellenpilot.app/Contents/MacOS/Stellenpilot
+          ws="$RUNNER_TEMP/ws"
+          "$app" --home "$ws" init
+          test -f "$ws/config.toml" || { echo "init did not create config.toml"; exit 1; }
+          STELLENPILOT_NO_BROWSER=1 "$app" --home "$ws" &
+          pid=$!
+          ok=0
+          for i in $(seq 1 40); do sleep 1; if curl -fsS http://127.0.0.1:8765/api/state >/dev/null; then ok=1; break; fi; done
+          kill $pid || true
+          if [ $ok != 1 ]; then cat "$ws/app.log" 2>/dev/null; echo "dashboard did not answer"; exit 1; fi
+          echo "Dashboard answered."
+      - name: build the disk image
+        run: |
+          v=${{ steps.v.outputs.version }}
+          mkdir -p dmg
+          cp -R dist/Stellenpilot.app dmg/
+          ln -s /Applications dmg/Applications
+          cp docs/mac-first-start.txt "dmg/First start - read me.txt"
+          hdiutil create -volname "Stellenpilot $v" -srcfolder dmg -ov -format UDZO "dist/Stellenpilot-$v-mac.dmg"
+      - name: test the disk image (open, start the app from it, close)
+        run: |
+          v=${{ steps.v.outputs.version }}
+          mnt=$(hdiutil attach -nobrowse -readonly "dist/Stellenpilot-$v-mac.dmg" | awk -F'\t' '/\/Volumes\//{print $NF}')
+          test -d "$mnt/Stellenpilot.app" && test -L "$mnt/Applications"
+          STELLENPILOT_NO_BROWSER=1 "$mnt/Stellenpilot.app/Contents/MacOS/Stellenpilot" --home "$RUNNER_TEMP/ws2" &
+          pid=$!
+          ok=0
+          for i in $(seq 1 40); do sleep 1; if curl -fsS http://127.0.0.1:8765/api/state >/dev/null; then ok=1; break; fi; done
+          kill $pid || true
+          sleep 2
+          hdiutil detach "$mnt" || hdiutil detach -force "$mnt"
+          [ $ok = 1 ] || { echo "app from the disk image did not answer"; exit 1; }
+          echo "Disk image works."
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: mac
+          path: dist/Stellenpilot-*-mac.dmg
+      - name: publish to the release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=${{ steps.v.outputs.version }}
+          sed "s/VERSION/$v/g" packaging/release-notes.md > notes.md
+          # The Windows workflow may create the release at the same moment: whoever is first creates it,
+          # both then upload their files. --clobber lets a re-run replace its own file.
+          gh release view "v$v" >/dev/null 2>&1 || gh release create "v$v" --title "Stellenpilot $v" --notes-file notes.md || true
+          gh release upload "v$v" "dist/Stellenpilot-$v-mac.dmg" --clobber

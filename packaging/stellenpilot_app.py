@@ -1,4 +1,4 @@
-# Entry point for the Windows app built with PyInstaller (see .github/workflows/windows.yml).
+# Entry point for the Windows and Mac apps built with PyInstaller (.github/workflows/windows.yml, macos.yml).
 from stellenpilot.app import main
 
 raise SystemExit(main())

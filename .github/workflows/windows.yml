@@ -1,6 +1,6 @@
 # Builds the Windows app and installer (no Python needed on the user's PC) and attaches them to a
 # GitHub release named after the version in pyproject.toml. Runs when that version changes on main,
-# and from the Actions tab ("Run workflow"). A release that already exists is left alone.
+# and from the Actions tab ("Run workflow"). Shares the release with the Mac app (macos.yml).
 name: windows app
 
 on:
@@ -81,12 +81,14 @@ jobs:
           path: |
             dist/Stellenpilot-Setup-*.exe
             dist/Stellenpilot-Portable-*.zip
-      - name: publish the release
-        if: steps.v.outputs.exists == 'false'
+      - name: publish to the release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           v=${{ steps.v.outputs.version }}
-          gh release create "v$v" "dist/Stellenpilot-Setup-$v.exe" "dist/Stellenpilot-Portable-$v.zip" \
-            --title "Stellenpilot $v" --notes "Windows: download **Stellenpilot-Setup-$v.exe** and run it. No Python needed. Windows may warn that the app is from an unknown publisher (it is not code signed yet): click **More info**, then **Run anyway**. Python users: \`pip install -U stellenpilot\`."
+          sed "s/VERSION/$v/g" packaging/release-notes.md > notes.md
+          # The Mac workflow may create the release at the same moment: whoever is first creates it,
+          # both then upload their files. --clobber lets a re-run replace its own files.
+          gh release view "v$v" >/dev/null 2>&1 || gh release create "v$v" --title "Stellenpilot $v" --notes-file notes.md || true
+          gh release upload "v$v" "dist/Stellenpilot-Setup-$v.exe" "dist/Stellenpilot-Portable-$v.zip" --clobber
