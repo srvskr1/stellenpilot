@@ -124,8 +124,12 @@ class ImapTests(unittest.TestCase):
             home = Path(d)
             (home / "config.toml").write_text('[gmail]\nenabled = true\nmethod = "imap"\naddress = "me@gmail.com"\n', encoding="utf-8")
             os.environ.pop(mail_imap.SECRET, None)
-            with self.assertRaisesRegex(RuntimeError, "Connect it again"):
-                sync(DB(Path(d) / "x.db"), home, 3, settings=Settings(home))
+            db = DB(Path(d) / "x.db")
+            try:
+                with self.assertRaisesRegex(RuntimeError, "Connect it again"):
+                    sync(db, home, 3, settings=Settings(home))
+            finally:
+                db.conn.close()  # Windows cannot delete an open database file
 
 
 @mock.patch.dict(os.environ)
