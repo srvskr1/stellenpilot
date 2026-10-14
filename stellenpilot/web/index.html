@@ -698,6 +698,7 @@ body.wizopen{overflow:hidden}
             <div class="btnrow"><button type="button" class="btn sec" id="iconBtn">Put the icon on my desktop</button></div>
           </section>
           <div class="savebar" id="saveBar"><span id="setMsg" role="status">No changes yet.</span><button class="btn" type="submit" id="setSave">Save changes</button></div>
+          <div id="rereadBox" hidden><div class="btnrow" style="margin-top:12px;align-items:center"><span id="rereadMsg" role="status">Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.</span><button type="button" class="btn sec" id="rereadBtn">Read my CV again</button></div></div>
         </form>
 
         <section class="box scard" id="s-gmail" aria-labelledby="gm-h2"><h2 id="gm-h2">Gmail</h2>
@@ -1349,15 +1350,21 @@ async function saveSettings(){
   const f=$("setForm"),body={keys:{}};
   for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
   f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
-  const r=await api("POST","/api/settings",body);await loadSettings();lastState="";refresh();return r;
+  const r=await api("POST","/api/settings",body);await loadSettings();$("rereadBox").hidden=!r.rereadOffer;lastState="";refresh();return r;
 }
+/* An AI turned on after a CV import without AI: offer to read the saved CV again. */
+$("rereadBtn").addEventListener("click",async()=>{const b=$("rereadBtn"),m=$("rereadMsg");b.disabled=true;
+  m.textContent="Reading your CV with the AI… with an AI on this computer this can take a few minutes.";
+  try{const r=await api("POST","/api/cv/reread",{});cv=normCv(r.profile);if($("cvForm"))renderCv();
+    m.textContent="✓ Your CV is read and saved. Check it under My CV.";b.hidden=true}
+  catch(e){m.textContent=e.message;b.disabled=false}});
 $("setForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const f=e.target,m=$("setMsg"),b=$("setSave"),body={keys:{}};
   for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
   f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
   b.disabled=true;m.textContent="";
-  try{const r=await api("POST","/api/settings",body);await loadSettings();m.textContent="Saved. "+(r.scheduleNote?"Automatic search: "+r.scheduleNote:"The next search uses these settings.");lastState="";refresh()}
+  try{const r=await api("POST","/api/settings",body);await loadSettings();m.textContent="Saved. "+(r.scheduleNote?"Automatic search: "+r.scheduleNote:"The next search uses these settings.");$("rereadBox").hidden=!r.rereadOffer;lastState="";refresh()}
   catch(err){m.textContent=err.message}finally{b.disabled=false}
 });
 

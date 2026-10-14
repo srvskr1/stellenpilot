@@ -2,8 +2,9 @@
 
 The AI only sorts your CV into sections. Every bullet and skill it returns is checked against
 your original text; anything that is not in your CV is dropped and listed for you to check.
-Without an AI model, the contact details are filled in and your CV text is placed in the file
-as comments so you can copy facts across by hand.
+Without an AI model, the contact details and the tool names your CV mentions are filled in, and
+your CV text is placed in the file as comments so you can copy the rest across by hand. The CV
+text is also kept in cv_source.txt, so it can be read again once you turn on an AI.
 """
 from __future__ import annotations
 
@@ -51,6 +52,51 @@ def _read_any(path: Path) -> str:
 
 
 # ---------------------------------------------------------------- facts without an LLM
+
+CV_SOURCE = "cv_source.txt"
+_MARKER = "# ---- Your CV text, to copy facts into the sections above ----"
+# A line that says you are learning a tool, or plan to use it, is no proof that you used it.
+# "Machine learning" and "deep learning" are subjects, not a statement about learning.
+_LEARNING_LINE = re.compile(r"(?<!machine )(?<!deep )(?<!reinforcement )\b(learning|currently studying|studying|lerne\w*|in progress)\b", re.I)
+_PLANNED_LINE = re.compile(r"\b(planned|plan to|planning to|will add|upcoming|geplant|nächste\w*)\b", re.I)
+
+
+def rule_skills(text: str) -> dict[str, list[str]]:
+    """Tool names found in the CV text, without an AI. Only exact names from a fixed list count,
+    so nothing is guessed. Tools named only on a 'currently learning' line go to Learning, which
+    documents never present as experience; tools named only on a 'planned' line are left out."""
+    from .score import _mentioned
+    used, learning = set(), set()
+    for line in (text or "").splitlines():
+        found = _mentioned(line)
+        if not found:
+            continue
+        if _LEARNING_LINE.search(line):
+            learning |= found
+        elif not _PLANNED_LINE.search(line):
+            used |= found
+    used -= learning  # the CV itself says these are still being learned
+    out: dict[str, list[str]] = {}
+    if used:
+        out["Skills"] = sorted(used, key=str.lower)
+    if learning:
+        out["Learning"] = sorted(learning, key=str.lower)
+    return out
+
+
+def saved_cv_text(home: Path) -> str:
+    """The text of the last imported CV: cv_source.txt, or the comment block an import without AI
+    wrote into profile.imported.toml (older versions kept it only there)."""
+    src = home / CV_SOURCE
+    if src.exists():
+        return src.read_text(encoding="utf-8", errors="replace")
+    imported = home / "profile.imported.toml"
+    if imported.exists():
+        lines = imported.read_text(encoding="utf-8", errors="replace").splitlines()
+        if _MARKER in lines:
+            body = lines[lines.index(_MARKER) + 1:]
+            return "\n".join(ln[2:] if ln.startswith("# ") else ln.lstrip("#") for ln in body)
+    return ""
 
 def contact_facts(text: str) -> dict:
     email = re.search(r"[\w.+-]+@[\w-]+\.[\w.]+", text)
@@ -293,15 +339,22 @@ def to_toml(profile: dict, notes: list[str] | None, source_text: str | None = No
     for ed in profile.get("education") or []:
         out += ["", "[[education]]", f"degree = {_s(ed.get('degree'))}", f"school = {_s(ed.get('school'))}", f"dates = {_s(ed.get('dates'))}"]
     if source_text:
-        out += ["", "# ---- Your CV text, to copy facts into the sections above ----",
+        out += ["", _MARKER,
                 *[f"# {ln}" for ln in source_text.splitlines() if ln.strip()]]
     return "\n".join(out) + "\n"
 
 
 def import_cv(path: Path, settings) -> tuple[Path, list[str]]:
+    from .config import write_private
+    text = read_cv_text(path)
+    # Kept so the CV can be read again when an AI is turned on later. Private: it holds your contact details.
+    write_private(settings.home / CV_SOURCE, text)
+    return import_text(text, settings)
+
+
+def import_text(text: str, settings) -> tuple[Path, list[str]]:
     import tomllib
     from .llm import LLM
-    text = read_cv_text(path)
     llm = LLM(settings)
     contact = contact_facts(text)
     if llm.enabled:
@@ -315,8 +368,14 @@ def import_cv(path: Path, settings) -> tuple[Path, list[str]]:
         profile, notes = verify(data, text)
         body = to_toml(profile, notes)
     else:
-        profile = {"person": contact, "skills": {}, "experience": [], "projects": [], "education": []}
-        notes = ["No AI model configured, so only contact details were filled in. Copy your experience from the CV text at the bottom."]
+        skills = rule_skills(text)
+        profile = {"person": contact, "skills": skills, "experience": [], "projects": [], "education": []}
+        found = len(skills.get("Skills", []))
+        notes = [f"No AI model configured, so contact details{f' and {found} tool names from your CV' if found else ''} "
+                 "were filled in. Copy your experience, projects and education from the CV text at the bottom, "
+                 "or turn on an AI and let it read your CV again."]
+        if skills.get("Learning"):
+            notes.append(f"Listed as still learning, never as experience: {', '.join(skills['Learning'])}.")
         body = to_toml(profile, notes, source_text=text)
     tomllib.loads(body)  # never write a file that would not load
     out = settings.home / "profile.imported.toml"
