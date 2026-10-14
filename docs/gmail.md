@@ -1,16 +1,24 @@
-# Gmail status sync (optional)
+# Email status sync (optional)
 
-The sync reads recent mail about your applications and moves statuses forward: confirmation of receipt to Applied, an invitation to Interview, a rejection to Rejected, an offer to Offer. It never moves a status backwards, never sends, deletes or labels mail, and only asks for the read only scope `https://www.googleapis.com/auth/gmail.readonly`.
+The sync reads recent mail about your applications and moves statuses forward: confirmation of receipt to Applied, an invitation to Interview, a rejection to Rejected, an offer to Offer. It never moves a status backwards, and it never sends, deletes, moves or labels mail. Nothing is marked as read.
 
-## The easy way: in the dashboard
+## The easy way: email address and app password (about 2 minutes)
 
-Open **Settings** and scroll to **Gmail**. Three steps, once:
+Open **Settings** and scroll to **Email**.
 
-1. **Install Gmail support** with one button.
-2. **Create your own Google key file** (the steps are shown there, and below in steps 2 to 5) and choose the downloaded file.
-3. **Connect Gmail**. A Google page opens; allow read only access.
+1. Turn on **2-Step Verification** for your Google account (https://myaccount.google.com/signinoptions/twosv). Google only offers app passwords with it.
+2. Open **App passwords** (https://myaccount.google.com/apppasswords), type the name `Stellenpilot` and press **Create**. Copy the 16 letters.
+3. Enter your email address and the app password in Stellenpilot and press **Connect**.
 
-After that every search also checks your Gmail, and **Applications** has a **Check Gmail** button.
+Stellenpilot logs in once to check, then saves the app password in `.env` (readable only by you). It opens your inbox read only (IMAP `EXAMINE`) and reads messages with `BODY.PEEK`, so the mailbox cannot change. To stop, press **Disconnect** (this also deletes the saved password) and delete the app password in your Google account.
+
+**Other providers.** GMX, web.de, Yahoo, t-online, Posteo, mailbox.org and iCloud work the same way: switch on IMAP in your mail settings, and create an app password if your account uses 2-Step Verification. For any other provider enter its IMAP server. Outlook and Hotmail only allow Microsoft's own sign in, which is not supported yet.
+
+**When it does not work.** Work and university Google accounts often have app passwords switched off by their administrator. Use the other way below.
+
+## The other way: your own Google key file (about 10 minutes)
+
+This uses the Gmail API with the read only scope `https://www.googleapis.com/auth/gmail.readonly`. In the dashboard open **Other way: your own Google key file** under **Email**: install Gmail support, create and choose the key file, then connect.
 
 ## One time setup by hand (about 10 minutes)
 

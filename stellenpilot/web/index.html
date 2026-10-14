@@ -593,7 +593,7 @@ body.wizopen{overflow:hidden}
       <div class="setwrap">
         <nav class="setnav" aria-label="Settings sections" id="setNav">
           <a href="#settings" data-sec="s-search">Job search</a><a href="#settings" data-sec="s-sources">Job sources</a><a href="#settings" data-sec="s-ai">AI model</a>
-          <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-icon">Desktop icon</a><a href="#settings" data-sec="s-gmail">Gmail</a>
+          <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-icon">Desktop icon</a><a href="#settings" data-sec="s-gmail">Email</a>
         </nav>
         <div class="setcol">
         <form class="addform setform" id="setForm">
@@ -705,9 +705,24 @@ body.wizopen{overflow:hidden}
           <div class="savebar" id="saveBar"><span id="setMsg" role="status">No changes yet.</span><button class="btn" type="submit" id="setSave">Save changes</button></div>
         </form>
 
-        <section class="box scard" id="s-gmail" aria-labelledby="gm-h2"><h2 id="gm-h2">Gmail</h2>
-          <p class="hint">Stellenpilot can read your application emails and move jobs forward by itself: a confirmation to Applied, an invitation to Interview, a rejection to Rejected. It only reads. It never sends, deletes or labels mail.</p>
+        <section class="box scard" id="s-gmail" aria-labelledby="gm-h2"><h2 id="gm-h2">Email</h2>
+          <p class="hint">Stellenpilot can read your application emails and move jobs forward by itself: a confirmation to Applied, an invitation to Interview, a rejection to Rejected. It only reads. It never sends, deletes, moves or labels mail, and nothing is marked as read.</p>
           <p class="state" id="gmState">Checking…</p>
+          <div id="gmQuick">
+            <ol class="gsteps3">
+              <li class="cur"><span class="ic">1</span><div><b>Turn on 2-Step Verification</b><p>Google only offers app passwords when your account has it. Already on? Skip this step. <a href="https://myaccount.google.com/signinoptions/twosv" target="_blank" rel="noopener">Open 2-Step Verification</a></p></div></li>
+              <li class="cur"><span class="ic">2</span><div><b>Create an app password</b><p>Open <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">App passwords</a>, type the name <b>Stellenpilot</b> and press Create. Google shows 16 letters: copy them. It is a separate password just for Stellenpilot; you can delete it there at any time.</p></div></li>
+              <li class="cur"><span class="ic">3</span><div><b>Connect</b>
+                <div class="g2"><label>Email address <input class="input" id="gmAddr" type="email" autocomplete="email" placeholder="you@gmail.com"></label>
+                <label>App password <input class="input" id="gmPass" type="password" autocomplete="off" placeholder="16 letters from Google"></label></div>
+                <details class="keyhelp"><summary>Not Gmail? GMX, web.de and others</summary>
+                  <p>GMX, web.de, Yahoo, t-online, Posteo, mailbox.org and iCloud work too. First switch on <b>IMAP</b> in your mail settings; if your account uses 2-Step Verification, create an app password there as well. For other providers, enter the IMAP server from their help pages. Outlook and Hotmail are not supported yet.</p>
+                  <label>Mail server (only if needed) <input class="input" id="gmHost" autocomplete="off" placeholder="e.g. imap.example.com"></label>
+                </details>
+                <div class="btnrow"><button type="button" class="btn" id="gmImap">Connect</button></div></div></li>
+            </ol>
+          </div>
+          <details class="keyhelp" id="gmAdvanced"><summary>Other way: your own Google key file (for work or university accounts without app passwords)</summary>
           <ol class="gsteps3" id="gmSteps">
             <li data-g="packages"><span class="ic"></span><div><b>Install Gmail support</b><p>A small add on from Google, installed once.</p><div class="btnrow"><button type="button" class="btn sec" id="gmInstall">Install</button></div></div></li>
             <li data-g="credentials"><span class="ic"></span><div><b>Create your own Google key file</b><p>Google wants every app that reads Gmail to have its own key. It takes about 10 minutes, once.</p>
@@ -718,10 +733,11 @@ body.wizopen{overflow:hidden}
                 <li>Go to <b>Credentials</b>, <b>Create credentials</b>, <b>OAuth client ID</b>, type <b>Desktop app</b>. Press <b>Download JSON</b>.</li>
                 <li>Choose that downloaded file with the button below.</li></ol></details>
               <div class="btnrow"><label class="btn sec">Choose the downloaded file<input type="file" id="gmCred" accept=".json,application/json" hidden></label></div></div></li>
-            <li data-g="connected"><span class="ic"></span><div><b>Connect your Gmail</b><p>A Google page opens in your browser. Pick your account and allow read only access. Google warns that the app is not verified, because it is your own private app: press <b>Advanced</b>, then continue. In Testing mode Google asks again about once a week.</p>
+            <li data-g="connected"><span class="ic"></span><div><b>Connect with your key file</b><p>A Google page opens in your browser. Pick your account and allow read only access. Google warns that the app is not verified, because it is your own private app: press <b>Advanced</b>, then continue. In Testing mode Google asks again about once a week.</p>
               <div class="btnrow"><button type="button" class="btn" id="gmConnect">Connect Gmail</button></div></div></li>
           </ol>
-          <div class="btnrow" id="gmDone" hidden><button type="button" class="btn sec" id="gmCheck">Check Gmail now</button><button type="button" class="linkbtn" id="gmOff">Disconnect</button></div>
+          </details>
+          <div class="btnrow" id="gmDone" hidden><button type="button" class="btn sec" id="gmCheck">Check email now</button><button type="button" class="linkbtn" id="gmOff">Disconnect</button></div>
           <p class="state" id="gmMsg" role="status"></p>
         </section>
         </div>
@@ -795,7 +811,7 @@ body.wizopen{overflow:hidden}
     <section class="page" id="page-apps" aria-labelledby="apps-h" hidden>
       <header class="phead">
         <div><h1 id="apps-h">Applications</h1><p>Everything you sent, and how it is going</p></div>
-        <button class="btn sec" id="gmailBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>Check Gmail</span></button>
+        <button class="btn sec" id="gmailBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>Check email</span></button>
         <a href="#settings" id="gmHint" data-goto="s-gmail" hidden>Connect Gmail to update statuses by itself</a>
       </header>
       <div class="gmailbox" id="gmailBox" hidden></div>
@@ -1205,7 +1221,7 @@ async function checkGmail(){
     box.innerHTML=r.changes.length?`<strong>${r.changes.length} status update${r.changes.length>1?"s":""} from Gmail</strong><ul>${r.changes.map(c=>`<li>${esc(c.company)}: ${esc(LABEL[c.from])} to ${esc(LABEL[c.to])}</li>`).join("")}</ul>`:`<strong>No status changes.</strong> <span class="muted">Every tracked job already matches its latest email.</span>`;
     refresh();
   }catch(e){box.innerHTML=`<strong>Could not check Gmail.</strong> <span class="muted">${esc(e.message)}</span>`}
-  finally{btn.disabled=false;btn.querySelector("span").textContent="Check Gmail";localGmail=false;renderOffice()}
+  finally{btn.disabled=false;btn.querySelector("span").textContent="Check email";localGmail=false;renderOffice()}
 }
 $("gmailBtn").addEventListener("click",checkGmail);
 $("addBtn").addEventListener("click",()=>{const p=$("addPanel"),open=p.hidden;p.hidden=!open;$("addBtn").setAttribute("aria-expanded",String(open));if(open){p.scrollIntoView({behavior:"smooth",block:"start"});p.querySelector("input").focus()}});
@@ -1387,11 +1403,17 @@ $("aiTest").addEventListener("click",async()=>{const m=$("aiTestMsg"),b=$("aiTes
   try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.className="state "+(c.ok?"ok":"bad");m.textContent=(c.ok?"✓ ":"")+c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,"")}
   catch(e){m.className="state bad";m.textContent=e.message}finally{b.disabled=false}});
 function renderGmail(g){if(!g)return;
-  const done={packages:g.packages,credentials:g.credentials,connected:g.connected&&g.enabled},order=["packages","credentials","connected"],cur=order.find(k=>!done[k]);
+  const imapOn=g.method==="imap"&&g.enabled&&g.connected;
+  const done={packages:g.packages,credentials:g.credentials,connected:g.method!=="imap"&&g.connected&&g.enabled},order=["packages","credentials","connected"],cur=order.find(k=>!done[k]);
   document.querySelectorAll("#gmSteps > li").forEach((li,i)=>{const k=li.dataset.g;li.className=done[k]?"done":k===cur?"cur":"";li.querySelector(".ic").textContent=done[k]?"✓":i+1});
-  $("gmDone").hidden=!!cur;
-  const st=$("gmState");st.className="state"+(cur?"":" ok");
-  st.textContent=cur?(g.connected&&!g.enabled?"Not connected. Press Connect Gmail to switch it back on.":"Not connected yet. Three steps, once."):"✓ Connected. Every search also checks your Gmail, and you can check now on Applications.";
+  const on=imapOn||!cur;
+  $("gmDone").hidden=!on;$("gmQuick").hidden=on;$("gmAdvanced").hidden=imapOn;
+  if(!$("gmAddr").value&&g.address)$("gmAddr").value=g.address;
+  if(!$("gmHost").value&&g.imapHost)$("gmHost").value=g.imapHost;
+  const st=$("gmState");st.className="state"+(on?" ok":"");
+  st.textContent=imapOn?`✓ Connected: ${g.address}. Every search also checks your email, and you can check now on Applications.`
+    :!cur?"✓ Connected with your Google key file. Every search also checks your Gmail, and you can check now on Applications."
+    :"Not connected yet. Three steps, about 2 minutes, once.";
 }
 async function gmailDo(path,btn,busy,body){const m=$("gmMsg"),t=btn&&btn.textContent;if(btn){btn.disabled=true;btn.textContent=busy}m.className="state";m.textContent="";
   try{const r=await api("POST",path,body);renderGmail(r.gmail);lastState="";refresh();return r}
@@ -1399,6 +1421,9 @@ async function gmailDo(path,btn,busy,body){const m=$("gmMsg"),t=btn&&btn.textCon
 $("gmInstall").addEventListener("click",e=>gmailDo("/api/gmail/install",e.currentTarget,"Installing, this can take a minute…"));
 $("gmConnect").addEventListener("click",async e=>{$("gmMsg").textContent="";const r=await gmailDo("/api/gmail/connect",e.currentTarget,"Waiting for you in the Google page…");if(r){$("gmMsg").className="state ok";$("gmMsg").textContent="Gmail is connected."}});
 $("gmOff").addEventListener("click",e=>gmailDo("/api/gmail/disconnect",null,""));
+$("gmImap").addEventListener("click",async e=>{const r=await gmailDo("/api/gmail/imap",e.currentTarget,"Checking your login…",
+  {address:$("gmAddr").value.trim(),password:$("gmPass").value,host:$("gmHost").value.trim()});
+  if(r){$("gmPass").value="";$("gmMsg").className="state ok";$("gmMsg").textContent="Connected. The password is saved only on this computer."}});
 $("gmCheck").addEventListener("click",()=>{location.hash="#apps";checkGmail()});
 $("gmCred").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
   if(f.size>100e3){$("gmMsg").className="state bad";$("gmMsg").textContent="That file is too big to be the Google key file.";return}

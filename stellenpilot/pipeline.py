@@ -212,10 +212,10 @@ def _run(settings, db: DB, tailor: bool) -> dict:
 
     gmail_changes = []
     if settings["gmail"].get("enabled"):
-        db.stage("gmail", "Reading Gmail for replies")
+        db.stage("gmail", "Reading your email for replies")
         try:
             from .gmail_sync import sync
-            gmail_changes = sync(db, settings.home, settings["gmail"].get("lookback_days", 3))
+            gmail_changes = sync(db, settings.home, settings["gmail"].get("lookback_days", 3), settings=settings)
         except Exception as e:
             problems.append(f"gmail: {e}")
 

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import os
 import math
 import subprocess
@@ -23,7 +24,7 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
          "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
-SLOW_POSTS = {"/api/add", "/api/gmail", "/api/cv/import", "/api/cv/reread", "/api/gmail/install", "/api/gmail/connect", "/api/builtin/test"}
+SLOW_POSTS = {"/api/add", "/api/gmail", "/api/gmail/imap", "/api/cv/import", "/api/cv/reread", "/api/gmail/install", "/api/gmail/connect", "/api/builtin/test"}
 # What the Settings page may change. Types come from config.DEFAULTS.
 EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remote", "max_age_days", "exclude_title_words"),
             "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack", "jobicy", "remotive"),
@@ -128,7 +129,7 @@ def weekly_summary(jobs: list[dict]) -> list[dict]:
 def _sync_closing(sync, settings):
     own = DB(settings.db_path)
     try:
-        return sync(own, settings.home, settings["gmail"].get("lookback_days", 3))
+        return sync(own, settings.home, settings["gmail"].get("lookback_days", 3), settings=settings)
     finally:
         own.conn.close()
 
@@ -148,10 +149,17 @@ GMAIL_PACKAGES = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2"
 def gmail_status(settings) -> dict:
     from importlib.util import find_spec
     home = Path(settings.home)
-    return {"enabled": bool(settings["gmail"].get("enabled")),
+    from .mail_imap import SECRET
+    cfg = settings["gmail"]
+    imap = cfg.get("method") == "imap"
+    return {"enabled": bool(cfg.get("enabled")),
+            "method": "imap" if imap else "oauth",
+            "address": cfg.get("address", "") if imap else "",
+            "imapHost": cfg.get("imap_host", "") if imap else "",
+            "passwordSaved": bool(settings.secret(SECRET)),
             "packages": bool(find_spec("googleapiclient") and find_spec("google_auth_oauthlib")),
             "credentials": (home / "credentials.json").exists(),
-            "connected": (home / "token.json").exists()}
+            "connected": bool(settings.secret(SECRET)) if imap else (home / "token.json").exists()}
 
 
 def shortcut_status() -> dict:
@@ -505,17 +513,46 @@ def make_handler(settings, port: int = 8765):
                 return self._send(200, {"gmail": gmail_status(settings)})
             if self.path == "/api/gmail/connect":
                 from .config import save_user_config
+                settings.cfg["gmail"] = {**settings["gmail"], "method": "oauth"}
                 from .gmail_sync import _service
                 try:
                     _service(settings.home)  # opens Google's consent page in the browser on this computer
                 except Exception as e:
                     return self._send(400, {"error": f"Could not connect Gmail: {e}"})
-                settings.cfg = save_user_config(settings.home, {"gmail": {"enabled": True}})
+                settings.cfg = save_user_config(settings.home, {"gmail": {"enabled": True, "method": "oauth"}})
+                return self._send(200, {"gmail": gmail_status(settings)})
+            if self.path == "/api/gmail/imap":
+                # The simple way: address and app password. Logs in once, read only, to check them.
+                from .config import save_secrets, save_user_config
+                from . import mail_imap
+                try:
+                    body = self._body()
+                    address = str(body.get("address") or "").strip()
+                    password = str(body.get("password") or "").strip()
+                    given = str(body.get("host") or "").strip()
+                    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", address):
+                        raise mail_imap.MailError("Enter your full email address.")
+                    if given and not re.fullmatch(r"[A-Za-z0-9.-]+", given):
+                        raise mail_imap.MailError("The mail server name looks wrong, for example imap.gmx.net.")
+                    password = password or (settings.secret(mail_imap.SECRET) or "")
+                    if not password:
+                        raise mail_imap.MailError("Paste the app password.")
+                    host = mail_imap.host_for(address, given)
+                    mail_imap.check(host, address, password)
+                except mail_imap.MailError as e:
+                    return self._send(400, {"error": str(e)})
+                except ValueError as e:
+                    return self._send(400, {"error": str(e)})
+                save_secrets(settings.home, {mail_imap.SECRET: "".join(password.split())})
+                settings.cfg = save_user_config(settings.home, {"gmail": {"enabled": True, "method": "imap",
+                                                                          "address": address, "imap_host": given}})
                 return self._send(200, {"gmail": gmail_status(settings)})
             if self.path == "/api/gmail/disconnect":
-                from .config import save_user_config
+                from .config import save_secrets, save_user_config
+                from .mail_imap import SECRET
                 (settings.home / "token.json").unlink(missing_ok=True)
-                settings.cfg = save_user_config(settings.home, {"gmail": {"enabled": False}})
+                save_secrets(settings.home, {}, clear=[SECRET])  # forget the app password too
+                settings.cfg = save_user_config(settings.home, {"gmail": {"enabled": False, "method": "", "address": ""}})
                 return self._send(200, {"gmail": gmail_status(settings)})
             if self.path == "/api/gmail":
                 if not settings["gmail"].get("enabled"):
