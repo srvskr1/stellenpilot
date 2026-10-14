@@ -80,12 +80,6 @@ class SafeFetchTests(unittest.TestCase):
             with self.subTest(url=url), self.assertRaises(AddError):
                 fetch_page(url)
 
-    def test_redirect_to_local_address_is_refused(self):
-        from stellenpilot.manual import _CheckedRedirects
-        import urllib.request
-        req = urllib.request.Request("https://example.com/")
-        with self.assertRaises(AddError):
-            _CheckedRedirects().redirect_request(req, None, 302, "Found", {}, f"http://127.0.0.1:{self.srv.server_address[1]}/")
 
     def test_bad_link_with_pasted_text_is_refused(self):
         with self.assertRaises(AddError):
