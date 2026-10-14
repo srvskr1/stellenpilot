@@ -446,12 +446,17 @@ def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: boo
     # Company plus title, so two roles at one company never overwrite each other.
     folder = out_root / date.today().isoformat() / f"{slug(job['company'], 30)}__{slug(job['title'], 40)}"
     folder.mkdir(parents=True, exist_ok=True)
+    from . import progress
+    steps = 4 if make_pdf else 3
+    progress.stage("Choosing the experience, projects and skills that fit this job", expect=700, step=1, steps=steps)
     plan = make_plan(job, profile, llm)
     who = slug(person.get("name", "CV"))
     cv = folder / f"{who}_CV_{slug(job['company'], 30)}.docx"
     build_cv(profile, plan, cv)
     lang = letter_language(job, letter_setting, llm, my_german)
+    progress.stage("Writing the cover letter", expect=1500, step=2, steps=steps)
     body, note = letter_body(job, profile, plan, llm, lang)
+    progress.stage("Making the Word files", step=3, steps=steps)
     from .text import LEVELS, normalize_level
     level_note = ""
     if lang == "de" and LEVELS.index(normalize_level(my_german) or "A2") < LEVELS.index("B2"):
@@ -470,6 +475,8 @@ def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: boo
         "## Notes", "* Read both documents before sending. The truth guard checks tools and numbers, not every claim.",
         *[f"* {n}" for n in (level_note, plan.get("note"), plan.get("guard"), note) if n],
     ]) + "\n", encoding="utf-8")
+    if make_pdf:
+        progress.stage("Making the PDF files", step=4, steps=steps)
     pdfs = to_pdf([cv, letter]) if make_pdf else []
     return {"folder": str(folder), "files": [str(p) for p in (cv, letter, report, *pdfs)],
             "coverage": plan["coverage"]}
