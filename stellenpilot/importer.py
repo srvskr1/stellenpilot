@@ -2,9 +2,10 @@
 
 The AI only sorts your CV into sections. Every bullet and skill it returns is checked against
 your original text; anything that is not in your CV is dropped and listed for you to check.
-Without an AI model, the contact details and the tool names your CV mentions are filled in, and
-your CV text is placed in the file as comments so you can copy the rest across by hand. The CV
-text is also kept in cv_source.txt, so it can be read again once you turn on an AI.
+A CV with clear headings is sorted without any AI (see cv_parse.py); otherwise the AI points at line
+numbers, and only as a last resort copies the CV. When nothing fits and there is no AI, your CV
+text is placed in the file as comments to copy from. The CV text is also kept in cv_source.txt, so
+it can be read again once you turn on an AI.
 """
 from __future__ import annotations
 
@@ -24,9 +25,39 @@ def read_cv_text(path: Path) -> str:
     return text
 
 
+# A CV is a few pages. These limits stop a small file that unpacks into gigabytes (a "zip bomb")
+# from filling the memory: Word files are zip archives, and PDF pages are compressed streams.
+MAX_DOCX_UNPACKED = 50_000_000      # all parts of a .docx together, after unpacking
+MAX_DOCX_PART = 25_000_000          # one part (the text, or one picture)
+MAX_DOCX_PARTS = 1_000
+MAX_PDF_PAGES = 20
+MAX_PDF_STREAM = 20_000_000         # one decompressed PDF stream
+MAX_TEXT_BYTES = 2_000_000          # a .txt or .md CV
+MAX_CV_CHARS = 200_000              # text kept from any CV
+
+
+def _check_docx(path: Path) -> None:
+    import zipfile
+    try:
+        with zipfile.ZipFile(path) as z:
+            infos = z.infolist()
+    except zipfile.BadZipFile:
+        raise RuntimeError("This is not a valid Word file. Save it again as .docx, or export a PDF.") from None
+    # The sizes in the zip directory are an upper bound: zipfile refuses to unpack more than they say.
+    if (len(infos) > MAX_DOCX_PARTS or sum(i.file_size for i in infos) > MAX_DOCX_UNPACKED
+            or any(i.file_size > MAX_DOCX_PART for i in infos)):
+        raise RuntimeError("This Word file unpacks to far more than a CV ever needs, so it was not opened. "
+                           "Save your CV again as .docx or PDF.")
+
+
 def _read_any(path: Path) -> str:
+    return _read_limited(path)[:MAX_CV_CHARS]
+
+
+def _read_limited(path: Path) -> str:
     suffix = path.suffix.lower()
     if suffix == ".docx":
+        _check_docx(path)
         doc = Document(str(path))
         parts = [p.text for p in doc.paragraphs]
         for table in doc.tables:
@@ -40,15 +71,40 @@ def _read_any(path: Path) -> str:
             raise RuntimeError("Reading PDFs needs pypdf: pip install pypdf") from e
         from pypdf.errors import PyPdfError
         try:
-            reader = PdfReader(str(path))
-            if reader.is_encrypted and not reader.decrypt(""):
-                raise RuntimeError("This PDF is password protected. Save an unprotected copy or export as DOCX.")
-            return "\n".join((page.extract_text() or "") for page in reader.pages)
+            with _pdf_limits():
+                reader = PdfReader(str(path))
+                if reader.is_encrypted and not reader.decrypt(""):
+                    raise RuntimeError("This PDF is password protected. Save an unprotected copy or export as DOCX.")
+                out, size = [], 0
+                for page in reader.pages[:MAX_PDF_PAGES]:
+                    text = page.extract_text() or ""
+                    out.append(text)
+                    size += len(text)
+                    if size > MAX_CV_CHARS:
+                        break
+                return "\n".join(out)
         except PyPdfError as e:
             raise RuntimeError(f"Could not read this PDF ({e.__class__.__name__}). Export your CV as DOCX or text instead.") from None
     if suffix in (".txt", ".md"):
-        return path.read_text(encoding="utf-8", errors="replace")
+        with open(path, "rb") as f:
+            return f.read(MAX_TEXT_BYTES).decode("utf-8", "replace")
     raise RuntimeError(f"Unsupported file type {suffix}. Use PDF, DOCX, TXT or MD.")
+
+
+def _pdf_limits():
+    """Lower pypdf's decompression limits (75 MB per stream by default) while reading a CV."""
+    import contextlib
+    try:
+        from pypdf import apply_configuration
+    except ImportError:  # older pypdf: its own default limits still apply
+        return contextlib.nullcontext()
+    caps = {k: MAX_PDF_STREAM for k in (
+        "zlib_maximum_output_length", "lzw_maximum_output_length", "run_length_maximum_output_length",
+        "brotli_maximum_output_length", "jbig2_maximum_output_length", "array_based_stream_maximum_output_length",
+        "maximum_declared_stream_length", "image_maximum_buffer_size")}
+    from pypdf import Configuration
+    known = set(getattr(Configuration, "__dataclass_fields__", {}))
+    return apply_configuration(**{k: v for k, v in caps.items() if k in known})
 
 
 # ---------------------------------------------------------------- facts without an LLM
@@ -352,31 +408,80 @@ def import_cv(path: Path, settings) -> tuple[Path, list[str]]:
     return import_text(text, settings)
 
 
+def _full_ai(text: str, llm, contact: dict) -> dict:
+    """Last resort: the AI writes the whole profile. Slow on a laptop (it copies the CV), but it
+    copes with layouts that neither the headings nor the line numbers made sense of."""
+    from . import progress
+    progress.stage("Reading your CV and writing your profile", expect=int(len(text[:12000]) * 1.15) + 400)
+    data = structure_with_llm(text, llm)
+    model_person = data.get("person") if isinstance(data, dict) and isinstance(data.get("person"), dict) else {}
+    # The plain text reader is exact for email, phone and links, so it wins over the model there.
+    person = {**{k: v for k, v in model_person.items() if v}, **{k: v for k, v in contact.items() if v and k != "name"}}
+    person.setdefault("name", contact.get("name", ""))
+    data = data if isinstance(data, dict) else {}
+    data["person"] = person
+    return data
+
+
+def sort_cv(text: str, llm=None) -> tuple[dict, str, str]:
+    """The profile from CV text, the way it was found ("rules", "ai-lines", "ai-full" or "rules-partial")
+    and, for a partial result, why the rules were unsure. Fastest way first:
+    1. headings, dates and bullets: instant, and enough for most clean CVs;
+    2. the AI answers with line numbers only: a minute or two on a laptop;
+    3. the AI copies the CV into the profile: slow, for layouts the first two could not sort."""
+    from . import cv_parse, progress
+    contact = contact_facts(text)
+    progress.stage("Sorting your CV by its headings")
+    sections = cv_parse.by_rules(text)
+    profile = cv_parse.build(sections, contact)
+    ok, why = cv_parse.good_enough(profile, sections, text)
+    if ok:
+        return profile, "rules", ""
+    if not (llm and llm.enabled):
+        return profile, "rules-partial", why
+    lines = cv_parse.numbered(text[:16000])
+    # The answer is a few line ranges: about 40 characters per job, project or degree plus the frame.
+    # The answer is a short list of line numbers, a few characters per CV line at most.
+    progress.stage("Finding where your jobs, projects and degrees start (AI)",
+                   expect=40 + 2 * sum(1 for ln in text.splitlines() if ln.strip()))
+    try:
+        answer = llm.complete_json(cv_parse.LINES_SYSTEM, lines, max_tokens=900)
+        s2, e2 = cv_parse.by_line_numbers(answer, text)
+        p2 = cv_parse.build(s2, contact, e2)
+        complete = (all(e["title"] and e["company"] for e in p2["experience"])
+                    and all(e["degree"] and e["school"] for e in p2["education"]))
+        if (p2["experience"] or p2["projects"]) and complete:
+            if not p2["skills"]:
+                p2["skills"] = profile["skills"]
+            return p2, "ai-lines", ""
+    except Exception:  # broken JSON or nonsense ranges: the slow way below still works
+        pass
+    return _full_ai(text, llm, contact), "ai-full", ""
+
+
 def import_text(text: str, settings) -> tuple[Path, list[str]]:
     import tomllib
+    from . import progress
     from .llm import LLM
     llm = LLM(settings)
-    contact = contact_facts(text)
-    if llm.enabled:
-        data = structure_with_llm(text, llm)
-        model_person = data.get("person") if isinstance(data, dict) and isinstance(data.get("person"), dict) else {}
-        # The plain text reader is exact for email, phone and links, so it wins over the model there.
-        person = {**{k: v for k, v in model_person.items() if v}, **{k: v for k, v in contact.items() if v and k != "name"}}
-        person.setdefault("name", contact.get("name", ""))
-        data = data if isinstance(data, dict) else {}
-        data["person"] = person
-        profile, notes = verify(data, text)
-        body = to_toml(profile, notes)
-    else:
-        skills = rule_skills(text)
-        profile = {"person": contact, "skills": skills, "experience": [], "projects": [], "education": []}
-        found = len(skills.get("Skills", []))
-        notes = [f"No AI model configured, so contact details{f' and {found} tool names from your CV' if found else ''} "
-                 "were filled in. Copy your experience, projects and education from the CV text at the bottom, "
-                 "or turn on an AI and let it read your CV again."]
-        if skills.get("Learning"):
-            notes.append(f"Listed as still learning, never as experience: {', '.join(skills['Learning'])}.")
-        body = to_toml(profile, notes, source_text=text)
+    data, how, why = sort_cv(text, llm)
+    if not data.get("skills"):
+        data["skills"] = rule_skills(text)
+    progress.stage("Checking every line against your CV")
+    profile, notes = verify(data, text)
+    keep_text = False
+    if how == "rules-partial":
+        keep_text = True
+        found = [k for k, label in (("experience", "jobs"), ("projects", "projects"), ("education", "degrees")) if profile[k]]
+        notes.insert(0, "Sorted without an AI by the headings of your CV, but not everything fit "
+                        f"({why}). Check every section, copy what is missing from the CV text at the bottom, "
+                        "or turn on an AI and let it read your CV again." if found else
+                        "No AI model configured, and the headings of your CV did not show where your jobs and "
+                        "projects are. Contact details and tool names were filled in. Copy the rest from the CV "
+                        "text at the bottom, or turn on an AI and let it read your CV again.")
+    if profile["skills"].get("Learning"):
+        notes.append(f"Listed as still learning, never as experience: {', '.join(profile['skills']['Learning'])}.")
+    body = to_toml(profile, notes, source_text=text if keep_text else None)
     tomllib.loads(body)  # never write a file that would not load
     out = settings.home / "profile.imported.toml"
     out.write_text(body, encoding="utf-8")

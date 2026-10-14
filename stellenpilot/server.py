@@ -38,6 +38,22 @@ CHOICES = {("llm", "provider"): {"none", "builtin", "ollama", "lmstudio", "llama
 SECRETS = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ADZUNA_APP_ID", "ADZUNA_APP_KEY", "THEIRSTACK_API_KEY")
 
 
+_TRUE, _FALSE = {"true", "1", "yes", "on"}, {"false", "0", "no", "off", ""}
+
+
+def _as_bool(v, name: str) -> bool:
+    """bool("false") is True in Python, so text is read by its meaning. Anything else is refused."""
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, int) and v in (0, 1):
+        return bool(v)
+    if isinstance(v, str) and v.strip().lower() in _TRUE | _FALSE:
+        return v.strip().lower() in _TRUE
+    if v is None:
+        return False
+    raise ValueError(f"{name.replace('_', ' ')} must be on or off")
+
+
 def clean_settings(body: dict) -> dict:
     """Keep only editable fields, with the type the default has. Raises ValueError with a friendly message."""
     from .config import DEFAULTS
@@ -51,7 +67,7 @@ def clean_settings(body: dict) -> dict:
                 continue
             want, v = DEFAULTS[section][k], given[k]
             if isinstance(want, bool):
-                v = bool(v)
+                v = _as_bool(v, k)
             elif isinstance(want, int):
                 try:
                     v = int(v)
@@ -258,6 +274,11 @@ def make_handler(settings, port: int = 8765):
         def do_GET(self):
             if not self._host_ok():
                 return
+            if self.path.startswith("/api/progress"):  # polled while slow AI work runs, so no lock
+                from urllib.parse import parse_qs, urlsplit
+                from . import progress
+                task = (parse_qs(urlsplit(self.path).query).get("task") or [""])[0]
+                return self._send(200, progress.snapshot(task))
             if self.path == "/api/check":  # may wait up to 10 s for a local model server, so no lock
                 from .cli import setup_checks
                 return self._send(200, {"checks": setup_checks(settings)})
@@ -306,7 +327,8 @@ def make_handler(settings, port: int = 8765):
                                         "scheduleActive": schedule.is_enabled(settings.home),
                                         "inDocker": schedule.in_docker(),
                                         "gmail": gmail_status(settings),
-                                        "shortcut": shortcut_status()})
+                                        "shortcut": shortcut_status(),
+                                        "rereadOffer": reread_offer(settings)})
             if self.path == "/api/builtin":
                 from . import builtin
                 return self._send(200, builtin.status(settings["llm"].get("model") or "standard"))
@@ -339,7 +361,7 @@ def make_handler(settings, port: int = 8765):
                 if "notes" in body:
                     fields["notes"] = str(body["notes"])[:5000]
                 if "closed" in body:
-                    fields["closed"] = int(bool(body["closed"]))
+                    fields["closed"] = int(_as_bool(body["closed"], "closed"))
                 if fields:
                     db.update_job(job_id, fields, by_user=True)
             except (ValueError, TypeError, OverflowError) as e:
@@ -363,9 +385,14 @@ def make_handler(settings, port: int = 8765):
                 return self._send(200, {"ok": True})
             if self.path.startswith("/api/docs/"):
                 from .manual import AddError, make_docs
+                from . import progress
                 own = DB(settings.db_path)
+                job_id = unquote(self.path[len("/api/docs/"):])
                 try:
-                    make_docs(settings, own, unquote(self.path[len("/api/docs/"):]))
+                    with progress.track("docs:" + job_id, "Writing your CV and cover letter"):
+                        make_docs(settings, own, job_id)
+                except progress.Busy:
+                    return self._send(409, {"error": "These documents are already being written."})
                 except AddError as e:
                     return self._send(400, {"error": str(e)})
                 except Exception as e:
@@ -379,7 +406,7 @@ def make_handler(settings, port: int = 8765):
                     body = self._body()
                     own = DB(settings.db_path)
                     try:
-                        res = add_job(settings, own, tailor=bool(body.get("tailor")),
+                        res = add_job(settings, own, tailor=_as_bool(body.get("tailor"), "tailor"),
                                       **{k: str(body.get(k) or "") for k in ("url", "text", "title", "company", "location")})
                     finally:
                         own.conn.close()
@@ -517,9 +544,13 @@ def make_handler(settings, port: int = 8765):
             with tempfile.TemporaryDirectory() as tmp:
                 path = Path(tmp) / ("cv" + suffix)
                 path.write_bytes(data)
+                from . import progress
                 try:
-                    out, notes = import_cv(path, settings)
+                    with progress.track("cv", "Reading your CV"):
+                        out, notes = import_cv(path, settings)
                     cv_text = read_cv_text(path)
+                except progress.Busy:
+                    return self._send(409, {"error": "Your CV is already being read. Wait until it is finished."})
                 except (RuntimeError, ValueError) as e:
                     return self._send(400, {"error": str(e)})
                 except OSError as e:
@@ -538,10 +569,14 @@ def make_handler(settings, port: int = 8765):
             if not reread_offer(settings):
                 return self._send(400, {"error": "Nothing to read again: turn on an AI first, and this only works "
                                                  "while your profile has no jobs or projects."})
+            from . import progress
             try:
                 if not LLM(settings).enabled:
                     raise RuntimeError("Turn on an AI first.")
-                out, notes = import_text(saved_cv_text(settings.home), settings)
+                with progress.track("cv", "Reading your CV again"):
+                    out, notes = import_text(saved_cv_text(settings.home), settings)
+            except progress.Busy:
+                return self._send(409, {"error": "Your CV is already being read. Wait until it is finished."})
             except RuntimeError as e:
                 return self._send(400, {"error": str(e)})
             except OSError as e:
@@ -554,6 +589,11 @@ def make_handler(settings, port: int = 8765):
                                         "notes": notes})
             from .importer import to_toml
             with lock:
+                now = settings.profile or {}
+                if now.get("experience") or now.get("projects"):
+                    # Filled in meanwhile (by you, or by another read): never overwrite it.
+                    return self._send(409, {"error": "Your profile was filled in meanwhile, so it was left as it is.",
+                                            "profile": now})
                 prof = settings.home / "profile.toml"
                 if prof.exists():
                     prof.replace(settings.home / "profile.backup.toml")

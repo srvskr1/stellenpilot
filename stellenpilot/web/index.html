@@ -541,6 +541,10 @@ body.wizopen{overflow:hidden}
 @media (max-width:900px){.office{--sc:.7}}
 @media (max-width:600px){.office{--sc:.5;height:320px}.room{top:64%}.bub{max-width:190px}.bub div{font-size:12px}}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.aiprog{display:grid;gap:6px;font-weight:400}
+.aiprog b{font-weight:600;color:var(--text)}
+.aiprog progress{width:100%;max-width:420px;height:8px;accent-color:var(--accent)}
+.aiprog .sub{font-size:.875rem;color:var(--text-tertiary)}
 </style>
 </head>
 <body>
@@ -587,7 +591,7 @@ body.wizopen{overflow:hidden}
         <button class="btn sec" type="button" data-setup>Run setup again</button>
       </header>
       <div class="setwrap">
-        <nav class="setnav" aria-label="Settings sections">
+        <nav class="setnav" aria-label="Settings sections" id="setNav">
           <a href="#settings" data-sec="s-search">Job search</a><a href="#settings" data-sec="s-sources">Job sources</a><a href="#settings" data-sec="s-ai">AI model</a>
           <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-icon">Desktop icon</a><a href="#settings" data-sec="s-gmail">Gmail</a>
         </nav>
@@ -674,6 +678,7 @@ body.wizopen{overflow:hidden}
             <label data-for="openai">OpenAI API key <span class="keyset" data-key="OPENAI_API_KEY"></span><input class="input" name="OPENAI_API_KEY" type="password" autocomplete="off" placeholder="sk-..."></label>
             <label data-for="local llamacpp vllm lmstudio ollama">Server address <span class="muted">Leave empty for the usual one.</span><input class="input" name="base_url" placeholder="http://localhost:11434"></label>
             <div class="btnrow" data-for="ollama lmstudio anthropic openai llamacpp vllm local"><button type="button" class="btn sec" id="aiTest">Save and test</button><span id="aiTestMsg" role="status"></span></div>
+            <div id="rereadBox" hidden><div class="btnrow" style="margin-top:12px;align-items:center"><span id="rereadMsg" role="status">Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.</span><button type="button" class="btn sec" id="rereadBtn">Read my CV again</button></div></div>
           </section>
 
           <section class="box scard" id="s-docs"><h2>Documents and German</h2><p class="hint">When CVs and letters are made, and in which language.</p>
@@ -698,7 +703,6 @@ body.wizopen{overflow:hidden}
             <div class="btnrow"><button type="button" class="btn sec" id="iconBtn">Put the icon on my desktop</button></div>
           </section>
           <div class="savebar" id="saveBar"><span id="setMsg" role="status">No changes yet.</span><button class="btn" type="submit" id="setSave">Save changes</button></div>
-          <div id="rereadBox" hidden><div class="btnrow" style="margin-top:12px;align-items:center"><span id="rereadMsg" role="status">Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.</span><button type="button" class="btn sec" id="rereadBtn">Read my CV again</button></div></div>
         </form>
 
         <section class="box scard" id="s-gmail" aria-labelledby="gm-h2"><h2 id="gm-h2">Gmail</h2>
@@ -1114,8 +1118,9 @@ main.addEventListener("click",async e=>{
   if(b.dataset.skip){await save(b.dataset.skip,{status:"skipped",statusSource:"manual",statusUpdatedAt:new Date().toISOString(),statusNote:"Posting closed"},"Moved to skipped");return}
   if(b.dataset.openFolder){try{await api("POST","/api/open-folder/"+encodeURIComponent(b.dataset.openFolder));toast("Folder opened")}catch(e){toast(e.message)}return}
   if(b.dataset.doc){try{await api("POST","/api/open-doc/"+encodeURIComponent(b.dataset.id)+"/"+b.dataset.doc);toast("Opening the "+(b.dataset.doc==="cv"?"CV":"cover letter"))}catch(e){toast(e.message)}return}
-  if(b.dataset.make){const t=b.textContent;b.disabled=true;b.textContent="Writing your CV and cover letter…";
-    try{await api("POST","/api/docs/"+encodeURIComponent(b.dataset.make));toast("Documents ready");lastState="";await refresh()}catch(e){toast(e.message);b.disabled=false;b.textContent=t}return}
+  if(b.dataset.make){const t=b.textContent,id=b.dataset.make;b.disabled=true;b.textContent="Writing your CV and cover letter…";
+    try{await withProgress("docs:"+id,()=>api("POST","/api/docs/"+encodeURIComponent(id)),
+        p=>{b.textContent=`${p.steps?`Step ${p.step} of ${p.steps}: `:""}${p.stage}${p.percent!=null?` (${p.percent}%)`:""}… ${mmss(p.elapsed||0)}`});toast("Documents ready");lastState="";await refresh()}catch(e){toast(e.message);b.disabled=false;b.textContent=t}return}
 });
 main.addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches("details[data-prep]"))return;d.open?openPrep.add(d.dataset.prep):openPrep.delete(d.dataset.prep)},true);
 main.addEventListener("focusout",async e=>{const t=e.target;if(!t.matches("textarea[data-notes-id]"))return;
@@ -1298,12 +1303,12 @@ async function importCv(file){
   msg.className="state";msg.textContent=`Reading ${file.name}… with an AI on this computer this can take a few minutes.`;$("drop").style.pointerEvents="none";
   try{
     const data=await new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=()=>bad(new Error("Could not read the file"));fr.readAsDataURL(file)});
-    const r=await api("POST","/api/cv/import",{name:file.name,data});
+    const r=await withProgress("cv",()=>api("POST","/api/cv/import",{name:file.name,data}),p=>{msg.innerHTML=progressHtml(p,{slow:SLOW_CV})});
     cv=normCv(r.profile);renderCv();
     $("cvNotes").innerHTML=r.notes.map(n=>`<li>${esc(n)}</li>`).join("");$("cvNotesBox").hidden=!r.notes.length;
     $("cvSrcText").textContent=r.cvText||"";$("cvSrc").hidden=!r.cvText;
     const thin=!cv.experience.length&&!cv.education.length;$("cvSrc").open=thin;
-    msg.textContent=thin?"Your contact details and languages are filled in. Add your jobs, skills and degrees below; your CV text is there to copy from. Then press Save my CV.":"Read. Check every field below, fix anything wrong, then press Save my CV.";cvDirty(true);
+    msg.textContent=thin?"Your contact details and skills are filled in, but the headings of this CV did not show where your jobs and degrees are. Add them below (your CV text is there to copy from), or turn on an AI in Settings and read it again. Then press Save my CV.":"Read. Check every field below, fix anything wrong, then press Save my CV.";cvDirty(true);
   }catch(e){msg.textContent=e.message}
   finally{$("drop").style.pointerEvents="";$("cvFile").value=""}
 }
@@ -1333,7 +1338,7 @@ function showProvider(){const f=$("setForm"),pv=f.provider.value;f.querySelector
 async function loadSettings(){
   const f=$("setForm");
   try{
-    const r=await api("GET","/api/settings");
+    const r=await api("GET","/api/settings");$("rereadBox").hidden=!r.rereadOffer;
     for(const [sec,keys] of Object.entries(SETF))for(const k of keys){const el=f.elements[k],v=r[sec][k];if(el.type==="checkbox")el.checked=!!v;else el.value=Array.isArray(v)?v.join("\n"):v??""}
     f.querySelectorAll(".keyset").forEach(el=>el.innerHTML=r.keys[el.dataset.key]?`Key saved <button type="button" class="linkbtn" data-clear-key="${esc(el.dataset.key)}">Remove</button>`:"");
     f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";if(el.dataset.ph===undefined)el.dataset.ph=el.placeholder;el.placeholder=r.keys[el.name]?"saved, type to replace":el.dataset.ph});
@@ -1354,8 +1359,8 @@ async function saveSettings(){
 }
 /* An AI turned on after a CV import without AI: offer to read the saved CV again. */
 $("rereadBtn").addEventListener("click",async()=>{const b=$("rereadBtn"),m=$("rereadMsg");b.disabled=true;
-  m.textContent="Reading your CV with the AI… with an AI on this computer this can take a few minutes.";
-  try{const r=await api("POST","/api/cv/reread",{});cv=normCv(r.profile);if($("cvForm"))renderCv();
+  m.textContent="Starting…";
+  try{const r=await withProgress("cv",()=>api("POST","/api/cv/reread",{}),p=>{m.innerHTML=progressHtml(p,{slow:SLOW_CV})});cv=normCv(r.profile);if($("cvForm"))renderCv();
     m.textContent="✓ Your CV is read and saved. Check it under My CV.";b.hidden=true}
   catch(e){m.textContent=e.message;b.disabled=false}});
 $("setForm").addEventListener("submit",async e=>{
@@ -1375,8 +1380,9 @@ const renderSched=()=>{$("lastrun").innerHTML=sched.enabled?`<div class="live on
 /* ---------- Settings extras ---------- */
 function setDirty(on){$("saveBar").classList.toggle("dirty",on);if(on)$("setMsg").textContent="You have unsaved changes.";else if(/unsaved/.test($("setMsg").textContent))$("setMsg").textContent="No changes yet."}
 $("setForm").addEventListener("input",()=>setDirty(true));$("setForm").addEventListener("change",()=>setDirty(true));
-document.querySelector(".setnav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
-  document.querySelectorAll(".setnav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
+/* The Settings side menu. My CV has its own (#cvNav); querySelector(".setnav") used to find that one first. */
+$("setNav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
+  document.querySelectorAll("#setNav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
 $("aiTest").addEventListener("click",async()=>{const m=$("aiTestMsg"),b=$("aiTest");b.disabled=true;m.className="state";m.textContent="Saving and testing…";
   try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.className="state "+(c.ok?"ok":"bad");m.textContent=(c.ok?"✓ ":"")+c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,"")}
   catch(e){m.className="state bad";m.textContent=e.message}finally{b.disabled=false}});
@@ -1489,8 +1495,9 @@ async function openSetup(){
 function closeSetup(){W("setup").hidden=true;document.body.classList.remove("wizopen")}
 function wCvNote(kind,html){const o=W("wCvOut");o.className="wnote"+(kind?" "+kind:"");o.innerHTML=html}
 async function readFile(file){return new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=()=>bad(new Error("Could not read the file"));fr.readAsDataURL(file)})}
-async function importAndSave(file){
-  const r=await api("POST","/api/cv/import",{name:file.name,data:await readFile(file)});
+async function importAndSave(file,render){
+  const data=await readFile(file);
+  const r=await withProgress("cv",()=>api("POST","/api/cv/import",{name:file.name,data}),render||(()=>{}));
   await api("POST","/api/cv/save",{profile:r.profile});
   cv=normCv(r.profile);if($("cvForm"))renderCv();
   return r;
@@ -1502,11 +1509,11 @@ async function wImport(file){
   const d=W("wDrop");d.classList.add("busy");W("wNext").disabled=true;wMsg("");
   wCvNote("",`Reading <b>${esc(file.name)}</b>… with an AI on this computer this can take a few minutes.`);
   try{
-    const r=await importAndSave(file),p=r.profile;wz.file=file;wz.hasCv=true;
+    const r=await importAndSave(file,p=>wCvNote("",progressHtml(p,{slow:SLOW_CV}))),p=r.profile;wz.file=file;wz.hasCv=true;
     const n=k=>(p[k]||[]).length, sk=Object.values(p.skills||{}).flat().length;
     wz.thin=!n("experience")&&!n("education");
     wz.ideas=((p.person&&p.person.headlines)||[]).map(h=>String(h).split("|")[0].trim()).filter(Boolean);wChipsRender();
-    if(wz.thin)wCvNote("",`Saved your contact details${(p.person.languages||[]).length?" and languages":""}. Without an AI the rest of a CV can't be read reliably. <b>Pick an AI in step 3 and Stellenpilot reads your CV again by itself.</b> Or fill in the rest later under My CV.`);
+    if(wz.thin)wCvNote("",`Saved your contact details${(p.person.languages||[]).length?" and languages":""}. The headings of this CV did not show clearly where your jobs and degrees are. <b>Pick an AI in step 3 and Stellenpilot reads your CV again by itself.</b> Or fill in the rest later under My CV.`);
     else wCvNote("ok",`Read and saved: <b>${esc(p.person.name||"")}</b>, ${n("experience")} job${n("experience")===1?"":"s"}, ${n("education")} degree${n("education")===1?"":"s"}, ${sk} skills.${r.notes.length?`<ul>${r.notes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""} You can check every detail later under My CV.`);
   }catch(e){wCvNote("bad",esc(e.message)+(/name/i.test(e.message)?" Use “let me type it in” below instead.":""))}
   finally{d.classList.remove("busy");W("wNext").disabled=false;W("wFile").value=""}
@@ -1523,7 +1530,7 @@ async function wChecks(){
   let reread="";
   if(wz.thin&&wz.file&&wz.ai!=="none"&&!wz.rereading){wz.rereading=true;W("wNext").disabled=true;W("wNext").textContent="Reading your CV…";
     reread=`<li class="busy" id="wReread"><span class="ic">…</span><span>Reading your CV again with the AI so the whole profile is filled in. This can take a few minutes.</span></li>`;
-    importAndSave(wz.file).then(r=>{wz.thin=!(r.profile.experience||[]).length&&!(r.profile.education||[]).length;
+    importAndSave(wz.file,p=>{const li=W("wReread");if(li)li.lastElementChild.innerHTML=progressHtml(p,{slow:SLOW_CV})}).then(r=>{wz.thin=!(r.profile.experience||[]).length&&!(r.profile.education||[]).length;
         const li=W("wReread");if(li){li.className=wz.thin?"bad":"";li.innerHTML=`<span class="ic">${wz.thin?"!":"✓"}</span><span>${wz.thin?"The AI could not read your jobs and degrees either. Add them under My CV after setup.":"Your full CV is now read and saved. Check it later under My CV."}</span>`}})
       .catch(e=>{const li=W("wReread");if(li){li.className="bad";li.innerHTML=`<span class="ic">!</span><span>Could not read your CV again: ${esc(e.message)}</span>`}})
       .finally(()=>{wz.rereading=false;if(wz.step===3){W("wNext").disabled=false;W("wNext").textContent="Find my first jobs"}})}
@@ -1601,6 +1608,28 @@ $("runBtn").addEventListener("click",async()=>{
 });
 
 /* ---------- Local API ---------- */
+/* ---------- live progress of slow AI work (reading a CV, writing documents) ---------- */
+const mmss=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+function progressHtml(p,{slow=""}={}){
+  if(!p||!p.stage)return "";
+  const step=p.steps?`Step ${p.step} of ${p.steps}: `:"";
+  let mid="";
+  if(p.expect&&!p.chars)mid=`<span class="sub">The AI reads first; writing starts in a moment.</span>`;
+  else if(p.chars){
+    const pct=p.percent??0;
+    mid=`<progress max="100" value="${pct}" aria-label="Progress"></progress><span class="sub">Written ${p.chars.toLocaleString()} of about ${p.expect.toLocaleString()} characters (${pct}%)${p.found&&p.found.length?` · found so far: ${esc(p.found.join(", "))}`:""}</span>`}
+  const left=p.eta!=null&&p.chars>200?` · about ${Math.max(1,Math.round(p.eta/60))} min left`:"";
+  return `<span class="aiprog"><b>${esc(step+p.stage)}…</b>${mid}<span class="sub">${mmss(p.elapsed||0)} so far${left}.${slow?" "+slow:""}</span></span>`;
+}
+/* Poll /api/progress while `work` runs; render(snapshot) updates the page. Returns work's result. */
+async function withProgress(task,work,render){
+  let on=true;
+  const tick=async()=>{while(on){try{const p=await api("GET","/api/progress?task="+encodeURIComponent(task));if(on&&p.active)render(p)}catch(e){}
+    await new Promise(r=>setTimeout(r,1500))}};
+  tick();
+  try{return await work()}finally{on=false}
+}
+const SLOW_CV="Most CVs are sorted in a second. When the AI is needed, it takes 1 to 3 minutes on a laptop; keep this page open.";
 async function api(method,path,body){
   const r=await fetch(path,{method,headers:{"Content-Type":"application/json","X-Jobhunt":"1"},body:body?JSON.stringify(body):undefined});
   const data=await r.json().catch(()=>({}));

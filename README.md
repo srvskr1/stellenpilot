@@ -15,7 +15,7 @@ It comes with its own **free built-in AI**, so you need no account, no API key a
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-**Windows:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed. **Everyone else:**
+**Windows and Mac:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed (Mac: [first start](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md)). **Everyone else:**
 
 ```bash
 pip install stellenpilot
@@ -48,7 +48,7 @@ Every day, by itself:
 
 ### What the AI does for you
 
-* **Reads your CV.** Drop a PDF or Word file and the AI turns it into a structured profile. Every bullet is checked against your original, and anything left out or made up is flagged.
+* **Reads your CV.** Drop a PDF or Word file and it becomes a structured profile. A CV with clear headings is sorted in about a second, without any AI; for other layouts the AI only points at line numbers, so even a laptop needs just a minute or two. Every word is copied from your CV, and anything left out is flagged.
 * **Scores every job** from 0 to 100 with a one line reason and the honest gaps (for example "asks for dbt, which you are still learning").
 * **Understands German job ads.** It finds the German level an ad really needs (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and writes an English summary of every German ad.
 * **Tailors your CV.** It picks and orders the experience, projects and skills from your profile that matter most for this job, and chooses the best fitting headline.
@@ -147,6 +147,12 @@ Five calm pages, in your browser, on your computer:
 **[Download Stellenpilot for Windows](https://github.com/srvskr1/stellenpilot/releases/latest)** (the file `Stellenpilot-Setup-X.Y.Z.exe`, about 26 MB). Python is included, nothing else to install. Run it, then double click **Stellenpilot** on your desktop.
 
 Windows may say "Windows protected your PC" because the app is not code signed yet. Click **More info**, then **Run anyway**. The installer is built by GitHub straight from this repository.
+
+### Mac: download the app
+
+**[Download Stellenpilot for Mac](https://github.com/srvskr1/stellenpilot/releases/latest)** (the file `Stellenpilot-X.Y.Z-mac.dmg`, for Macs with an Apple chip). Open it and drag Stellenpilot into Applications.
+
+The app is not signed by Apple yet, so macOS stops it the first time: on macOS 15 and newer, open **System Settings, Privacy & Security** and click **Open Anyway**. Step by step, with the fix for older macOS and for a "damaged" message: [docs/mac.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md). The disk image is built by GitHub straight from this repository.
 
 ### With Python (Windows, macOS, Linux)
 

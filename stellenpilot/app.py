@@ -1,6 +1,7 @@
-"""The Windows app (and `python -m stellenpilot.app`): start the dashboard without a terminal.
+"""The Windows and Mac app (and `python -m stellenpilot.app`): start the dashboard without a terminal.
 
-Double click: starts Stellenpilot for the default workspace (Documents/Stellenpilot), opens the
+Double click: starts Stellenpilot for the default workspace (Documents/Stellenpilot; on a Mac
+~/Stellenpilot), opens the
 browser and shows a small window with Open and Stop. With other arguments it acts as the normal
 command line, which the daily task uses: `Stellenpilot.exe --home X run`.
 """
@@ -16,6 +17,10 @@ PORT = 8765
 
 
 def default_home() -> Path:
+    # macOS asks for permission before an app may touch Documents, and the daily search (cron)
+    # cannot answer that question. A folder in the home folder needs no permission.
+    if sys.platform == "darwin":
+        return Path.home() / "Stellenpilot"
     return Path.home() / "Documents" / "Stellenpilot"
 
 

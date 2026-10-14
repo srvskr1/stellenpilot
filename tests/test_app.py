@@ -28,3 +28,19 @@ class AppTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InitAndHomeTest(unittest.TestCase):
+    def test_init_creates_a_missing_folder(self):
+        import tempfile
+        from stellenpilot.cli import main
+        with tempfile.TemporaryDirectory() as d:
+            ws = Path(d) / "new" / "workspace"
+            self.assertEqual(main(["--home", str(ws), "init"]), 0)
+            self.assertTrue((ws / "config.toml").exists())
+
+    def test_mac_keeps_files_out_of_documents(self):
+        with mock.patch.object(app.sys, "platform", "darwin"):
+            self.assertEqual(app.default_home(), Path.home() / "Stellenpilot")
+        with mock.patch.object(app.sys, "platform", "win32"):
+            self.assertEqual(app.default_home(), Path.home() / "Documents" / "Stellenpilot")
