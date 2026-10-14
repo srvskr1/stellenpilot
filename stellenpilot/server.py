@@ -21,7 +21,8 @@ from .db import DB, STATUSES
 CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "statusUpdatedAt",
          "status_note": "statusNote", "gap_tags": "gapTags", "interview_at": "interviewAt",
          "found_at": "foundAt", "posted_at": "postedAt", "job_type": "jobType", "closed_at": "closedAt",
-         "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote"}
+         "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote",
+         "finished_at": "finishedAt"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
 SLOW_POSTS = {"/api/add", "/api/gmail", "/api/gmail/imap", "/api/cv/import", "/api/cv/reread", "/api/gmail/install", "/api/gmail/connect", "/api/builtin/test"}
@@ -321,6 +322,7 @@ def make_handler(settings, port: int = 8765):
                 return self._send(200, {
                     "jobs": [camel(j) for j in jobs],
                     "runs": [camel(r) for r in db.runs()],
+                    "history": [camel(r) for r in db.history()],
                     "weekly": weekly_summary(jobs),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
                     "subtitle": subtitle(),

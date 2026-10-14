@@ -37,7 +37,7 @@ jobs:
           python -m pip install ".[gmail]" pyinstaller pillow
           pyinstaller --noconfirm --clean --windowed --name Stellenpilot \
             --osx-bundle-identifier io.github.srvskr1.stellenpilot \
-            --icon stellenpilot/web/icon.png \
+            --icon packaging/icon-mac.png \
             --collect-data stellenpilot --collect-submodules stellenpilot --collect-data googleapiclient \
             --distpath dist --workpath build packaging/stellenpilot_app.py
           test -x dist/Stellenpilot.app/Contents/MacOS/Stellenpilot

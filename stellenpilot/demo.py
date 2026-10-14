@@ -51,4 +51,5 @@ def load_demo(settings) -> int:
         db.insert_job(job)
     db.run_update(today(), found=42, added=6, shortlisted=3, docs_made=3, gmail_updates=1,
                   notes="Demo data", stage="done")
+    db.log_run(today(), found=42, added=6, shortlisted=3, docs_made=3, gmail_updates=1, notes="Demo data")
     return len(SAMPLES)
