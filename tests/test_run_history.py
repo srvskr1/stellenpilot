@@ -18,6 +18,7 @@ class RunHistoryTest(unittest.TestCase):
             self.assertEqual([r["found"] for r in h], [3, 10, 4])  # newest first
             self.assertEqual(h[0]["notes"], "second search")
             self.assertIn("T", h[0]["finished_at"])  # a time, so two runs on one day can be told apart
+            db.conn.close()  # Windows cannot delete an open database file
 
     def test_old_day_rows_carry_over_once(self):
         with tempfile.TemporaryDirectory() as d:
@@ -36,7 +37,9 @@ class RunHistoryTest(unittest.TestCase):
             db = DB(path)
             self.assertEqual([r["date"] for r in db.history()], ["2026-10-13", "2026-10-12"])  # unfinished run left out
             db.conn.close()
-            self.assertEqual(len(DB(path).history()), 2)  # not copied again on the next start
+            db = DB(path)
+            self.assertEqual(len(db.history()), 2)  # not copied again on the next start
+            db.conn.close()  # Windows cannot delete an open database file
 
 
 if __name__ == "__main__":
