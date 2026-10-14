@@ -67,7 +67,13 @@ jobs:
       - name: test the disk image (open, start the app from it, close)
         run: |
           v=${{ steps.v.outputs.version }}
-          mnt=$(hdiutil attach -nobrowse -readonly "dist/Stellenpilot-$v-mac.dmg" | awk -F'\t' '/\/Volumes\//{print $NF}')
+          # hdiutil sometimes answers "Resource temporarily unavailable" right after creating an image: retry.
+          mnt=""
+          for i in 1 2 3 4 5; do
+            mnt=$(hdiutil attach -nobrowse -readonly "dist/Stellenpilot-$v-mac.dmg" | awk -F'\t' '/\/Volumes\//{print $NF}') && [ -n "$mnt" ] && break
+            echo "attach failed, try $i of 5"; sleep $((i * 5))
+          done
+          [ -n "$mnt" ] || { echo "could not open the disk image"; exit 1; }
           test -d "$mnt/Stellenpilot.app" && test -L "$mnt/Applications"
           STELLENPILOT_NO_BROWSER=1 "$mnt/Stellenpilot.app/Contents/MacOS/Stellenpilot" --home "$RUNNER_TEMP/ws2" &
           pid=$!
