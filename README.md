@@ -60,6 +60,10 @@ Every day, by itself:
 
 A job assistant that invents experience gets people into trouble. Stellenpilot has a **truth guard**: any generated sentence that mentions a number, a tool or a language level your profile does not back up is rejected and replaced with safe text. Skills in a group called "Learning" are never presented as experience. The AI rephrases and selects; it never adds facts.
 
+### Measured, not assumed
+
+`stellenpilot eval` checks how well the scores rank the jobs you labeled (thumbs, interviews, or a sheet you fill in), and compares the stored score, keyword scoring and any AI you name: Spearman correlation, AUC, precision at 10, and how many good jobs pass `min_match`. Use it to pick a model and a threshold on your own data. See [docs/evaluation.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/evaluation.md).
+
 ### Choose your AI
 
 | | Built-in AI | Ollama, LM Studio, llama.cpp | Claude or OpenAI | No AI |
@@ -233,6 +237,8 @@ Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Job
 | `stellenpilot add LINK` | add a job from a careers page link |
 | `stellenpilot add --text ad.txt --title "..." --company "..." --tailor` | add a pasted ad and tailor it now |
 | `stellenpilot watch LINK` | find the watchlist entry for a company |
+| `stellenpilot eval` | measure how well scoring ranks the jobs you labeled ([docs/evaluation.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/evaluation.md)) |
+| `stellenpilot eval --make-sheet` | write 100 jobs to label by hand in `eval/labels.csv` |
 | `stellenpilot notify-test` | send a test digest |
 | `stellenpilot telegram-id` | show your Telegram chat id |
 
@@ -245,6 +251,7 @@ stellenpilot/
   sources/      one module per job API
   pipeline.py   the daily run: collect, score, tailor, Gmail
   score.py      LLM or keyword scoring, taste from your ratings
+  evaluate.py   scoring evaluation: labels, metrics, model comparison
   tailor.py     truthful CV plan, DOCX, cover letter, report, PDF
   server.py     local dashboard API
   web/          dashboard page

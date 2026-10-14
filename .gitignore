@@ -9,6 +9,7 @@ token.json
 *.db-wal
 *.db-shm
 output/
+eval/
 profile.imported.toml
 profile.backup.toml
 config.backup.toml
