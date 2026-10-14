@@ -53,6 +53,17 @@ CREATE TABLE IF NOT EXISTS runs (
   stage_at TEXT,
   stage_note TEXT NOT NULL DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS run_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL,
+  finished_at TEXT NOT NULL,
+  found INTEGER NOT NULL DEFAULT 0,
+  added INTEGER NOT NULL DEFAULT 0,
+  shortlisted INTEGER NOT NULL DEFAULT 0,
+  docs_made INTEGER NOT NULL DEFAULT 0,
+  gmail_updates INTEGER NOT NULL DEFAULT 0,
+  notes TEXT NOT NULL DEFAULT ''
+);
 """
 
 STATUSES = ("new", "ready", "applied", "interview", "offer", "rejected", "skipped")
@@ -82,6 +93,13 @@ class DB:
         for col in ("german_level", "summary_en"):
             if col not in have:
                 self.conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
+        # Before run_log existed, each day kept one row in runs and a second search the same day
+        # overwrote it. Carry those day rows over once so the history starts complete.
+        if not self.conn.execute("SELECT 1 FROM run_log LIMIT 1").fetchone():
+            self.conn.execute(
+                "INSERT INTO run_log (date, finished_at, found, added, shortlisted, docs_made, gmail_updates, notes) "
+                "SELECT date, COALESCE(stage_at, date), found, added, shortlisted, docs_made, gmail_updates, notes "
+                "FROM runs WHERE stage = 'done' ORDER BY date")
         self.conn.commit()
 
     # ---------- jobs ----------
@@ -176,3 +194,14 @@ class DB:
 
     def runs(self) -> list[dict]:
         return [dict(r) for r in self.conn.execute("SELECT * FROM runs ORDER BY date DESC")]
+
+    def log_run(self, date: str, **fields) -> None:
+        """Keep one row per finished search, so several searches on one day all stay in the history."""
+        fields = {"date": date, "finished_at": datetime.now().isoformat(timespec="seconds"), **fields}
+        cols = ", ".join(fields)
+        self.conn.execute(f"INSERT INTO run_log ({cols}) VALUES ({', '.join('?' * len(fields))})", list(fields.values()))
+        self.conn.commit()
+
+    def history(self, limit: int = 200) -> list[dict]:
+        """Finished searches, newest first."""
+        return [dict(r) for r in self.conn.execute("SELECT * FROM run_log ORDER BY id DESC LIMIT ?", (limit,))]

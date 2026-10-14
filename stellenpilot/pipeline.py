@@ -223,8 +223,10 @@ def _run(settings, db: DB, tailor: bool) -> dict:
     from .notify import send_digest
     problems += send_digest(settings, db, {"new": added, "shortlisted": shortlisted, "gmail": gmail_changes,
                                            "problems": problems}, day)
-    db.run_update(day, found=len(new), added=added, shortlisted=shortlisted, docs_made=docs,
-                  gmail_updates=len(gmail_changes), notes="; ".join(problems)[:500])
+    summary = dict(found=len(new), added=added, shortlisted=shortlisted, docs_made=docs,
+                   gmail_updates=len(gmail_changes), notes="; ".join(problems)[:500])
+    db.run_update(day, **summary)
+    db.log_run(day, **summary)
     db.stage("done", f"Done: {len(new)} new jobs, {shortlisted} shortlisted")
     return {"new": added, "shortlisted": shortlisted, "docs": docs, "closed": closed,
             "gmail": gmail_changes, "problems": problems}

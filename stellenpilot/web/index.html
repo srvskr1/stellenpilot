@@ -125,8 +125,13 @@ h2{font:600 1.25rem/1.3 var(--f-ui);margin:0}
 .rowlink .tx span{display:block;font-size:.875rem;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rowlink svg{width:18px;height:18px;color:#98A2B3;flex:none}
 .empty{padding:22px 24px;color:var(--text-tertiary);background:var(--surface);border:1px dashed var(--border-strong);border-radius:14px}
-.history summary{cursor:pointer;font-weight:600;font-size:1.0625rem;min-height:44px;display:flex;align-items:center;gap:8px}
-.history summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.history summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;font-weight:600;font-size:.9375rem;color:var(--accent);background:var(--surface);border:1px solid var(--border-strong);box-shadow:var(--shadow-1);user-select:none;transition:background .15s,border-color .15s}
+.history summary::-webkit-details-marker{display:none}
+.history summary:hover{background:var(--accent-soft);border-color:var(--accent)}
+.history summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.history summary svg{width:16px;height:16px;flex:none;transition:transform .15s}
+.history[open] summary svg{transform:rotate(90deg)}
+.history summary .cnt{font-weight:500;color:var(--text-tertiary)}
 .history .runs{margin-top:10px}
 
 /* Jobs */
@@ -767,9 +772,9 @@ body.wizopen{overflow:hidden}
         <p id="off-note"></p>
         <div class="office" id="office" role="img" aria-label="Agent office"></div>
       </section>
-      <details class="history"><summary>Search history</summary>
+      <details class="history"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><span>Search history</span><span class="cnt" id="runsCount"></span></summary>
         <div class="runs"><table>
-          <thead><tr><th>Date</th><th>Found</th><th>Shortlisted</th><th>Docs</th><th>Gmail</th><th>Notes</th></tr></thead>
+          <thead><tr><th>When</th><th>Found</th><th>Shortlisted</th><th>Docs</th><th>Gmail</th><th>Notes</th></tr></thead>
           <tbody id="runs"><tr><td colspan="6" class="muted">No runs recorded yet.</td></tr></tbody>
         </table></div>
       </details>
@@ -871,6 +876,7 @@ body.wizopen{overflow:hidden}
         <button type="button" class="wopt" role="radio" data-ai="builtin"><span class="rad"></span><span class="t"><b>Built-in AI</b><span>Free and private. Downloaded once, then it runs on this computer. No account, no key.</span></span><span class="tag rec">Recommended</span></button>
         <button type="button" class="wopt" role="radio" data-ai="anthropic"><span class="rad"></span><span class="t"><b>Claude</b><span>The best letters and fast. Needs an API key; a daily search costs a few cents.</span></span><span class="tag">Paid</span></button>
         <button type="button" class="wopt" role="radio" data-ai="ollama"><span class="rad"></span><span class="t"><b>Ollama</b><span>Free on this computer, if you already use the Ollama app.</span></span><span class="tag">Free</span></button>
+        <button type="button" class="wopt" role="radio" data-ai="local"><span class="rad"></span><span class="t"><b>Other local server</b><span>Any OpenAI compatible server you already run, like llama.cpp, vLLM or LM Studio.</span></span><span class="tag">Free</span></button>
         <button type="button" class="wopt" role="radio" data-ai="none"><span class="rad"></span><span class="t"><b>No AI for now</b><span>Keyword matching and simple template letters. You can add AI later.</span></span><span class="tag">Basic</span></button>
       </div>
       <div class="whow bi" data-how="builtin" hidden id="biSetup"></div>
@@ -886,6 +892,16 @@ body.wizopen{overflow:hidden}
           <option value="qwen3.5:9b">qwen3.5:9b, better writing, needs 16 GB memory</option></select></label>
         <div class="btnrow"><button type="button" class="btn sec" id="wTest">Test</button><span id="wTestMsg" role="status"></span></div>
       </div>
+      <div class="whow" data-how="local" hidden>
+        <ol>
+          <li>Start your server and load a model in it.</li>
+          <li>Put the model name and the server address below. The address usually ends in <code>/v1</code>.</li>
+          <li>Press <b>Test</b>. It should say the model is ready.</li>
+        </ol>
+        <label class="wfield">Model<input class="input" id="wLocalModel" placeholder="e.g. qwen3.5:4b" autocomplete="off" style="font-weight:400"></label>
+        <label class="wfield">Server address<input class="input" id="wLocalUrl" placeholder="http://localhost:8080/v1" autocomplete="off" style="font-weight:400"></label>
+        <div class="btnrow"><button type="button" class="btn sec" id="wLocalTest">Test</button><span id="wLocalMsg" role="status"></span></div>
+      </div>
       <div class="whow" data-how="anthropic" hidden>
         <ol>
           <li>Sign in at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</li>
@@ -894,7 +910,7 @@ body.wizopen{overflow:hidden}
         </ol>
         <label class="wfield">API key<input class="input" id="wKey" type="password" autocomplete="off" placeholder="sk-ant-..." style="font-weight:400"></label>
       </div>
-      <p class="small">More choices, like OpenAI or LM Studio, are in Settings.</p>
+      <p class="small">More choices, like OpenAI, are in Settings.</p>
     </div>
 
     <div class="wstep" data-w="3" hidden>
@@ -923,7 +939,7 @@ body.wizopen{overflow:hidden}
 <script>
 const STAGES=[["new","New"],["ready","Ready"],["applied","Applied"],["interview","Interview"],["offer","Offer"],["rejected","Rejected"],["skipped","Skipped"]];
 const LABEL=Object.fromEntries(STAGES);
-let jobs=[], runs=[], filter=null, db=null, canWrite=true, firstName="";
+let jobs=[], runs=[], runLog=[], filter=null, db=null, canWrite=true, firstName="";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"#";
@@ -989,10 +1005,11 @@ function renderDetail(){
       <button class="mini" data-rate="-1" data-id="${esc(j._id)}" aria-pressed="${j.rating===-1}" ${dis}>${ICO.down}Not for me</button></div>`:""}
     <label class="notes">Notes<textarea class="input" data-notes-id="${esc(j._id)}" placeholder="Contact person, salary, what they said on the phone" ${dis}>${esc(j.notes||"")}</textarea></label>`;
 }
+function fmtWhen(s){const d=new Date(s);return isNaN(d)||!/T/.test(s||"")?esc(s):d.toLocaleString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}
 function renderRuns(){
-  if(!runs.length)return;
-  const r=[...runs].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  $("runs").innerHTML=r.map(x=>`<tr><td class="num">${esc(x.date)}</td><td class="num">${esc(x.found)}</td><td class="num">${esc(x.shortlisted)}</td><td class="num">${esc(x.docsMade)}</td><td class="num">${esc(x.gmailUpdates)}</td><td>${esc(x.notes)}</td></tr>`).join("");
+  $("runsCount").textContent=runLog.length?`(${runLog.length})`:"";
+  if(!runLog.length)return;
+  $("runs").innerHTML=runLog.map(x=>`<tr><td class="num">${fmtWhen(x.finishedAt||x.date)}</td><td class="num">${esc(x.found)}</td><td class="num">${esc(x.shortlisted)}</td><td class="num">${esc(x.docsMade)}</td><td class="num">${esc(x.gmailUpdates)}</td><td>${esc(x.notes)}</td></tr>`).join("");
 }
 function renderStrip(run){
   const r=[...runs].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0],el=$("strip");
@@ -1503,7 +1520,8 @@ async function openSetup(){
     const [st,c]=await Promise.all([api("GET","/api/settings"),api("GET","/api/cv")]);
     const s=st.search;wz.titles=c.isExample?[]:[...(s.keywords||[])];W("wCity").value=s.city||"";W("wKm").value=s.radius_km||50;W("wRemote").checked=!!s.include_remote;
     W("wGerman").value=st.language.my_german_level||"";W("wWatch").checked=!!st.watch.starter_list;
-    wz.prevAi=["builtin","ollama","anthropic","none"].includes(st.llm.provider)?st.llm.provider:"none";
+    wz.prevAi=["builtin","ollama","anthropic","local","none"].includes(st.llm.provider)?st.llm.provider:"none";
+    if(st.llm.provider==="local"){W("wLocalModel").value=st.llm.model||"";W("wLocalUrl").value=st.llm.base_url||""}
     wz.ai=c.isExample&&wz.prevAi==="none"?"builtin":wz.prevAi;  // first setup: suggest the Built-in AI
     if(st.llm.provider==="builtin"&&["standard","light"].includes(st.llm.model))biKey=st.llm.model;
     if(wz.ai==="ollama"&&[...W("wModel").options].some(o=>o.value===st.llm.model))W("wModel").value=st.llm.model;
@@ -1543,9 +1561,13 @@ async function wImport(file){
   }catch(e){wCvNote("bad",esc(e.message)+(/name/i.test(e.message)?" Use “let me type it in” below instead.":""))}
   finally{d.classList.remove("busy");W("wNext").disabled=false;W("wFile").value=""}
 }
-async function wTest(){
-  const m=W("wTestMsg");m.textContent="Testing…";m.style.color="";
-  try{await api("POST","/api/settings",{llm:{provider:"ollama",model:W("wModel").value,...(wz.prevAi!=="ollama"?{base_url:""}:{})}});wz.prevAi="ollama";
+async function wTest(provider="ollama"){
+  const local=provider==="local",m=W(local?"wLocalMsg":"wTestMsg");
+  const llm=local?{provider,model:W("wLocalModel").value.trim(),base_url:W("wLocalUrl").value.trim()}
+    :{provider,model:W("wModel").value,...(wz.prevAi!==provider?{base_url:""}:{})};
+  if(local&&(!llm.model||!llm.base_url)){m.textContent="Fill in the model and the server address.";m.style.color="var(--pill-rejected-fg)";return false}
+  m.textContent="Testing…";m.style.color="";
+  try{await api("POST","/api/settings",{llm});wz.prevAi=provider;
     const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");wz.aiOk=c.ok;
     m.textContent=(c.ok?"✓ ":"")+c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,"");m.style.color=c.ok?"var(--ok-fg)":"var(--pill-rejected-fg)";return c.ok}
   catch(e){m.textContent=e.message;m.style.color="var(--pill-rejected-fg)";return false}
@@ -1581,6 +1603,7 @@ async function wNext(){
         if(!(bi&&bi.engine&&bi.models[biKey].ready)){wMsg(bi&&bi.download.active?"The AI is still downloading. Wait until it is finished, or choose No AI for now and switch later in Settings.":"Press Download first, or choose No AI for now and switch later in Settings.");b.disabled=false;return}
         await api("POST","/api/settings",{llm:{provider:"builtin",model:biKey,base_url:""}})}
       else if(wz.ai==="ollama"){if(!(await wTest())){wMsg("The free AI is not ready yet. Follow the steps above and press Test, or choose No AI for now.");b.disabled=false;return}}
+      else if(wz.ai==="local"){if(!(await wTest("local"))){wMsg("Stellenpilot cannot reach that server yet. Check the model and address and press Test, or choose No AI for now.");b.disabled=false;return}}
       else if(wz.ai==="anthropic"){const k=W("wKey").value.trim();
         if(!k&&!wz.keySaved){wMsg("Paste your Claude API key, or choose another option.");b.disabled=false;W("wKey").focus();return}
         await api("POST","/api/settings",{llm:{provider:"anthropic",model:"claude-haiku-4-5-20251001",base_url:""},keys:k?{ANTHROPIC_API_KEY:k}:{}});wz.keySaved=true;W("wKey").value=""}
@@ -1612,7 +1635,8 @@ W("wKm").addEventListener("input",wKm);
 W("wOpts").addEventListener("click",e=>{const b=e.target.closest(".wopt");if(!b)return;wz.ai=b.dataset.ai;wMsg("");wAiRender()});
 W("wOpts").addEventListener("keydown",e=>{if(!["ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const o=[...document.querySelectorAll(".wopt")],i=o.findIndex(x=>x.dataset.ai===wz.ai),n=o[(i+(e.key==="ArrowDown"?1:o.length-1))%o.length];wz.ai=n.dataset.ai;wAiRender();n.focus()});
 W("wModel").addEventListener("change",()=>{wz.aiOk=false;W("wTestMsg").textContent="";wAiRender()});
-W("wTest").addEventListener("click",wTest);
+W("wTest").addEventListener("click",()=>wTest());
+W("wLocalTest").addEventListener("click",()=>wTest("local"));
 $("guideBtn").addEventListener("click",openSetup);
 document.addEventListener("click",e=>{if(e.target.closest("[data-setup]"))openSetup()});
 
@@ -1668,7 +1692,7 @@ async function refresh(){
     const sig=JSON.stringify(st);
     if(sig===lastState)return;
     lastState=sig;
-    jobs=st.jobs;runs=st.runs;weekly=st.weekly;
+    jobs=st.jobs;runs=st.runs;runLog=st.history||[];weekly=st.weekly;
     $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();
     if(!st.profileReady&&!cvPrompted){cvPrompted=true;openSetup()}
