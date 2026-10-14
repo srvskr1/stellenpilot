@@ -6,10 +6,12 @@ never fetched. Paste the ad text instead; that is you reading the page, not a bo
 from __future__ import annotations
 
 import hashlib
+import http.client
 import ipaddress
 import json
 import re
 import socket
+import ssl
 import urllib.parse
 import urllib.request
 
@@ -27,9 +29,19 @@ class AddError(RuntimeError):
     pass
 
 
-def check_url(url: str) -> str:
-    """Refuse anything but a public http(s) page: no file:, no local or private network addresses,
-    no sites that forbid automated access. Used for the first link and again for every redirect."""
+def _public(ip: ipaddress._BaseAddress) -> bool:
+    """Only addresses on the public internet. IPv4 written as IPv6 (::ffff:127.0.0.1) is judged as IPv4."""
+    mapped = getattr(ip, "ipv4_mapped", None)
+    if mapped is not None:
+        ip = mapped
+    return ip.is_global and not ip.is_multicast
+
+
+def resolve_public(url: str) -> tuple[str, str, int, str]:
+    """Check a link and look its host up ONCE. Returns (scheme, host, port, ip). The caller must connect
+    to exactly this ip: looking the name up again later could give a different, internal address
+    (DNS rebinding), and the check would mean nothing.
+    Refuses anything but http(s), sites that forbid automated access, and every non public address."""
     parts = urllib.parse.urlsplit((url or "").strip())
     scheme, host = parts.scheme.lower(), (parts.hostname or "").lower()
     if scheme not in ("http", "https") or not host:
@@ -38,35 +50,85 @@ def check_url(url: str) -> str:
         raise AddError(f"{host} does not allow automated access. Open the ad, copy its text, and add it with "
                        "--text (or paste it into the dashboard), plus --title and --company.")
     try:
-        addrs = {info[4][0] for info in socket.getaddrinfo(host, None)}
+        port = parts.port or (443 if scheme == "https" else 80)
+    except ValueError:
+        raise AddError("The link has an invalid port.") from None
+    try:
+        infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
     except socket.gaierror:
-        try:  # a literal IP address needs no lookup
-            addrs = {str(ipaddress.ip_address(host.strip("[]")))}
-        except ValueError:
-            if urllib.request.getproxies().get(scheme):
-                return url  # behind a proxy the name may only resolve there; the proxy reaches public sites only
-            raise AddError(f"Could not find {host}. Check the link.") from None
+        # No proxy fallback on purpose: a proxy (often a company proxy) can reach internal hosts we
+        # cannot check, so a name that does not resolve here is not fetched at all.
+        raise AddError(f"Could not find {host} from this computer. Check the link, or copy the ad text "
+                       "and add it as text instead.") from None
+    addrs = [info[4][0] for info in infos]
     for a in addrs:
-        ip = ipaddress.ip_address(a.split("%")[0])
-        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified:
+        if not _public(ipaddress.ip_address(a.split("%")[0])):
             raise AddError(f"{host} points to a local or private network address. Only public job pages can be added by link.")
+    if not addrs:
+        raise AddError(f"Could not find {host}. Check the link.")
+    return scheme, host, port, addrs[0]
+
+
+def check_url(url: str) -> str:
+    """Kept for callers that only want the check. Fetching must go through open_public()."""
+    resolve_public(url)
     return url
 
 
-class _CheckedRedirects(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        check_url(newurl)
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+class _PinnedHTTP(http.client.HTTPConnection):
+    """Talks to the checked address only; the Host header still names the site."""
+    def __init__(self, host: str, ip: str, port: int, timeout: float):
+        super().__init__(host, port, timeout=timeout)
+        self._ip = ip
+
+    def connect(self):
+        self.sock = socket.create_connection((self._ip, self.port), self.timeout)
 
 
-_OPENER = urllib.request.build_opener(_CheckedRedirects)
+class _PinnedHTTPS(http.client.HTTPSConnection):
+    """Connects to the checked address, and still verifies the certificate for the site's name (SNI)."""
+    def __init__(self, host: str, ip: str, port: int, timeout: float):
+        super().__init__(host, port, timeout=timeout, context=ssl.create_default_context())
+        self._ip = ip
+
+    def connect(self):
+        sock = socket.create_connection((self._ip, self.port), self.timeout)
+        self.sock = self._context.wrap_socket(sock, server_hostname=self.host)
+
+
+class FetchError(RuntimeError):
+    def __init__(self, status: int, url: str):
+        super().__init__(f"HTTP {status} for {url}")
+        self.status = status
+
+
+def open_public(url: str, max_bytes: int = MAX_PAGE_BYTES, timeout: float = 30, max_redirects: int = 5) -> tuple[str, bytes]:
+    """GET a public web page. Every hop (the link and each redirect) is checked and connected to by
+    its checked address, never through a proxy and never by a second name lookup. Returns
+    (final url, body). Raises AddError for refused links and FetchError for HTTP errors."""
+    for _ in range(max_redirects + 1):
+        scheme, host, port, ip = resolve_public(url)
+        parts = urllib.parse.urlsplit(url)
+        path = urllib.parse.urlunsplit(("", "", parts.path or "/", parts.query, ""))
+        conn = (_PinnedHTTPS if scheme == "https" else _PinnedHTTP)(host, ip, port, timeout)
+        try:
+            default = 443 if scheme == "https" else 80
+            conn.request("GET", path, headers={"User-Agent": USER_AGENT, "Accept": "text/html",
+                                               "Host": host if port == default else f"{host}:{port}"})
+            resp = conn.getresponse()
+            if resp.status in (301, 302, 303, 307, 308) and resp.getheader("Location"):
+                url = urllib.parse.urljoin(url, resp.getheader("Location"))
+                continue
+            if resp.status >= 400:
+                raise FetchError(resp.status, url)
+            return url, resp.read(max_bytes)
+        finally:
+            conn.close()
+    raise AddError("The link redirects too often.")
 
 
 def fetch_page(url: str) -> str:
-    check_url(url)
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html"})
-    with _OPENER.open(req, timeout=30) as r:
-        return r.read(MAX_PAGE_BYTES).decode("utf-8", "replace")
+    return open_public(url)[1].decode("utf-8", "replace")
 
 
 def job_from_feed(url: str, country: str = "") -> dict:

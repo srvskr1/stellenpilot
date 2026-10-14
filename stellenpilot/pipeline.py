@@ -1,6 +1,7 @@
 """The daily run: collect, score, tailor, sync Gmail. Writes live progress for the dashboard."""
 from __future__ import annotations
 
+import http.client
 import logging
 import urllib.error
 from datetime import date, timedelta
@@ -11,7 +12,6 @@ from . import sources
 from .http import friendly_error
 from .db import DB, today
 from .llm import LLM, job_ad
-from .http import USER_AGENT
 from .score import profile_text, score_job, taste_summary
 from .tailor import tailor_job, unsupported_claims
 from .text import dedupe_key, title_excluded
@@ -89,7 +89,7 @@ def my_german_level(settings) -> str:
 def check_closed(db: DB, limit: int = 15) -> int:
     """Mark jobs whose posting now returns 404 or 410. Other errors are ignored (could be temporary)."""
     import random
-    from .manual import _OPENER, NO_FETCH, AddError, check_url
+    from .manual import NO_FETCH, AddError, FetchError, open_public
     closed = 0
     open_jobs = db.jobs("status IN ('new', 'ready') AND closed = 0 AND url != ''")
     # A different sample each run, so every posting gets checked over time, not only the top matches.
@@ -98,18 +98,13 @@ def check_closed(db: DB, limit: int = 15) -> int:
         if any(b in host for b in NO_FETCH):
             continue  # sites that forbid automated access are never fetched, not even to check
         try:
-            check_url(job["url"])  # public http(s) pages only, also on every redirect (_OPENER)
-        except AddError:
-            continue
-        req = urllib.request.Request(job["url"], headers={"User-Agent": USER_AGENT})
-        try:
-            _OPENER.open(req, timeout=15).close()
-        except urllib.error.HTTPError as e:
-            if e.code in (404, 410):
+            open_public(job["url"], max_bytes=1, timeout=15)  # public pages only, checked on every redirect
+        except FetchError as e:
+            if e.status in (404, 410):
                 db.update_job(job["id"], {"closed": 1, "closed_at": today()})
                 closed += 1
-        except Exception:
-            pass
+        except (AddError, OSError, http.client.HTTPException):
+            pass  # refused, offline or a broken server: try again another day
     return closed
 
 
