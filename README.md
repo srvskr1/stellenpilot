@@ -299,6 +299,10 @@ LibreOffice and Python stay installed; remove them like any other app if you no 
 
 Issues and pull requests are welcome. New sources should use an official or clearly permitted API, follow the shape in `stellenpilot/sources/__init__.py`, and come with an offline test.
 
+## How it was built
+
+Built with an AI pair programmer, decisions are mine.
+
 ## Credits and license
 
 MIT, see [LICENSE](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE). Credits for ideas and data are in [NOTICE.md](https://github.com/srvskr1/stellenpilot/blob/main/NOTICE.md). The built-in AI uses [llama.cpp](https://github.com/ggml-org/llama.cpp) (MIT) and [Qwen3.5](https://huggingface.co/Qwen) models (Apache 2.0), downloaded from their official sources.
