@@ -64,6 +64,8 @@ A job assistant that invents experience gets people into trouble. Stellenpilot h
 
 `stellenpilot eval` checks how well the scores rank the jobs you labeled (thumbs, interviews, or a sheet you fill in), and compares the stored score, keyword scoring and any AI you name: Spearman correlation, AUC, precision at 10, and how many good jobs pass `min_match`. Use it to pick a model and a threshold on your own data. See [docs/evaluation.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/evaluation.md).
 
+First results on 28 real jobs: AUC 0.73 for the stored score and 0.75 for keywords, and 9 of the top 10 were jobs worth applying to. The built-in AI does not beat keywords yet, and the default `min_match` of 70 skips most good jobs. Full numbers and limits in [docs/results.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/results.md).
+
 ### Choose your AI
 
 | | Built-in AI | Ollama, LM Studio, llama.cpp | Claude or OpenAI | No AI |

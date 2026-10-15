@@ -48,22 +48,36 @@ def labels_from_db(db: DB, include_rejected: bool = False) -> dict[str, float]:
     return out
 
 
+def _sheet_rows(path: Path) -> list[dict]:
+    """Read the label sheet the way Excel leaves it. A German Excel saves with ';' and in Windows-1252,
+    and a sheet opened as a table can gain a 'Column1;Column2;...' line above the real header."""
+    data = path.read_bytes()
+    try:
+        text = data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        text = data.decode("cp1252")
+    lines = text.splitlines()
+    for i, line in enumerate(lines[:5]):
+        delim = ";" if line.count(";") > line.count(",") else ","
+        head = [c.strip().strip('"').lower() for c in line.split(delim)]
+        if "id" in head and "label" in head:
+            rows = csv.DictReader(lines[i:], delimiter=delim)
+            return [{(k or "").strip().lower(): (v or "") for k, v in r.items()} for r in rows]
+    raise ValueError(f"{path.name} needs the columns id and label")
+
+
 def labels_from_csv(path: Path) -> dict[str, float]:
     """A sheet with at least the columns id and label. Labels can be 0/1 or a grade like 0 to 3.
     Rows with an empty label are ignored, so a half filled sheet works."""
     out: dict[str, float] = {}
-    with open(path, newline="", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        if not reader.fieldnames or "id" not in reader.fieldnames or "label" not in reader.fieldnames:
-            raise ValueError(f"{path.name} needs the columns id and label")
-        for row in reader:
-            raw = (row.get("label") or "").strip()
-            if not raw:
-                continue
-            try:
-                out[row["id"].strip()] = float(raw)
-            except ValueError:
-                raise ValueError(f"{path.name}: label '{raw}' for {row['id']} is not a number") from None
+    for row in _sheet_rows(path):
+        raw = (row.get("label") or "").strip()
+        if not raw:
+            continue
+        try:
+            out[row["id"].strip()] = float(raw.replace(",", "."))
+        except ValueError:
+            raise ValueError(f"{path.name}: label '{raw}' for {row['id']} is not a number") from None
     return out
 
 

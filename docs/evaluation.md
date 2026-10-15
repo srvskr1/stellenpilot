@@ -22,7 +22,7 @@ stellenpilot eval --make-sheet        # writes eval/labels.csv with 100 jobs
 The sheet takes jobs evenly from every score band and leaves the scores out, so the old score does
 not pull your judgement. Open it in Excel or LibreOffice and fill the `label` column with 1 (I would
 apply) or 0 (I would not), or a grade from 0 to 3 if you want more detail. Empty rows are ignored, so
-you can label in several sittings. 50 labels give a first look; about 100 let you compare models.
+you can label in several sittings. Saving from Excel is fine, also with `;` as separator. 50 labels give a first look; about 100 let you compare models.
 
 ## 2. Run it
 
@@ -48,7 +48,7 @@ keyword                           0.22   0.63    50%     95%       38%     9.8  
 builtin:light                     0.35   0.71    60%     64%       58%    14.0     2   31.5
 ```
 
-(Example numbers, not a measurement.)
+(Example numbers, not a measurement. Real results are in [results.md](results.md).)
 
 | column | question it answers | good sign |
 |---|---|---|

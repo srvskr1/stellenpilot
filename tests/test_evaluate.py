@@ -65,6 +65,12 @@ class LabelTests(unittest.TestCase):
         self.assertEqual(ev.labels_from_db(self.db), {"a": 1.0, "b": 1.0, "c": 0.0})
         self.assertEqual(ev.labels_from_db(self.db, include_rejected=True)["d"], 0.0)
 
+    def test_csv_labels_saved_by_german_excel(self):
+        # Excel in German: ';' separator, Windows-1252, and a 'Column1;...' line above the header.
+        p = self.home / "excel.csv"
+        p.write_bytes("Column1;Column2;Column3\nid;label;title\na;1;Müller\nb;0;x\nc;;y\n".encode("cp1252"))
+        self.assertEqual(ev.labels_from_csv(p), {"a": 1.0, "b": 0.0})
+
     def test_csv_labels_skip_empty_and_reject_text(self):
         p = self.home / "l.csv"
         p.write_text("id,label,title\na,1,x\nb,,y\nc,0,z\n", encoding="utf-8")
