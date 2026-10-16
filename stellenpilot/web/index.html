@@ -1083,7 +1083,7 @@ function renderToday(){
 }
 const COLS=["applied","interview","offer","rejected"];
 function renderApps(){
-  const sent=jobs.filter(j=>SENT.includes(j.status)).sort((a,b)=>String(b.statusUpdatedAt||"").localeCompare(String(a.statusUpdatedAt||"")));
+  const sent=jobs.filter(j=>SENT.includes(j.status)).sort((a,b)=>(Date.parse(b.statusUpdatedAt)||0)-(Date.parse(a.statusUpdatedAt)||0));
   $("gm-count").textContent=sent.length?`${sent.length} sent. Drag a card to move it, or use its menu.`:"";
   if(!sent.length){$("board").innerHTML=`<div class="empty" style="grid-column:1/-1">Nothing sent yet. When you press I applied on a job, it shows up here, and Gmail can move it forward by itself.</div>`;return}
   $("board").innerHTML=COLS.map(k=>{const list=sent.filter(j=>j.status===k);

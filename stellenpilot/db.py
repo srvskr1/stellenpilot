@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import date, datetime
 from pathlib import Path
 
 SCHEMA = """
@@ -72,12 +72,27 @@ USER_FIELDS = ("rating", "notes")
 EDITABLE = {"status", "status_note", "rating", "notes", "closed", "interview_at", "prep", "folder"}
 
 
+# One clock everywhere: local time, the clock you live by. Timestamps keep their UTC offset
+# ("2026-10-18T21:30:00+02:00"), so they stay exact across daylight saving changes and moves.
 def now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
 def today() -> str:
-    return datetime.now().date().isoformat()
+    return date.today().isoformat()
+
+
+def local_day(stamp: str | None) -> str:
+    """The local date (YYYY-MM-DD) of a stored timestamp, or "" if there is none.
+    Older databases hold UTC stamps ("...+00:00"); they are converted, so a Sunday evening in
+    Germany stays Sunday. Stamps without an offset are already local and only lose their time."""
+    if not stamp:
+        return ""
+    try:
+        t = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+    except ValueError:
+        return stamp[:10]
+    return (t.astimezone() if t.tzinfo else t).date().isoformat()
 
 
 class DB:
@@ -197,7 +212,7 @@ class DB:
 
     def log_run(self, date: str, **fields) -> None:
         """Keep one row per finished search, so several searches on one day all stay in the history."""
-        fields = {"date": date, "finished_at": datetime.now().isoformat(timespec="seconds"), **fields}
+        fields = {"date": date, "finished_at": now(), **fields}
         cols = ", ".join(fields)
         self.conn.execute(f"INSERT INTO run_log ({cols}) VALUES ({', '.join('?' * len(fields))})", list(fields.values()))
         self.conn.commit()
