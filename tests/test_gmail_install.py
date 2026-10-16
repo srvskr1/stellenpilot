@@ -1,14 +1,10 @@
 """Issue #19: the Google packages are installed from the command line, never by the dashboard server."""
 import io
-import json
 import sys
 import tempfile
-import threading
 import unittest
-import urllib.error
 import urllib.request
 from contextlib import redirect_stdout
-from http.server import ThreadingHTTPServer
 from pathlib import Path
 from unittest import mock
 
@@ -57,26 +53,18 @@ class InstallCommandTests(unittest.TestCase):
 
 class EndpointTests(unittest.TestCase):
     def test_server_no_longer_installs_and_shows_the_command(self):
+        from helpers import fetch_json, http_error, running
         from stellenpilot.server import make_handler
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
-            srv = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(Settings(Path(d))))
-            threading.Thread(target=srv.serve_forever, daemon=True).start()
-            base = f"http://127.0.0.1:{srv.server_address[1]}"
-            try:
-                req = urllib.request.Request(f"{base}/api/gmail/install", data=b"{}", method="POST",
-                                             headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
-                with mock.patch("subprocess.run") as run, mock.patch("subprocess.call") as call:
-                    with self.assertRaises(urllib.error.HTTPError) as e:
-                        urllib.request.urlopen(req, timeout=10)
-                    self.assertEqual(e.exception.code, 404)
-                    run.assert_not_called()
-                    call.assert_not_called()
-                g = json.load(urllib.request.urlopen(f"{base}/api/settings", timeout=10))["gmail"]
-                self.assertEqual(g["installCommand"], "stellenpilot gmail --install")
-                self.assertIn("-m stellenpilot gmail --install", g["installCommandFull"])
-            finally:
-                srv.shutdown()
-
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d, running(make_handler(Settings(Path(d)))) as srv:
+            req = urllib.request.Request(f"{srv.base}/api/gmail/install", data=b"{}", method="POST",
+                                         headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
+            with mock.patch("subprocess.run") as run, mock.patch("subprocess.call") as call:
+                self.assertEqual(http_error(req)[0], 404)
+                run.assert_not_called()
+                call.assert_not_called()
+            g = fetch_json(f"{srv.base}/api/settings")["gmail"]
+            self.assertEqual(g["installCommand"], "stellenpilot gmail --install")
+            self.assertIn("-m stellenpilot gmail --install", g["installCommandFull"])
 
 if __name__ == "__main__":
     unittest.main()

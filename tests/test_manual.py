@@ -51,7 +51,6 @@ class SafeFetchTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         import http.server
-        import threading
 
         class H(http.server.BaseHTTPRequestHandler):
             def log_message(self, *a):
@@ -61,15 +60,15 @@ class SafeFetchTests(unittest.TestCase):
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(b"<title>Internal admin</title>SECRET")
-        cls.srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), H)
-        threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
+        from helpers import Server
+        cls.srv = Server(H)
 
     @classmethod
     def tearDownClass(cls):
-        cls.srv.shutdown()
+        cls.srv.close()
 
     def test_local_and_special_addresses_are_refused(self):
-        port = self.srv.server_address[1]
+        port = self.srv.port
         for url in (f"http://127.0.0.1:{port}/", f"http://localhost:{port}/", "http://169.254.169.254/latest/",
                     "http://[::1]/", "file:///etc/passwd", "ftp://example.com/x"):
             with self.subTest(url=url), self.assertRaises(AddError):

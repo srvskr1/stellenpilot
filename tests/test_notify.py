@@ -21,6 +21,7 @@ class NotifyTests(unittest.TestCase):
                             "url": "https://x", "match": 82, "dedupe_key": "a"})
 
     def tearDown(self):
+        self.db.conn.close()
         self.tmp.cleanup()
 
     def test_digest_text(self):

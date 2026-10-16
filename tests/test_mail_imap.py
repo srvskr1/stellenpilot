@@ -4,11 +4,9 @@ import imaplib
 import json
 import os
 import tempfile
-import threading
 import unittest
 import urllib.error
 import urllib.request
-from http.server import ThreadingHTTPServer
 from pathlib import Path
 from unittest import mock
 
@@ -134,10 +132,13 @@ class ImapTests(unittest.TestCase):
 
 @mock.patch.dict(os.environ)
 class EndpointTests(unittest.TestCase):
+    def _req(self, base, path, body):
+        return urllib.request.Request(f"{base}{path}", data=json.dumps(body).encode(), method="POST",
+                                      headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
+
     def _post(self, base, path, body):
-        req = urllib.request.Request(f"{base}{path}", data=json.dumps(body).encode(), method="POST",
-                                     headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
-        return json.load(urllib.request.urlopen(req, timeout=10))
+        from helpers import fetch_json
+        return fetch_json(self._req(base, path, body))
 
     def test_connect_and_disconnect(self):
         from stellenpilot.server import make_handler
@@ -146,13 +147,11 @@ class EndpointTests(unittest.TestCase):
                 mock.patch.object(mail_imap.imaplib, "IMAP4_SSL", FakeIMAP):
             home = Path(d)
             settings = Settings(home)
-            srv = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(settings))
-            threading.Thread(target=srv.serve_forever, daemon=True).start()
-            base = f"http://127.0.0.1:{srv.server_address[1]}"
-            try:
-                with self.assertRaises(urllib.error.HTTPError) as e:
-                    self._post(base, "/api/gmail/imap", {"address": "me@gmail.com", "password": "wrong"})
-                self.assertIn("app password", json.load(e.exception)["error"])
+            from helpers import http_error, running
+            with running(make_handler(settings)) as srv:
+                base = srv.base
+                code, body = http_error(self._req(base, "/api/gmail/imap", {"address": "me@gmail.com", "password": "wrong"}))
+                self.assertIn("app password", body["error"])
                 g = self._post(base, "/api/gmail/imap", {"address": "me@gmail.com", "password": "abcd efgh ijkl mnop"})["gmail"]
                 self.assertEqual((g["method"], g["address"], g["enabled"], g["connected"]), ("imap", "me@gmail.com", True, True))
                 env = (home / ".env").read_text(encoding="utf-8")
@@ -163,8 +162,6 @@ class EndpointTests(unittest.TestCase):
                 g = self._post(base, "/api/gmail/disconnect", {})["gmail"]
                 self.assertFalse(g["enabled"])
                 self.assertNotIn(mail_imap.SECRET, (home / ".env").read_text(encoding="utf-8"))
-            finally:
-                srv.shutdown()
 
 
 if __name__ == "__main__":

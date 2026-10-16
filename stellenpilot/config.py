@@ -1,7 +1,9 @@
 """Load config.toml, profile.toml and secrets from the environment or a .env file."""
 from __future__ import annotations
 
+import json
 import os
+import re
 import tomllib
 from pathlib import Path
 
@@ -121,24 +123,49 @@ class Settings:
 
 # ---------------------------------------------------------------- saving from the dashboard
 
-def _toml_value(v) -> str:
-    import json
+# One TOML encoder for keys and values, used by dump_toml here and by importer.to_toml (issue #21).
+_BARE_KEY = re.compile(r"[A-Za-z0-9_-]+")
+
+
+def toml_str(v) -> str:
+    """A TOML basic string. JSON escapes every control character TOML forbids except DEL, so that one is added."""
+    return json.dumps(str(v), ensure_ascii=False).replace("\x7f", "\\u007f")
+
+
+_COMMENT_BAD = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")  # TOML comments allow tab but no other control character
+
+
+def toml_comment(text, prefix: str = "# ") -> list[str]:
+    """Comment lines for any text: one per line, so a line break can never end the comment early."""
+    lines = (_COMMENT_BAD.sub(" ", ln).rstrip() for ln in str(text or "").splitlines())
+    return [prefix + ln for ln in lines if ln.strip()]
+
+
+def toml_key(k) -> str:
+    k = str(k)
+    return k if _BARE_KEY.fullmatch(k) else toml_str(k)  # TOML bare keys are ASCII only, so "größe" is quoted
+
+
+def toml_value(v) -> str:
+    if v is None:
+        raise ValueError("TOML has no empty value (None)")
     if isinstance(v, bool):
         return "true" if v else "false"
     if isinstance(v, (int, float)):
         return repr(v)
-    if isinstance(v, list):
-        return "[" + ", ".join(_toml_value(x) for x in v) + "]"
-    return json.dumps(str(v), ensure_ascii=False)  # JSON strings are valid TOML basic strings
+    if isinstance(v, dict):
+        return "{" + ", ".join(f"{toml_key(k)} = {toml_value(x)}" for k, x in v.items() if x is not None) + "}"
+    if isinstance(v, (list, tuple)):
+        return "[" + ", ".join(toml_value(x) for x in v) + "]"
+    return toml_str(v)
 
 
 def dump_toml(data: dict, prefix: str = "") -> str:
-    import json
-    key = lambda k: k if k.replace("_", "").replace("-", "").isalnum() else json.dumps(k, ensure_ascii=False)
-    lines = [f"{key(k)} = {_toml_value(v)}" for k, v in data.items() if not isinstance(v, dict)]
+    """Plain TOML for config.toml: values first, then one [table] per nested dict. None values are left out."""
+    lines = [f"{toml_key(k)} = {toml_value(v)}" for k, v in data.items() if v is not None and not isinstance(v, dict)]
     for k, v in data.items():
         if isinstance(v, dict):
-            name = f"{prefix}.{key(k)}" if prefix else key(k)
+            name = f"{prefix}.{toml_key(k)}" if prefix else toml_key(k)
             lines += ["", f"[{name}]", dump_toml(v, name).strip("\n")]
     return "\n".join(lines).strip("\n") + "\n"
 
