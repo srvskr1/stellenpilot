@@ -223,6 +223,10 @@ def _plain(e: Exception) -> str:
     text = str(e)
     if isinstance(e, OSError) and ("getaddrinfo" in text or "timed out" in text or "Connection" in text):
         return "Could not download. Check the internet connection and try again."
+    if "CERTIFICATE_VERIFY_FAILED" in text or "SSL" in text:
+        return ("Could not check the secure connection to the download site. This usually means an antivirus "
+                "or a company network is inspecting web traffic. Update Stellenpilot (it now uses the same "
+                "certificate check as your browser), or allow Python in the antivirus web shield, then try again.")
     if "No space left" in text:
         return "Not enough free disk space. The AI needs about 3 GB."
     return text
