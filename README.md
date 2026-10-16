@@ -228,6 +228,7 @@ Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Job
 * With Claude or OpenAI, your profile and the job ads are sent to that provider.
 * The dashboard listens on 127.0.0.1 only, and write requests need a custom header, so other websites cannot change your data through your browser.
 * Read every document before you send it. The truth guard checks digits and the tools it knows (see `VOCAB` in `stellenpilot/score.py`). It cannot judge spelled out numbers or vague claims, so you are the final check.
+* Why the server, the guards, the link fetcher and the AI downloads are built the way they are: [docs/architecture.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/architecture.md).
 
 ## Commands
 
@@ -299,7 +300,7 @@ LibreOffice and Python stay installed; remove them like any other app if you no 
 
 ## Contributing
 
-Issues and pull requests are welcome. New sources should use an official or clearly permitted API, follow the shape in `stellenpilot/sources/__init__.py`, and come with an offline test.
+Issues and pull requests are welcome. Read [docs/architecture.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/architecture.md) first, it explains the decisions that are easy to undo by accident. New sources should use an official or clearly permitted API, follow the shape in `stellenpilot/sources/__init__.py`, and come with an offline test.
 
 ## How it was built
 
