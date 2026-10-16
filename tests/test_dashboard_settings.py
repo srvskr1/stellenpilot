@@ -72,3 +72,40 @@ class CredentialsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LanguageTest(unittest.TestCase):
+    def test_ui_language_is_a_setting(self):
+        self.assertEqual(clean_settings({"ui": {"language": "de"}}), {"ui": {"language": "de"}})
+        self.assertEqual(DEFAULTS["ui"]["language"], "auto")
+        with self.assertRaises(ValueError):
+            clean_settings({"ui": {"language": "fr"}})
+
+    def test_page_gets_only_a_known_language(self):
+        from stellenpilot.server import with_language
+        page = b'<!doctype html>\n<html lang="en">\n<head>'
+        self.assertIn(b'data-ui="de"', with_language(page, "de"))
+        self.assertIn(b'data-ui="auto"', with_language(page, '"><script>'))  # never written into the HTML as is
+
+    def test_every_code_string_has_a_german_text(self):
+        """Strings passed to t() in the dashboard must be in the DE table, or German users see English."""
+        import re
+        html = (Path(__file__).parent.parent / "stellenpilot" / "web" / "index.html").read_text(encoding="utf-8")
+        table = html[html.index("const DE={"):html.index("const n1=")]
+        keys = {m.group(1).encode().decode("unicode_escape").encode("latin-1").decode("utf-8")
+                for m in re.finditer(r'(?:^|[,{\n])\s*"((?:[^"\\]|\\.)*)":', table)}
+        keys |= set(re.findall(r"'([^']*)':", table))
+        code = html[html.index("const STAGES="):]
+        used = set(re.findall(r"\bt\('([^']*)'", code))
+        for call in re.findall(r'\bt\(((?:[^()"\']|"(?:[^"\\]|\\.)*")*?)(?:,\{|\))', code):
+            call = re.sub(r'[=!]==\s*"(?:[^"\\]|\\.)*"', "", call)  # comparisons, not text
+            used |= {s.encode().decode("unicode_escape").encode("latin-1").decode("utf-8")
+                     for s in re.findall(r'"((?:[^"\\]|\\.)*)"', call)}
+        missing = sorted(u for u in used if u and u not in keys)
+        self.assertEqual(missing, [])
+
+    def test_german_learning_group(self):
+        from stellenpilot.score import is_learning_group
+        self.assertTrue(is_learning_group("Learning"))
+        self.assertTrue(is_learning_group("Lernen"))
+        self.assertFalse(is_learning_group("Cloud"))
