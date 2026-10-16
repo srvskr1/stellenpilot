@@ -33,10 +33,12 @@ EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remo
             "language": ("my_german_level",),
             "tailor": ("min_match", "letter_language"),
             "schedule": ("enabled", "time"),
-            "watch": ("starter_list",)}
+            "watch": ("starter_list",),
+            "ui": ("language",)}
 CHOICES = {("llm", "provider"): {"none", "builtin", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
            ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
-           ("tailor", "letter_language"): {"auto", "en", "de"}}
+           ("tailor", "letter_language"): {"auto", "en", "de"},
+           ("ui", "language"): {"auto", "en", "de"}}
 SECRETS = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ADZUNA_APP_ID", "ADZUNA_APP_KEY", "THEIRSTACK_API_KEY")
 
 
@@ -208,6 +210,12 @@ def reread_offer(settings) -> bool:
             and bool(saved_cv_text(settings.home).strip()))
 
 
+def with_language(page: bytes, choice) -> bytes:
+    """Tell the page which language the user picked. Only a known value is ever written into the HTML."""
+    choice = choice if choice in CHOICES[("ui", "language")] else "auto"
+    return page.replace(b'<html lang="en">', f'<html lang="en" data-ui="{choice}">'.encode(), 1)
+
+
 def make_handler(settings, port: int = 8765):
     db = DB(settings.db_path)
     run_state = {"running": False, "result": None, "error": ""}
@@ -312,7 +320,7 @@ def make_handler(settings, port: int = 8765):
 
         def _get(self):
             if self.path in ("/", "/index.html"):
-                return self._send(200, page, "text/html; charset=utf-8")
+                return self._send(200, with_language(page, settings["ui"].get("language")), "text/html; charset=utf-8")
             if self.path == "/icon.png":
                 return self._send(200, icon, "image/png")
             if self.path in fonts:
