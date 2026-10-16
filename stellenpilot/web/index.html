@@ -575,6 +575,7 @@ body.wizopen{overflow:hidden}
     <div class="sidefoot">
       <div id="lastrun"><div class="live"><i></i>Automatic search off</div></div>
       <button class="linkbtn" id="guideBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>Run setup again</button>
+      <a class="linkbtn" id="bugLink" href="https://github.com/srvskr1/stellenpilot/issues/new?template=bug_report.md" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M12 20v-9M9 6l-2-3M15 6l2-3M3 13h5M16 13h5M4 8l4 2M20 8l-4 2M4 19l4-2M20 19l-4-2"/></svg>Report a bug</a>
     </div>
   </aside>
 
@@ -601,7 +602,7 @@ body.wizopen{overflow:hidden}
     <section class="page-x" id="setPanel" aria-labelledby="set-h" hidden>
       <header class="phead">
         <div><h1 id="set-h">Settings</h1><p>What to search, where, and who writes your documents.</p></div>
-        <button class="btn sec" type="button" data-setup>Run setup again</button>
+        <div class="btnrow"><a class="btn sec" href="https://github.com/srvskr1/stellenpilot/issues/new?template=bug_report.md" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M12 20v-9M9 6l-2-3M15 6l2-3M3 13h5M16 13h5M4 8l4 2M20 8l-4 2M4 19l4-2M20 19l-4-2"/></svg>Report a bug</a><button class="btn sec" type="button" data-setup>Run setup again</button></div>
       </header>
       <div class="setwrap">
         <nav class="setnav" aria-label="Settings sections" id="setNav">
@@ -964,7 +965,7 @@ const DE={
 // navigation and page heads
 "Home":"Start","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
 "Automatic search off":"Automatische Suche aus","Automatic search on":"Automatische Suche an","Every day at {x}":"Jeden Tag um {x}",
-"Turn it on in Settings":"In den Einstellungen einschalten","Run setup again":"Einrichtung erneut starten",
+"Turn it on in Settings":"In den Einstellungen einschalten","Run setup again":"Einrichtung erneut starten","Report a bug":"Fehler melden",
 "Main":"Hauptmenü","Language":"Sprache",
 // My CV
 "Every score, CV and cover letter is made from this. Nothing else is ever added.":"Jede Bewertung, jeder Lebenslauf und jedes Anschreiben entsteht daraus. Nichts anderes wird je hinzugefügt.",
