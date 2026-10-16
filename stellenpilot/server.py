@@ -16,7 +16,7 @@ from pathlib import Path
 from urllib.parse import unquote
 
 from . import schedule
-from .db import DB, STATUSES
+from .db import DB, STATUSES, local_day
 
 CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "statusUpdatedAt",
          "status_note": "statusNote", "gap_tags": "gapTags", "interview_at": "interviewAt",
@@ -106,10 +106,11 @@ def camel(d: dict) -> dict:
     return {CAMEL.get(k, k): v for k, v in d.items() if k not in ("description", "dedupe_key")}
 
 
-def weekly_summary(jobs: list[dict]) -> list[dict]:
-    """This week's numbers, computed from the jobs table."""
-    start = date.today() - timedelta(days=date.today().weekday())
-    in_week = [j for j in jobs if (j.get("status_updated_at") or "")[:10] >= start.isoformat()]
+def weekly_summary(jobs: list[dict], today: date | None = None) -> list[dict]:
+    """This week's numbers, computed from the jobs table. Weeks start on Monday, local time."""
+    today = today or date.today()
+    start = today - timedelta(days=today.weekday())
+    in_week = [j for j in jobs if local_day(j.get("status_updated_at")) >= start.isoformat()]
     gaps = Counter(t for j in jobs if (j.get("match") or 0) > 0 for t in j.get("gap_tags", []) if t != "German")
     applied = sum(1 for j in in_week if j["status"] == "applied")
     replies = sum(1 for j in in_week if j["status"] in ("interview", "offer", "rejected"))
