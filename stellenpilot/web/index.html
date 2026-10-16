@@ -368,6 +368,7 @@ label.btn{cursor:pointer}
 .wopt .tag.rec{background:var(--ok-bg);color:var(--ok-fg)}
 .whow{border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
 .whow ol{margin:0;padding-left:20px;color:var(--text-secondary);line-height:1.7}
+.gmcmd{font:.8125rem var(--f-mono);background:var(--surface-alt);padding:2px 6px;border-radius:6px;user-select:all;word-break:break-all}
 .whow code{white-space:nowrap;font:.875rem var(--f-mono);background:var(--surface-alt);padding:2px 6px;border-radius:6px;user-select:all}
 .whow .btnrow{gap:12px}
 .wchecks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -729,7 +730,7 @@ body.wizopen{overflow:hidden}
           </div>
           <details class="keyhelp" id="gmAdvanced"><summary>Other way: your own Google key file (for work or university accounts without app passwords)</summary>
           <ol class="gsteps3" id="gmSteps">
-            <li data-g="packages"><span class="ic"></span><div><b>Install Gmail support</b><p>A small add on from Google, installed once.</p><div class="btnrow"><button type="button" class="btn sec" id="gmInstall">Install</button></div></div></li>
+            <li data-g="packages"><span class="ic"></span><div><b>Install Gmail support</b><p>A small add on from Google, installed once. Run this in the terminal where you installed Stellenpilot, then press Check again.</p><p><code class="gmcmd" id="gmCmd"></code></p><p class="small">Command not found? Use this one instead: <code class="gmcmd" id="gmCmdFull"></code></p><div class="btnrow"><button type="button" class="btn sec" id="gmCopy">Copy command</button><button type="button" class="btn sec" id="gmRecheck">Check again</button></div></div></li>
             <li data-g="credentials"><span class="ic"></span><div><b>Create your own Google key file</b><p>Google wants every app that reads Gmail to have its own key. It takes about 10 minutes, once.</p>
               <details class="keyhelp"><summary>Show me how</summary><ol>
                 <li>Open <a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a> and create a project. Any name works, for example Stellenpilot.</li>
@@ -1421,6 +1422,7 @@ $("aiTest").addEventListener("click",async()=>{const m=$("aiTestMsg"),b=$("aiTes
   catch(e){m.className="state bad";m.textContent=e.message}finally{b.disabled=false}});
 function renderGmail(g){if(!g)return;
   const imapOn=g.method==="imap"&&g.enabled&&g.connected;
+  $("gmCmd").textContent=g.installCommand||"";$("gmCmdFull").textContent=g.installCommandFull||"";
   const done={packages:g.packages,credentials:g.credentials,connected:g.method!=="imap"&&g.connected&&g.enabled},order=["packages","credentials","connected"],cur=order.find(k=>!done[k]);
   document.querySelectorAll("#gmSteps > li").forEach((li,i)=>{const k=li.dataset.g;li.className=done[k]?"done":k===cur?"cur":"";li.querySelector(".ic").textContent=done[k]?"✓":i+1});
   const on=imapOn||!cur;
@@ -1435,7 +1437,8 @@ function renderGmail(g){if(!g)return;
 async function gmailDo(path,btn,busy,body){const m=$("gmMsg"),t=btn&&btn.textContent;if(btn){btn.disabled=true;btn.textContent=busy}m.className="state";m.textContent="";
   try{const r=await api("POST",path,body);renderGmail(r.gmail);lastState="";refresh();return r}
   catch(e){m.className="state bad";m.textContent=e.message}finally{if(btn){btn.disabled=false;btn.textContent=t}}}
-$("gmInstall").addEventListener("click",e=>gmailDo("/api/gmail/install",e.currentTarget,"Installing, this can take a minute…"));
+$("gmCopy").addEventListener("click",async e=>{const b=e.currentTarget;try{await navigator.clipboard.writeText($("gmCmd").textContent);b.textContent="Copied"}catch{b.textContent="Select it and copy"}setTimeout(()=>b.textContent="Copy command",2000)});
+$("gmRecheck").addEventListener("click",async e=>{const b=e.currentTarget,m=$("gmMsg");b.disabled=true;try{const r=await api("GET","/api/settings");renderGmail(r.gmail);m.className="state"+(r.gmail.packages?" ok":" bad");m.textContent=r.gmail.packages?"Gmail support is installed.":"Not installed yet. Run the command above, then check again."}catch(err){m.className="state bad";m.textContent=err.message}finally{b.disabled=false}});
 $("gmConnect").addEventListener("click",async e=>{$("gmMsg").textContent="";const r=await gmailDo("/api/gmail/connect",e.currentTarget,"Waiting for you in the Google page…");if(r){$("gmMsg").className="state ok";$("gmMsg").textContent="Gmail is connected."}});
 $("gmOff").addEventListener("click",e=>gmailDo("/api/gmail/disconnect",null,""));
 $("gmImap").addEventListener("click",async e=>{const r=await gmailDo("/api/gmail/imap",e.currentTarget,"Checking your login…",

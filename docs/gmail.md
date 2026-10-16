@@ -18,11 +18,11 @@ Stellenpilot logs in once to check, then saves the app password in `.env` (reada
 
 ## The other way: your own Google key file (about 10 minutes)
 
-This uses the Gmail API with the read only scope `https://www.googleapis.com/auth/gmail.readonly`. In the dashboard open **Other way: your own Google key file** under **Email**: install Gmail support, create and choose the key file, then connect.
+This uses the Gmail API with the read only scope `https://www.googleapis.com/auth/gmail.readonly`. In the dashboard open **Other way: your own Google key file** under **Email**: run the install command it shows in a terminal, create and choose the key file, then connect. The Windows and Mac apps already include Gmail support and skip the first step.
 
 ## One time setup by hand (about 10 minutes)
 
-1. Install the extra packages: `pip install -e ".[gmail]"`
+1. Install the extra packages: `stellenpilot gmail --install` (from a source checkout, `pip install -e ".[gmail]"` does the same).
 2. Go to https://console.cloud.google.com , create a project (any name).
 3. **APIs and Services, Library**: enable the **Gmail API**.
 4. **OAuth consent screen**: choose **External**, fill in the app name and your email, add the scope `gmail.readonly`, and add your own Gmail address as a **test user**. Leave the app in **Testing**.
