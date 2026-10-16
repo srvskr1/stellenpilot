@@ -37,6 +37,10 @@ class Server:
         self.port = self.srv.server_address[1]
         self.connected = []
 
+    def close(self):
+        self.srv.shutdown()
+        self.srv.server_close()
+
     def connect(self, addr, timeout=None, *a, **k):
         self.connected.append(addr[0])
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # not create_connection: its lookup is patched
@@ -109,7 +113,7 @@ class RedirectTests(unittest.TestCase):
     def tearDown(self):
         self.lookup.stop()
         self.connect.stop()
-        self.site.srv.shutdown()
+        self.site.close()
 
     def test_redirect_to_another_public_site_is_followed(self):
         url, body = open_public("http://jobs.example/a")

@@ -664,6 +664,7 @@ def make_handler(settings, port: int = 8765):
         threading.Thread(target=background_run, daemon=True).start()
 
     Handler.catch_up = staticmethod(catch_up)
+    Handler.close = staticmethod(db.conn.close)  # releases the dashboard's database connection
     return Handler
 
 
@@ -713,3 +714,6 @@ def serve(settings, port: int = 8765, host: str = "127.0.0.1", open_browser: boo
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
+    finally:
+        httpd.server_close()
+        handler.close()

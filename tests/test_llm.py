@@ -1,9 +1,8 @@
 """Local LLM support, tested against a fake server that speaks the Ollama and OpenAI APIs."""
 import json
 import tempfile
-import threading
 import unittest
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 from stellenpilot.config import Settings
@@ -53,13 +52,13 @@ def settings_for(home: Path, **llm):
 class LocalLLMTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.srv = ThreadingHTTPServer(("127.0.0.1", 0), Fake)
-        threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
-        cls.base = f"http://127.0.0.1:{cls.srv.server_address[1]}"
+        from helpers import Server
+        cls.srv = Server(Fake)
+        cls.base = cls.srv.base
 
     @classmethod
     def tearDownClass(cls):
-        cls.srv.shutdown()
+        cls.srv.close()
 
     def setUp(self):
         SEEN.clear()
