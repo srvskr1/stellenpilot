@@ -551,6 +551,13 @@ body.wizopen{overflow:hidden}
 .aiprog b{font-weight:600;color:var(--text)}
 .aiprog progress{width:100%;max-width:420px;height:8px;accent-color:var(--accent)}
 .aiprog .sub{font-size:.875rem;color:var(--text-tertiary)}
+/* Language switch (setup wizard) */
+.wlang{display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:2px;gap:2px}
+.wlang button{font:inherit;font-size:.875rem;font-weight:600;border:0;background:none;color:var(--text-secondary);padding:4px 12px;border-radius:999px;cursor:pointer}
+.wlang button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.wlang button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+/* Phones: brand and language on the first row, step and "finish later" on the second. */
+@media (max-width:600px){.wtop{display:grid;grid-template-columns:1fr auto;gap:12px}.wtop .right{display:contents}.wtop #wLater{justify-self:end}}
 </style>
 </head>
 <body>
@@ -598,11 +605,15 @@ body.wizopen{overflow:hidden}
       </header>
       <div class="setwrap">
         <nav class="setnav" aria-label="Settings sections" id="setNav">
-          <a href="#settings" data-sec="s-search">Job search</a><a href="#settings" data-sec="s-sources">Job sources</a><a href="#settings" data-sec="s-ai">AI model</a>
+          <a href="#settings" data-sec="s-lang">Language</a><a href="#settings" data-sec="s-search">Job search</a><a href="#settings" data-sec="s-sources">Job sources</a><a href="#settings" data-sec="s-ai">AI model</a>
           <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-icon">Desktop icon</a><a href="#settings" data-sec="s-gmail">Email</a>
         </nav>
         <div class="setcol">
         <form class="addform setform" id="setForm">
+          <section class="box scard" id="s-lang"><h2>Language</h2><p class="hint">The language of Stellenpilot itself. Your CVs and cover letters have their own setting under Documents.</p>
+            <div class="g3"><label>Show Stellenpilot in
+              <select class="input" name="language"><option value="auto">Automatic (browser)</option><option value="en" lang="en" translate="no">English</option><option value="de" lang="de" translate="no">Deutsch</option></select></label></div>
+          </section>
           <section class="box scard" id="s-search"><h2>Job search</h2><p class="hint">What you are looking for and where.</p>
             <label>Job titles <span class="muted">One per line, written the way companies write them.</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
             <div class="g3">
@@ -678,7 +689,8 @@ body.wizopen{overflow:hidden}
               <li>Add a little credit under <b>Billing</b>. A daily search usually costs a few cents.</li>
               <li>Open <b>API keys</b>, create a key, paste it below and press <b>Save and test</b>. Model <code>claude-haiku-4-5-20251001</code> is fast and cheap.</li></ol></div>
             <div class="howto" data-for="openai"><b>Get an OpenAI API key</b><ol>
-              <li>Sign in at <a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a> and add a little credit under <b>Billing</b>.</li>
+              <li>Sign in at <a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a>.</li>
+              <li>Add a little credit under <b>Billing</b>. A daily search usually costs a few cents.</li>
               <li>Open <b>API keys</b>, create a key, paste it below with a model name, and press <b>Save and test</b>.</li></ol></div>
             <label data-for="anthropic">Anthropic API key <span class="keyset" data-key="ANTHROPIC_API_KEY"></span><input class="input" name="ANTHROPIC_API_KEY" type="password" autocomplete="off" placeholder="sk-ant-..."></label>
             <label data-for="openai">OpenAI API key <span class="keyset" data-key="OPENAI_API_KEY"></span><input class="input" name="OPENAI_API_KEY" type="password" autocomplete="off" placeholder="sk-..."></label>
@@ -836,7 +848,7 @@ body.wizopen{overflow:hidden}
 <div class="wiz" id="setup" role="dialog" aria-modal="true" aria-labelledby="wTitle" hidden>
   <div class="wtop">
     <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 20l8-4 8 4z"/></svg></span><b>Stellenpilot</b></div>
-    <div class="right"><span id="wCount">Step 1 of 4</span><button class="linkbtn" type="button" id="wLater">Finish later</button></div>
+    <div class="right"><div class="wlang" role="group" aria-label="Language" id="wLang"><button type="button" data-lang="en" lang="en" translate="no">English</button><button type="button" data-lang="de" lang="de" translate="no">Deutsch</button></div><span id="wCount">Step 1 of 4</span><button class="linkbtn" type="button" id="wLater">Finish later</button></div>
   </div>
   <div class="wbar" role="progressbar" aria-label="Setup progress" aria-valuemin="1" aria-valuemax="4" id="wBarBox"><i id="wBar" style="width:25%"></i></div>
   <div class="wcard">
@@ -938,14 +950,334 @@ body.wizopen{overflow:hidden}
 <footer class="credits">Job data from <a href="https://www.arbeitsagentur.de/jobsuche/" target="_blank" rel="noopener">Bundesagentur für Arbeit</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a>, <a href="https://www.adzuna.de" target="_blank" rel="noopener">The Adzuna API</a>, <a href="https://theirstack.com" target="_blank" rel="noopener">TheirStack</a>, <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a> and <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>, depending on which sources you enable.</footer>
 
 <script>
-const STAGES=[["new","New"],["ready","Ready"],["applied","Applied"],["interview","Interview"],["offer","Offer"],["rejected","Rejected"],["skipped","Skipped"]];
+/* ---------- Language ----------
+   The server writes the saved choice into <html data-ui>: "auto" follows the browser, "en" or "de" is fixed.
+   English is the source text. For German, t() translates strings built in code, and a small translator
+   swaps the English text of the page (and everything rendered later) using the DE table below.
+   Text the user typed (notes, CV fields, job titles) is never touched: inputs, textareas and
+   anything marked translate="no" are skipped. */
+const UI_CHOICE=document.documentElement.dataset.ui||"auto";
+const LANG=UI_CHOICE==="de"||(UI_CHOICE==="auto"&&/^de\b/i.test(navigator.language||""))?"de":"en";
+document.documentElement.lang=LANG;
+const LOC=LANG==="de"?"de-DE":"en-GB";
+const DE={
+// navigation and page heads
+"Home":"Start","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
+"Automatic search off":"Automatische Suche aus","Automatic search on":"Automatische Suche an","Every day at {x}":"Jeden Tag um {x}",
+"Turn it on in Settings":"In den Einstellungen einschalten","Run setup again":"Einrichtung erneut starten",
+"Main":"Hauptmenü","Language":"Sprache",
+// My CV
+"Every score, CV and cover letter is made from this. Nothing else is ever added.":"Jede Bewertung, jeder Lebenslauf und jedes Anschreiben entsteht daraus. Nichts anderes wird je hinzugefügt.",
+"Upload a new CV":"Neuen Lebenslauf hochladen","Check these before saving":"Prüfe das vor dem Speichern","Your CV text, to copy from":"Dein Lebenslauftext zum Kopieren",
+"CV sections":"Abschnitte des Lebenslaufs","About you":"Über dich","Skills":"Fähigkeiten","Experience":"Erfahrung","Projects":"Projekte","Education":"Ausbildung",
+"No changes yet.":"Noch keine Änderungen.","You have unsaved changes.":"Du hast ungespeicherte Änderungen.","Save my CV":"Lebenslauf speichern",
+"Job title":"Jobtitel","Company":"Firma","Dates":"Zeitraum","2021 to 2023":"2021 bis 2023","What you did":"Was du gemacht hast","(one point per line)":"(ein Punkt pro Zeile)",
+"Built SQL reports for the sales team":"SQL Berichte für das Vertriebsteam gebaut","Name":"Name","What it does":"Was es macht","Degree":"Abschluss","School":"Hochschule","2023 to now":"2023 bis heute",
+"Group, e.g. Cloud":"Gruppe, z. B. Cloud","Full name":"Vollständiger Name","Email":"E-Mail","Phone":"Telefon","City":"Stadt","Essen, Germany":"Essen, Deutschland",
+"Languages":"Sprachen","One per line, with a level like German (A2).":"Eine pro Zeile, mit Niveau wie Deutsch (A2).","English (C1)\nGerman (A2)":"Englisch (C1)\nDeutsch (A2)",
+"Links":"Links","One per line.":"Eines pro Zeile.","Headlines":"Überschriften","One per line. The best fit is picked for each job.":"Eine pro Zeile. Für jeden Job wird die passendste genommen.",
+"Short summary":"Kurzes Profil","Two or three true sentences about you":"Zwei oder drei wahre Sätze über dich",
+"Put skills you are still learning in a group called":"Fähigkeiten, die du noch lernst, kommen in eine Gruppe namens",
+". They are never shown as experience.":" (oder Lernen). Sie werden nie als Erfahrung gezeigt.",
+"Work experience":"Berufserfahrung","Each point is copied word for word into your tailored CVs, so keep them short and true.":"Jeder Punkt wird wörtlich in deine angepassten Lebensläufe übernommen, also halte ihn kurz und wahr.",
+"No jobs yet.":"Noch keine Jobs.","No projects yet.":"Noch keine Projekte.","No degrees yet.":"Noch keine Abschlüsse.",
+"+ Add skill group":"+ Gruppe hinzufügen","+ Add job":"+ Job hinzufügen","+ Add project":"+ Projekt hinzufügen","+ Add degree":"+ Abschluss hinzufügen","Remove":"Entfernen",
+"job":"Job","jobs":"Jobs","skills":"Fähigkeiten","projects":"Projekte","degree":"Abschluss","degrees":"Abschlüsse","German":"Deutsch",
+"Add your name":"Trag deinen Namen ein","Add at least one job or internship":"Trag mindestens einen Job oder ein Praktikum ein","Add your skills":"Trag deine Fähigkeiten ein",
+"Add German with a level, like German (A2), so ads asking for more are handled right":"Trag Deutsch mit Niveau ein, etwa Deutsch (A2), damit Anzeigen mit höheren Anforderungen richtig behandelt werden",
+"Add a headline":"Trag eine Überschrift ein","To get better matches: ":"Für bessere Treffer: ","✓ Your CV looks complete.":"✓ Dein Lebenslauf sieht vollständig aus.",
+"Use a PDF, DOCX or TXT file.":"Nimm eine PDF, DOCX oder TXT Datei.","That file is over 10 MB.":"Die Datei ist größer als 10 MB.","Could not read the file":"Die Datei konnte nicht gelesen werden",
+"Reading {f}… with an AI on this computer this can take a few minutes.":"{f} wird gelesen… mit einer KI auf diesem Computer kann das ein paar Minuten dauern.",
+"Your contact details and skills are filled in, but the headings of this CV did not show where your jobs and degrees are. Add them below (your CV text is there to copy from), or turn on an AI in Settings and read it again. Then press Save my CV.":"Kontaktdaten und Fähigkeiten sind ausgefüllt, aber an den Überschriften dieses Lebenslaufs war nicht zu erkennen, wo deine Jobs und Abschlüsse stehen. Trag sie unten ein (dein Lebenslauftext steht zum Kopieren bereit) oder schalte in den Einstellungen eine KI ein und lies ihn erneut. Klicke dann auf Lebenslauf speichern.",
+"Read. Check every field below, fix anything wrong, then press Save my CV.":"Gelesen. Prüfe jedes Feld unten, korrigiere Fehler und klicke dann auf Lebenslauf speichern.",
+"Saved. The next search uses your CV.":"Gespeichert. Die nächste Suche nutzt deinen Lebenslauf.",
+// Settings
+"What to search, where, and who writes your documents.":"Was gesucht wird, wo, und wer deine Unterlagen schreibt.","Settings sections":"Bereiche der Einstellungen",
+"Job search":"Jobsuche","Job sources":"Jobquellen","AI model":"KI Modell","Documents":"Unterlagen","Automatic search":"Automatische Suche","Desktop icon":"Desktopsymbol",
+"The language of Stellenpilot itself. Your CVs and cover letters have their own setting under Documents.":"Die Sprache von Stellenpilot selbst. Für Lebensläufe und Anschreiben gibt es unter Unterlagen eine eigene Einstellung.",
+"Show Stellenpilot in":"Stellenpilot anzeigen auf","Automatic (browser)":"Automatisch (wie der Browser)",
+"What you are looking for and where.":"Was du suchst und wo.","Job titles":"Jobtitel","One per line, written the way companies write them.":"Einer pro Zeile, so geschrieben, wie Firmen sie schreiben.",
+"Distance from the city (km)":"Entfernung zur Stadt (km)","Country code":"Ländercode","Also remote jobs anywhere in the country":"Auch Remote Jobs im ganzen Land",
+"Only ads from the last ... days":"Nur Anzeigen der letzten ... Tage","Skip titles with these words":"Titel mit diesen Wörtern überspringen",
+"Where jobs come from. The first two work without any key. Saved keys are never shown again; leave a key box empty to keep it.":"Woher die Jobs kommen. Die ersten zwei gehen ohne Schlüssel. Gespeicherte Schlüssel werden nie wieder angezeigt; lass ein Feld leer, um den Schlüssel zu behalten.",
+"The biggest German job board. Free, no key.":"Die größte deutsche Jobbörse. Kostenlos, ohne Schlüssel.","Many English speaking jobs in Germany. Free, no key.":"Viele englischsprachige Jobs in Deutschland. Kostenlos, ohne Schlüssel.",
+"Collects ads from many sites. Free key, about 3 minutes to get.":"Sammelt Anzeigen von vielen Seiten. Kostenloser Schlüssel, in etwa 3 Minuten erstellt.",
+"How to get your free Adzuna keys":"So bekommst du deine kostenlosen Adzuna Schlüssel","Open":"Öffne",
+"and register. It is free; for the website field your GitHub or LinkedIn profile is fine.":"und registriere dich. Das ist kostenlos; als Website reicht dein GitHub oder LinkedIn Profil.",
+"Confirm the email Adzuna sends you, then log in.":"Bestätige die E-Mail von Adzuna und melde dich dann an.","Your developer dashboard shows two values:":"Dein Developer Dashboard zeigt zwei Werte:",
+"(short, 8 characters) and":"(kurz, 8 Zeichen) und","(long, 32 characters).":"(lang, 32 Zeichen).","Paste them into the two boxes below and press":"Füge sie unten in die beiden Felder ein und klicke auf",
+"Save changes":"Änderungen speichern","The free plan allows 250 searches a day; Stellenpilot uses at most 20 per search. Never share these keys.":"Der kostenlose Tarif erlaubt 250 Suchen am Tag; Stellenpilot braucht höchstens 20 pro Suche. Gib diese Schlüssel nie weiter.",
+"Finds ads from company career sites. Free key with 200 credits a month.":"Findet Anzeigen auf Karriereseiten von Firmen. Kostenloser Schlüssel mit 200 Credits im Monat.",
+"How to get your free TheirStack key":"So bekommst du deinen kostenlosen TheirStack Schlüssel","and sign up for free. Google sign in works.":"und registriere dich kostenlos. Anmelden mit Google geht auch.",
+"Open your account settings and find the":"Öffne deine Kontoeinstellungen und suche den Bereich","API key":"API Schlüssel","section.":".",
+"Copy the key (a long text), paste it below and press":"Kopiere den Schlüssel (ein langer Text), füge ihn unten ein und klicke auf",
+"One credit per job found. Stellenpilot asks for 6 jobs a search, so the free credits last a month of daily searches.":"Ein Credit pro gefundenem Job. Stellenpilot fragt 6 Jobs pro Suche ab, die kostenlosen Credits reichen also für einen Monat täglicher Suchen.",
+"Remote jobs only. Free, no key.":"Nur Remote Jobs. Kostenlos, ohne Schlüssel.","Remote jobs only, a small feed. Free, no key.":"Nur Remote Jobs, ein kleiner Feed. Kostenlos, ohne Schlüssel.",
+"Company watchlist":"Firmenliste","Checks the career pages of about 200 companies with offices in Germany, often before the job boards. Adds a minute or two to each search.":"Prüft die Karriereseiten von etwa 200 Firmen mit Büros in Deutschland, oft bevor die Stelle auf Jobbörsen steht. Jede Suche dauert dadurch ein bis zwei Minuten länger.",
+"Application ID, e.g. 1a2b3c4d":"Application ID, z. B. 1a2b3c4d","Application Key, 32 characters":"Application Key, 32 Zeichen","Paste your TheirStack API key":"Füge deinen TheirStack API Schlüssel ein",
+"Key saved":"Schlüssel gespeichert","saved, type to replace":"gespeichert, zum Ersetzen neu eingeben","Remove this saved key from this computer?":"Diesen gespeicherten Schlüssel von diesem Computer entfernen?",
+"The AI scores each job against your CV and writes your CV and cover letter. It only uses facts from your CV. Without one, scoring uses keywords and letters come from a template.":"Die KI bewertet jeden Job anhand deines Lebenslaufs und schreibt Lebenslauf und Anschreiben. Sie nutzt nur Fakten aus deinem Lebenslauf. Ohne KI wird nach Stichwörtern bewertet und die Anschreiben kommen aus einer Vorlage.",
+"Who writes your documents":"Wer deine Unterlagen schreibt","No AI (keywords and templates)":"Keine KI (Stichwörter und Vorlagen)","Built-in AI (free, runs on this computer)":"Eingebaute KI (kostenlos, läuft auf diesem Computer)",
+"Ollama (free, on this computer)":"Ollama (kostenlos, auf diesem Computer)","LM Studio (free, on this computer)":"LM Studio (kostenlos, auf diesem Computer)","Claude (API key)":"Claude (API Schlüssel)","OpenAI (API key)":"OpenAI (API Schlüssel)",
+"Other local server":"Anderer lokaler Server","llama.cpp server":"llama.cpp Server","vLLM server":"vLLM Server","Gap:":"Lücke:","Model":"Modell","e.g. qwen3.5:4b":"z. B. qwen3.5:4b","Set up Ollama":"Ollama einrichten","Download Ollama from":"Lade Ollama von","and install it like any app.":"herunter und installiere es wie jede andere App.",
+"Open a terminal (on Windows: PowerShell) and run":"Öffne ein Terminal (unter Windows: PowerShell) und führe",". On an older computer use":" aus. Auf einem älteren Computer nimm","; with 16 GB memory or more,":"; mit 16 GB Arbeitsspeicher oder mehr schreibt","writes better.":"besser.",
+"Put the same name in":"Trag denselben Namen oben bei","above, then press":"ein und klicke dann auf","Save and test":"Speichern und testen","Set up LM Studio":"LM Studio einrichten","Install LM Studio from":"Installiere LM Studio von",
+"and download a model inside it, for example Qwen3.5 4B.":"und lade darin ein Modell herunter, zum Beispiel Qwen3.5 4B.","Open the":"Öffne den Tab","tab and start the server.":"und starte den Server.","Put the model name in":"Trag den Modellnamen oben bei",
+"Get a Claude API key":"Claude API Schlüssel besorgen","Add a little credit under":"Lade unter",". A daily search usually costs a few cents.":" ein wenig Guthaben auf. Eine tägliche Suche kostet meist ein paar Cent.",
+", create a key, paste it below and press":", erstelle einen Schlüssel, füge ihn unten ein und klicke auf",". Model":". Das Modell","is fast and cheap.":"ist schnell und günstig.","Get an OpenAI API key":"OpenAI API Schlüssel besorgen",
+", create a key, paste it below with a model name, and press":", erstelle einen Schlüssel, füge ihn mit einem Modellnamen unten ein und klicke auf","Anthropic API key":"Anthropic API Schlüssel","OpenAI API key":"OpenAI API Schlüssel",
+"Server address":"Serveradresse","Leave empty for the usual one.":"Leer lassen für die übliche.","Saving and testing…":"Wird gespeichert und getestet…",
+"Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.":"Dein Profil hat noch keine Jobs oder Projekte. Die KI kann deinen Lebenslauf erneut lesen und sie eintragen.","Read my CV again":"Lebenslauf erneut lesen",
+"Starting…":"Startet…","✓ Your CV is read and saved. Check it under My CV.":"✓ Dein Lebenslauf ist gelesen und gespeichert. Prüfe ihn unter Mein Lebenslauf.",
+"Documents and German":"Unterlagen und Deutsch","When CVs and letters are made, and in which language.":"Wann Lebensläufe und Anschreiben erstellt werden, und in welcher Sprache.","My German level":"Mein Deutschniveau","From my CV":"Aus meinem Lebenslauf",
+"Make documents for matches from":"Unterlagen erstellen ab einer Passung von","Cover letter language":"Sprache der Anschreiben","Automatic":"Automatisch","Always English":"Immer Englisch","Always German":"Immer Deutsch",
+"Match goes from 0 to 100. Automatic writes German letters only if your German is B2 or better.":"Die Passung reicht von 0 bis 100. Automatisch schreibt deutsche Anschreiben nur, wenn dein Deutsch B2 oder besser ist.",
+"Search for new jobs every day without opening Stellenpilot.":"Jeden Tag nach neuen Jobs suchen, ohne Stellenpilot zu öffnen.","Search every day":"Jeden Tag suchen","The dashboard does not need to be open.":"Das Dashboard muss dafür nicht offen sein.","At":"Um",
+"Your computer must be on. On Windows a missed search runs when you log in; on Mac and Linux it runs when you open Stellenpilot.":"Dein Computer muss an sein. Unter Windows läuft eine verpasste Suche bei der Anmeldung nach; auf Mac und Linux, wenn du Stellenpilot öffnest.",
+"Inside Docker this cannot be set up from here. See docs/docker.md.":"In Docker lässt sich das hier nicht einrichten. Siehe docs/docker.md.",
+"Switched on here, but the task is missing on your computer. Press Save changes to create it again.":"Hier eingeschaltet, aber die Aufgabe fehlt auf deinem Computer. Klicke auf Änderungen speichern, um sie neu anzulegen.",
+"✓ On: every day at {x}.":"✓ An: jeden Tag um {x}.","Off right now.":"Gerade aus.","Saved.":"Gespeichert.","Automatic search: ":"Automatische Suche: ","The next search uses these settings.":"Die nächste Suche nutzt diese Einstellungen.",
+"Start Stellenpilot with a double click, no commands. It opens in your browser; keep the small window it opens running while you use it.":"Starte Stellenpilot mit einem Doppelklick, ohne Befehle. Es öffnet sich im Browser; lass das kleine Fenster, das dabei aufgeht, offen, solange du es nutzt.",
+"Put the icon on my desktop":"Symbol auf meinen Desktop legen","Create it again":"Neu erstellen","✓ The icon is on your desktop.":"✓ Das Symbol ist auf deinem Desktop.","Done. Look for Stellenpilot on your desktop.":"Fertig. Schau auf deinem Desktop nach Stellenpilot.",
+// Email
+"Stellenpilot can read your application emails and move jobs forward by itself: a confirmation to Applied, an invitation to Interview, a rejection to Rejected. It only reads. It never sends, deletes, moves or labels mail, and nothing is marked as read.":"Stellenpilot kann deine Bewerbungs E-Mails lesen und Jobs von selbst weiterschieben: eine Bestätigung zu Beworben, eine Einladung zu Gespräch, eine Absage zu Abgelehnt. Es liest nur. Es sendet, löscht, verschiebt oder markiert nie eine E-Mail, und nichts wird als gelesen markiert.",
+"Checking…":"Wird geprüft…","Turn on 2-Step Verification":"Bestätigung in zwei Schritten einschalten","Google only offers app passwords when your account has it. Already on? Skip this step.":"Google bietet App Passwörter nur an, wenn dein Konto sie hat. Schon an? Dann überspring diesen Schritt.",
+"Open 2-Step Verification":"Bestätigung in zwei Schritten öffnen","Create an app password":"App Passwort erstellen",", type the name":", gib den Namen",
+"and press Create. Google shows 16 letters: copy them. It is a separate password just for Stellenpilot; you can delete it there at any time.":"ein und klicke auf Erstellen. Google zeigt 16 Buchstaben: kopiere sie. Das ist ein eigenes Passwort nur für Stellenpilot; du kannst es dort jederzeit löschen.",
+"Connect":"Verbinden","Email address":"E-Mail Adresse","App password":"App Passwort","16 letters from Google":"16 Buchstaben von Google","Not Gmail? GMX, web.de and others":"Kein Gmail? GMX, web.de und andere",
+"GMX, web.de, Yahoo, t-online, Posteo, mailbox.org and iCloud work too. First switch on":"GMX, web.de, Yahoo, t-online, Posteo, mailbox.org und iCloud gehen auch. Schalte zuerst",
+"in your mail settings; if your account uses 2-Step Verification, create an app password there as well. For other providers, enter the IMAP server from their help pages. Outlook and Hotmail are not supported yet.":"in deinen Mail Einstellungen ein; wenn dein Konto die Bestätigung in zwei Schritten nutzt, erstelle dort auch ein App Passwort. Bei anderen Anbietern trag den IMAP Server aus deren Hilfeseiten ein. Outlook und Hotmail werden noch nicht unterstützt.",
+"Mail server (only if needed)":"Mailserver (nur falls nötig)","e.g. imap.example.com":"z. B. imap.example.com",
+"Other way: your own Google key file (for work or university accounts without app passwords)":"Anderer Weg: deine eigene Google Schlüsseldatei (für Arbeits oder Uni Konten ohne App Passwörter)",
+"Install Gmail support":"Gmail Unterstützung installieren","A small add on from Google, installed once. Run this in the terminal where you installed Stellenpilot, then press Check again.":"Eine kleine Erweiterung von Google, einmal installiert. Führe das im Terminal aus, in dem du Stellenpilot installiert hast, und klicke dann auf Erneut prüfen.",
+"Command not found? Use this one instead:":"Befehl nicht gefunden? Nimm stattdessen diesen:","Copy command":"Befehl kopieren","Check again":"Erneut prüfen","Copied":"Kopiert","Select it and copy":"Markieren und kopieren",
+"Create your own Google key file":"Eigene Google Schlüsseldatei erstellen","Google wants every app that reads Gmail to have its own key. It takes about 10 minutes, once.":"Google will, dass jede App, die Gmail liest, einen eigenen Schlüssel hat. Das dauert einmalig etwa 10 Minuten.",
+"Show me how":"Zeig mir wie","and create a project. Any name works, for example Stellenpilot.":"und lege ein Projekt an. Jeder Name geht, zum Beispiel Stellenpilot.","Go to":"Geh zu",", search for":", suche nach","and press":"und klicke auf",
+". Choose":". Wähle",", fill in an app name and your email, and add your own Gmail address as a":", trag einen App Namen und deine E-Mail ein und füge deine eigene Gmail Adresse hinzu als",". Leave the app in":". Lass die App im Modus",
+", type":", Typ",". Press":". Klicke auf","Choose that downloaded file with the button below.":"Wähle die heruntergeladene Datei mit dem Knopf unten.","Choose the downloaded file":"Heruntergeladene Datei wählen",
+"Connect with your key file":"Mit deiner Schlüsseldatei verbinden",
+"A Google page opens in your browser. Pick your account and allow read only access. Google warns that the app is not verified, because it is your own private app: press":"Eine Google Seite öffnet sich im Browser. Wähle dein Konto und erlaube nur Lesezugriff. Google warnt, dass die App nicht geprüft ist, weil es deine eigene private App ist: klicke auf",
+", then continue. In Testing mode Google asks again about once a week.":" und dann auf Weiter. Im Testmodus fragt Google etwa einmal pro Woche erneut.",
+"Connect Gmail":"Gmail verbinden","Check email now":"E-Mails jetzt prüfen","Disconnect":"Trennen",
+"✓ Connected: {x}. Every search also checks your email, and you can check now on Applications.":"✓ Verbunden: {x}. Jede Suche prüft auch deine E-Mails, und unter Bewerbungen kannst du sofort prüfen.",
+"✓ Connected with your Google key file. Every search also checks your Gmail, and you can check now on Applications.":"✓ Mit deiner Google Schlüsseldatei verbunden. Jede Suche prüft auch dein Gmail, und unter Bewerbungen kannst du sofort prüfen.",
+"Not connected yet. Three steps, about 2 minutes, once.":"Noch nicht verbunden. Drei Schritte, etwa 2 Minuten, nur einmal.","Gmail support is installed.":"Gmail Unterstützung ist installiert.",
+"Not installed yet. Run the command above, then check again.":"Noch nicht installiert. Führe den Befehl oben aus und prüfe dann erneut.","Waiting for you in the Google page…":"Wartet auf dich auf der Google Seite…",
+"Gmail is connected.":"Gmail ist verbunden.","Checking your login…":"Deine Anmeldung wird geprüft…","Connected. The password is saved only on this computer.":"Verbunden. Das Passwort ist nur auf diesem Computer gespeichert.",
+"That file is too big to be the Google key file.":"Diese Datei ist zu groß für eine Google Schlüsseldatei.",
+// Built-in AI
+"How fast is it?":"Wie schnell ist sie?","It runs on your computer's processor, so it is slower than Claude, but free and private. You can keep working while it runs.":"Sie läuft auf dem Prozessor deines Computers, ist also langsamer als Claude, aber kostenlos und privat. Du kannst weiterarbeiten, während sie läuft.",
+"on a typical laptop: about 20 to 40 seconds to score one job, and 1 to 2 minutes for a CV with its cover letter.":"auf einem typischen Laptop: etwa 20 bis 40 Sekunden, um einen Job zu bewerten, und 1 bis 2 Minuten für einen Lebenslauf mit Anschreiben.",
+"is about twice as fast, with simpler writing.":"ist etwa doppelt so schnell, schreibt aber einfacher.",
+"To keep searches short, the AI reads the 20 most promising new jobs of each search. The others get a keyword score.":"Damit Suchen kurz bleiben, liest die KI die 20 vielversprechendsten neuen Jobs jeder Suche. Die anderen werden nach Stichwörtern bewertet.",
+"A daily search with the AI takes about 10 to 20 minutes with Standard, or 5 to 10 minutes with Light. Without the AI it takes a minute or two.":"Eine tägliche Suche mit KI dauert mit Standard etwa 10 bis 20 Minuten, mit Light 5 bis 10 Minuten. Ohne KI dauert sie ein bis zwei Minuten.",
+"Measured on our small test server with only 2 processor cores: Standard needed 67 seconds per job and 2 minutes per CV and letter; Light 32 seconds and about 1 minute. Older laptops can be that slow. Newer ones and Macs with Apple chips are faster.":"Gemessen auf unserem kleinen Testserver mit nur 2 Prozessorkernen: Standard brauchte 67 Sekunden pro Job und 2 Minuten pro Lebenslauf mit Anschreiben; Light 32 Sekunden und etwa 1 Minute. Ältere Laptops können so langsam sein. Neuere und Macs mit Apple Chips sind schneller.",
+"After the download, press":"Klicke nach dem Download auf","to measure your own computer.":", um deinen eigenen Computer zu messen.",
+"There is no ready made AI engine for this kind of computer. Choose Claude or Ollama instead.":"Für diese Art Computer gibt es keine fertige KI Engine. Wähle stattdessen Claude oder Ollama.",
+"{n} GB download.":"{n} GB Download.","Better writing. Needs about 6 GB of free memory.":"Schreibt besser. Braucht etwa 6 GB freien Arbeitsspeicher.",
+"About twice as fast, simpler writing. For older computers or 8 GB of memory.":"Etwa doppelt so schnell, schreibt einfacher. Für ältere Computer oder 8 GB Arbeitsspeicher.","✓ Downloaded":"✓ Heruntergeladen",
+"Downloading the AI engine":"Die KI Engine wird heruntergeladen","Unpacking the engine":"Die Engine wird entpackt","Downloading the AI model":"Das KI Modell wird heruntergeladen",": {a} of {b} MB":": {a} von {b} MB",
+"You can keep using Stellenpilot.":"Du kannst Stellenpilot weiter nutzen.","✓ Ready. It starts by itself when a search needs it.":"✓ Bereit. Sie startet von selbst, wenn eine Suche sie braucht.",
+"Test speed":"Tempo testen","Remove the AI files":"KI Dateien entfernen","Download ({n} GB)":"Herunterladen ({n} GB)",
+"Downloaded once from llama.cpp on GitHub and Qwen on Hugging Face, then everything runs offline.":"Einmal von llama.cpp auf GitHub und Qwen auf Hugging Face geladen, danach läuft alles offline.",
+"Starting the AI and measuring. The first start can take a minute…":"Die KI startet und misst. Der erste Start kann eine Minute dauern…",
+"On this computer: about <b>{a} seconds</b> to score a job and <b>{b} minutes</b> for a CV with cover letter. A daily search takes about <b>{c} minutes</b>.":"Auf diesem Computer: etwa <b>{a} Sekunden</b>, um einen Job zu bewerten, und <b>{b} Minuten</b> für einen Lebenslauf mit Anschreiben. Eine tägliche Suche dauert etwa <b>{c} Minuten</b>.",
+"Speed on a typical laptop: 30 to 60 seconds per CV with cover letter, and 5 to 10 minutes for a daily search with the AI. It runs in the background.":"Tempo auf einem typischen Laptop: 30 bis 60 Sekunden pro Lebenslauf mit Anschreiben und 5 bis 10 Minuten für eine tägliche Suche mit KI. Sie läuft im Hintergrund.",
+"Speed on a typical laptop: 1 to 2 minutes per CV with cover letter, and 10 to 20 minutes for a daily search with the AI. It runs in the background.":"Tempo auf einem typischen Laptop: 1 bis 2 Minuten pro Lebenslauf mit Anschreiben und 10 bis 20 Minuten für eine tägliche Suche mit KI. Sie läuft im Hintergrund.",
+"AI model size":"Größe des KI Modells","The AI files were removed":"Die KI Dateien wurden entfernt",
+// Home
+"Welcome":"Willkommen","Loading your jobs":"Deine Jobs werden geladen","Search now":"Jetzt suchen","Searching…":"Suche läuft…",
+"No search yet. Press Search now to find your first jobs.":"Noch keine Suche. Klicke auf Jetzt suchen, um deine ersten Jobs zu finden.",
+"Ready to apply":"Bereit zum Bewerben","Read your documents, then send them yourself":"Lies deine Unterlagen und schick sie dann selbst ab","Coming up":"Demnächst","Newest matches":"Neueste Treffer",
+"Also needs a look":"Braucht auch einen Blick","Agent office":"Agentenbüro","Loading":"Lädt","Search history":"Suchverlauf",
+"When":"Wann","Found":"Gefunden","Shortlisted":"In der Auswahl","Docs":"Unterlagen","Notes":"Notizen","No runs recorded yet.":"Noch keine Suchen erfasst.",
+"Searching now. This takes a few minutes, watch the office below.":"Die Suche läuft. Das dauert ein paar Minuten, schau unten ins Büro.","Today's search is done":"Die heutige Suche ist fertig",
+"Your first search finds jobs that fit your CV.":"Deine erste Suche findet Jobs, die zu deinem Lebenslauf passen.","Nothing is waiting on you right now.":"Gerade wartet nichts auf dich.",
+"{n} applications ready":"{n} Bewerbungen fertig","{n} application ready":"{n} Bewerbung fertig","{n} interviews coming up":"{n} anstehende Gespräche","{n} interview coming up":"{n} anstehendes Gespräch",
+"You have {x}.":"Du hast {x}."," and ":" und ","See all {n} ready jobs":"Alle {n} fertigen Jobs ansehen",
+"Nothing ready yet. After each search Stellenpilot writes a CV and cover letter for your best matches, and they show up here.":"Noch nichts fertig. Nach jeder Suche schreibt Stellenpilot Lebenslauf und Anschreiben für deine besten Treffer, und sie erscheinen hier.",
+"match":"Passung","Details":"Details","I applied":"Beworben","Open CV":"Lebenslauf öffnen","Open cover letter":"Anschreiben öffnen","Open job ad":"Anzeige öffnen","Open folder":"Ordner öffnen",
+"Date":"Datum","Prep pack":"Vorbereitung","No interviews yet. When Gmail finds an invite, or you set a job to Interview, it shows here.":"Noch keine Gespräche. Wenn Gmail eine Einladung findet oder du einen Job auf Gespräch setzt, erscheint er hier.",
+"No new matches waiting. The next search adds them here.":"Keine neuen Treffer. Die nächste Suche fügt sie hier hinzu.","Move to skipped":"Zu Übersprungen verschieben",
+"Rate":"Bewerte","new match":"neuen Treffer","new matches":"neue Treffer","Yes or Not for me on each job teaches the scoring what you like":"Mit Ja oder Nicht für mich lernt die Bewertung, was dir gefällt","Start rating":"Bewerten starten",
+// office
+"Job boards":"Jobbörsen","Scoring":"Bewertung","CV + letters":"Unterlagen","Break room":"Pausenraum","Starting up":"Startet gerade",
+"Searching your job sources":"Durchsucht deine Jobquellen","Scoring jobs against your CV":"Bewertet Jobs anhand deines Lebenslaufs","Writing CVs and cover letters":"Schreibt Lebensläufe und Anschreiben","Reading Gmail for replies":"Liest Gmail nach Antworten",
+"Checking your Gmail right now":"Prüft gerade dein Gmail","Waiting for the first search. Press Search now at the top.":"Wartet auf die erste Suche. Klicke oben auf Jetzt suchen.",
+'The {d} search stopped at "{s}". Was the computer switched off?':"Die Suche vom {d} stoppte bei „{s}“. War der Computer aus?",
+"Done for {d}: {m} good matches, {c} CVs and letters. Back at the next search.":"Fertig für {d}: {m} gute Treffer, {c} Lebensläufe und Anschreiben. Bis zur nächsten Suche.","today":"heute",
+"Search interrupted":"Suche unterbrochen","Working: {x}":"Arbeitet: {x}","On a break":"Macht Pause","since":"seit",
+// Jobs
+"Match":"Passung","Any":"Alle","60 or more":"60 oder mehr","70 or more":"70 oder mehr","80 or more":"80 oder mehr","Search title or company":"Titel oder Firma suchen","Add a job":"Job hinzufügen",
+"Add a job yourself":"Selbst einen Job hinzufügen","Found it on LinkedIn, a company site or through a friend":"Gefunden auf LinkedIn, einer Firmenseite oder über Freunde","Link to the ad":"Link zur Anzeige",
+"(company careers pages; for LinkedIn or StepStone paste the text below)":"(Karriereseiten von Firmen; bei LinkedIn oder StepStone füge unten den Text ein)","Or paste the ad text":"Oder füge den Anzeigentext ein",
+"Copy the whole job ad here":"Kopiere die ganze Anzeige hierher","needed when pasting text":"nötig beim Einfügen von Text","Location":"Ort","e.g. Essen or Remote":"z. B. Essen oder Remote",
+"Also make the CV and cover letter now":"Lebenslauf und Anschreiben gleich mit erstellen","Add and score":"Hinzufügen und bewerten","Filter by status":"Nach Status filtern",
+"Also show jobs that need more German than you have":"Auch Jobs zeigen, die mehr Deutsch verlangen, als du kannst","Job list":"Jobliste","Job details":"Jobdetails",
+"No jobs yet. Press Search now on Home, or add a job you found yourself.":"Noch keine Jobs. Klicke auf der Startseite auf Jetzt suchen oder füge einen Job hinzu, den du selbst gefunden hast.",
+"All":"Alle","New":"Neu","Ready":"Bereit","Applied":"Beworben","Interview":"Gespräch","Offer":"Angebot","Rejected":"Abgelehnt","Skipped":"Übersprungen",
+"No jobs for this filter.":"Keine Jobs für diesen Filter.","Strong match":"Sehr gute Passung","Good match":"Gute Passung","Possible match":"Mögliche Passung",
+"Needs German":"Deutsch nötig","German ad":"Deutsche Anzeige","English":"Englisch","Remote":"Remote","Posting closed":"Anzeige geschlossen",
+"Found in your Gmail":"In deinem Gmail gefunden","An application you sent yourself. Status updates come from Gmail.":"Eine Bewerbung, die du selbst geschickt hast. Statusänderungen kommen aus Gmail.",
+"Honest gaps":"Ehrliche Lücken","English summary of this German ad":"Englische Zusammenfassung dieser deutschen Anzeige","Your documents":"Deine Unterlagen","Make CV and cover letter":"Lebenslauf und Anschreiben erstellen",
+"Takes a few seconds, or a minute or two with a local AI.":"Dauert ein paar Sekunden, mit einer lokalen KI ein bis zwei Minuten.","Interview prep pack":"Vorbereitung aufs Gespräch",
+"Rate this match":"Diesen Treffer bewerten","Is this a good match for you?":"Passt dieser Job zu dir?","Yes":"Ja","Not for me":"Nicht für mich",
+"Contact person, salary, what they said on the phone":"Ansprechperson, Gehalt, was am Telefon gesagt wurde","Marked applied on Home":"Auf der Startseite als beworben markiert",
+"You can view this board but not change it":"Du kannst diese Übersicht ansehen, aber nicht ändern","Could not save. Try again in a moment.":"Speichern ging nicht. Versuch es gleich noch einmal.",
+"Marked as a good match":"Als guter Treffer markiert","Marked as not for you":"Als nicht passend markiert","Rating removed":"Bewertung entfernt","Moved to Applications":"Zu Bewerbungen verschoben",
+"Folder opened":"Ordner geöffnet","Opening the CV":"Lebenslauf wird geöffnet","Opening the cover letter":"Anschreiben wird geöffnet","Writing your CV and cover letter…":"Lebenslauf und Anschreiben werden geschrieben…",
+"Documents ready":"Unterlagen fertig","Notes saved":"Notizen gespeichert",
+"Add a link or paste the ad text.":"Füge einen Link oder den Anzeigentext ein.","Scoring and tailoring…":"Wird bewertet und angepasst…","Scoring…":"Wird bewertet…",
+"Already on your board: {a} at {b}.":"Schon auf deiner Liste: {a} bei {b}.","Added {a} at {b}, match {m}.":"Hinzugefügt: {a} bei {b}, Passung {m}.",
+// Applications
+"Everything you sent, and how it is going":"Alles, was du geschickt hast, und wie es läuft","Check email":"E-Mails prüfen","Connect Gmail to update statuses by itself":"Verbinde Gmail, damit sich der Status von selbst aktualisiert",
+"Your applications":"Deine Bewerbungen","Insights":"Auswertung","What works and what to learn next":"Was funktioniert und was du als Nächstes lernen solltest","Reply rate by channel":"Antwortquote nach Kanal",
+"Replies count interviews, offers and rejections out of applications sent.":"Als Antwort zählen Gespräche, Angebote und Absagen im Verhältnis zu gesendeten Bewerbungen.",
+"Skill gaps across job ads":"Lücken über alle Anzeigen","How many matched ads named each gap. Learn the top ones first.":"Wie viele passende Anzeigen jede Lücke nannten. Lerne die obersten zuerst.",
+"Weekly summary":"Wochenrückblick","The first weekly summary arrives on Sunday evening.":"Der erste Wochenrückblick kommt am Sonntagabend.",
+"Nothing sent yet. When you press I applied on a job, it shows up here, and Gmail can move it forward by itself.":"Noch nichts gesendet. Wenn du bei einem Job auf Beworben klickst, erscheint er hier, und Gmail kann ihn von selbst weiterschieben.",
+"Moved here by Gmail":"Von Gmail hierher verschoben","None":"Keine","Source":"Quelle","Role type":"Art der Stelle","Full time":"Vollzeit","Working student":"Werkstudent","On site or hybrid":"Vor Ort oder hybrid",
+"Other":"Andere","Found in Gmail":"In Gmail gefunden","Java or Scala":"Java oder Scala","Professional DE experience":"Berufserfahrung im Data Engineering",
+"Small numbers for now. This gets reliable after about 20 applications.":"Noch kleine Zahlen. Aussagekräftig wird das nach etwa 20 Bewerbungen.","No applications sent yet.":"Noch keine Bewerbungen gesendet.",
+"No gaps recorded yet.":"Noch keine Lücken erfasst.","applied":"beworben","replies":"Antworten","interviews":"Gespräche","Top gap:":"Größte Lücke:",
+"Checking Gmail…":"Gmail wird geprüft…","Reading recent application emails…":"Neue Bewerbungs E-Mails werden gelesen…","{n} status updates from Gmail":"{n} Statusänderungen aus Gmail","{n} status update from Gmail":"{n} Statusänderung aus Gmail",
+"{a} to {b}":"von {a} zu {b}","No status changes.":"Keine Statusänderungen.","Every tracked job already matches its latest email.":"Jeder verfolgte Job passt schon zur neuesten E-Mail.","Could not check Gmail.":"Gmail konnte nicht geprüft werden.",
+// setup wizard
+"Finish later":"Später fertig machen","Setup progress":"Fortschritt der Einrichtung","Step {a} of {b}":"Schritt {a} von {b}",
+"Let's start with your CV":"Fangen wir mit deinem Lebenslauf an","Stellenpilot reads it and fills in your profile. Nothing is invented, and it stays on this computer.":"Stellenpilot liest ihn und füllt dein Profil aus. Nichts wird erfunden, und alles bleibt auf diesem Computer.",
+"Drop your CV here":"Leg deinen Lebenslauf hier ab","or click to choose a file · PDF or Word":"oder klick, um eine Datei zu wählen · PDF oder Word","I don't have a file, let me type it in":"Ich habe keine Datei, ich tippe ihn selbst ein",
+"What jobs are you looking for?":"Welche Jobs suchst du?","Write them the way companies do. You can change this any time in Settings.":"Schreib sie so, wie Firmen es tun. Du kannst das jederzeit in den Einstellungen ändern.",
+"Type a title and press Enter":"Titel eingeben und Enter drücken","Add a job title":"Jobtitel hinzufügen","From your CV:":"Aus deinem Lebenslauf:",
+"Where do you live?":"Wo wohnst du?","How far would you travel?":"Wie weit würdest du fahren?","Up to {n} km from your city":"Bis zu {n} km von deiner Stadt",
+"Also show remote jobs anywhere in the country":"Auch Remote Jobs im ganzen Land zeigen","Your German level":"Dein Deutschniveau","Take it from my CV":"Aus meinem Lebenslauf übernehmen",
+"Jobs that ask for much more German than this are hidden, and letters stay in English below B2.":"Jobs, die viel mehr Deutsch verlangen, werden ausgeblendet, und unter B2 bleiben die Anschreiben auf Englisch.",
+"Also check the career pages of about 200 companies with offices in Germany (adds a minute or two to each search)":"Auch die Karriereseiten von etwa 200 Firmen mit Büros in Deutschland prüfen (jede Suche dauert dadurch ein bis zwei Minuten länger)",
+"Who should write your documents?":"Wer soll deine Unterlagen schreiben?",
+"An AI reads each job ad, scores it against your CV and writes a CV and cover letter in natural language. It only uses facts from your CV.":"Eine KI liest jede Anzeige, bewertet sie anhand deines Lebenslaufs und schreibt Lebenslauf und Anschreiben in natürlicher Sprache. Sie nutzt nur Fakten aus deinem Lebenslauf.",
+"AI choice":"KI Auswahl","Built-in AI":"Eingebaute KI","Free and private. Downloaded once, then it runs on this computer. No account, no key.":"Kostenlos und privat. Einmal heruntergeladen, dann läuft sie auf diesem Computer. Kein Konto, kein Schlüssel.",
+"Recommended":"Empfohlen","The best letters and fast. Needs an API key; a daily search costs a few cents.":"Die besten Anschreiben und schnell. Braucht einen API Schlüssel; eine tägliche Suche kostet ein paar Cent.","Paid":"Kostenpflichtig",
+"Free on this computer, if you already use the Ollama app.":"Kostenlos auf diesem Computer, wenn du die Ollama App schon nutzt.","Free":"Kostenlos",
+"Any OpenAI compatible server you already run, like llama.cpp, vLLM or LM Studio.":"Jeder OpenAI kompatible Server, den du schon betreibst, etwa llama.cpp, vLLM oder LM Studio.",
+"No AI for now":"Vorerst keine KI","Keyword matching and simple template letters. You can add AI later.":"Abgleich nach Stichwörtern und einfache Anschreiben aus Vorlagen. KI kannst du später hinzufügen.","Basic":"Einfach",
+"Open a terminal (on Windows: PowerShell) and paste":"Öffne ein Terminal (unter Windows: PowerShell), füge","then wait for the download.":"ein und warte auf den Download.","Press":"Klicke auf","Test":"Testen",
+". It should say the model is ready.":". Es sollte melden, dass das Modell bereit ist.","qwen3.5:4b, good for most laptops (recommended)":"qwen3.5:4b, gut für die meisten Laptops (empfohlen)",
+"ministral-3:3b, for older or slower computers":"ministral-3:3b, für ältere oder langsamere Computer","qwen3.5:9b, better writing, needs 16 GB memory":"qwen3.5:9b, schreibt besser, braucht 16 GB Arbeitsspeicher",
+"Start your server and load a model in it.":"Starte deinen Server und lade darin ein Modell.","Put the model name and the server address below. The address usually ends in":"Trag unten den Modellnamen und die Serveradresse ein. Die Adresse endet meist auf",
+". Five euros lasts months.":" ein wenig Guthaben auf. Fünf Euro reichen für Monate.",", create a key and paste it here. It is saved only on this computer.":", erstelle einen Schlüssel und füge ihn hier ein. Er wird nur auf diesem Computer gespeichert.",
+"More choices, like OpenAI, are in Settings.":"Weitere Möglichkeiten wie OpenAI findest du in den Einstellungen.","Saved. Type a new key to replace it":"Gespeichert. Gib einen neuen Schlüssel ein, um ihn zu ersetzen",
+"You're all set":"Alles bereit","Here is what Stellenpilot will use. Anything with a red mark can be fixed later in Settings.":"Das wird Stellenpilot verwenden. Alles mit roter Markierung kannst du später in den Einstellungen beheben.",
+"Search automatically every day":"Jeden Tag automatisch suchen","Your computer needs to be on. A missed search runs when you next log in or open Stellenpilot.":"Dein Computer muss an sein. Eine verpasste Suche läuft nach, wenn du dich das nächste Mal anmeldest oder Stellenpilot öffnest.",
+"Put a Stellenpilot icon on my desktop, so next time I just double click it":"Ein Stellenpilot Symbol auf meinen Desktop legen, damit ich nächstes Mal nur doppelklicken muss",
+"Back":"Zurück","Continue":"Weiter","Find my first jobs":"Meine ersten Jobs finden","Stellenpilot never applies for you and never contacts companies.":"Stellenpilot bewirbt sich nie für dich und kontaktiert nie Firmen.",
+"Your CV for <b>{n}</b> is saved. Drop a new file to replace it, or press Continue.":"Dein Lebenslauf für <b>{n}</b> ist gespeichert. Leg eine neue Datei ab, um ihn zu ersetzen, oder klicke auf Weiter.",
+"Use a PDF or Word file.":"Nimm eine PDF oder Word Datei.","Reading <b>{f}</b>… with an AI on this computer this can take a few minutes.":"<b>{f}</b> wird gelesen… mit einer KI auf diesem Computer kann das ein paar Minuten dauern.",
+"Saved your contact details and languages.":"Deine Kontaktdaten und Sprachen sind gespeichert.","Saved your contact details.":"Deine Kontaktdaten sind gespeichert.",
+"The headings of this CV did not show clearly where your jobs and degrees are. <b>Pick an AI in step 3 and Stellenpilot reads your CV again by itself.</b> Or fill in the rest later under My CV.":"An den Überschriften dieses Lebenslaufs war nicht klar zu erkennen, wo deine Jobs und Abschlüsse stehen. <b>Wähle in Schritt 3 eine KI, dann liest Stellenpilot deinen Lebenslauf von selbst noch einmal.</b> Oder ergänze den Rest später unter Mein Lebenslauf.",
+"Read and saved: <b>{n}</b>, {j}, {d}, {s} skills.":"Gelesen und gespeichert: <b>{n}</b>, {j}, {d}, {s} Fähigkeiten.","1 job":"1 Job","{n} jobs":"{n} Jobs","1 degree":"1 Abschluss","{n} degrees":"{n} Abschlüsse",
+"You can check every detail later under My CV.":"Jedes Detail kannst du später unter Mein Lebenslauf prüfen.","Use “let me type it in” below instead.":"Nutze stattdessen unten „ich tippe ihn selbst ein“.",
+"Fill in the model and the server address.":"Trag das Modell und die Serveradresse ein.","Testing…":"Wird getestet…","Checking your setup":"Deine Einrichtung wird geprüft","Reading your CV…":"Lebenslauf wird gelesen…",
+"Reading your CV again with the AI so the whole profile is filled in. This can take a few minutes.":"Die KI liest deinen Lebenslauf noch einmal, damit das ganze Profil ausgefüllt wird. Das kann ein paar Minuten dauern.",
+"The AI could not read your jobs and degrees either. Add them under My CV after setup.":"Auch die KI konnte deine Jobs und Abschlüsse nicht lesen. Trag sie nach der Einrichtung unter Mein Lebenslauf ein.",
+"Your full CV is now read and saved. Check it later under My CV.":"Dein ganzer Lebenslauf ist jetzt gelesen und gespeichert. Prüfe ihn später unter Mein Lebenslauf.","Could not read your CV again: ":"Der Lebenslauf konnte nicht erneut gelesen werden: ",
+"Drop your CV first, or choose “let me type it in”.":"Leg zuerst deinen Lebenslauf ab oder wähle „ich tippe ihn selbst ein“.","Add at least one job title.":"Trag mindestens einen Jobtitel ein.","Add the city you live in.":"Trag die Stadt ein, in der du wohnst.",
+"The AI is still downloading. Wait until it is finished, or choose No AI for now and switch later in Settings.":"Die KI wird noch heruntergeladen. Warte, bis sie fertig ist, oder wähle Vorerst keine KI und wechsle später in den Einstellungen.",
+"Press Download first, or choose No AI for now and switch later in Settings.":"Klicke zuerst auf Herunterladen oder wähle Vorerst keine KI und wechsle später in den Einstellungen.",
+"The free AI is not ready yet. Follow the steps above and press Test, or choose No AI for now.":"Die kostenlose KI ist noch nicht bereit. Folge den Schritten oben und klicke auf Testen, oder wähle Vorerst keine KI.",
+"Stellenpilot cannot reach that server yet. Check the model and address and press Test, or choose No AI for now.":"Stellenpilot erreicht diesen Server noch nicht. Prüfe Modell und Adresse und klicke auf Testen, oder wähle Vorerst keine KI.",
+"Paste your Claude API key, or choose another option.":"Füge deinen Claude API Schlüssel ein oder wähle eine andere Option.","Automatic search is not on: ":"Die automatische Suche ist nicht an: ",
+"Icon added to your desktop. Next time, just double click it.":"Symbol auf deinem Desktop angelegt. Nächstes Mal einfach doppelklicken.",
+// running a search and slow AI work
+"The search stopped: ":"Die Suche wurde abgebrochen: ","Done: {a} new jobs, {b} good matches, {c} documents.":"Fertig: {a} neue Jobs, {b} gute Treffer, {c} Unterlagen.","{n} problems: ":"{n} Probleme: ","{n} problem: ":"{n} Problem: ",
+"Step {a} of {b}: ":"Schritt {a} von {b}: ","The AI reads first; writing starts in a moment.":"Die KI liest zuerst; das Schreiben beginnt gleich.","Progress":"Fortschritt",
+"Written {a} of about {b} characters":"{a} von etwa {b} Zeichen geschrieben","found so far:":"bisher gefunden:","about {n} min left":"noch etwa {n} Min.","so far":"bisher",
+"Most CVs are sorted in a second. When the AI is needed, it takes 1 to 3 minutes on a laptop; keep this page open.":"Die meisten Lebensläufe sind in einer Sekunde sortiert. Wenn die KI gebraucht wird, dauert es auf einem Laptop 1 bis 3 Minuten; lass diese Seite offen.",
+"Cannot reach Stellenpilot. Start it again with: stellenpilot serve":"Stellenpilot ist nicht erreichbar. Starte es neu mit: stellenpilot serve",
+// footer
+"Sign in at":"Melde dich an bei","Job data from":"Jobdaten von","and":"und",", depending on which sources you enable.":", je nachdem, welche Quellen du einschaltest.",
+// text the engine sends (setup checks, progress)
+"Your CV is not saved yet":"Dein Lebenslauf ist noch nicht gespeichert","No job source is switched on":"Keine Jobquelle ist eingeschaltet",
+"PDF export: LibreOffice found":"PDF Export: LibreOffice gefunden","No LibreOffice, so you get Word files only (optional)":"Kein LibreOffice, daher nur Word Dateien (optional)",
+"Your profile has no skills, jobs or projects yet, so every job gets about the same score. Fill it in under My CV, or turn on an AI and let it read your CV again.":"Dein Profil hat noch keine Fähigkeiten, Jobs oder Projekte, daher bekommt jeder Job etwa dieselbe Bewertung. Füll es unter Mein Lebenslauf aus oder schalte eine KI ein und lass sie deinen Lebenslauf erneut lesen.",
+"Your profile lists skills but no jobs or projects, so the AI has little to compare and your tailored CVs will be thin. Add them under My CV, or turn on an AI and let it read your CV again.":"Dein Profil nennt Fähigkeiten, aber keine Jobs oder Projekte, daher hat die KI wenig zum Vergleichen und deine angepassten Lebensläufe werden dünn. Trag sie unter Mein Lebenslauf ein oder schalte eine KI ein und lass sie deinen Lebenslauf erneut lesen.",
+"none: keyword scoring and template letters":"keine: Bewertung nach Stichwörtern und Anschreiben aus Vorlagen",
+"the built-in AI is not downloaded yet. Open Settings, AI model, and press Download.":"die eingebaute KI ist noch nicht heruntergeladen. Öffne Einstellungen, KI Modell, und klicke auf Herunterladen.",
+"Reading your CV and writing your profile":"Dein Lebenslauf wird gelesen und dein Profil geschrieben","Sorting your CV by its headings":"Dein Lebenslauf wird nach Überschriften sortiert",
+"Finding where your jobs, projects and degrees start (AI)":"Die KI sucht, wo deine Jobs, Projekte und Abschlüsse beginnen","Checking every line against your CV":"Jede Zeile wird mit deinem Lebenslauf abgeglichen",
+"The answer was not complete. Asking the AI once more":"Die Antwort war unvollständig. Die KI wird noch einmal gefragt",
+"Choosing the experience, projects and skills that fit this job":"Erfahrung, Projekte und Fähigkeiten für diesen Job werden ausgewählt","Writing the cover letter":"Das Anschreiben wird geschrieben",
+"Making the Word files":"Die Word Dateien werden erstellt","Making the PDF files":"Die PDF Dateien werden erstellt","Starting the daily search":"Die tägliche Suche startet",
+"Checking if open postings are still online":"Prüfe, ob offene Anzeigen noch online sind"
+};
+const n1=(n,one,many)=>(+n===1?one:many).replace("{n}",n);
+/* Patterns for text that carries numbers or names. Tried in order after the exact table. */
+const DE_RX=[
+ [/^Step (\d+) of (\d+)$/,"Schritt $1 von $2"],
+ [/^Last search (.+)$/,"Letzte Suche am $1"],
+ [/^(\d+) jobs checked$/,"$1 Jobs geprüft"],[/^(\d+) good matches$/,"$1 gute Treffer"],[/^(\d+) CVs and letters made$/,"$1 Lebensläufe und Anschreiben erstellt"],
+ [/^(\d+) updates? from Gmail$/,(m,n)=>n1(n,"1 Aktualisierung aus Gmail","{n} Aktualisierungen aus Gmail")],
+ [/^German: (.+)$/,(m,x)=>"Deutsch: "+(x==="needed"?"nötig":x==="not needed"?"nicht nötig":x)],
+ [/^Interview with (.+)$/,"Gespräch mit $1"],[/^Interview (\d.*)$/,"Gespräch $1"],
+ [/^Status set (from Gmail|by you|by the daily search)(.*)$/s,(m,w,rest)=>({"from Gmail":"Status von Gmail gesetzt","by you":"Status von dir gesetzt","by the daily search":"Status von der täglichen Suche gesetzt"})[w]+rest.replace(/\.\. /,". ")],
+ [/^Good (morning|afternoon|evening)(, .+)?$/,(m,w,name)=>({morning:"Guten Morgen",afternoon:"Guten Tag",evening:"Guten Abend"})[w]+(name||"")],
+ [/^See all (\d+)$/,"Alle $1 ansehen"],[/^closed the posting for (.+)$/,"hat die Anzeige für $1 geschlossen"],[/^Noticed (.+)$/,"Bemerkt am $1"],[/^(\d+) to do$/,"$1 zu erledigen"],
+ [/^(\d+) sent\. Drag a card to move it, or use its menu\.$/,"$1 gesendet. Zieh eine Karte, um sie zu verschieben, oder nutze ihr Menü."],
+ [/^Move to (.+)$/,"Verschieben nach $1"],[/^Moved to (.+)$/,(m,x)=>"Verschoben nach "+t(x)],[/^Status saved: (.+)$/,"Status gespeichert: $1"],
+ [/^(\d+) of (\d+)(?:, (\d+) interviews?)?$/,(m,a,b,i)=>`${a} von ${b}`+(i?", "+n1(i,"1 Gespräch","{n} Gespräche"):"")],
+ [/^(\d+) ads?$/,(m,n)=>n1(n,"1 Anzeige","{n} Anzeigen")],[/^Week of (.+)$/,"Woche vom $1"],
+ [/^Project (\d+)$/,"Projekt $1"],[/^Degree (\d+)$/,"Abschluss $1"],
+ // from the engine
+ [/^CV saved for (.+)$/,"Lebenslauf gespeichert für $1"],[/^Looking for (.+) near (.+)$/,"Suche nach $1 in der Nähe von $2"],
+ [/^AI model: (.+)$/s,(m,x)=>"KI Modell: "+ts(x)],[/^(.+) is on but its key is missing$/,"$1 ist an, aber der Schlüssel fehlt"],
+ [/^(\d+) job sources? on$/,(m,n)=>n1(n,"1 Jobquelle an","{n} Jobquellen an")],
+ [/^built-in AI \((.+)\), downloaded and ready$/,"eingebaute KI ($1), heruntergeladen und bereit"],
+ [/^nothing answers at (\S+)\. Start the Ollama app \(or run: ollama serve\), then test again\.(.*)$/,"Unter $1 antwortet nichts. Starte die Ollama App (oder führe ollama serve aus) und teste dann erneut.$2"],
+ [/^nothing answers at (\S+)\. Start the model server, then test again\.(.*)$/,"Unter $1 antwortet nichts. Starte den Modellserver und teste dann erneut.$2"],
+ [/^(\S+) at (\S+), model (.+) ready$/,"$1 unter $2, Modell $3 bereit"],
+ [/^(\S+) is running, but model '(.+)' is not installed\. Available: (.*?)\.(?: Run: (.+))?$/,(m,p,mod,av,run)=>`${p} läuft, aber das Modell '${mod}' ist nicht installiert. Verfügbar: ${av==="none"?"keins":av}.`+(run?` Führe aus: ${run}`:"")],
+ [/^Searching (.+)$/,"Durchsucht $1"],[/^Scoring (\d+) new jobs against your CV$/,"$1 neue Jobs werden mit deinem Lebenslauf verglichen"],
+ [/^Scoring (\d+) new jobs; the AI reads the (\d+) most promising$/,"$1 neue Jobs werden bewertet; die KI liest die $2 vielversprechendsten"],
+ [/^Scoring new jobs with the AI on this computer \((\d+) of (\d+)\)$/,"Neue Jobs werden mit der KI auf diesem Computer bewertet ($1 von $2)"],
+ [/^Tailoring CV (\d+) of (\d+): (.+)$/,"Lebenslauf $1 von $2 wird angepasst: $3"],[/^Preparing your (.+) interview$/,"Dein Gespräch bei $1 wird vorbereitet"]];
+/* Only in attributes (aria-label, title), where a job title can follow. */
+const DE_RXA=[[/^Status for (.+)$/,"Status für $1"],[/^Move (.+)$/,"$1 verschieben"],[/^Remove (.+)$/,"$1 entfernen"],[/^Agent office: (.+)$/s,(m,x)=>"Agentenbüro: "+ts(x)]];
+/* t(): a string built in code, with {name} placeholders. */
+function t(s,v){let o=s==null?"":String(s);if(LANG==="de"&&Object.hasOwn(DE,o))o=DE[o];
+  return v?o.replace(/\{(\w+)\}/g,(m,k)=>Object.hasOwn(v,k)?String(v[k]):m):o}
+/* ts(): text that may come from the engine or carry numbers: the table first, then the patterns. */
+function ts(s,attr){if(LANG!=="de"||!s)return s==null?"":String(s);const k=String(s);if(Object.hasOwn(DE,k))return DE[k];
+  for(const [rx,to] of attr?[...DE_RXA,...DE_RX]:DE_RX)if(rx.test(k))return k.replace(rx,to);return k}
+const I18N_SKIP=new Set(["SCRIPT","STYLE","TEXTAREA","PRE","CODE","svg"]);
+const I18N_ATTRS=["placeholder","aria-label","title"];
+function trText(n){const raw=n.data,k=raw.trim();if(!k||!/[A-Za-z]/.test(k))return;const nk=k.replace(/\s+/g," "),v=ts(nk);if(v!==nk)n.data=raw.replace(k,()=>v)}
+function trAttrs(el){for(const a of I18N_ATTRS){const v=el.getAttribute(a);if(v){const x=ts(v,true);if(x!==v)el.setAttribute(a,x)}}}
+function translateTree(root){
+  if(LANG!=="de"||!root)return;
+  if(root.nodeType===3){const p=root.parentElement;if(p&&!I18N_SKIP.has(p.nodeName)&&!p.closest('[translate="no"]'))trText(root);return}
+  if(root.nodeType!==1||root.closest('[translate="no"]'))return;
+  trAttrs(root);if(I18N_SKIP.has(root.nodeName))return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT,{acceptNode:n=>n.nodeType===1
+    ?(n.getAttribute("translate")==="no"||n.nodeName==="svg"?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT)
+    :(I18N_SKIP.has(n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT)});
+  let n;while((n=w.nextNode()))n.nodeType===1?trAttrs(n):trText(n);
+}
+if(LANG==="de"){
+  translateTree(document.body);
+  new MutationObserver(ms=>{for(const m of ms){
+    if(m.type==="childList")m.addedNodes.forEach(translateTree);
+    else if(m.type==="characterData")translateTree(m.target);
+    else if(m.target.nodeType===1&&!m.target.closest('[translate="no"]'))trAttrs(m.target)}})
+  .observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:I18N_ATTRS});
+}
+</script>
+<script>
+const STAGES=[["new","New"],["ready","Ready"],["applied","Applied"],["interview","Interview"],["offer","Offer"],["rejected","Rejected"],["skipped","Skipped"]].map(([k,l])=>[k,t(l)]);
 const LABEL=Object.fromEntries(STAGES);
 let jobs=[], runs=[], runLog=[], filter=null, db=null, canWrite=true, firstName="";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"#";
 function toast(t,ms=2200){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,ms)}
-function fmtDate(s){if(!s)return"";const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}
+function fmtDate(s){if(!s)return"";const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleDateString(LOC,{day:"numeric",month:"short"})}
 
 const ARROW=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>`;
 const MAIL=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>`;
@@ -953,7 +1285,7 @@ const tone=m=>m>=75?"--sb:var(--ok-bg);--sf:var(--ok-fg)":m>=60?"--sb:var(--mid-
 const verdict=m=>m>=75?"Strong match":m>=60?"Good match":"Possible match";
 const pill=st=>`<span class="pill" style="background:var(--pill-${esc(st||"new")}-bg);color:var(--pill-${esc(st||"new")}-fg)">${esc(LABEL[st]||"New")}</span>`;
 const isRemote=j=>/remote/i.test(j.location||"")||/^remote/i.test(j.why||"");
-const langText=j=>j.source==="Found in Gmail"?"":j.lang==="German needed"?"Needs German":j.lang==="German ad"?"German ad":"English";
+const langText=j=>j.source==="Found in Gmail"?"":t(j.lang==="German needed"?"Needs German":j.lang==="German ad"?"German ad":"English");
 const metaLine=j=>[j.company,j.location,j.jobType,langText(j)].filter(Boolean).map(esc).join(" · ");
 const seen=j=>$("showDe").checked||j.lang!=="German needed";
 let sel=null;
@@ -1000,13 +1332,13 @@ function renderDetail(){
     ${j.prep?`<details class="xtra" ${openPrep.has(j._id)?"open":""} data-prep="${esc(j._id)}"><summary>Interview prep pack</summary><div class="prepbody">${fmtPrep(j.prep)}</div></details>`:""}
     <div class="dfoot"><label>Status <select class="status input" data-id="${esc(j._id)}" aria-label="Status for ${esc(j.title)}" ${dis}>${STAGES.map(([k,l])=>`<option value="${k}" ${j.status===k?"selected":""}>${l}</option>`).join("")}</select></label>
       <a href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">Open job ad ${ICO.ext}</a>
-      <span class="small" style="flex-basis:100%">${j.statusSource==="gmail"?"Status set from Gmail":j.statusSource==="manual"?"Status set by you":"Status set by the daily search"}${j.statusUpdatedAt?", "+fmtDate(j.statusUpdatedAt):""}${j.statusNote?". "+esc(j.statusNote):""}</span></div>
+      <span class="small" style="flex-basis:100%">${j.statusSource==="gmail"?"Status set from Gmail":j.statusSource==="manual"?"Status set by you":"Status set by the daily search"}${j.statusUpdatedAt?", "+fmtDate(j.statusUpdatedAt):""}${j.statusNote?". "+esc(t(j.statusNote)):""}</span></div>
     ${m>0?`<div class="rateq" role="group" aria-label="Rate this match">Is this a good match for you?
       <button class="mini" data-rate="1" data-id="${esc(j._id)}" aria-pressed="${j.rating===1}" ${dis}>${ICO.up}Yes</button>
       <button class="mini" data-rate="-1" data-id="${esc(j._id)}" aria-pressed="${j.rating===-1}" ${dis}>${ICO.down}Not for me</button></div>`:""}
     <label class="notes">Notes<textarea class="input" data-notes-id="${esc(j._id)}" placeholder="Contact person, salary, what they said on the phone" ${dis}>${esc(j.notes||"")}</textarea></label>`;
 }
-function fmtWhen(s){const d=new Date(s);return isNaN(d)||!/T/.test(s||"")?esc(s):d.toLocaleString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+function fmtWhen(s){const d=new Date(s);return isNaN(d)||!/T/.test(s||"")?esc(s):d.toLocaleString(LOC,{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}
 function renderRuns(){
   $("runsCount").textContent=runLog.length?`(${runLog.length})`:"";
   if(!runLog.length)return;
@@ -1031,7 +1363,7 @@ const ICO={
  copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`};
 const openNotes=new Set(), openPrep=new Set();
 let weekly=[], pendingRender=false;
-function fmtWhen(s){const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
+function fmtWhen(s){const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleString(LOC,{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
 function fmtPrep(t){let o="",inList=false;for(const raw of String(t).split("\n")){const l=raw.trim();
   if(/^[-*] /.test(l)){if(!inList){o+="<ul>";inList=true}o+=`<li>${esc(l.slice(2))}</li>`;continue}
   if(inList){o+="</ul>";inList=false}
@@ -1046,23 +1378,23 @@ function goJob(id,openSel){const j=jobs.find(x=>x._id===id);if(!j)return;
     if(innerWidth<=1100)$("detail").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})})}
 function readyCard(j){const m=Number(j.match)||0,id=esc(j._id);
   return `<article class="box rcard" style="${tone(m)}"><div class="ring"><b>${m}</b><span>match</span></div>
-    <div class="rmain"><h3>${esc(j.title)}</h3><p class="meta">${metaLine(j)}</p>${j.why?`<p class="why">${esc(j.why)}${j.gaps?" Gap: "+esc(j.gaps):""}</p>`:""}</div>
+    <div class="rmain"><h3>${esc(j.title)}</h3><p class="meta">${metaLine(j)}</p>${j.why?`<p class="why">${esc(j.why)}${j.gaps?" "+t("Gap:")+" "+esc(j.gaps):""}</p>`:""}</div>
     <div class="racts">${j.folder?`<button class="btn sec" data-doc="cv" data-id="${id}">Open CV</button><button class="btn sec" data-doc="letter" data-id="${id}">Open cover letter</button>`:""}
     <a class="btn sec" href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">Open job ad</a><button class="btn sec" data-go="${id}">Details</button>
     <button class="btn" data-applied="${id}" ${canWrite?"":"disabled"}>I applied</button></div></article>`}
-const MON=d=>d.toLocaleDateString("en-GB",{month:"short"}),DAYN=d=>d.getDate();
+const MON=d=>d.toLocaleDateString(LOC,{month:"short"}),DAYN=d=>d.getDate();
 function renderHome(){
   const live=j=>!j.closed, ready=jobs.filter(j=>j.status==="ready"&&live(j)).sort((a,b)=>(b.match||0)-(a.match||0));
   const ints=jobs.filter(j=>j.status==="interview").sort((a,b)=>String(a.interviewAt||"9").localeCompare(String(b.interviewAt||"9")));
   const h=new Date().getHours(), hi=h<12?"Good morning":h<18?"Good afternoon":"Good evening";
   $("hello").textContent=firstName?`${hi}, ${firstName}`:hi;
-  const parts=[ready.length&&`${ready.length} application${ready.length>1?"s":""} ready`,ints.length&&`${ints.length} interview${ints.length>1?"s":""} coming up`].filter(Boolean);
-  $("helloSub").textContent=!jobs.length?"Your first search finds jobs that fit your CV.":parts.length?`You have ${parts.join(" and ")}.`:"Nothing is waiting on you right now.";
-  $("ready").innerHTML=ready.length?ready.slice(0,5).map(readyCard).join("")+(ready.length>5?`<p><a href="#jobs" data-tab="ready">See all ${ready.length} ready jobs</a></p>`:"")
+  const parts=[ready.length&&t(ready.length>1?"{n} applications ready":"{n} application ready",{n:ready.length}),ints.length&&t(ints.length>1?"{n} interviews coming up":"{n} interview coming up",{n:ints.length})].filter(Boolean);
+  $("helloSub").textContent=!jobs.length?"Your first search finds jobs that fit your CV.":parts.length?t("You have {x}.",{x:parts.join(t(" and "))}):"Nothing is waiting on you right now.";
+  $("ready").innerHTML=ready.length?ready.slice(0,5).map(readyCard).join("")+(ready.length>5?`<p><a href="#jobs" data-tab="ready">${t("See all {n} ready jobs",{n:ready.length})}</a></p>`:"")
     :`<div class="empty">Nothing ready yet. After each search Stellenpilot writes a CV and cover letter for your best matches, and they show up here.</div>`;
   $("soon").innerHTML=ints.length?ints.map(j=>{const d=j.interviewAt?new Date(j.interviewAt):null,okd=d&&!isNaN(d);
     return `<div class="box soon">${okd?`<div class="cal"><small>${MON(d)}</small><b>${DAYN(d)}</b></div>`:`<div class="cal"><small>Date</small><b>?</b></div>`}
-      <div class="tx"><b>Interview with ${esc(j.company)}</b><span>${okd?esc(d.toLocaleString("en-GB",{weekday:"long",hour:"2-digit",minute:"2-digit"}))+" · ":""}${esc(j.title)}</span></div>
+      <div class="tx"><b>Interview with ${esc(j.company)}</b><span>${okd?esc(d.toLocaleString(LOC,{weekday:"long",hour:"2-digit",minute:"2-digit"}))+" · ":""}${esc(j.title)}</span></div>
       <button class="linkbtn" data-go="${esc(j._id)}" ${j.prep?'data-open="prep"':""}>${j.prep?"Prep pack":"Details"}</button></div>`}).join("")
     :`<div class="empty">No interviews yet. When Gmail finds an invite, or you set a job to Interview, it shows here.</div>`;
   const fresh=jobs.filter(j=>j.status==="new"&&Number(j.match)>0&&live(j)&&seen(j)).sort((a,b)=>String(b.foundAt||"").localeCompare(String(a.foundAt||""))||(b.match||0)-(a.match||0));
@@ -1154,7 +1486,7 @@ main.addEventListener("click",async e=>{
   if(b.dataset.doc){try{await api("POST","/api/open-doc/"+encodeURIComponent(b.dataset.id)+"/"+b.dataset.doc);toast("Opening the "+(b.dataset.doc==="cv"?"CV":"cover letter"))}catch(e){toast(e.message)}return}
   if(b.dataset.make){const t=b.textContent,id=b.dataset.make;b.disabled=true;b.textContent="Writing your CV and cover letter…";
     try{await withProgress("docs:"+id,()=>api("POST","/api/docs/"+encodeURIComponent(id)),
-        p=>{b.textContent=`${p.steps?`Step ${p.step} of ${p.steps}: `:""}${p.stage}${p.percent!=null?` (${p.percent}%)`:""}… ${mmss(p.elapsed||0)}`});toast("Documents ready");lastState="";await refresh()}catch(e){toast(e.message);b.disabled=false;b.textContent=t}return}
+        p=>{b.textContent=`${p.steps?t("Step {a} of {b}: ",{a:p.step,b:p.steps}):""}${ts(p.stage)}${p.percent!=null?` (${p.percent}%)`:""}… ${mmss(p.elapsed||0)}`});toast("Documents ready");lastState="";await refresh()}catch(e){toast(e.message);b.disabled=false;b.textContent=t}return}
 });
 main.addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches("details[data-prep]"))return;d.open?openPrep.add(d.dataset.prep):openPrep.delete(d.dataset.prep)},true);
 main.addEventListener("focusout",async e=>{const t=e.target;if(!t.matches("textarea[data-notes-id]"))return;
@@ -1204,20 +1536,20 @@ function officeState(){
   if(!r)return{st:"break",note:"Waiting for the first search. Press Search now at the top."};
   if(r.stage&&r.stage!=="done"&&OFF_NOTE[r.stage]){
     const age=Date.now()-Date.parse(r.stageAt||r.date);
-    if(age>3*3600e3)return{st:"break",warn:true,note:`The ${r.date} search stopped at "${OFF.find(s=>s[0]===r.stage)[1]}". Was the computer switched off?`};
-    return{st:r.stage,note:r.stageNote||OFF_NOTE[r.stage],since:r.stageAt};
+    if(age>3*3600e3)return{st:"break",warn:true,note:t('The {d} search stopped at "{s}". Was the computer switched off?',{d:r.date,s:t(OFF.find(s=>s[0]===r.stage)[1])})};
+    return{st:r.stage,note:ts(r.stageNote)||t(OFF_NOTE[r.stage]),since:r.stageAt};
   }
-  return{st:"break",note:`Done for ${r.date===new Date().toLocaleDateString("en-CA")?"today":r.date}: ${r.shortlisted??0} good matches, ${r.docsMade??0} CVs and letters. Back at the next search.`};
+  return{st:"break",note:t("Done for {d}: {m} good matches, {c} CVs and letters. Back at the next search.",{d:r.date===new Date().toLocaleDateString("en-CA")?t("today"):r.date,m:r.shortlisted??0,c:r.docsMade??0})};
 }
 function renderOffice(){
   if(!$("chr"))buildOffice();
   const s=officeState(),idx=OFF.findIndex(o=>o[0]===s.st),[,name,x,y]=OFF[idx],working=s.st!=="break";
   OFF.forEach(([k],i)=>{$("stn-"+k).classList.toggle("on",i===idx&&working);const t=$("tag-"+k);t.classList.toggle("on",i===idx);t.classList.toggle("rest",i===idx&&!working);t.classList.toggle("done",working&&!localGmail&&i<idx&&k!=="break")});
   const pill=$("off-state");pill.className="offpill"+(s.warn?" warn":working?" work":"");
-  pill.textContent=s.warn?"Search interrupted":working?`Working: ${name}`:"On a break";
-  $("off-note").textContent=working&&s.since?`${OFF_NOTE[s.st]||name}, since ${new Date(s.since).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`:"";
-  const bub=$("bub"),chr=$("chr");bub.firstElementChild.textContent=s.note;bub.classList.toggle("warn",!!s.warn);
-  $("office").setAttribute("aria-label","Agent office: "+s.note);
+  pill.textContent=s.warn?t("Search interrupted"):working?t("Working: {x}",{x:t(name)}):t("On a break");
+  $("off-note").textContent=working&&s.since?`${t(OFF_NOTE[s.st]||name)}, ${t("since")} ${new Date(s.since).toLocaleTimeString(LOC,{hour:"2-digit",minute:"2-digit"})}`:"";
+  const bub=$("bub"),chr=$("chr");bub.firstElementChild.textContent=t(s.note);bub.classList.toggle("warn",!!s.warn);
+  $("office").setAttribute("aria-label",t("Agent office")+": "+t(s.note));
   const dist=Math.hypot(x-offX,y-offY),walkMs=reduce?0:Math.min(2400,dist*5);
   clearTimeout(offTimer);chr.style.setProperty("--walk",walkMs+"ms");chr.style.left=x+"px";chr.style.top=y+"px";
   const settle=()=>{chr.classList.remove("walk");chr.classList.toggle("work",working&&!reduce);chr.classList.toggle("rest",!working)};
@@ -1236,7 +1568,7 @@ async function checkGmail(){
   box.hidden=false;box.innerHTML=`<span class="muted">Reading recent application emails…</span>`;
   try{
     const r=await api("POST","/api/gmail");
-    box.innerHTML=r.changes.length?`<strong>${r.changes.length} status update${r.changes.length>1?"s":""} from Gmail</strong><ul>${r.changes.map(c=>`<li>${esc(c.company)}: ${esc(LABEL[c.from])} to ${esc(LABEL[c.to])}</li>`).join("")}</ul>`:`<strong>No status changes.</strong> <span class="muted">Every tracked job already matches its latest email.</span>`;
+    box.innerHTML=r.changes.length?`<strong>${t(r.changes.length>1?"{n} status updates from Gmail":"{n} status update from Gmail",{n:r.changes.length})}</strong><ul>${r.changes.map(c=>`<li>${esc(c.company)}: ${esc(t("{a} to {b}",{a:LABEL[c.from],b:LABEL[c.to]}))}</li>`).join("")}</ul>`:`<strong>No status changes.</strong> <span class="muted">Every tracked job already matches its latest email.</span>`;
     refresh();
   }catch(e){box.innerHTML=`<strong>Could not check Gmail.</strong> <span class="muted">${esc(e.message)}</span>`}
   finally{btn.disabled=false;btn.querySelector("span").textContent="Check email";localGmail=false;renderOffice()}
@@ -1252,7 +1584,7 @@ $("addForm").addEventListener("submit",async e=>{
   try{
     const r=await api("POST","/api/add",body);
     const j=r.job;
-    msg.textContent=r.status==="exists"?`Already on your board: ${j.title} at ${j.company}.`:`Added ${j.title} at ${j.company}, match ${j.match}.`;
+    msg.textContent=r.status==="exists"?t("Already on your board: {a} at {b}.",{a:j.title,b:j.company}):t("Added {a} at {b}, match {m}.",{a:j.title,b:j.company,m:j.match});
     if(r.status!=="exists")f.reset();
     await refresh();if(j&&j._id)goJob(j._id);
   }catch(err){msg.textContent=err.message}
@@ -1315,12 +1647,12 @@ $("cvForm").addEventListener("click",e=>{
 function cvStat(){
   const c=cv,n=(c.experience||[]).length,ed=(c.education||[]).length,sk=Object.values(c.skills||{}).flat().length,langs=c.person.languages||[];
   const de=langs.find(l=>/german|deutsch/i.test(l)),tips=[];
-  if(!c.person.name)tips.push("Add your name");if(!n)tips.push("Add at least one job or internship");if(!sk)tips.push("Add your skills");
-  if(!de)tips.push("Add German with a level, like German (A2), so ads asking for more are handled right");if(!(c.person.headlines||[]).length)tips.push("Add a headline");
+  if(!c.person.name)tips.push(t("Add your name"));if(!n)tips.push(t("Add at least one job or internship"));if(!sk)tips.push(t("Add your skills"));
+  if(!de)tips.push(t("Add German with a level, like German (A2), so ads asking for more are handled right"));if(!(c.person.headlines||[]).length)tips.push(t("Add a headline"));
   $("cvStat").innerHTML=`<div class="nums"><div><b>${n}</b><span>job${n===1?"":"s"}</span></div><div><b>${sk}</b><span>skills</span></div><div><b>${(c.projects||[]).length}</b><span>projects</span></div><div><b>${ed}</b><span>degree${ed===1?"":"s"}</span></div><div><b>${esc(de?(de.match(/\b[ABC][12]\b/)||["?"])[0]:"?")}</b><span>German</span></div></div>
-    <p class="${tips.length?"":"ok"}">${tips.length?"To get better matches: "+tips.map(esc).join(". ")+".":"✓ Your CV looks complete."}</p>`;
+    <p class="${tips.length?"":"ok"}">${tips.length?t("To get better matches: ")+tips.map(esc).join(". ")+".":t("✓ Your CV looks complete.")}</p>`;
 }
-function cvDirty(on){$("cvBar").classList.toggle("dirty",on);if(on)$("cvSaveMsg").textContent="You have unsaved changes.";else if(/unsaved/.test($("cvSaveMsg").textContent))$("cvSaveMsg").textContent="No changes yet."}
+function cvDirty(on){$("cvBar").classList.toggle("dirty",on);if(on)$("cvSaveMsg").textContent=t("You have unsaved changes.");else if($("cvSaveMsg").textContent===t("You have unsaved changes."))$("cvSaveMsg").textContent=t("No changes yet.")}
 $("cvForm").addEventListener("input",()=>cvDirty(true));
 $("cvNav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
   document.querySelectorAll("#cvNav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
@@ -1334,7 +1666,7 @@ async function importCv(file){
   if(!file)return;
   if(!/\.(pdf|docx|txt|md)$/i.test(file.name)){msg.textContent="Use a PDF, DOCX or TXT file.";return}
   if(file.size>10e6){msg.textContent="That file is over 10 MB.";return}
-  msg.className="state";msg.textContent=`Reading ${file.name}… with an AI on this computer this can take a few minutes.`;$("drop").style.pointerEvents="none";
+  msg.className="state";msg.textContent=t("Reading {f}… with an AI on this computer this can take a few minutes.",{f:file.name});$("drop").style.pointerEvents="none";
   try{
     const data=await new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=()=>bad(new Error("Could not read the file"));fr.readAsDataURL(file)});
     const r=await withProgress("cv",()=>api("POST","/api/cv/import",{name:file.name,data}),p=>{msg.innerHTML=progressHtml(p,{slow:SLOW_CV})});
@@ -1361,11 +1693,11 @@ $("cvSave").addEventListener("click",async()=>{
 let cvPrompted=false;
 
 /* ---------- Settings ---------- */
-const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"]};
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"],ui:["language"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,.keyhelp,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 $("setForm").addEventListener("click",async e=>{const b=e.target.closest("[data-clear-key]");if(!b)return;e.preventDefault();
-  if(!confirm("Remove this saved key from this computer?"))return;
+  if(!confirm(t("Remove this saved key from this computer?")))return;
   try{await api("POST","/api/settings",{clear_keys:[b.dataset.clearKey]});await loadSettings()}catch(err){$("setMsg").textContent=err.message}});
 function showProvider(){const f=$("setForm"),pv=f.provider.value;f.querySelectorAll("[data-for]").forEach(el=>el.hidden=!el.dataset.for.split(" ").includes(pv));f.model.closest("label").hidden=pv==="none"||pv==="builtin";
   if(pv==="builtin"){if(!["standard","light"].includes(f.model.value))f.model.value="standard";biLoad()}}
@@ -1378,7 +1710,7 @@ async function loadSettings(){
     f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";if(el.dataset.ph===undefined)el.dataset.ph=el.placeholder;el.placeholder=r.keys[el.name]?"saved, type to replace":el.dataset.ph});
     showProvider();showKeys();
     const ss=$("schedState");
-    ss.textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"Switched on here, but the task is missing on your computer. Press Save changes to create it again.":r.scheduleActive?`✓ On: every day at ${r.schedule.time}.`:"Off right now.";
+    ss.textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"Switched on here, but the task is missing on your computer. Press Save changes to create it again.":r.scheduleActive?t("✓ On: every day at {x}.",{x:r.schedule.time}):"Off right now.";
     ss.className="state"+(r.scheduleActive?" ok":r.schedule.enabled?" bad":"");
     f.elements.enabled.disabled=r.inDocker;renderGmail(r.gmail);renderIcon(r.shortcut);setDirty(false);
   }catch(e){$("setMsg").textContent=e.message}
@@ -1389,7 +1721,7 @@ async function saveSettings(){
   const f=$("setForm"),body={keys:{}};
   for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
   f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
-  const r=await api("POST","/api/settings",body);await loadSettings();$("rereadBox").hidden=!r.rereadOffer;lastState="";refresh();return r;
+  const r=await api("POST","/api/settings",body);if(body.ui.language!==UI_CHOICE){location.reload();return r}await loadSettings();$("rereadBox").hidden=!r.rereadOffer;lastState="";refresh();return r;
 }
 /* An AI turned on after a CV import without AI: offer to read the saved CV again. */
 $("rereadBtn").addEventListener("click",async()=>{const b=$("rereadBtn"),m=$("rereadMsg");b.disabled=true;
@@ -1403,22 +1735,22 @@ $("setForm").addEventListener("submit",async e=>{
   for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
   f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
   b.disabled=true;m.textContent="";
-  try{const r=await api("POST","/api/settings",body);await loadSettings();m.textContent="Saved. "+(r.scheduleNote?"Automatic search: "+r.scheduleNote:"The next search uses these settings.");$("rereadBox").hidden=!r.rereadOffer;lastState="";refresh()}
+  try{const r=await api("POST","/api/settings",body);if(body.ui.language!==UI_CHOICE){location.reload();return}await loadSettings();m.textContent=t("Saved.")+" "+(r.scheduleNote?t("Automatic search: ")+r.scheduleNote:t("The next search uses these settings."));$("rereadBox").hidden=!r.rereadOffer;lastState="";refresh()}
   catch(err){m.textContent=err.message}finally{b.disabled=false}
 });
 
 
 let sched={enabled:false,time:"08:45"};
 const schedText=()=>sched.enabled?`Automatic search daily at <b>${esc(sched.time)}</b>.`:"Automatic search is off (Settings).";
-const renderSched=()=>{$("lastrun").innerHTML=sched.enabled?`<div class="live on"><i></i>Automatic search on</div><div>Every day at ${esc(sched.time)}</div>`:`<div class="live"><i></i>Automatic search off</div><div><a href="#settings">Turn it on in Settings</a></div>`};
+const renderSched=()=>{$("lastrun").innerHTML=sched.enabled?`<div class="live on"><i></i>${t("Automatic search on")}</div><div>${t("Every day at {x}",{x:esc(sched.time)})}</div>`:`<div class="live"><i></i>Automatic search off</div><div><a href="#settings">Turn it on in Settings</a></div>`};
 /* ---------- Settings extras ---------- */
-function setDirty(on){$("saveBar").classList.toggle("dirty",on);if(on)$("setMsg").textContent="You have unsaved changes.";else if(/unsaved/.test($("setMsg").textContent))$("setMsg").textContent="No changes yet."}
+function setDirty(on){$("saveBar").classList.toggle("dirty",on);if(on)$("setMsg").textContent=t("You have unsaved changes.");else if($("setMsg").textContent===t("You have unsaved changes."))$("setMsg").textContent=t("No changes yet.")}
 $("setForm").addEventListener("input",()=>setDirty(true));$("setForm").addEventListener("change",()=>setDirty(true));
 /* The Settings side menu. My CV has its own (#cvNav); querySelector(".setnav") used to find that one first. */
 $("setNav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
   document.querySelectorAll("#setNav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
 $("aiTest").addEventListener("click",async()=>{const m=$("aiTestMsg"),b=$("aiTest");b.disabled=true;m.className="state";m.textContent="Saving and testing…";
-  try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.className="state "+(c.ok?"ok":"bad");m.textContent=(c.ok?"✓ ":"")+c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,"")}
+  try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.className="state "+(c.ok?"ok":"bad");m.textContent=(c.ok?"✓ ":"")+ts(c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,""))}
   catch(e){m.className="state bad";m.textContent=e.message}finally{b.disabled=false}});
 function renderGmail(g){if(!g)return;
   const imapOn=g.method==="imap"&&g.enabled&&g.connected;
@@ -1430,7 +1762,7 @@ function renderGmail(g){if(!g)return;
   if(!$("gmAddr").value&&g.address)$("gmAddr").value=g.address;
   if(!$("gmHost").value&&g.imapHost)$("gmHost").value=g.imapHost;
   const st=$("gmState");st.className="state"+(on?" ok":"");
-  st.textContent=imapOn?`✓ Connected: ${g.address}. Every search also checks your email, and you can check now on Applications.`
+  st.textContent=imapOn?t("✓ Connected: {x}. Every search also checks your email, and you can check now on Applications.",{x:g.address})
     :!cur?"✓ Connected with your Google key file. Every search also checks your Gmail, and you can check now on Applications."
     :"Not connected yet. Three steps, about 2 minutes, once.";
 }
@@ -1468,15 +1800,15 @@ function biHtml(){
   if(!bi)return `<p class="small">Checking…</p>`;
   if(!bi.supported)return `<p class="state bad">There is no ready made AI engine for this kind of computer. Choose Claude or Ollama instead.</p>`;
   const d=bi.download,ready=bi.engine&&bi.models[biKey].ready,pct=d.total?Math.round(d.done/d.total*100):0;
-  const models=Object.entries(bi.models).map(([k,m])=>`<button type="button" class="mopt" role="radio" data-bikey="${k}" aria-checked="${k===biKey}"><b>${esc(m.label)}</b><span>${m.gb} GB download. ${esc(m.note)}</span>${m.ready?"<em>✓ Downloaded</em>":""}</button>`).join("");
+  const models=Object.entries(bi.models).map(([k,m])=>`<button type="button" class="mopt" role="radio" data-bikey="${k}" aria-checked="${k===biKey}"><b>${esc(t(m.label))}</b><span>${t("{n} GB download.",{n:m.gb})} ${esc(t(m.note))}</span>${m.ready?"<em>✓ Downloaded</em>":""}</button>`).join("");
   let action;
-  if(d.active)action=`<div class="bar"><i style="width:${pct}%"></i></div><p class="small">${d.step==="engine"?"Downloading the AI engine":d.step==="unpack"?"Unpacking the engine":"Downloading the AI model"}${d.total?`: ${Math.round(d.done/1e6)} of ${Math.round(d.total/1e6)} MB`:"…"}. You can keep using Stellenpilot.</p>`;
+  if(d.active)action=`<div class="bar"><i style="width:${pct}%"></i></div><p class="small">${t(d.step==="engine"?"Downloading the AI engine":d.step==="unpack"?"Unpacking the engine":"Downloading the AI model")}${d.total?t(": {a} of {b} MB",{a:Math.round(d.done/1e6),b:Math.round(d.total/1e6)}):"…"}. ${t("You can keep using Stellenpilot.")}</p>`;
   else if(ready)action=`<p class="state ok">✓ Ready. It starts by itself when a search needs it.</p><div class="btnrow"><button type="button" class="btn sec" data-bitest>Test speed</button><button type="button" class="linkbtn" data-biremove>Remove the AI files</button></div>`;
-  else action=`<div class="btnrow"><button type="button" class="btn" data-bidl>Download (${bi.models[biKey].gb} GB)</button></div><p class="small">Downloaded once from llama.cpp on GitHub and Qwen on Hugging Face, then everything runs offline.</p>`;
+  else action=`<div class="btnrow"><button type="button" class="btn" data-bidl>${t("Download ({n} GB)",{n:bi.models[biKey].gb})}</button></div><p class="small">Downloaded once from llama.cpp on GitHub and Qwen on Hugging Face, then everything runs offline.</p>`;
   const err=d.error?`<p class="state bad">${esc(d.error)}</p>`:"";
   const meas=biSpeed?(biSpeed.error?`<p class="state bad">${esc(biSpeed.error)}</p>`:biSpeed.busy?`<p class="small">Starting the AI and measuring. The first start can take a minute…</p>`
-    :`<p class="meas">On this computer: about <b>${biSpeed.seconds_per_job} seconds</b> to score a job and <b>${biSpeed.minutes_per_document} minutes</b> for a CV with cover letter. A daily search takes about <b>${biSpeed.minutes_daily} minutes</b>.</p>`):"";
-  const quick=`<p class="small">Speed on a typical laptop: ${biKey==="light"?"30 to 60 seconds per CV with cover letter, and 5 to 10 minutes":"1 to 2 minutes per CV with cover letter, and 10 to 20 minutes"} for a daily search with the AI. It runs in the background.</p>`;
+    :`<p class="meas">${t("On this computer: about <b>{a} seconds</b> to score a job and <b>{b} minutes</b> for a CV with cover letter. A daily search takes about <b>{c} minutes</b>.",{a:biSpeed.seconds_per_job,b:biSpeed.minutes_per_document,c:biSpeed.minutes_daily})}</p>`):"";
+  const quick=`<p class="small">${t(biKey==="light"?"Speed on a typical laptop: 30 to 60 seconds per CV with cover letter, and 5 to 10 minutes for a daily search with the AI. It runs in the background.":"Speed on a typical laptop: 1 to 2 minutes per CV with cover letter, and 10 to 20 minutes for a daily search with the AI. It runs in the background.")}</p>`;
   return `<div class="models" role="radiogroup" aria-label="AI model size">${models}</div>${quick}${action}${err}${meas}${SPEED_TEXT()}`;
 }
 function biRender(){["biSetup","biSettings"].forEach(id=>{const el=$(id);if(el&&!el.hidden)el.innerHTML=biHtml()})}
@@ -1498,9 +1830,9 @@ function wMsg(t){W("wMsg").textContent=t||""}
 function wShow(i){
   wz.step=i;wMsg("");
   document.querySelectorAll("[data-w]").forEach(el=>el.hidden=+el.dataset.w!==i);
-  W("wCount").textContent=`Step ${i+1} of 4`;W("wBar").style.width=((i+1)*25)+"%";W("wBarBox").setAttribute("aria-valuenow",i+1);
+  W("wCount").textContent=t("Step {a} of {b}",{a:i+1,b:4});wLangRender();W("wBar").style.width=((i+1)*25)+"%";W("wBarBox").setAttribute("aria-valuenow",i+1);
   W("wBack").style.visibility=i?"visible":"hidden";
-  W("wNext").textContent=i===3?"Find my first jobs":"Continue";W("wNext").disabled=false;
+  W("wNext").textContent=t(i===3?"Find my first jobs":"Continue");W("wNext").disabled=false;
   if(i===3)wChecks();
   W("setup").scrollTo(0,0);const h=document.querySelector(`[data-w="${i}"] h1`);if(h){h.tabIndex=-1;h.focus({preventScroll:true})}
 }
@@ -1509,12 +1841,12 @@ function wChipsRender(){
   const ideas=(wz.ideas||[]).filter(x=>!wz.titles.some(t=>t.toLowerCase()===x.toLowerCase())).slice(0,5);
   W("wIdeas").innerHTML=ideas.length?`From your CV:`+ideas.map(x=>`<button type="button" data-idea="${esc(x)}">+ ${esc(x)}</button>`).join(""):"";
 }
-function wKm(){W("wKmOut").textContent=`Up to ${W("wKm").value} km from your city`}
+function wKm(){W("wKmOut").textContent=t("Up to {n} km from your city",{n:W("wKm").value})}
 function wAiRender(){
   document.querySelectorAll(".wopt").forEach(b=>b.setAttribute("aria-checked",String(b.dataset.ai===wz.ai)));
   document.querySelectorAll("[data-how]").forEach(el=>el.hidden=el.dataset.how!==wz.ai);
   W("wPull").textContent="ollama pull "+W("wModel").value;
-  W("wKey").placeholder=wz.keySaved?"Saved. Type a new key to replace it":"sk-ant-...";
+  W("wKey").placeholder=wz.keySaved?t("Saved. Type a new key to replace it"):"sk-ant-...";
   if(wz.ai==="builtin")biLoad();
 }
 async function openSetup(){
@@ -1534,7 +1866,7 @@ async function openSetup(){
     const p=c.profile||{},name=p.person&&p.person.name;
     wz.hasCv=!c.isExample&&!!name;
     wz.ideas=((p.person&&p.person.headlines)||[]).map(h=>String(h).split("|")[0].trim()).filter(Boolean);
-    if(wz.hasCv)wCvNote("ok",`Your CV for <b>${esc(name)}</b> is saved. Drop a new file to replace it, or press Continue.`);
+    if(wz.hasCv)wCvNote("ok",t("Your CV for <b>{n}</b> is saved. Drop a new file to replace it, or press Continue.",{n:esc(name)}));
     wChipsRender();wKm();wAiRender();
   }catch(e){wMsg(e.message)}
 }
@@ -1553,15 +1885,15 @@ async function wImport(file){
   if(!/\.(pdf|docx|txt|md)$/i.test(file.name)){wCvNote("bad","Use a PDF or Word file.");return}
   if(file.size>10e6){wCvNote("bad","That file is over 10 MB.");return}
   const d=W("wDrop");d.classList.add("busy");W("wNext").disabled=true;wMsg("");
-  wCvNote("",`Reading <b>${esc(file.name)}</b>… with an AI on this computer this can take a few minutes.`);
+  wCvNote("",t("Reading <b>{f}</b>… with an AI on this computer this can take a few minutes.",{f:esc(file.name)}));
   try{
     const r=await importAndSave(file,p=>wCvNote("",progressHtml(p,{slow:SLOW_CV}))),p=r.profile;wz.file=file;wz.hasCv=true;
     const n=k=>(p[k]||[]).length, sk=Object.values(p.skills||{}).flat().length;
     wz.thin=!n("experience")&&!n("education");
     wz.ideas=((p.person&&p.person.headlines)||[]).map(h=>String(h).split("|")[0].trim()).filter(Boolean);wChipsRender();
-    if(wz.thin)wCvNote("",`Saved your contact details${(p.person.languages||[]).length?" and languages":""}. The headings of this CV did not show clearly where your jobs and degrees are. <b>Pick an AI in step 3 and Stellenpilot reads your CV again by itself.</b> Or fill in the rest later under My CV.`);
-    else wCvNote("ok",`Read and saved: <b>${esc(p.person.name||"")}</b>, ${n("experience")} job${n("experience")===1?"":"s"}, ${n("education")} degree${n("education")===1?"":"s"}, ${sk} skills.${r.notes.length?`<ul>${r.notes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""} You can check every detail later under My CV.`);
-  }catch(e){wCvNote("bad",esc(e.message)+(/name/i.test(e.message)?" Use “let me type it in” below instead.":""))}
+    if(wz.thin)wCvNote("",t((p.person.languages||[]).length?"Saved your contact details and languages.":"Saved your contact details.")+" "+t("The headings of this CV did not show clearly where your jobs and degrees are. <b>Pick an AI in step 3 and Stellenpilot reads your CV again by itself.</b> Or fill in the rest later under My CV."));
+    else wCvNote("ok",`${t("Read and saved: <b>{n}</b>, {j}, {d}, {s} skills.",{n:esc(p.person.name||""),j:t(n("experience")===1?"1 job":"{n} jobs",{n:n("experience")}),d:t(n("education")===1?"1 degree":"{n} degrees",{n:n("education")}),s:sk})}${r.notes.length?`<ul>${r.notes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""} ${t("You can check every detail later under My CV.")}`);
+  }catch(e){wCvNote("bad",esc(e.message)+(/name/i.test(e.message)?" "+t("Use “let me type it in” below instead."):""))}
   finally{d.classList.remove("busy");W("wNext").disabled=false;W("wFile").value=""}
 }
 async function wTest(provider="ollama"){
@@ -1572,20 +1904,20 @@ async function wTest(provider="ollama"){
   m.textContent="Testing…";m.style.color="";
   try{await api("POST","/api/settings",{llm});wz.prevAi=provider;
     const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");wz.aiOk=c.ok;
-    m.textContent=(c.ok?"✓ ":"")+c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,"");m.style.color=c.ok?"var(--ok-fg)":"var(--pill-rejected-fg)";return c.ok}
+    m.textContent=(c.ok?"✓ ":"")+ts(c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,""));m.style.color=c.ok?"var(--ok-fg)":"var(--pill-rejected-fg)";return c.ok}
   catch(e){m.textContent=e.message;m.style.color="var(--pill-rejected-fg)";return false}
 }
 async function wChecks(){
   const ul=W("wChecks");ul.innerHTML=`<li class="opt"><span class="ic">…</span><span>Checking your setup</span></li>`;
   let reread="";
-  if(wz.thin&&wz.file&&wz.ai!=="none"&&!wz.rereading){wz.rereading=true;W("wNext").disabled=true;W("wNext").textContent="Reading your CV…";
+  if(wz.thin&&wz.file&&wz.ai!=="none"&&!wz.rereading){wz.rereading=true;W("wNext").disabled=true;W("wNext").textContent=t("Reading your CV…");
     reread=`<li class="busy" id="wReread"><span class="ic">…</span><span>Reading your CV again with the AI so the whole profile is filled in. This can take a few minutes.</span></li>`;
     importAndSave(wz.file,p=>{const li=W("wReread");if(li)li.lastElementChild.innerHTML=progressHtml(p,{slow:SLOW_CV})}).then(r=>{wz.thin=!(r.profile.experience||[]).length&&!(r.profile.education||[]).length;
         const li=W("wReread");if(li){li.className=wz.thin?"bad":"";li.innerHTML=`<span class="ic">${wz.thin?"!":"✓"}</span><span>${wz.thin?"The AI could not read your jobs and degrees either. Add them under My CV after setup.":"Your full CV is now read and saved. Check it later under My CV."}</span>`}})
-      .catch(e=>{const li=W("wReread");if(li){li.className="bad";li.innerHTML=`<span class="ic">!</span><span>Could not read your CV again: ${esc(e.message)}</span>`}})
-      .finally(()=>{wz.rereading=false;if(wz.step===3){W("wNext").disabled=false;W("wNext").textContent="Find my first jobs"}})}
+      .catch(e=>{const li=W("wReread");if(li){li.className="bad";li.innerHTML=`<span class="ic">!</span><span>${t("Could not read your CV again: ")}${esc(e.message)}</span>`}})
+      .finally(()=>{wz.rereading=false;if(wz.step===3){W("wNext").disabled=false;W("wNext").textContent=t("Find my first jobs")}})}
   try{const r=await api("GET","/api/check");
-    ul.innerHTML=reread+r.checks.filter(c=>!(reread&&c.step==="cv")).map(c=>`<li class="${c.optional?"opt":c.ok?"":"bad"}"><span class="ic">${c.optional?"i":c.ok?"✓":"!"}</span><span>${esc(c.text)}</span></li>`).join("")}
+    ul.innerHTML=reread+r.checks.filter(c=>!(reread&&c.step==="cv")).map(c=>`<li class="${c.optional?"opt":c.ok?"":"bad"}"><span class="ic">${c.optional?"i":c.ok?"✓":"!"}</span><span>${esc(ts(c.text))}</span></li>`).join("")}
   catch(e){ul.innerHTML=reread+`<li class="bad"><span class="ic">!</span><span>${esc(e.message)}</span></li>`}
 }
 async function wNext(){
@@ -1615,11 +1947,15 @@ async function wNext(){
     if(wz.step===3){
       b.disabled=true;
       try{const r=await api("POST","/api/settings",{schedule:{enabled:W("wAuto").checked,time:W("wTime").value||"08:45"}});if(r.scheduleNote)toast(r.scheduleNote,6000)}
-      catch(e){toast("Automatic search is not on: "+e.message,9000)}
+      catch(e){toast(t("Automatic search is not on: ")+e.message,9000)}
       if(!W("wIconRow").hidden&&W("wIcon").checked){try{await api("POST","/api/shortcut");toast("Icon added to your desktop. Next time, just double click it.",6000)}catch(e){toast(e.message,8000)}}
       closeSetup();location.hash="#home";lastState="";await refresh();$("runBtn").click()}
   }catch(e){wMsg(e.message);b.disabled=false}
 }
+function wLangRender(){document.querySelectorAll("#wLang [data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===LANG)))}
+/* Picking a language saves it and reloads the page in that language, back at the same setup step. */
+W("wLang").addEventListener("click",async e=>{const b=e.target.closest("[data-lang]");if(!b||b.dataset.lang===LANG)return;
+  try{await api("POST","/api/settings",{ui:{language:b.dataset.lang}});try{sessionStorage.setItem("sp-setup",String(wz.step))}catch{}location.reload()}catch(err){wMsg(err.message)}});
 W("wNext").addEventListener("click",wNext);
 W("wBack").addEventListener("click",()=>wShow(Math.max(0,wz.step-1)));
 W("wLater").addEventListener("click",closeSetup);
@@ -1647,11 +1983,11 @@ document.addEventListener("click",e=>{if(e.target.closest("[data-setup]"))openSe
 let wasRunning=false;
 function showRun(r){
   const btn=$("runBtn"),msg=$("runMsg");if(!r)return;
-  btn.disabled=r.running;btn.querySelector("span").textContent=r.running?"Searching…":"Search now";renderStrip(r);
+  btn.disabled=r.running;btn.querySelector("span").textContent=t(r.running?"Searching…":"Search now");renderStrip(r);
   msg.classList.toggle("bad",!!r.error);
   if(r.running)msg.textContent="";
-  else if(r.error)msg.textContent=`The search stopped: ${r.error}`;
-  else if(r.result)msg.textContent=`Done: ${r.result.new} new jobs, ${r.result.shortlisted} good matches, ${r.result.docs} documents.`+(r.result.problems.length?` ${r.result.problems.length} problem${r.result.problems.length>1?"s":""}: ${r.result.problems.slice(0,2).join("; ")}`:"");
+  else if(r.error)msg.textContent=t("The search stopped: ")+r.error;
+  else if(r.result)msg.textContent=t("Done: {a} new jobs, {b} good matches, {c} documents.",{a:r.result.new,b:r.result.shortlisted,c:r.result.docs})+(r.result.problems.length?" "+t(r.result.problems.length>1?"{n} problems: ":"{n} problem: ",{n:r.result.problems.length})+r.result.problems.slice(0,2).join("; "):"");
   wasRunning=r.running;
 }
 $("runBtn").addEventListener("click",async()=>{
@@ -1664,14 +2000,14 @@ $("runBtn").addEventListener("click",async()=>{
 const mmss=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 function progressHtml(p,{slow=""}={}){
   if(!p||!p.stage)return "";
-  const step=p.steps?`Step ${p.step} of ${p.steps}: `:"";
+  const step=p.steps?t("Step {a} of {b}: ",{a:p.step,b:p.steps}):"";
   let mid="";
-  if(p.expect&&!p.chars)mid=`<span class="sub">The AI reads first; writing starts in a moment.</span>`;
+  if(p.expect&&!p.chars)mid=`<span class="sub">${t("The AI reads first; writing starts in a moment.")}</span>`;
   else if(p.chars){
     const pct=p.percent??0;
-    mid=`<progress max="100" value="${pct}" aria-label="Progress"></progress><span class="sub">Written ${p.chars.toLocaleString()} of about ${p.expect.toLocaleString()} characters (${pct}%)${p.found&&p.found.length?` · found so far: ${esc(p.found.join(", "))}`:""}</span>`}
-  const left=p.eta!=null&&p.chars>200?` · about ${Math.max(1,Math.round(p.eta/60))} min left`:"";
-  return `<span class="aiprog"><b>${esc(step+p.stage)}…</b>${mid}<span class="sub">${mmss(p.elapsed||0)} so far${left}.${slow?" "+slow:""}</span></span>`;
+    mid=`<progress max="100" value="${pct}" aria-label="${t("Progress")}"></progress><span class="sub">${t("Written {a} of about {b} characters",{a:p.chars.toLocaleString(LOC),b:p.expect.toLocaleString(LOC)})} (${pct}%)${p.found&&p.found.length?` · ${t("found so far:")} ${esc(p.found.join(", "))}`:""}</span>`}
+  const left=p.eta!=null&&p.chars>200?" · "+t("about {n} min left",{n:Math.max(1,Math.round(p.eta/60))}):"";
+  return `<span class="aiprog"><b>${esc(step+ts(p.stage))}…</b>${mid}<span class="sub">${mmss(p.elapsed||0)} ${t("so far")}${left}.${slow?" "+t(slow):""}</span></span>`;
 }
 /* Poll /api/progress while `work` runs; render(snapshot) updates the page. Returns work's result. */
 async function withProgress(task,work,render){
@@ -1703,6 +2039,8 @@ async function refresh(){
   }catch(e){if(!jobs.length){$("strip").innerHTML=`<span class="ok bad">Cannot reach Stellenpilot. Start it again with: stellenpilot serve</span>`}}
 }
 route();refresh();setInterval(refresh,5000);
+(()=>{let k=null;try{k=sessionStorage.getItem("sp-setup");sessionStorage.removeItem("sp-setup")}catch{}
+  if(k!==null){cvPrompted=true;openSetup().then(()=>{if(+k>0&&+k<3)wShow(+k)})}})();
 render();renderOffice();
 </script>
 </body>

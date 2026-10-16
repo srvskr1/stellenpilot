@@ -21,8 +21,8 @@ RE_CACHE = {v: re.compile(rf"(?<![\w/]){re.escape(v)}(?![\w/])", 0 if v in CASE_
 
 
 def is_learning_group(name: str) -> bool:
-    """Skill groups named like 'Learning' hold skills you are learning, not experience."""
-    return "learn" in name.lower()
+    """Skill groups named like 'Learning' (or the German 'Lernen') hold skills you are learning, not experience."""
+    return "learn" in name.lower() or "lern" in name.lower()
 
 
 def learning_items(profile: dict) -> list[str]:

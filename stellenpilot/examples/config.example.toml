@@ -122,3 +122,7 @@ only_when_new = false
 # Optional. See docs/gmail.md. Reads mail only, never sends.
 enabled = false
 lookback_days = 3
+
+[ui]
+# Language of the dashboard: "auto" follows your browser, "en" is English, "de" is German.
+language = "auto"

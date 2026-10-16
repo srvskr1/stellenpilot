@@ -55,10 +55,11 @@ Every day, by itself:
 * **Writes the cover letter** in natural language for that company and role, plus a short report: what the ad asks for, what you cover, and which gaps to be honest about. German letters only if your German is B2 or better.
 * **Prepares interviews** with likely questions and questions to ask them.
 * **Learns your taste.** Mark jobs as a good match or not for you, and the next search leans toward what you liked.
+* **Speaks English and German.** Pick the dashboard language in the first setup step or under Settings, Language. Automatic follows your browser. Your CVs and cover letters keep their own language setting.
 
 ### Truthful by design
 
-A job assistant that invents experience gets people into trouble. Stellenpilot has a **truth guard**: any generated sentence that mentions a number, a tool or a language level your profile does not back up is rejected and replaced with safe text. Skills in a group called "Learning" are never presented as experience. The AI rephrases and selects; it never adds facts.
+A job assistant that invents experience gets people into trouble. Stellenpilot has a **truth guard**: any generated sentence that mentions a number, a tool or a language level your profile does not back up is rejected and replaced with safe text. Skills in a group called "Learning" (or "Lernen") are never presented as experience. The AI rephrases and selects; it never adds facts.
 
 ### Measured, not assumed
 
