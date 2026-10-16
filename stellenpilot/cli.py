@@ -157,7 +157,9 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--host", default=os.environ.get("JOBHUNT_HOST", "127.0.0.1"),
                    help="address to listen on; keep 127.0.0.1 unless you run inside Docker")
     sub.add_parser("shortcut", help="put a Stellenpilot icon on the desktop that starts this workspace")
-    sub.add_parser("gmail", help="sync statuses from your email once")
+    gm = sub.add_parser("gmail", help="sync statuses from your email once")
+    gm.add_argument("--install", action="store_true",
+                    help="install the Google packages needed for the key file way, then stop")
     sub.add_parser("demo", help="load fictional sample jobs to try the dashboard without any keys")
     sub.add_parser("notify-test", help="send a test digest by email or Telegram")
     sub.add_parser("telegram-id", help="show your Telegram chat id after you messaged your bot")
@@ -191,6 +193,9 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "init":
         cmd_init(home)
         return 0
+    if a.cmd == "gmail" and a.install:  # needs no config, so it works before setup is finished
+        from .gmail_sync import install_packages
+        return install_packages()
     settings = Settings(home)
     if a.cmd == "doctor":
         return cmd_doctor(settings)
