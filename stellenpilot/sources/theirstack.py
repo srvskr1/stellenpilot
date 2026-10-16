@@ -64,7 +64,8 @@ def fetch(settings) -> list[dict]:
                 "id": f"ts-{j['id']}",
                 "source": LABEL,
                 "title": title,
-                "company": j.get("company") or (j.get("company_object") or {}).get("name") or "",
+                # The top level "company" field is deprecated in TheirStack's docs; it is only a fallback.
+                "company": (j.get("company_object") or {}).get("name") or j.get("company") or "",
                 "location": ("Remote, " if remote else "") + (j.get("short_location") or j.get("location") or ""),
                 "remote": remote,
                 "url": j.get("final_url") or j.get("url") or "",
