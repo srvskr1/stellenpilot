@@ -180,6 +180,7 @@ class DbTests(unittest.TestCase):
     def test_run_does_not_undo_a_manual_status(self):
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             db = DB(Path(d) / "t.db")
+            self.addCleanup(db.conn.close)  # before the folder is removed (Windows locks open files)
             db.insert_job({**JOB, "dedupe_key": "k"})
             db.set_status("t-1", "applied", source="manual")
             db.mark_ready("t-1", "/tmp/x", "note")
@@ -189,6 +190,7 @@ class DbTests(unittest.TestCase):
     def test_pipeline_never_overwrites_user_fields(self):
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             db = DB(Path(d) / "t.db")
+            self.addCleanup(db.conn.close)  # before the folder is removed (Windows locks open files)
             db.insert_job({**JOB, "dedupe_key": "k"})
             db.update_job("t-1", {"notes": "mine", "rating": 1}, by_user=True)
             db.update_job("t-1", {"notes": "overwritten", "rating": -1, "match": 50})
