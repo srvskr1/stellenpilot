@@ -25,7 +25,7 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
          "finished_at": "finishedAt"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
-SLOW_POSTS = {"/api/add", "/api/gmail", "/api/gmail/imap", "/api/cv/import", "/api/cv/reread", "/api/gmail/install", "/api/gmail/connect", "/api/builtin/test"}
+SLOW_POSTS = {"/api/add", "/api/gmail", "/api/gmail/imap", "/api/cv/import", "/api/cv/reread", "/api/gmail/connect", "/api/builtin/test"}
 # What the Settings page may change. Types come from config.DEFAULTS.
 EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remote", "max_age_days", "exclude_title_words"),
             "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack", "jobicy", "remotive"),
@@ -145,11 +145,8 @@ def open_in_file_manager(path: str) -> None:
         subprocess.Popen(["xdg-open", path])
 
 
-GMAIL_PACKAGES = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2"]
-
-
 def gmail_status(settings) -> dict:
-    from importlib.util import find_spec
+    from .gmail_sync import install_command, install_command_full, packages_installed
     home = Path(settings.home)
     from .mail_imap import SECRET
     cfg = settings["gmail"]
@@ -159,7 +156,9 @@ def gmail_status(settings) -> dict:
             "address": cfg.get("address", "") if imap else "",
             "imapHost": cfg.get("imap_host", "") if imap else "",
             "passwordSaved": bool(settings.secret(SECRET)),
-            "packages": bool(find_spec("googleapiclient") and find_spec("google_auth_oauthlib")),
+            "packages": packages_installed(),
+            "installCommand": install_command(),
+            "installCommandFull": install_command_full(),
             "credentials": (home / "credentials.json").exists(),
             "connected": bool(settings.secret(SECRET)) if imap else (home / "token.json").exists()}
 
@@ -491,20 +490,6 @@ def make_handler(settings, port: int = 8765):
                 except Exception as e:
                     return self._send(400, {"error": f"Could not create the icon: {e}"})
                 return self._send(200, {"path": str(where), "shortcut": shortcut_status()})
-            if self.path == "/api/gmail/install":
-                from .launch import frozen
-                if frozen():
-                    return self._send(400, {"error": "The Windows app already contains Gmail support. Update the app if this step still shows."})
-                try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", *GMAIL_PACKAGES],
-                                   check=True, capture_output=True, text=True, timeout=900)
-                except subprocess.CalledProcessError as e:
-                    return self._send(500, {"error": "Install failed: " + (e.stderr or e.stdout or "")[-400:].strip()})
-                except (OSError, subprocess.TimeoutExpired) as e:
-                    return self._send(500, {"error": f"Install failed: {e}"})
-                import importlib
-                importlib.invalidate_caches()
-                return self._send(200, {"gmail": gmail_status(settings)})
             if self.path == "/api/gmail/credentials":
                 try:
                     text = check_credentials(str(self._body().get("text") or ""))
