@@ -10,6 +10,7 @@ Both hand the same {"sender", "subject", "snippet"} messages to apply(), which m
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 from .text import _norm
@@ -52,6 +53,48 @@ def _pick(candidates: list[dict]) -> dict | None:
     return pool[0] if len(pool) == 1 else None  # ambiguous: do nothing
 
 
+
+# The Google packages for the key file way. Keep in sync with the "gmail" extra in pyproject.toml.
+PACKAGES = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2"]
+
+
+def packages_installed() -> bool:
+    import importlib
+    from importlib.util import find_spec
+    importlib.invalidate_caches()  # they may have been installed by another process since the last check
+    return bool(find_spec("googleapiclient") and find_spec("google_auth_oauthlib"))
+
+
+def install_command() -> str:
+    return "stellenpilot gmail --install"
+
+
+def install_command_full() -> str:
+    """The same command for this exact Python, for when `stellenpilot` is not on the PATH."""
+    exe = sys.executable
+    return f'"{exe}" -m stellenpilot gmail --install' if " " in exe else f"{exe} -m stellenpilot gmail --install"
+
+
+def install_packages() -> int:
+    """Install the Google packages into the Python that runs Stellenpilot. Returns pip's exit code.
+    Runs from the command line only, never from the dashboard server."""
+    import subprocess
+    from .launch import frozen
+    if frozen():
+        print("This app already contains Gmail support. If the dashboard still asks for it, update the app.")
+        return 0
+    if packages_installed():
+        print("Gmail support is already installed.")
+        return 0
+    code = subprocess.call([sys.executable, "-m", "pip", "install", *PACKAGES])
+    if code == 0:
+        print("Gmail support is installed. In the dashboard press Check again.")
+    else:
+        print("The install failed. If pip says permission denied, your Python folder is read only: "
+              "install Stellenpilot in a virtual environment (see INSTALL.md) and run this command there.")
+    return code
+
+
 def _service(home: Path):
     try:
         from google.auth.transport.requests import Request
@@ -59,7 +102,7 @@ def _service(home: Path):
         from google_auth_oauthlib.flow import InstalledAppFlow
         from googleapiclient.discovery import build
     except ImportError as e:
-        raise RuntimeError('Gmail sync needs extra packages. Inside the stellenpilot folder run: pip install -e ".[gmail]"') from e
+        raise RuntimeError(f"Gmail sync needs extra packages. In a terminal run: {install_command()}") from e
     token, creds_file = home / "token.json", home / "credentials.json"
     creds = Credentials.from_authorized_user_file(str(token), SCOPES) if token.exists() else None
     if not creds or not creds.valid:
