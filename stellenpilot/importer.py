@@ -16,6 +16,8 @@ from pathlib import Path
 
 from docx import Document
 
+from .config import toml_comment, toml_str
+
 
 def read_cv_text(path: Path) -> str:
     text = _read_any(path)
@@ -361,7 +363,7 @@ def verify(profile: dict, source: str) -> tuple[dict, list[str]]:
 # ---------------------------------------------------------------- TOML output
 
 def _s(v) -> str:
-    return json.dumps(str(v or ""), ensure_ascii=False)  # JSON strings are valid TOML basic strings
+    return toml_str("" if v is None else v)
 
 
 def _arr(vals) -> str:
@@ -379,7 +381,7 @@ def to_toml(profile: dict, notes: list[str] | None, source_text: str | None = No
              "# Imported by `stellenpilot import`. Review every line, then rename this file to profile.toml.")
     out = [first, "# Bullets are copied word for word into your CVs; tailoring only reorders them.", ""]
     if notes:
-        out += ["# CHECK THESE:", *[f"#   {n}" for n in notes], ""]
+        out += ["# CHECK THESE:", *[ln for n in notes for ln in toml_comment(n, "#   ")], ""]
     out += ["[person]", f"name = {_s(p.get('name'))}", f"email = {_s(p.get('email'))}", f"phone = {_s(p.get('phone'))}",
             f"location = {_s(p.get('location'))}", f"links = {_arr(p.get('links'))}", f"languages = {_arr(p.get('languages'))}",
             "# One to three headlines; the tailor picks the best one per job. Write your own, keep them true.",
@@ -396,7 +398,7 @@ def to_toml(profile: dict, notes: list[str] | None, source_text: str | None = No
         out += ["", "[[education]]", f"degree = {_s(ed.get('degree'))}", f"school = {_s(ed.get('school'))}", f"dates = {_s(ed.get('dates'))}"]
     if source_text:
         out += ["", _MARKER,
-                *[f"# {ln}" for ln in source_text.splitlines() if ln.strip()]]
+                *toml_comment(source_text)]
     return "\n".join(out) + "\n"
 
 
