@@ -3,7 +3,6 @@ import json
 import os
 import stat
 import tempfile
-import threading
 import tomllib
 import unittest
 import urllib.error
@@ -129,13 +128,16 @@ class FakeLLM:
 
 
 class RereadServerTests(unittest.TestCase):
+    def _req(self, base, path, body):
+        return urllib.request.Request(f"{base}{path}", data=json.dumps(body).encode(), method="POST",
+                                      headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
+
     def _post(self, base, path, body):
-        req = urllib.request.Request(f"{base}{path}", data=json.dumps(body).encode(), method="POST",
-                                     headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
-        return json.load(urllib.request.urlopen(req, timeout=10))
+        from helpers import fetch_json
+        return fetch_json(self._req(base, path, body))
 
     def test_turning_on_ai_offers_and_runs_a_reread(self):
-        from http.server import ThreadingHTTPServer
+        from helpers import fetch_json, http_error, running
         from stellenpilot.server import make_handler, reread_offer
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             home = Path(d)
@@ -143,16 +145,12 @@ class RereadServerTests(unittest.TestCase):
             (home / importer.CV_SOURCE).write_text(CV, encoding="utf-8")
             settings = Settings(home)
             self.assertFalse(reread_offer(settings))  # no AI yet
-            srv = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(settings))
-            threading.Thread(target=srv.serve_forever, daemon=True).start()
-            base = f"http://127.0.0.1:{srv.server_address[1]}"
-            try:
-                with self.assertRaises(urllib.error.HTTPError) as e:
-                    self._post(base, "/api/cv/reread", {})
-                self.assertEqual(e.exception.code, 400)
+            with running(make_handler(settings)) as srv:
+                base = srv.base
+                self.assertEqual(http_error(self._req(base, "/api/cv/reread", {}))[0], 400)
                 r = self._post(base, "/api/settings", {"llm": {"provider": "ollama", "model": "fake"}})
                 self.assertTrue(r["rereadOffer"])
-                page = json.load(urllib.request.urlopen(f"{base}/api/settings", timeout=10))
+                page = fetch_json(f"{base}/api/settings")
                 self.assertTrue(page["rereadOffer"])  # shown when Settings opens, not only right after a save
                 with mock.patch("stellenpilot.llm.LLM", FakeLLM):
                     r = self._post(base, "/api/cv/reread", {})
@@ -161,8 +159,6 @@ class RereadServerTests(unittest.TestCase):
                 self.assertEqual(saved["experience"][0]["title"], "Junior Data Analyst")
                 self.assertTrue((home / "profile.backup.toml").exists())
                 self.assertFalse(reread_offer(settings))  # a filled profile is never replaced again
-            finally:
-                srv.shutdown()
 
 
 if __name__ == "__main__":

@@ -1,10 +1,9 @@
 """Live progress for slow AI work: the table, streaming from local model servers, and the endpoint."""
 import json
 import tempfile
-import threading
 import unittest
 import urllib.request
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from unittest import mock
 
@@ -94,13 +93,13 @@ class _Fake(BaseHTTPRequestHandler):
 class StreamingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.srv = ThreadingHTTPServer(("127.0.0.1", 0), _Fake)
-        threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
-        cls.base = f"http://127.0.0.1:{cls.srv.server_address[1]}"
+        from helpers import Server
+        cls.srv = Server(_Fake)
+        cls.base = cls.srv.base
 
     @classmethod
     def tearDownClass(cls):
-        cls.srv.shutdown()
+        cls.srv.close()
 
     def _llm(self, provider, base_url):
         with tempfile.TemporaryDirectory() as d:
@@ -139,24 +138,19 @@ class EndpointTests(unittest.TestCase):
             (home / "cv_source.txt").write_text("Sourav Sarker\nPython SQL\n" * 5, encoding="utf-8")
             settings = Settings(home)
             settings.profile = {"person": {"name": "Sourav Sarker"}}
-            srv = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(settings))
-            threading.Thread(target=srv.serve_forever, daemon=True).start()
-            base = f"http://127.0.0.1:{srv.server_address[1]}"
-            try:
+            from helpers import fetch_json, http_error, running
+            with running(make_handler(settings)) as srv:
                 with progress.track("cv", "Reading your CV again"):
                     progress.stage("Reading your CV and writing your profile", expect=1000)
                     progress.writing("x" * 250)
-                    snap = json.load(urllib.request.urlopen(f"{base}/api/progress?task=cv", timeout=10))
+                    snap = fetch_json(f"{srv.base}/api/progress?task=cv")
                     self.assertTrue(snap["active"])
                     self.assertEqual(snap["percent"], 25)
-                    req = urllib.request.Request(f"{base}/api/cv/reread", data=b"{}", method="POST",
+                    req = urllib.request.Request(f"{srv.base}/api/cv/reread", data=b"{}", method="POST",
                                                  headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
                     with mock.patch("stellenpilot.llm.LLM.enabled", new_callable=mock.PropertyMock, return_value=True):
-                        with self.assertRaises(urllib.error.HTTPError) as e:
-                            urllib.request.urlopen(req, timeout=10)
-                    self.assertEqual(e.exception.code, 409)  # a second read while one runs is refused
-            finally:
-                srv.shutdown()
+                        code, _ = http_error(req)
+                    self.assertEqual(code, 409)  # a second read while one runs is refused
 
 
 if __name__ == "__main__":

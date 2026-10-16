@@ -1,7 +1,6 @@
 """Offline tests. Run with: python -m unittest discover -s tests"""
 import json
 import tempfile
-import threading
 import tomllib
 import unittest
 import urllib.request
@@ -215,30 +214,25 @@ class SourceTests(unittest.TestCase):
 
 class ServerTests(unittest.TestCase):
     def test_patch_requires_header_and_saves(self):
-        from http.server import ThreadingHTTPServer
+        from helpers import fetch, fetch_json, http_error, running
         from stellenpilot.server import make_handler
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
             settings = Settings(Path(d))
-            DB(settings.db_path).insert_job({**JOB, "dedupe_key": "k"})
-            srv = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(settings))
-            threading.Thread(target=srv.serve_forever, daemon=True).start()
-            base = f"http://127.0.0.1:{srv.server_address[1]}"
-            body = json.dumps({"status": "applied"}).encode()
-            req = urllib.request.Request(f"{base}/api/jobs/t-1", data=body, method="PATCH")
-            with self.assertRaises(urllib.error.HTTPError) as e:
-                urllib.request.urlopen(req)
-            self.assertEqual(e.exception.code, 403)
-            req = urllib.request.Request(f"{base}/api/jobs/t-1", data=body, method="PATCH",
-                                         headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
-            urllib.request.urlopen(req)
-            state = json.load(urllib.request.urlopen(f"{base}/api/state"))
-            self.assertEqual(state["jobs"][0]["status"], "applied")
-            self.assertEqual(state["jobs"][0]["statusSource"], "manual")
-            bad_host = urllib.request.Request(f"{base}/api/state", headers={"Host": f"evil.example:{srv.server_address[1]}"})
-            with self.assertRaises(urllib.error.HTTPError) as e:
-                urllib.request.urlopen(bad_host)
-            self.assertEqual(e.exception.code, 403)
-            srv.shutdown()
+            db = DB(settings.db_path)
+            db.insert_job({**JOB, "dedupe_key": "k"})
+            db.conn.close()
+            with running(make_handler(settings)) as srv:
+                body = json.dumps({"status": "applied"}).encode()
+                req = urllib.request.Request(f"{srv.base}/api/jobs/t-1", data=body, method="PATCH")
+                self.assertEqual(http_error(req)[0], 403)
+                req = urllib.request.Request(f"{srv.base}/api/jobs/t-1", data=body, method="PATCH",
+                                             headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
+                fetch(req)
+                state = fetch_json(f"{srv.base}/api/state")
+                self.assertEqual(state["jobs"][0]["status"], "applied")
+                self.assertEqual(state["jobs"][0]["statusSource"], "manual")
+                bad_host = urllib.request.Request(f"{srv.base}/api/state", headers={"Host": f"evil.example:{srv.port}"})
+                self.assertEqual(http_error(bad_host)[0], 403)
 
 
 if __name__ == "__main__":
