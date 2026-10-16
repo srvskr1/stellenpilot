@@ -87,7 +87,8 @@ class LabelTests(unittest.TestCase):
             self.db.insert_job(_job(f"j{i}", 95 if i < 40 else i))  # most jobs score high
         p = self.home / "eval" / "labels.csv"
         self.assertEqual(ev.make_sheet(self.db, p, n=20), 20)
-        rows = list(csv.DictReader(open(p, encoding="utf-8")))
+        with open(p, encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
         self.assertNotIn("stored_match", rows[0])
         low = [r for r in rows if int(r["id"][1:]) >= 40]
         self.assertGreaterEqual(len(low), 8)  # the rare low scores are not crowded out
