@@ -1,7 +1,7 @@
 """Fictional sample data so anyone can try the dashboard without keys or network."""
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 
 from .db import DB, today
 from .text import dedupe_key
@@ -29,7 +29,7 @@ SAMPLES = [
     dict(id="demo-4", source="TheirStack", title="Working Student BI", company="Kölner Retail Tech",
          location="Köln", job_type="Werkstudent", match=69, fit="Possible", lang="English",
          why="Dashboard work in Power BI.", gaps="Retail domain and dbt.", gap_tags=["dbt"],
-         status="interview", interview_at=(datetime.now(timezone.utc) + timedelta(days=4)).replace(hour=8, minute=0, microsecond=0).isoformat(),
+         status="interview", interview_at=(datetime.now().astimezone() + timedelta(days=4)).replace(hour=8, minute=0, second=0, microsecond=0).isoformat(),
          prep="## About Kölner Retail Tech\nA fictional company used for the demo.\n## Likely questions\n- Walk us through a pipeline you built\n- How do you check data quality?\n## Questions to ask them\n- What does the BI stack look like?",
          url="https://example.com/jobs/4"),
     dict(id="demo-5", source="Bundesagentur für Arbeit", title="Werkstudent Datenmanagement", company="Westfalen Stadtwerke",
@@ -45,6 +45,13 @@ SAMPLES = [
 
 def load_demo(settings) -> int:
     db = DB(settings.db_path)
+    try:
+        return _load(db)
+    finally:
+        db.conn.close()
+
+
+def _load(db: DB) -> int:
     for i, job in enumerate(SAMPLES):
         job = {**job, "found_at": _iso(i % 3), "posted_at": _iso(i % 3 + 1),
                "dedupe_key": dedupe_key(job["company"], job["title"])}
