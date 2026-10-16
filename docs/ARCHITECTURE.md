@@ -83,9 +83,9 @@ Core resources:
 
 Mail, AI downloads and file system actions stay on the engine machine. Phones only read results and change job state.
 
-## 6. Security: the part that does not exist yet
+## 6. Security for remote access (planned)
 
-Today the server binds to `127.0.0.1` with no authentication. That is fine for one machine and wrong the moment a phone connects. Before any mobile client ships:
+Today Stellenpilot is local only. The server binds to `127.0.0.1`, refuses foreign `Host` headers (DNS rebinding) and refuses cross site requests (CSRF), so other machines and other websites cannot reach it. A login is not needed for that mode. It becomes needed the moment a phone connects over the network, so before any mobile client ships:
 
 1. **Pairing.** The desktop shows a QR code with engine address, a one time code and the certificate fingerprint. The phone scans it and receives a long lived device token.
 2. **Token auth** on every request (`Authorization: Bearer`). Tokens are listed in Settings and can be revoked per device.
