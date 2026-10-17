@@ -1,28 +1,33 @@
 # Stellenpilot
 
-**Your local AI job assistant. Open source, private, and on autopilot.**
+**Every morning it finds new jobs, scores them against your CV and writes a tailored CV and cover letter for the best ones. Free, local, no account.**
 
 [![PyPI](https://img.shields.io/pypi/v/stellenpilot)](https://pypi.org/project/stellenpilot/)
 [![Python](https://img.shields.io/pypi/pyversions/stellenpilot)](https://pypi.org/project/stellenpilot/)
 [![tests](https://github.com/srvskr1/stellenpilot/actions/workflows/tests.yml/badge.svg)](https://github.com/srvskr1/stellenpilot/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE)
 
-Stellenpilot is an AI agent for your job search that runs on your own computer. Every morning it finds new jobs, an AI reads each one against your CV, tells you honestly how well it fits, and writes a tailored CV and cover letter for the best matches. When you open the dashboard, the work is done: you read, decide and send.
-
-It comes with its own **free built-in AI**, so you need no account, no API key and no cloud. Your CV never leaves your computer. Built for the job market in Germany, and it works in other countries too. The app speaks English and German.
-
 ![Stellenpilot in about a minute: the four setup steps, Home, the agent office, Jobs, Applications and Settings](https://raw.githubusercontent.com/srvskr1/stellenpilot/main/docs/demo.gif)
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-**Windows and Mac:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed (Mac: [first start](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md)). **Everyone else:**
+**Windows and Mac:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed ([Mac first start](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md))
+
+**Linux or Python:**
 
 ```bash
 pip install stellenpilot
 stellenpilot serve
 ```
 
-Your browser opens Stellenpilot by itself. Setup takes a few minutes, plus the one time AI download: drop your CV, say what you are looking for, press **Download** for the built-in AI, and switch on the daily search. It also puts a **Stellenpilot icon on your desktop**: from then on you just double click it, no commands. Windows, macOS and Linux, Python 3.11 or newer.
+Drop your CV, say what you want, press **Download** for the built in AI, switch on the daily search. That's it. It also puts a Stellenpilot icon on your desktop, so next time you just double click. Windows, macOS and Linux, Python 3.11 or newer.
+
+### Why try it
+
+* **Private.** The built in AI runs on your computer. Your CV never leaves it.
+* **Honest.** A truth guard rejects any sentence your CV does not back up, and every score comes with your real gaps.
+* **Made for Germany.** 6 job boards plus about 200 company career pages, and it reads which German level an ad really needs. The app speaks English and German.
+* **You stay in control.** It never applies for you and never contacts a company.
 
 ## How it works
 
