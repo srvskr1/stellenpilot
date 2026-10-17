@@ -95,27 +95,76 @@ def local_day(stamp: str | None) -> str:
     return (t.astimezone() if t.tzinfo else t).date().isoformat()
 
 
+# ---------- migrations ----------
+# The database file remembers which steps it has had in SQLite's built in `PRAGMA user_version`.
+# On every start the steps it is missing run once, in order.
+#
+# Rules:
+#   * Only append. Never edit, reorder or delete a step: users' databases already ran it.
+#   * SCHEMA above is frozen. A new column or table goes in a new step here, not in SCHEMA,
+#     so fresh and old databases reach the same shape the same way.
+#   * Steps 1 and 2 check before acting because they replace checks that ran on every start
+#     before versioning existed. Steps from 3 on can be plain SQL.
+
+def _m1_jobs_extra_columns(conn: sqlite3.Connection) -> None:
+    have = {r[1] for r in conn.execute("PRAGMA table_info(jobs)")}
+    for col in ("german_level", "summary_en"):
+        if col not in have:
+            conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
+
+
+def _m2_run_log_backfill(conn: sqlite3.Connection) -> None:
+    # Before run_log existed, each day kept one row in runs and a second search the same day
+    # overwrote it. Carry those day rows over once so the history starts complete.
+    if not conn.execute("SELECT 1 FROM run_log LIMIT 1").fetchone():
+        conn.execute(
+            "INSERT INTO run_log (date, finished_at, found, added, shortlisted, docs_made, gmail_updates, notes) "
+            "SELECT date, COALESCE(stage_at, date), found, added, shortlisted, docs_made, gmail_updates, notes "
+            "FROM runs WHERE stage = 'done' ORDER BY date")
+
+
+MIGRATIONS = [
+    _m1_jobs_extra_columns,  # 1
+    _m2_run_log_backfill,    # 2
+]
+SCHEMA_VERSION = len(MIGRATIONS)
+
+
+def _version(conn: sqlite3.Connection) -> int:
+    return conn.execute("PRAGMA user_version").fetchone()[0]
+
+
 class DB:
     def __init__(self, path: Path | str):
+        had_data = Path(path).is_file() and Path(path).stat().st_size > 0
         self.conn = sqlite3.connect(str(path), check_same_thread=False, timeout=30)
         self.conn.row_factory = sqlite3.Row
+        if had_data and _version(self.conn) < SCHEMA_VERSION:
+            self._backup(Path(path))
         self.conn.executescript(SCHEMA)
         self._migrate()
 
+    def _backup(self, path: Path) -> None:
+        """Copy the database before upgrading it, so a bad step can be undone by hand."""
+        dest = sqlite3.connect(str(path.with_name(f"{path.name}.bak-v{_version(self.conn)}")))
+        with dest:
+            self.conn.backup(dest)
+        dest.close()
+
     def _migrate(self) -> None:
-        """Add columns introduced after a user's database was created."""
-        have = {r[1] for r in self.conn.execute("PRAGMA table_info(jobs)")}
-        for col in ("german_level", "summary_en"):
-            if col not in have:
-                self.conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
-        # Before run_log existed, each day kept one row in runs and a second search the same day
-        # overwrote it. Carry those day rows over once so the history starts complete.
-        if not self.conn.execute("SELECT 1 FROM run_log LIMIT 1").fetchone():
-            self.conn.execute(
-                "INSERT INTO run_log (date, finished_at, found, added, shortlisted, docs_made, gmail_updates, notes) "
-                "SELECT date, COALESCE(stage_at, date), found, added, shortlisted, docs_made, gmail_updates, notes "
-                "FROM runs WHERE stage = 'done' ORDER BY date")
-        self.conn.commit()
+        """Run the steps this database has not had yet. Safe when several processes start at once:
+        BEGIN IMMEDIATE takes the write lock, then the version is read again inside it."""
+        if _version(self.conn) >= SCHEMA_VERSION:
+            return
+        self.conn.execute("BEGIN IMMEDIATE")
+        try:
+            for step in range(_version(self.conn), SCHEMA_VERSION):
+                MIGRATIONS[step](self.conn)
+            self.conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+            self.conn.commit()
+        except BaseException:
+            self.conn.rollback()
+            raise
 
     # ---------- jobs ----------
     def job_ids(self) -> set[str]:
