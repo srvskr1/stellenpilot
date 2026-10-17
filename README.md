@@ -68,9 +68,9 @@ A job assistant that invents experience gets people into trouble. Stellenpilot h
 
 ### Measured, not assumed
 
-`stellenpilot eval` checks how well the scores rank the jobs you labeled (thumbs, interviews, or a sheet you fill in), and compares the stored score, keyword scoring and any AI you name: Spearman correlation, AUC, precision at 10, and how many good jobs pass `min_match`. Use it to pick a model and a threshold on your own data. See [docs/evaluation.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/evaluation.md).
+`stellenpilot eval` checks how well the scores rank the jobs you labeled (thumbs, interviews, or a sheet you fill in), and compares the stored score, keyword scoring and any AI you name: Spearman correlation, AUC, precision at 10, and how many good jobs pass `min_match`. Use it to pick a model and a threshold on your own data. See [docs/evaluation.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/evaluation.md)
 
-First results on 28 real jobs: AUC 0.73 for the stored score and 0.75 for keywords, and 9 of the top 10 were jobs worth applying to. The built-in AI does not beat keywords yet, and the default `min_match` of 70 skips most good jobs. Full numbers and limits in [docs/results.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/results.md).
+First results on 28 real jobs: AUC 0.73 for the stored score and 0.75 for keywords, and 9 of the top 10 were jobs worth applying to. The built-in AI does not beat keywords yet, and the default `min_match` of 70 skips most good jobs. Full numbers and limits in [docs/results.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/results.md)
 
 ### Choose your AI
 
@@ -126,16 +126,16 @@ Why these (checked on their model cards, October 2026): all are Apache 2.0, run 
 
 What we saw in testing with a very small model (Qwen2.5 1.5B on 2 CPU cores): the pipeline worked end to end, the German check and the truth guard did their job, and the cover letter stayed truthful. But the model gave every job the same score and wrote a two sentence letter, and each answer took about a minute. Small models are fine for trying the setup, not for real use.
 
-Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/local-llm.md). Run `stellenpilot doctor` to check that your model server is reachable and the model is installed.
+Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips and troubleshooting: [docs/local-llm.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/local-llm.md), and run `stellenpilot doctor` to check that your model server is reachable and the model is installed.
 
 </details>
 
 ## Automation
 
-* **Daily autopilot.** Switch on **Automatic search** in Settings and pick a time. Stellenpilot sets up Task Scheduler on Windows or cron on macOS and Linux for you. The dashboard does not need to be open. A search missed because the computer was off runs when you log in or open Stellenpilot. Doing it by hand: [docs/scheduling.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/scheduling.md).
+* **Daily autopilot.** Switch on **Automatic search** in Settings and pick a time. Stellenpilot sets up Task Scheduler on Windows or cron on macOS and Linux for you. The dashboard does not need to be open. A search missed because the computer was off runs when you log in or open Stellenpilot. Doing it by hand: [docs/scheduling.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/scheduling.md)
 * **Company watchlist.** Switch on the ready made list of about 200 companies with offices in Germany, or add your dream companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters. Their new roles often appear here before they reach the job boards.
-* **Email sync.** Read only. Connect Gmail (or GMX, web.de and others) in **Settings, Email** with your address and an app password, in about 2 minutes, and statuses move forward as replies arrive. It never sends, deletes, moves or labels mail. Details: [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail.md).
-* **Daily digest** to Telegram or email: top new matches, documents ready to send, interviews. See [docs/digest.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/digest.md).
+* **Email sync.** Read only. Connect Gmail (or GMX, web.de and others) in **Settings, Email** with your address and an app password, in about 2 minutes, and statuses move forward as replies arrive. It never sends, deletes, moves or labels mail. Details: [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail.md)
+* **Daily digest** to Telegram or email: top new matches, documents ready to send, interviews. See [docs/digest.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/digest.md)
 * **Jobs you found yourself.** Paste a link or the ad text from LinkedIn, a friend or anywhere, and the AI scores and tailors it like the rest.
 
 ## The dashboard
@@ -162,7 +162,7 @@ Windows may say "Windows protected your PC" because the app is not code signed y
 
 **[Download Stellenpilot for Mac](https://github.com/srvskr1/stellenpilot/releases/latest)** (the file `Stellenpilot-X.Y.Z-mac.dmg`, for Macs with an Apple chip). Open it and drag Stellenpilot into Applications.
 
-The app is not signed by Apple yet, so macOS stops it the first time: on macOS 15 and newer, open **System Settings, Privacy & Security** and click **Open Anyway**. Step by step, with the fix for older macOS and for a "damaged" message: [docs/mac.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md). The disk image is built by GitHub straight from this repository.
+The app is not signed by Apple yet, so macOS stops it the first time: on macOS 15 and newer, open **System Settings, Privacy & Security** and click **Open Anyway**. Step by step, with the fix for older macOS and for a "damaged" message: [docs/mac.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md), and the disk image is built by GitHub straight from this repository.
 
 ### With Python (Windows, macOS, Linux)
 
@@ -236,7 +236,7 @@ Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Job
 * With Claude or OpenAI, your profile and the job ads are sent to that provider.
 * The dashboard listens on 127.0.0.1 only, and write requests need a custom header, so other websites cannot change your data through your browser.
 * Read every document before you send it. The truth guard checks digits and the tools it knows (see `VOCAB` in `stellenpilot/score.py`). It cannot judge spelled out numbers or vague claims, so you are the final check.
-* Why the server, the guards, the link fetcher and the AI downloads are built the way they are: [docs/architecture.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/architecture.md).
+* Why the server, the guards, the link fetcher and the AI downloads are built the way they are: [docs/architecture.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/architecture.md)
 
 ## Commands
 
@@ -316,4 +316,4 @@ Built with an AI pair programmer, decisions are mine.
 
 ## Credits and license
 
-MIT, see [LICENSE](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE). Credits for ideas and data are in [NOTICE.md](https://github.com/srvskr1/stellenpilot/blob/main/NOTICE.md). The built-in AI uses [llama.cpp](https://github.com/ggml-org/llama.cpp) (MIT) and [Qwen3.5](https://huggingface.co/Qwen) models (Apache 2.0), downloaded from their official sources.
+MIT, see [LICENSE](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE), and credits for ideas and data are in [NOTICE.md](https://github.com/srvskr1/stellenpilot/blob/main/NOTICE.md), and the built-in AI uses [llama.cpp](https://github.com/ggml-org/llama.cpp) (MIT) and [Qwen3.5](https://huggingface.co/Qwen) models (Apache 2.0), downloaded from their official sources.
