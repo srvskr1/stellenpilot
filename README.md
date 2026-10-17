@@ -9,7 +9,7 @@
 
 Stellenpilot is an AI agent for your job search that runs on your own computer. Every morning it finds new jobs, an AI reads each one against your CV, tells you honestly how well it fits, and writes a tailored CV and cover letter for the best matches. When you open the dashboard, the work is done: you read, decide and send.
 
-It comes with its own **free built-in AI**, so you need no account, no API key and no cloud. Your CV never leaves your computer. Built for the job market in Germany, and it works in other countries too.
+It comes with its own **free built-in AI**, so you need no account, no API key and no cloud. Your CV never leaves your computer. Built for the job market in Germany, and it works in other countries too. The app speaks English and German.
 
 ![Stellenpilot in about a minute: the four setup steps, Home, the agent office, Jobs, Applications and Settings](https://raw.githubusercontent.com/srvskr1/stellenpilot/main/docs/demo.gif)
 
@@ -141,7 +141,9 @@ Five calm pages, in your browser, on your computer:
 * **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep.
 * **Applications**: a board you drag cards across (Applied, Interview, Offer, Rejected), with reply rates by source, the skill gaps employers mention most, and a weekly summary.
 * **My CV**: your profile, with tips to improve your matches.
-* **Settings**: job sources, the AI, the daily search and Gmail, with step by step help for every key.
+* **Settings**: language (English or Deutsch), job sources, the AI, the daily search and Gmail, with step by step help for every key.
+
+Something broken? **Report a bug** in the sidebar or in Settings opens the bug report form on GitHub.
 
 ## Install
 
@@ -301,7 +303,7 @@ LibreOffice and Python stay installed; remove them like any other app if you no 
 
 ## Contributing
 
-Issues and pull requests are welcome. Read [docs/architecture.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/architecture.md) first, it explains the decisions that are easy to undo by accident. New sources should use an official or clearly permitted API, follow the shape in `stellenpilot/sources/__init__.py`, and come with an offline test.
+Issues and pull requests are welcome. Found a bug? [Open a bug report](https://github.com/srvskr1/stellenpilot/issues/new?template=bug_report.md); it is public, so leave out API keys and CV details. Read [docs/architecture.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/architecture.md) first, it explains the decisions that are easy to undo by accident. New sources should use an official or clearly permitted API, follow the shape in `stellenpilot/sources/__init__.py`, and come with an offline test.
 
 ## How it was built
 
