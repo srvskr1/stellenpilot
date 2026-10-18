@@ -47,10 +47,9 @@ jobs:
 
   online:
     # The unit tests never touch the internet. This job checks the safe link fetch against real sites:
-    # a public https page with a redirect works, and an internal address is refused. Informational,
-    # so a flaky network does not block a merge.
+    # an internal address must be refused (hard failure), and a public page should load (warning only,
+    # so a flaky network or a rate limited site never turns main red).
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -66,12 +65,16 @@ jobs:
         run: |
           python - <<'PY'
           from stellenpilot.manual import AddError, open_public
-          url, body = open_public("http://github.com/srvskr1/stellenpilot")  # http, redirects to https
-          assert url.startswith("https://github.com/") and b"Stellenpilot" in body, (url, body[:200])
-          print("public page with redirect: ok,", url)
-          url, body = open_public("https://example.com/")
-          assert b"Example Domain" in body
-          print("plain https page: ok")
+          def public(url, check):
+              try:
+                  final, body = open_public(url)
+                  assert check(final, body), (final, body[:200])
+                  print("public page ok:", final)
+              except Exception as e:  # network trouble is not our bug, so warn instead of failing
+                  print(f"::warning::public fetch of {url} failed: {e!r}")
+          public("http://github.com/srvskr1/stellenpilot",  # http, redirects to https
+                 lambda u, b: u.startswith("https://github.com/") and b"Stellenpilot" in b)
+          public("https://example.com/", lambda u, b: b"Example Domain" in b)
           for bad in ("http://169.254.169.254/latest/meta-data/", "http://127.0.0.1:8765/", "http://localhost/"):
               try:
                   open_public(bad)
