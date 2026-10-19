@@ -28,7 +28,7 @@ LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
 SLOW_POSTS = {"/api/add", "/api/gmail", "/api/gmail/imap", "/api/cv/import", "/api/cv/reread", "/api/gmail/connect", "/api/builtin/test"}
 # What the Settings page may change. Types come from config.DEFAULTS.
 EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remote", "max_age_days", "exclude_title_words"),
-            "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack", "jobicy", "remotive"),
+            "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack", "jobicy", "remotive", "workingstudentjobs"),
             "llm": ("provider", "model", "base_url"),
             "language": ("my_german_level",),
             "tailor": ("min_match", "letter_language"),
