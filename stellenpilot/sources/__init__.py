@@ -6,9 +6,9 @@ Only official or public APIs are used. No scraping of sites whose terms forbid i
 """
 from __future__ import annotations
 
-from . import adzuna, arbeitnow, arbeitsagentur, jobicy, remotive, theirstack, watchlist
+from . import adzuna, arbeitnow, arbeitsagentur, jobicy, remotive, theirstack, watchlist, workingstudentjobs
 
-REGISTRY = {m.NAME: m for m in (watchlist, arbeitsagentur, arbeitnow, adzuna, theirstack, jobicy, remotive)}
+REGISTRY = {m.NAME: m for m in (watchlist, arbeitsagentur, arbeitnow, adzuna, theirstack, jobicy, remotive, workingstudentjobs)}
 
 
 def title_has_keyword(title: str, keywords: list[str]) -> bool:
