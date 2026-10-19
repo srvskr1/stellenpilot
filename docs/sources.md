@@ -40,6 +40,13 @@ Checked on 10 October 2026. Terms change, so read the linked pages yourself befo
 * Terms: link back to the job's Remotive URL and name Remotive as the source; do not resubmit the jobs to other job sites; call it at most about 4 times a day. This tool makes one call per run.
 * The free feed is small (a few dozen jobs at a time) and delayed by 24 hours, so expect only a few matches.
 
+## workingstudentjobs.de
+
+* Free and keyless Werkstudent and internship API for German cities: https://www.workingstudentjobs.de/developers
+* Terms: link every job with its `url` or `apply_url` (this tool uses `apply_url`, so the employer's click count stays right), do not re-host the listings as a competing job board, stay under 60 requests a minute.
+* One call per city (your city plus `nearby_cities`), asking only for jobs first seen within `max_age_days`. A city their API does not know is skipped with a note in the run log.
+* The feed has no ad text, so scoring sees only the title, skills, language requirements and field. Expect keyword scores to be rougher than for full ads.
+
 ## How many jobs to expect
 
 Measured on 11 October 2026 for data roles near Essen: with narrow titles ("Werkstudent Data", "Junior Data Engineer") and ads from the last 3 days, the Bundesagentur returned 15 jobs; the number is limited by the market, not by pages. With broader titles ("Data Engineer", "Data Analyst", "Python") and 14 days it returned 87 instead of 50 before pagination, Arbeitnow 3 instead of 0, and over 7 days Jobicy added 4 remote roles while Remotive added none. The ready made company watchlist (207 companies) added 17 matching roles at 15 companies for the narrow titles, in about 20 seconds. Broader titles and a longer `max_age_days` find more; the watchlist finds roles that never reach job boards.
