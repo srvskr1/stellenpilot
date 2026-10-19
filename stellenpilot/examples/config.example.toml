@@ -37,6 +37,7 @@ adzuna = false          # needs ADZUNA_APP_ID and ADZUNA_APP_KEY
 theirstack = false      # needs THEIRSTACK_API_KEY, 200 free credits a month
 jobicy = true           # free, no key, remote jobs only (used when include_remote = true)
 remotive = true         # free, no key, remote jobs only, one call a run, small feed
+workingstudentjobs = true # free, no key, Werkstudent and internships, one call per city
 
 [sources.limits]
 # Hard caps per run, to stay inside free plans and to be polite to free APIs.
@@ -45,6 +46,7 @@ adzuna_pages = 5             # pages per search, 50 jobs each
 arbeitsagentur_results = 150 # each kept job costs one extra request for the full ad
 arbeitsagentur_pages = 5     # pages per search, 50 jobs each
 arbeitnow_pages = 10         # 325 jobs per page; stops early at max_age_days
+workingstudentjobs_pages = 3  # pages per city, 300 jobs each
 jobicy_pages = 2             # pages per region, 200 jobs each
 theirstack_jobs = 6          # 1 credit per job, 200 credits a month
 

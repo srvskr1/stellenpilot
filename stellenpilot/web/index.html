@@ -655,6 +655,7 @@ body.wizopen{overflow:hidden}
               </details>
               <label>API key <span class="keyset" data-key="THEIRSTACK_API_KEY"></span><input class="input" name="THEIRSTACK_API_KEY" type="password" autocomplete="off" placeholder="Paste your TheirStack API key"></label></div>
             <div class="srcrow"><label class="check sw"><input type="checkbox" name="jobicy"><span class="t"><b>Jobicy</b><span>Remote jobs only. Free, no key.</span></span></label></div>
+            <div class="srcrow"><label class="check sw"><input type="checkbox" name="workingstudentjobs"><span class="t"><b>workingstudentjobs.de</b><span>Werkstudent and internship jobs in German cities. Free, no key.</span></span></label></div>
             <div class="srcrow"><label class="check sw"><input type="checkbox" name="remotive"><span class="t"><b>Remotive</b><span>Remote jobs only, a small feed. Free, no key.</span></span></label></div>
             <div class="srcrow"><label class="check sw"><input type="checkbox" name="starter_list"><span class="t"><b>Company watchlist</b><span>Checks the career pages of about 200 companies with offices in Germany, often before the job boards. Adds a minute or two to each search.</span></span></label></div>
           </section>
@@ -948,7 +949,7 @@ body.wizopen{overflow:hidden}
   <p class="wfoot">Stellenpilot never applies for you and never contacts companies.</p>
 </div>
 <div class="toast" id="toast" hidden></div>
-<footer class="credits">Job data from <a href="https://www.arbeitsagentur.de/jobsuche/" target="_blank" rel="noopener">Bundesagentur für Arbeit</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a>, <a href="https://www.adzuna.de" target="_blank" rel="noopener">The Adzuna API</a>, <a href="https://theirstack.com" target="_blank" rel="noopener">TheirStack</a>, <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a> and <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>, depending on which sources you enable.</footer>
+<footer class="credits">Job data from <a href="https://www.arbeitsagentur.de/jobsuche/" target="_blank" rel="noopener">Bundesagentur für Arbeit</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a>, <a href="https://www.adzuna.de" target="_blank" rel="noopener">The Adzuna API</a>, <a href="https://theirstack.com" target="_blank" rel="noopener">TheirStack</a>, <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a>, <a href="https://www.workingstudentjobs.de" target="_blank" rel="noopener">workingstudentjobs.de</a> and <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>, depending on which sources you enable.</footer>
 
 <script>
 /* ---------- Language ----------
@@ -1427,9 +1428,9 @@ function renderApps(){
         <div class="row">${j.status==="interview"&&j.interviewAt?`<span>${fmtWhen(j.interviewAt)}</span>`:`<span>${j.statusUpdatedAt?fmtDate(j.statusUpdatedAt):""}</span>`}${j.statusSource==="gmail"?`<span class="gm" title="Moved here by Gmail">Gmail</span>`:""}
         <select data-id="${esc(j._id)}" aria-label="Move ${esc(j.title)}" ${canWrite?"":"disabled"}>${[...COLS,"skipped"].map(c=>`<option value="${c}" ${c===j.status?"selected":""}>${c===j.status?LABEL[c]:"Move to "+LABEL[c]}</option>`).join("")}</select></div></article>`).join("")||`<div class="none">None</div>`}</div>`}).join("");
 }
-const SRCLINK={Adzuna:"https://www.adzuna.de",Arbeitnow:"https://www.arbeitnow.com",TheirStack:"https://theirstack.com",Jobicy:"https://jobicy.com",Remotive:"https://remotive.com","Bundesagentur für Arbeit":"https://www.arbeitsagentur.de/jobsuche/"};
+const SRCLINK={Adzuna:"https://www.adzuna.de",Arbeitnow:"https://www.arbeitnow.com",TheirStack:"https://theirstack.com",Jobicy:"https://jobicy.com",Remotive:"https://remotive.com","workingstudentjobs.de":"https://www.workingstudentjobs.de","Bundesagentur für Arbeit":"https://www.arbeitsagentur.de/jobsuche/"};
 const srcChip=s=>SRCLINK[s]?`<a class="chip" href="${SRCLINK[s]}" target="_blank" rel="noopener">${esc(s)}</a>`:`<span class="chip">${esc(s)}</span>`;
-const SRC=s=>/arbeitsagentur/i.test(s)?"Bundesagentur":/arbeitnow/i.test(s)?"Arbeitnow":/theirstack/i.test(s)?"TheirStack":/jobicy/i.test(s)?"Jobicy":/remotive/i.test(s)?"Remotive":/adzuna/i.test(s)?"Adzuna":/linkedin/i.test(s)?"LinkedIn":/stepstone/i.test(s)?"StepStone":/indeed/i.test(s)?"Indeed":/gmail/i.test(s)?"Found in Gmail":/jobswithoutgerman|firecrawl/i.test(s)?"jobswithoutgerman.de":"Other";
+const SRC=s=>/arbeitsagentur/i.test(s)?"Bundesagentur":/arbeitnow/i.test(s)?"Arbeitnow":/theirstack/i.test(s)?"TheirStack":/jobicy/i.test(s)?"Jobicy":/remotive/i.test(s)?"Remotive":/workingstudentjobs/i.test(s)?"workingstudentjobs.de":/adzuna/i.test(s)?"Adzuna":/linkedin/i.test(s)?"LinkedIn":/stepstone/i.test(s)?"StepStone":/indeed/i.test(s)?"Indeed":/gmail/i.test(s)?"Found in Gmail":/jobswithoutgerman|firecrawl/i.test(s)?"jobswithoutgerman.de":"Other";
 const SENT=["applied","interview","offer","rejected"],REPLY=["interview","offer","rejected"];
 const GAPDICT=[["German",/german/i],["dbt",/\bdbt\b/i],["Snowflake",/snowflake/i],["Kafka",/kafka/i],["Terraform",/terraform/i],["Spark",/spark/i],["Kubernetes",/kubernetes|k8s/i],["GCP",/\bgcp\b|google cloud/i],["Java or Scala",/\bjava\b|scala/i],["AWS CDK",/\bcdk\b/i],["Professional DE experience",/professional|years of experience/i]];
 function bars(rows,max,warm){return rows.map(r=>`<div class="brow"><span>${esc(r.k)}</span><span class="bt"><i class="${warm?"w":""}" style="width:${max?Math.round(r.v/max*100):0}%"></i></span><span class="nm">${r.lbl}</span></div>`).join("")}
@@ -1694,7 +1695,7 @@ $("cvSave").addEventListener("click",async()=>{
 let cvPrompted=false;
 
 /* ---------- Settings ---------- */
-const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"],ui:["language"]};
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive","workingstudentjobs"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"],ui:["language"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,.keyhelp,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 $("setForm").addEventListener("click",async e=>{const b=e.target.closest("[data-clear-key]");if(!b)return;e.preventDefault();

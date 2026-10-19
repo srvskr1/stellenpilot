@@ -18,7 +18,7 @@ from .text import dedupe_key, title_excluded
 
 log = logging.getLogger("stellenpilot")
 # Sources with full descriptions first, so duplicates keep the richer copy.
-ORDER = ["watchlist", "arbeitsagentur", "theirstack", "arbeitnow", "adzuna", "jobicy", "remotive"]
+ORDER = ["watchlist", "arbeitsagentur", "theirstack", "arbeitnow", "workingstudentjobs", "adzuna", "jobicy", "remotive"]
 
 
 def repost_since(settings) -> str | None:
