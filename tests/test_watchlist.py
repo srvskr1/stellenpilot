@@ -1,5 +1,4 @@
 """Watchlist feeds, parsed from small recorded samples (no network)."""
-import json
 import unittest
 from unittest import mock
 
