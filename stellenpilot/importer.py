@@ -156,14 +156,28 @@ def saved_cv_text(home: Path) -> str:
             return "\n".join(ln[2:] if ln.startswith("# ") else ln.lstrip("#") for ln in body)
     return ""
 
+_PHONE = re.compile(r"\+?\d[\d ()/.-]{7,}\d")
+# Date ranges look like phone numbers to the pattern above: "01/2020 - 12/2022", "2019 - 2023".
+_DATE_LIKE = re.compile(r"\b\d{1,2}[./](?:19|20)\d{2}\b|\b(?:19|20)\d{2}\s*[-/]\s*(?:\d{1,2}[./])?(?:19|20)\d{2}\b")
+
+
+def _phone(text: str) -> str:
+    """First thing that looks like a phone number: starts with + or 0, 8 to 15 digits, not a date range."""
+    for m in _PHONE.finditer(text):
+        s = m.group(0).strip()
+        if s[0] in "+0" and 8 <= len(re.sub(r"\D", "", s)) <= 15 and not _DATE_LIKE.search(s):
+            return s
+    return ""
+
+
 def contact_facts(text: str) -> dict:
     email = re.search(r"[\w.+-]+@[\w-]+\.[\w.]+", text)
-    phone = re.search(r"\+?\d[\d ()/.-]{7,}\d", text)
+    phone = _phone(text)
     # Profile links only (github.com/user, linkedin.com/in/user), not links to single repositories.
     links = re.findall(r"(?:https?://)?(?:www\.)?(?:github\.com|linkedin\.com/in|gitlab\.com)/[\w.-]+(?![\w./-])", text, re.I)
     first = next((ln.strip() for ln in text.splitlines() if ln.strip() and "@" not in ln and len(ln.strip()) < 50), "")
     langs = re.findall(r"(?i)\b(english|german|deutsch|englisch|french|spanish|bengali|hindi|arabic|turkish)\b[^\n,;]{0,20}?\b([ABC][12]|native|muttersprache|fluent|fließend)\b", text)
-    return {"name": first, "email": email.group(0) if email else "", "phone": phone.group(0).strip() if phone else "",
+    return {"name": first, "email": email.group(0) if email else "", "phone": phone,
             "links": list(dict.fromkeys(links)), "languages": [f"{a.title()} ({b.upper() if len(b) == 2 else b})" for a, b in langs]}
 
 
