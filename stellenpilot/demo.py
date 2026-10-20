@@ -1,6 +1,7 @@
 """Fictional sample data so anyone can try the dashboard without keys or network."""
 from __future__ import annotations
 
+import time
 from datetime import date, datetime, timedelta
 
 from .db import DB, today
@@ -11,6 +12,18 @@ D = date.today()
 
 def _iso(days_ago: int) -> str:
     return (D - timedelta(days=days_ago)).isoformat()
+
+
+def _local_at(wall: datetime) -> datetime:
+    """A wall time with the offset that really applies then, summer or winter time included.
+
+    `datetime.now().astimezone()` keeps today's offset, so a time in the other summer or
+    winter time would be stored an hour off. The wall time stays as given.
+    """
+    return datetime.fromtimestamp(time.mktime(wall.timetuple())).astimezone()
+
+
+INTERVIEW_AT = _local_at((datetime.now() + timedelta(days=4)).replace(hour=8, minute=0, second=0, microsecond=0)).isoformat()
 
 
 SAMPLES = [
@@ -29,7 +42,7 @@ SAMPLES = [
     dict(id="demo-4", source="TheirStack", title="Working Student BI", company="Kölner Retail Tech",
          location="Köln", job_type="Werkstudent", match=69, fit="Possible", lang="English",
          why="Dashboard work in Power BI.", gaps="Retail domain and dbt.", gap_tags=["dbt"],
-         status="interview", interview_at=(datetime.now().astimezone() + timedelta(days=4)).replace(hour=8, minute=0, second=0, microsecond=0).isoformat(),
+         status="interview", interview_at=INTERVIEW_AT,
          prep="## About Kölner Retail Tech\nA fictional company used for the demo.\n## Likely questions\n- Walk us through a pipeline you built\n- How do you check data quality?\n## Questions to ask them\n- What does the BI stack look like?",
          url="https://example.com/jobs/4"),
     dict(id="demo-5", source="Bundesagentur für Arbeit", title="Werkstudent Datenmanagement", company="Westfalen Stadtwerke",

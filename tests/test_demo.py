@@ -1,12 +1,14 @@
 """`stellenpilot demo` (issue #21): fictional jobs that show every part of the dashboard, no keys or network."""
+import os
 import tempfile
+import time
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from stellenpilot.config import Settings
 from stellenpilot.db import DB, STATUSES
-from stellenpilot.demo import SAMPLES, load_demo
+from stellenpilot.demo import SAMPLES, _local_at, load_demo
 
 
 class DemoTests(unittest.TestCase):
@@ -50,6 +52,38 @@ class DemoTests(unittest.TestCase):
             state = fetch_json(f"{srv.base}/api/state")
         self.assertEqual(len(state["jobs"]), len(SAMPLES))
         self.assertEqual(state["history"][0]["notes"], "Demo data")
+
+
+@unittest.skipUnless(hasattr(time, "tzset"), "needs time.tzset (not on Windows)")
+class BerlinTime(unittest.TestCase):
+    """The demo interview is four days out, so it can land in the other summer or winter time."""
+
+    def setUp(self):
+        self._tz = os.environ.get("TZ")
+        os.environ["TZ"] = "Europe/Berlin"
+        time.tzset()
+
+    def tearDown(self):
+        if self._tz is None:
+            os.environ.pop("TZ", None)
+        else:
+            os.environ["TZ"] = self._tz
+        time.tzset()
+
+    def test_wall_time_after_the_switch_keeps_the_winter_offset(self):
+        # Berlin switches to winter time on 2026-10-25, so 08:00 that day is +01:00, not +02:00.
+        wall = datetime(2026, 10, 25, 8, 0)
+        got = _local_at(wall)
+        self.assertEqual(got.replace(tzinfo=None), wall)
+        self.assertEqual(got.utcoffset(), timedelta(hours=1))
+        self.assertEqual(got.utcoffset(), got.astimezone().utcoffset())
+
+    def test_wall_time_before_the_switch_keeps_the_summer_offset(self):
+        wall = datetime(2026, 7, 1, 8, 0)
+        got = _local_at(wall)
+        self.assertEqual(got.replace(tzinfo=None), wall)
+        self.assertEqual(got.utcoffset(), timedelta(hours=2))
+        self.assertEqual(got.utcoffset(), got.astimezone().utcoffset())
 
 
 if __name__ == "__main__":
