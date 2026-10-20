@@ -26,14 +26,14 @@ Drop your CV, say what you want, press **Download** for the built in AI, switch 
 
 * **Private.** The built in AI runs on your computer. Your CV never leaves it.
 * **Honest.** A truth guard rejects any sentence your CV does not back up, and every score comes with your real gaps.
-* **Made for Germany.** 6 job boards plus about 200 company career pages, and it reads which German level an ad really needs. The app speaks English and German.
+* **Made for Germany.** 7 job boards plus about 200 company career pages, and it reads which German level an ad really needs. The app speaks English and German.
 * **You stay in control.** It never applies for you and never contacts a company.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    A["🔎 Collect<br/>6 job sources<br/>+ 200 company sites"] --> B["🧠 AI scores<br/>each job 0 to 100<br/>with reasons and gaps"]
+    A["🔎 Collect<br/>7 job sources<br/>+ 200 company sites"] --> B["🧠 AI scores<br/>each job 0 to 100<br/>with reasons and gaps"]
     B --> C["✍️ AI writes<br/>tailored CV and<br/>cover letter"]
     C --> D["📬 Gmail tracks<br/>replies and moves<br/>statuses forward"]
     D --> E["✅ You decide<br/>read, edit, send"]
@@ -41,7 +41,7 @@ flowchart LR
 
 Every day, by itself:
 
-1. **Collect.** Stellenpilot searches the Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy and Remotive, plus the career pages of about 200 companies with offices in Germany. Duplicates are removed.
+1. **Collect.** Stellenpilot searches the Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive and workingstudentjobs.de, plus the career pages of about 200 companies with offices in Germany. Duplicates are removed.
 2. **Score.** The AI reads each ad against your CV and gives a match from 0 to 100, a short reason, and the honest gaps. It reads which German level the ad really asks for and skips ads far above yours.
 3. **Write.** For the best matches it writes a CV and a cover letter tailored to that job, using only facts from your CV, as Word files and PDF.
 4. **Track.** With Gmail connected, confirmations, interview invitations and rejections move each application forward on their own. Interviews get a prep pack.
@@ -134,7 +134,7 @@ Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips an
 
 * **Daily autopilot.** Switch on **Automatic search** in Settings and pick a time. Stellenpilot sets up Task Scheduler on Windows or cron on macOS and Linux for you. The dashboard does not need to be open. A search missed because the computer was off runs when you log in or open Stellenpilot. Doing it by hand: [docs/scheduling.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/scheduling.md)
 * **Company watchlist.** Switch on the ready made list of about 200 companies with offices in Germany, or add your dream companies that use Greenhouse, Lever, Ashby, Personio or SmartRecruiters. Their new roles often appear here before they reach the job boards.
-* **Email sync.** Read only. Connect Gmail (or GMX, web.de and others) in **Settings, Email** with your address and an app password, in about 2 minutes, and statuses move forward as replies arrive. It never sends, deletes, moves or labels mail. Details: [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail.md)
+* **Email sync.** Read only. Connect Gmail (or GMX, web.de and others) in **Settings, Email** with your address and an app password, in about 2 minutes, and statuses move forward as replies arrive. It never sends, deletes, moves or labels mail. If your Google account has no app passwords, use your own Google key file instead: run `stellenpilot gmail --install` in a terminal, then follow the steps the dashboard shows. Details: [docs/gmail.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/gmail.md)
 * **Daily digest** to Telegram or email: top new matches, documents ready to send, interviews. See [docs/digest.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/digest.md)
 * **Jobs you found yourself.** Paste a link or the ad text from LinkedIn, a friend or anywhere, and the AI scores and tailors it like the rest.
 
@@ -225,10 +225,11 @@ Prefer files to the dashboard? Everything also lives in `profile.toml`, `config.
 | TheirStack | free, from theirstack.com | 200 credits a month, 1 credit per job | Keys may not be shared. Each user needs their own. |
 | Jobicy | none | free, one pass an hour at most | Remote jobs only. Credit Jobicy with a link to the listing; the dashboard does this. |
 | Remotive | none | free, about 4 calls a day at most | Remote jobs only, one call per run. Small feed, delayed by a day. Credit and link back to Remotive; the dashboard does this. |
+| workingstudentjobs.de | none | free, one call per city | Free Werkstudent and internship API for German cities. Every job links to its apply_url, and the listings must not be re-hosted as a competing board. The feed has no ad text, so only title, skills, language and field are scored. |
 
 There is no LinkedIn, StepStone or Indeed scraper on purpose. LinkedIn's and StepStone's terms forbid scraping, and Indeed has no public job search API. See [docs/sources.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/sources.md) for the details and links.
 
-Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Jobicy and Remotive cover remote roles open to your country, TheirStack and the company watchlist cover any country, and the Bundesagentur and Arbeitnow cover Germany only.
+Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Jobicy and Remotive cover remote roles open to your country, TheirStack and the company watchlist cover any country, and the Bundesagentur, Arbeitnow and workingstudentjobs.de cover Germany only.
 
 ## Privacy and safety
 
@@ -249,6 +250,7 @@ Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Job
 | `stellenpilot serve` | start the dashboard on 127.0.0.1:8765 and open it in the browser (`--no-browser` to skip) |
 | `stellenpilot shortcut` | put a Stellenpilot icon on the desktop that starts this workspace |
 | `stellenpilot gmail` | sync statuses from Gmail once |
+| `stellenpilot gmail --install` | install the Google packages for the own key file way of Gmail sync |
 | `stellenpilot demo` | load fictional sample jobs |
 | `stellenpilot import cv.pdf` | turn your CV into `profile.imported.toml` to review |
 | `stellenpilot add LINK` | add a job from a careers page link |
