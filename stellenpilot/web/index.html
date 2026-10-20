@@ -799,7 +799,9 @@ body.wizopen{overflow:hidden}
       <header class="phead">
         <h1 id="jobs-h">Jobs</h1>
         <div class="tools">
-          <input class="input" id="q" type="search" placeholder="Search title or company" aria-label="Search title or company">
+          <input class="input" id="q" type="search" placeholder="Search title, company or location" aria-label="Search title, company or location">
+          <label class="check" style="gap:8px">Source <select class="input" id="fsrc"></select></label>
+          <label class="check" style="gap:8px">Type <select class="input" id="ftype"></select></label>
           <label class="check" style="gap:8px">Match <select class="input" id="minm"><option value="0">Any</option><option value="60">60 or more</option><option value="70">70 or more</option><option value="80">80 or more</option></select></label>
           <button class="btn sec" id="addBtn" type="button" aria-expanded="false" aria-controls="addPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add a job</span></button>
         </div>
@@ -1110,7 +1112,8 @@ const DE={
 "Done for {d}: {m} good matches, {c} CVs and letters. Back at the next search.":"Fertig für {d}: {m} gute Treffer, {c} Lebensläufe und Anschreiben. Bis zur nächsten Suche.","today":"heute",
 "Search interrupted":"Suche unterbrochen","Working: {x}":"Arbeitet: {x}","On a break":"Macht Pause","since":"seit",
 // Jobs
-"Match":"Passung","Any":"Alle","60 or more":"60 oder mehr","70 or more":"70 oder mehr","80 or more":"80 oder mehr","Search title or company":"Titel oder Firma suchen","Add a job":"Job hinzufügen",
+"Match":"Passung","Any":"Alle","60 or more":"60 oder mehr","70 or more":"70 oder mehr","80 or more":"80 oder mehr",
+"Search title, company or location":"Titel, Firma oder Ort suchen","Source":"Quelle","Type":"Stellenart","Add a job":"Job hinzufügen",
 "Add a job yourself":"Selbst einen Job hinzufügen","Found it on LinkedIn, a company site or through a friend":"Gefunden auf LinkedIn, einer Firmenseite oder über Freunde","Link to the ad":"Link zur Anzeige",
 "(company careers pages; for LinkedIn or StepStone paste the text below)":"(Karriereseiten von Firmen; bei LinkedIn oder StepStone füge unten den Text ein)","Or paste the ad text":"Oder füge den Anzeigentext ein",
 "Copy the whole job ad here":"Kopiere die ganze Anzeige hierher","needed when pasting text":"nötig beim Einfügen von Text","Location":"Ort","e.g. Essen or Remote":"z. B. Essen oder Remote",
@@ -1291,10 +1294,23 @@ const langText=j=>j.source==="Found in Gmail"?"":t(j.lang==="German needed"?"Nee
 const metaLine=j=>[j.company,j.location,j.jobType,langText(j)].filter(Boolean).map(esc).join(" · ");
 const seen=j=>$("showDe").checked||j.lang!=="German needed";
 let sel=null;
+/* What the search box looks at: title, company, place, source, type and what the ad is about. */
+const hay=j=>[j.title,j.company,j.location,j.source,j.jobType,j.why,j.gaps].filter(Boolean).join(" ").toLowerCase();
 function visible(){
-  const q=$("q").value.trim().toLowerCase(), min=Number($("minm").value)||0;
-  return jobs.filter(j=>seen(j)&&(!filter||j.status===filter)&&(!q||(j.title+" "+j.company).toLowerCase().includes(q))&&(!min||Number(j.match)>=min||!(Number(j.match)>0)))
+  const q=$("q").value.trim().toLowerCase(), min=Number($("minm").value)||0, src=$("fsrc").value, typ=$("ftype").value;
+  return jobs.filter(j=>seen(j)&&(!filter||j.status===filter)&&(!src||j.source===src)&&(!typ||j.jobType===typ)
+    &&(!q||hay(j).includes(q))&&(!min||Number(j.match)>=min||!(Number(j.match)>0)))
     .sort((a,b)=>(b.match||0)-(a.match||0));
+}
+/* The source and type lists follow the jobs that are there, most used first. */
+function fillFilters(){
+  const uniq=f=>{const c=new Map();jobs.forEach(j=>{const v=f(j);if(v)c.set(v,(c.get(v)||0)+1)});
+    return [...c].sort((a,b)=>b[1]-a[1]).map(x=>x[0]);};
+  for(const [id,vals] of [["fsrc",uniq(j=>j.source)],["ftype",uniq(j=>j.jobType)]]){
+    const el=$(id),keep=el.value;
+    el.innerHTML=`<option value="">${t("Any")}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+    el.value=vals.includes(keep)?keep:"";
+  }
 }
 function renderPipe(){
   const base=jobs.filter(seen), n=k=>base.filter(j=>j.status===k).length;
@@ -1374,7 +1390,7 @@ function fmtPrep(t){let o="",inList=false;for(const raw of String(t).split("\n")
 async function save(id,fields,msg){try{await api("PATCH","/api/jobs/"+encodeURIComponent(id),fields);if(msg)toast(msg);refresh()}
   catch(err){if(err&&err.code==="invalid_argument"){canWrite=false;renderList();toast("You can view this board but not change it")}else toast("Could not save. Try again in a moment.")}}
 function goJob(id,openSel){const j=jobs.find(x=>x._id===id);if(!j)return;
-  if(filter&&j.status!==filter)filter=null;if(!seen(j))$("showDe").checked=true;$("q").value="";$("minm").value="0";
+  if(filter&&j.status!==filter)filter=null;if(!seen(j))$("showDe").checked=true;$("q").value="";$("minm").value="0";$("fsrc").value="";$("ftype").value="";
   if(openSel==="prep")openPrep.add(id);sel=id;location.hash="#jobs";render();
   requestAnimationFrame(()=>{const b=document.querySelector(`[data-pick="${CSS.escape(id)}"]`);if(b)b.scrollIntoView({block:"nearest"});
     if(innerWidth<=1100)$("detail").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})})}
@@ -1472,6 +1488,7 @@ let goto="";document.addEventListener("click",e=>{const a=e.target.closest("a[da
 
 $("pipe").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;filter=b.dataset.k||null;render()});
 $("q").addEventListener("input",renderList);$("minm").addEventListener("change",renderList);
+$("fsrc").addEventListener("change",renderList);$("ftype").addEventListener("change",renderList);
 $("showDe").addEventListener("change",render);
 const main=document.querySelector(".main");
 main.addEventListener("click",async e=>{
@@ -2034,6 +2051,7 @@ async function refresh(){
     if(sig===lastState)return;
     lastState=sig;
     jobs=st.jobs;runs=st.runs;runLog=st.history||[];weekly=st.weekly;
+    fillFilters();
     $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();
     if(!st.profileReady&&!cvPrompted){cvPrompted=true;openSetup()}

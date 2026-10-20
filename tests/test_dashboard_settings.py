@@ -113,3 +113,15 @@ class LanguageTest(unittest.TestCase):
         self.assertTrue(is_learning_group("Learning"))
         self.assertTrue(is_learning_group("Lernen"))
         self.assertFalse(is_learning_group("Cloud"))
+
+    def test_job_filter_controls_exist(self):
+        """The Jobs filter reads these ids; a rename in the script without the HTML would break the page."""
+        import re
+        html = (Path(__file__).parent.parent / "stellenpilot" / "web" / "index.html").read_text(encoding="utf-8")
+        code = html[html.index("const hay=j=>"):html.index("function renderPipe()")]
+        ids = set(re.findall(r'\$\("(\w+)"\)', code))
+        self.assertTrue(ids)
+        for i in ids:
+            self.assertIn(f'id="{i}"', html, f"the Jobs page has no #{i}")
+        for i in ("fsrc", "ftype"):  # the source and type lists are built from the jobs that are there
+            self.assertIn(f'["{i}"', code)
