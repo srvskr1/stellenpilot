@@ -78,6 +78,10 @@ class LanguageTest(unittest.TestCase):
     def test_ui_language_is_a_setting(self):
         self.assertEqual(clean_settings({"ui": {"language": "de"}}), {"ui": {"language": "de"}})
         self.assertEqual(DEFAULTS["ui"]["language"], "auto")
+
+    def test_jobicy_default_matches_the_docs(self):
+        # docs/sources.md, config.example.toml and jobicy.py all say 2 pages; the merged default must too.
+        self.assertEqual(DEFAULTS["sources"]["limits"]["jobicy_pages"], 2)
         with self.assertRaises(ValueError):
             clean_settings({"ui": {"language": "fr"}})
 

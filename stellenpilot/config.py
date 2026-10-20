@@ -29,7 +29,7 @@ DEFAULTS = {
         "remotive": True,
         "workingstudentjobs": True,
         "limits": {"adzuna_calls": 20, "adzuna_pages": 5, "theirstack_jobs": 6, "arbeitsagentur_results": 150,
-                   "arbeitsagentur_pages": 5, "arbeitnow_pages": 10, "jobicy_pages": 3,
+                   "arbeitsagentur_pages": 5, "arbeitnow_pages": 10, "jobicy_pages": 2,
                    "workingstudentjobs_pages": 3},
         "theirstack_options": {"location_ids": [], "english_only": True},
     },
