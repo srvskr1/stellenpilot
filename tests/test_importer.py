@@ -4,7 +4,7 @@ import tomllib
 import unittest
 from pathlib import Path
 
-from stellenpilot.importer import contact_facts, missing_lines, read_cv_text, to_toml, verify
+from stellenpilot.importer import contact_facts, read_cv_text, to_toml, verify
 
 CV = """Alex Example
 alex@example.com | +49 000 0000000 | github.com/alex-example
@@ -23,6 +23,14 @@ class ImporterTests(unittest.TestCase):
         c = contact_facts(CV)
         self.assertEqual((c["name"], c["email"]), ("Alex Example", "alex@example.com"))
         self.assertIn("German (A2)", c["languages"])
+
+    def test_phone_is_not_a_date_range(self):
+        for text, want in (("Data Analyst, 01/2020 - 12/2022\nSkills: SQL", ""),
+                           ("Werkstudent 2019 - 2023 2024 bei X", ""),
+                           ("Data Analyst 2020 - 2023\nTel. +49 201 1234567", "+49 201 1234567"),
+                           ("Mobil: 0176 12345678", "0176 12345678")):
+            with self.subTest(text=text):
+                self.assertEqual(contact_facts(text)["phone"], want)
 
     def test_verify_drops_invented_bullets_and_skills(self):
         data = {"person": {"name": "Alex Example", "languages": [{"name": "English", "level": "C1"}]},
