@@ -115,10 +115,9 @@ def llm_score(llm, job: dict, profile: dict, taste: str = "") -> dict:
             + f"JOB\nTitle: {job['title']}\nCompany: {job['company']}\nLocation: {job['location']}\n"
             f"Description:\n{job_ad(job['description'], llm.max_chars)}")
     out = llm.complete_json(SYSTEM, user, max_tokens=600)
-    try:
-        match = int(out.get("match") or 0)
-    except (TypeError, ValueError):
-        match = 0
+    # Local models sometimes answer "85%", "85.0" or "85/100" instead of a bare integer.
+    m = re.search(r"\d+(?:\.\d+)?", str(out.get("match") or ""))
+    match = round(float(m.group(0))) if m else 0
     return {
         "match": max(0, min(100, match)),
         "fit": str(out.get("fit", "")),

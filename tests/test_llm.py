@@ -122,6 +122,16 @@ class FallbackTests(unittest.TestCase):
         self.assertIsInstance(r["match"], int)
         self.assertIn("keyword score used", r["why"])
 
+    def test_match_given_as_text_is_still_read(self):
+        from unittest import mock
+        from stellenpilot.score import llm_score
+        job = {"title": "Working Student Data", "company": "X", "location": "Essen", "description": "Python and SQL."}
+        for given, want in (("85%", 85), ("72.6", 73), ("64/100", 64), (91, 91), (None, 0), ("high", 0), ("250", 100)):
+            llm = mock.Mock(max_chars=4000)
+            llm.complete_json.return_value = {"match": given}
+            with self.subTest(given=given):
+                self.assertEqual(llm_score(llm, job, {})["match"], want)
+
 
 class ParseJsonTests(unittest.TestCase):
     def test_tolerates_chatter_and_nested_braces(self):
