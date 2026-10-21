@@ -1,0 +1,858 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Stellenpilot</title>
+<meta name="description" content="Stellenpilot finds new jobs in Germany every morning, scores them against your CV and writes a tailored CV and cover letter. Free, local, no account.">
+<style>@font-face{font-family:"Geist";src:url(fonts/geist.woff2) format("woff2");font-weight:100 900;font-display:swap}@font-face{font-family:"Geist Mono";src:url(fonts/geist-mono.woff2) format("woff2");font-weight:100 900;font-display:swap}</style>
+<link rel="canonical" href="https://stellenpilot.dev/">
+<style>
+/* Layout: light frosted glass over a slow aurora in the app's own colors; one hero moment, then text and visual rows that each tell one feature. */
+:root{
+  color-scheme:light;
+  --bg:#F6F7F9; --bg-rgb:246,247,249;
+  --glass:rgba(255,255,255,.66); --glass-strong:rgba(255,255,255,.86);
+  --line:rgba(16,24,40,.10); --line-strong:rgba(16,24,40,.16);
+  --ink:#172554; --title:#1E3A8A; --text:#3B4A6B; --muted:#52627F;
+  --blue:#1D4ED8; --blue-rgb:29,78,216; --blue-soft:#EFF4FF; --blue-hover:#1E40AF;
+  --amber:#F59E0B; --amber-rgb:245,158,11; --violet-rgb:124,58,237;
+  --good:#047857; --good-bg:#E7F6EF; --warn:#B45309; --warn-bg:#FEF3E2; --bad:#B91C1C; --bad-bg:#FDECEC; --step:#6D28D9; --step-bg:#F3EEFF; --info-bg:#EFF4FF;
+  --paper:#FFFFFF;
+  --f-ui:"Geist","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"Geist Mono",ui-monospace,Consolas,monospace;
+  --e2:0 16px 44px rgba(23,37,84,.10);
+  --e3:0 28px 70px rgba(23,37,84,.16);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.65 var(--f-ui);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--blue);text-decoration:none}
+a:hover{color:var(--blue-hover)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:8px}
+b,strong{color:var(--ink);font-weight:600}
+h1,h2,h3{color:var(--title);text-wrap:balance;margin:0}
+
+/* aurora */
+.aurora{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:var(--bg)}
+.aurora span{position:absolute;width:64vmax;height:64vmax;border-radius:50%;will-change:transform;animation:drift 34s ease-in-out infinite alternate}
+.aurora span:nth-child(1){background:radial-gradient(circle,rgba(var(--blue-rgb),.20),transparent 62%);top:-28%;left:-18%}
+.aurora span:nth-child(2){background:radial-gradient(circle,rgba(var(--violet-rgb),.14),transparent 62%);top:18%;right:-30%;animation-duration:42s}
+.aurora span:nth-child(3){background:radial-gradient(circle,rgba(var(--amber-rgb),.13),transparent 62%);bottom:-40%;left:12%;animation-duration:48s}
+@keyframes drift{to{transform:translate3d(9vw,7vh,0) scale(1.12)}}
+
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px) saturate(150%);-webkit-backdrop-filter:blur(12px) saturate(150%);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),var(--e2)}
+@supports not (backdrop-filter:blur(1px)){.glass{background:var(--glass-strong)}}
+
+/* nav */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:rgba(var(--bg-rgb),.9)}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;transition:background .3s,box-shadow .3s}
+.nav.scrolled{background:rgba(var(--bg-rgb),.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:20px;padding-block:14px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);font-size:18px;letter-spacing:-.01em}
+.brand i{width:28px;height:28px;border-radius:9px;background:var(--blue);display:grid;place-items:center}
+.nav-links{display:flex;gap:22px;margin-left:auto;font-size:15px}
+.nav-links a{color:var(--text)}
+.nav-links a:hover{color:var(--ink)}
+.lang{display:inline-flex;padding:3px;border-radius:999px;background:rgba(255,255,255,.6);border:1px solid var(--line)}
+.lang button{min-width:44px;min-height:34px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:600 14px var(--f-ui);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--blue);color:#FFFFFF}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font:600 16px var(--f-ui);border:1px solid transparent;cursor:pointer;transition:transform .2s,background .2s,box-shadow .2s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--blue);color:#FFFFFF;box-shadow:0 8px 26px rgba(var(--blue-rgb),.32)}
+.btn-primary:hover{background:var(--blue-hover);color:#FFFFFF}
+.btn-ghost{background:rgba(255,255,255,.75);color:var(--ink);border-color:var(--line-strong)}
+.btn-ghost:hover{background:#FFFFFF;color:var(--ink)}
+.btn svg{width:18px;height:18px}
+.pip{display:inline-flex;align-items:center;gap:12px;padding:6px 6px 6px 16px;border-radius:14px;font:500 15px var(--f-mono);color:var(--ink);background:rgba(255,255,255,.7);border:1px solid var(--line)}
+.pip button{min-height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:#FFFFFF;color:var(--blue);font:600 13px var(--f-ui);cursor:pointer}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:56px;align-items:center;padding-block:56px 72px}
+.hero h1{font-size:clamp(2.3rem,5.2vw,4.1rem);line-height:1.04;letter-spacing:-.035em;color:var(--ink)}
+.lede{font-size:clamp(1.05rem,1.6vw,1.2rem);color:var(--text);max-width:34em;margin:20px 0 28px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.fine{font-size:14px;color:var(--muted);margin-top:14px}
+
+.stage{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:24px;border-radius:28px}
+.sheet{position:absolute;width:46%;aspect-ratio:1/1.3;background:var(--paper);border-radius:8px;box-shadow:0 12px 30px rgba(23,37,84,.14);padding:16px;display:flex;flex-direction:column;gap:7px}
+.sheet b{font-size:12px;color:var(--title)}
+.sheet i{display:block;height:6px;border-radius:3px;background:#E4E8F0}
+.sheet i.hl{background:rgba(var(--blue-rgb),.35)}
+.sheet.cv{right:16px;top:20px;transform:rotate(5deg)}
+.sheet.letter{right:46%;top:28px;transform:rotate(-4deg)}
+.job{position:relative;z-index:2;width:100%;max-width:440px;margin-top:84px;padding:20px;border-radius:20px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--e3)}
+.job-top{display:flex;gap:16px;align-items:center}
+.job h3{font-size:18px;color:var(--ink);line-height:1.3}
+.job .meta{font-size:14px;color:var(--muted)}
+.ring{position:relative;width:64px;height:64px;flex:none;margin-left:auto}
+.ring svg{width:64px;height:64px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:6}
+.ring .track{stroke:#E4E8F0}
+.ring .val{stroke:var(--good);stroke-linecap:round;stroke-dasharray:163.4;stroke-dashoffset:21.2}
+.ring.mid .val{stroke:var(--blue)}.ring.low .val{stroke:var(--amber)}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font:700 18px var(--f-ui);color:var(--good);font-variant-numeric:tabular-nums}
+.ring.mid span{color:var(--blue)}.ring.low span{color:var(--warn)}
+.reason{font-size:15px;color:var(--text);margin:14px 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font:600 13px/1.3 var(--f-ui);white-space:nowrap;flex:none}
+.chip.warn{color:var(--warn);background:var(--warn-bg)}
+.chip.good{color:var(--good);background:var(--good-bg)}
+.chip.bad{color:var(--bad);background:var(--bad-bg)}
+.chip.info{color:var(--blue);background:var(--info-bg)}
+.chip.step{color:var(--step);background:var(--step-bg)}
+.job-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 12px}
+.job-head>div{min-width:0}
+.replay{position:relative;z-index:2;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.8);color:var(--blue);font:600 13px var(--f-ui);cursor:pointer}
+
+/* hero sequence (only while .play) */
+.play .job{animation:rise .8s var(--ease) both}
+.play .ring .val{animation:ring 1.3s var(--ease) .5s both}
+.play .reason{animation:fade .6s var(--ease) 1.4s both}
+.play .chips .chip:nth-child(1){animation:pop .5s var(--ease) 1.8s both}
+.play .chips .chip:nth-child(2){animation:pop .5s var(--ease) 2.0s both}
+.play .sheet.letter{animation:fanL 1s var(--ease) 2.3s both}
+.play .sheet.cv{animation:fanR 1s var(--ease) 2.2s both}
+.play .status .is-new{animation:out .3s ease 2.9s both}
+.play .status .is-ready{animation:pop .5s var(--ease) 3.0s both}
+.status{display:grid}.status>*{grid-area:1/1}
+.status .is-new{opacity:0}
+@keyframes rise{from{opacity:0;transform:translateY(28px)}}
+@keyframes ring{from{stroke-dashoffset:163.4}}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+@keyframes pop{from{opacity:0;transform:scale(.8)}}
+@keyframes out{0%{opacity:1}100%{opacity:0}}
+@keyframes fanR{from{opacity:0;transform:rotate(0) translate(-60px,40px)}}
+@keyframes fanL{from{opacity:0;transform:rotate(0) translate(-40px,60px)}}
+
+/* rail: one connected pipeline, icons joined by a line */
+.rail{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:22px 12px 18px;border-radius:24px}
+.rail::before{content:"";position:absolute;left:10%;right:10%;top:44px;height:2px;background:linear-gradient(90deg,var(--blue),var(--blue) 75%,var(--good));opacity:.35}
+.rail a{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:0 6px;color:var(--text);border-radius:16px}
+.rail a:hover{color:var(--text)}
+.rail .ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--paper);border:1.5px solid rgba(var(--blue-rgb),.35);color:var(--blue);box-shadow:0 6px 16px rgba(var(--blue-rgb),.12);transition:transform .2s var(--ease),box-shadow .2s}
+.rail a:hover .ic{transform:translateY(-3px);box-shadow:0 10px 22px rgba(var(--blue-rgb),.2)}
+.rail .ic svg{width:22px;height:22px}
+.rail a:last-child .ic{background:var(--good);border-color:var(--good);color:#FFFFFF}
+.rail b{font-size:15px;line-height:1.25;color:var(--title)}
+/* a pulse travels the pipeline every 6s; each step pings as it passes (the work runs on its own, daily) */
+.rail .dot{position:absolute;left:10%;top:38px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background-color:var(--blue);background-image:radial-gradient(circle at 35% 30%,rgba(255,255,255,.95) 0 16%,rgba(255,255,255,0) 46%);box-shadow:0 0 0 4px rgba(var(--blue-rgb),.18),0 0 14px rgba(var(--blue-rgb),.6);animation:travel 6s linear infinite;z-index:1}
+@keyframes travel{0%{left:10%;opacity:0}4%{opacity:1}80%{left:90%;opacity:1;background-color:var(--good);box-shadow:0 0 0 4px rgba(4,120,87,.18),0 0 14px rgba(4,120,87,.6)}88%,100%{left:90%;opacity:0;background-color:var(--good)}}
+.rail .ic{position:relative;z-index:2;animation:bump 6s linear infinite;animation-delay:calc(var(--k)*1.2s)}
+.rail .ic::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--blue);opacity:0;animation:ping 6s linear infinite;animation-delay:inherit}
+.rail a:last-child .ic::after{border-color:var(--good)}
+@keyframes bump{0%{transform:scale(1)}3%{transform:scale(1.12)}8%,100%{transform:scale(1)}}
+@keyframes ping{0%{opacity:.7;transform:scale(1)}10%{opacity:0;transform:scale(1.7)}100%{opacity:0;transform:scale(1.7)}}
+.rail span{font-size:13px;line-height:1.4;max-width:16em}
+
+/* sections */
+section{scroll-margin-top:80px}
+.sec-head{max-width:640px;margin:120px 0 40px}
+.sec-head h2{font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.12;letter-spacing:-.025em;color:var(--ink)}
+.sec-head p{color:var(--text);margin-top:12px}
+.row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:center;margin-bottom:96px}
+.row.flip{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+.row.flip .txt{order:2}
+.txt .kicker{font:600 14px var(--f-ui);color:var(--blue)}
+.txt h3{font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.15;letter-spacing:-.02em;margin:6px 0 12px}
+.txt p{color:var(--text);max-width:30em}
+.viz{position:relative;padding:24px;border-radius:24px;min-height:260px;overflow:hidden}
+
+/* F1 sources */
+.f1{display:grid;grid-template-columns:minmax(0,.9fr) 40px minmax(0,1.1fr);align-items:center;gap:8px}
+.srcs{display:flex;flex-direction:column;gap:6px}
+.src{padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.85);border:1px solid var(--line);font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src.many{color:var(--blue)}
+.flow{height:100%;display:flex;align-items:center}
+.flow svg{width:40px;height:120px}
+.flow path{fill:none;stroke:rgba(var(--blue-rgb),.5);stroke-width:2;stroke-dasharray:4 5}
+.list{display:flex;flex-direction:column;gap:8px}
+.lrow{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:var(--paper);border:1px solid var(--line);font-size:14px;color:var(--ink)}
+.lrow span{color:var(--muted);font-size:13px;white-space:nowrap}
+.dup-wrap{position:relative}
+.dup{position:absolute;inset:0;opacity:0}
+.note{margin-top:10px}
+.viz.play .src{animation:fade .5s var(--ease) both;animation-delay:calc(var(--i)*90ms)}
+.viz.play .flow path{animation:dash 1.2s linear .5s both}
+.viz.play .lrow{animation:fade .5s var(--ease) both;animation-delay:calc(.7s + var(--i)*120ms)}
+.viz.play .dup{animation:merge 1.2s var(--ease) 1.3s both}
+.viz.play .note{animation:pop .5s var(--ease) 2.3s both}
+@keyframes dash{from{stroke-dashoffset:60;opacity:0}}
+@keyframes merge{0%{opacity:1;transform:translateY(46px)}70%{opacity:1;transform:none}100%{opacity:0;transform:none}}
+
+/* F2 sorting */
+.sortlist{position:relative;display:flex;flex-direction:column;gap:10px}
+.scard{display:flex;align-items:center;gap:14px;height:84px;padding:0 16px;border-radius:16px;background:var(--glass-strong);border:1px solid var(--line)}
+.scard .ring,.scard .ring svg{width:52px;height:52px}
+.scard .ring{margin-left:0;flex:none}
+.scard .ring span{font-size:16px}
+.scard .ring .val{stroke-dasharray:122.5}
+.scard .sinfo{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
+.scard .sinfo b{font-size:16px;line-height:1.3;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scard .sinfo small{font-size:14px;line-height:1.35;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scard .v{font-weight:600}.scard .v.g{color:var(--good)}.scard .v.b{color:var(--blue)}.scard .v.w{color:var(--warn)}
+.viz.play .s91{animation:fromDown1 1s var(--ease) .4s both}
+.viz.play .s74{animation:fromDown1 1s var(--ease) .4s both}
+.viz.play .s52{animation:fromUp2 1s var(--ease) .4s both}
+.viz.play .scard .ring .val{animation:ring2 1s var(--ease) 1.2s both}
+.viz.play .scard .sinfo small{animation:fade .5s var(--ease) 1.8s both}
+@keyframes fromDown1{from{transform:translateY(94px)}}
+@keyframes fromUp2{from{transform:translateY(-188px)}}
+@keyframes ring2{from{stroke-dashoffset:122.5}}
+
+/* F3 German level: the AI scans the ad, finds the phrase, a needle walks the level meter to what the ad needs, the summary types itself */
+.ad{position:relative;overflow:hidden;padding:16px 18px;border-radius:14px;background:var(--paper);border:1px solid var(--line);font-size:15px;color:var(--text)}
+.ad mark{background:linear-gradient(rgba(var(--amber-rgb),.35),rgba(var(--amber-rgb),.35)) 0 100%/100% 100% no-repeat;color:var(--ink);font-weight:600;padding:0 2px;border-radius:3px}
+.ad::after{content:"";position:absolute;left:0;right:0;top:0;height:34px;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,transparent,rgba(var(--blue-rgb),.16) 60%,rgba(var(--blue-rgb),.45) 96%,transparent);border-bottom:2px solid rgba(var(--blue-rgb),.6)}
+.lvl-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:20px 0 12px;font-size:14px;color:var(--text)}
+.lvl-legend .k{display:inline-flex;align-items:center;gap:6px}
+.lvl-legend .k i{width:10px;height:10px;border-radius:50%}
+.lvl-legend .k.me i{background:var(--blue)}.lvl-legend .k.need i{background:var(--amber)}
+.lvl-legend .chip{margin-left:auto}
+.meter{position:relative;padding-top:6px}
+.seg6,.lab6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.seg6 i{height:12px;border-radius:6px;background:#E4E8F0;transform-origin:left}
+.seg6 i.have{background:var(--blue)}
+.seg6 i.gap{background:repeating-linear-gradient(135deg,rgba(var(--amber-rgb),.6) 0 5px,rgba(var(--amber-rgb),.22) 5px 10px);box-shadow:inset 0 0 0 1.5px var(--amber)}
+.needle{position:absolute;top:1px;left:calc(75% - 11px);width:22px;height:22px;border-radius:50%;z-index:2;
+  background-color:var(--amber);background-image:radial-gradient(circle at 35% 30%,rgba(255,255,255,.95) 0 16%,rgba(255,255,255,0) 48%);
+  border:3px solid #FFFFFF;box-shadow:0 4px 12px rgba(var(--amber-rgb),.45)}
+.lab6{margin-top:8px;text-align:center;font:600 13px var(--f-ui);color:var(--muted)}
+.lab6 .me{color:var(--blue)}.lab6 .need{color:var(--warn)}
+.summary{margin-top:16px;min-height:3.2em;padding:12px 14px;border-radius:12px;background:var(--info-bg);font-size:14px;color:var(--ink)}
+.summary .caret{display:inline-block;width:2px;height:1em;margin-left:2px;vertical-align:-2px;background:var(--blue);animation:blink .8s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.viz.play .ad::after{animation:scan 1.1s ease-in-out .2s both}
+@keyframes scan{0%{opacity:1;transform:translateY(-40px)}90%{opacity:1}100%{opacity:0;transform:translateY(120px)}}
+.viz.play .ad mark{animation:sweep .7s var(--ease) 1.2s both}
+@keyframes sweep{from{background-size:0 100%}}
+.viz.play .seg6 i.have{animation:segfill .3s var(--ease) both;animation-delay:calc(1.5s + var(--i)*.14s)}
+.viz.play .needle{animation:walk 1.1s var(--ease) 2.05s both}
+@keyframes walk{from{left:-11px;opacity:0}15%{opacity:1}}
+.viz.play .seg6 i.gap{animation:segfill .3s var(--ease) both;animation-delay:calc(2.45s + var(--i)*.22s)}
+@keyframes segfill{from{transform:scaleX(0)}}
+.viz.play .lvl-legend .chip{animation:pop .5s var(--ease) 3.1s both}
+
+/* F4 tailoring */
+.f4{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;position:relative}
+.doc{background:var(--paper);border-radius:8px;padding:16px;box-shadow:0 10px 26px rgba(23,37,84,.12);display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text);min-height:250px}
+.doc h4{margin:0 0 4px;font-size:13px;color:var(--title)}
+.cvline{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#F4F6FA}
+.cvline.m{background:var(--info-bg);color:var(--ink);font-weight:600}
+.tag{display:inline-block;padding:1px 6px;margin:1px 0;border-radius:6px}
+.tag.m{background:rgba(var(--blue-rgb),.14);color:var(--ink);font-weight:600}
+.letter2{position:absolute;right:-6px;bottom:-14px;width:46%;background:var(--paper);border-radius:8px;padding:12px;box-shadow:var(--e3);font-size:12px;color:var(--text);display:flex;flex-direction:column;gap:6px}
+.letter2 i{display:block;height:5px;border-radius:3px;background:#E4E8F0}
+.badges{display:flex;gap:6px}
+.viz.play .tag.m,.viz.play .cvline.m{animation:glow 1s ease .4s both}
+.viz.play .cvline.up1{animation:glow 1s ease .4s both,up1 .9s var(--ease) 1.4s both}
+.viz.play .cvline.up2{animation:glow 1s ease .4s both,up2 .9s var(--ease) 1.4s both}
+.viz.play .cvline.dn{animation:dn .9s var(--ease) 1.4s both}
+.viz.play .letter2{animation:slideOut 1s var(--ease) 2.3s both}
+@keyframes glow{from{background:#F4F6FA;color:var(--text)}}
+@keyframes up1{from{transform:translateY(80px)}}
+@keyframes up2{from{transform:translateY(80px)}}
+@keyframes dn{from{transform:translateY(-80px)}}
+@keyframes slideOut{from{opacity:0;transform:translate(-60px,20px) rotate(-4deg)}}
+
+/* F5 truth guard */
+.gen{display:flex;flex-direction:column;gap:14px}
+.gline{position:relative;padding:14px 16px;border-radius:14px;background:var(--paper);border:1px solid var(--line);font-size:15px;color:var(--ink)}
+.gline .lbl{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.strike{position:relative;color:var(--bad)}
+.strike::after{content:"";position:absolute;left:-2px;right:-2px;top:52%;height:2px;background:var(--bad);transform-origin:left}
+.gline.fixed{border-color:rgba(4,120,87,.35);background:var(--good-bg)}
+.viz.play .strike::after{animation:grow .7s var(--ease) .6s both}
+.viz.play .strike{animation:redden .4s ease .6s both}
+.viz.play .gen .chip.bad{animation:pop .5s var(--ease) 1.2s both}
+.viz.play .gline.fixed{animation:fade .6s var(--ease) 1.8s both}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes redden{from{color:var(--ink)}}
+
+/* F6 reply tracking */
+.track6{display:flex;flex-direction:column;gap:14px}
+.mailtoast{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:12px 14px;border-radius:16px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--e2)}
+.mailtoast svg{width:34px;height:34px;flex:none;padding:7px;border-radius:10px;background:var(--info-bg);color:var(--blue)}
+.mailtoast .who{flex:1;min-width:150px;display:flex;flex-direction:column;line-height:1.35}
+.mailtoast .who b{font-size:14px}
+.mailtoast .who small{font-size:13px;color:var(--text)}
+.appcard{padding:16px;border-radius:18px;background:var(--glass-strong);border:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.apphead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.apphead div{display:flex;flex-direction:column;line-height:1.35}
+.apphead b{font-size:16px}
+.apphead small{font-size:13px;color:var(--muted)}
+.steps{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));text-align:center}
+.steps::before,.steps .fill{content:"";position:absolute;left:10%;top:7px;height:4px;border-radius:2px}
+.steps::before{width:80%;background:#E1E6EF}
+.steps .fill{width:60%;background:var(--blue)}
+.st{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;font:600 12px/1.2 var(--f-ui);color:var(--muted)}
+.st i{width:18px;height:18px;border-radius:50%;background:#FFFFFF;border:3px solid #D5DBE6}
+.st.done i{background:var(--blue);border-color:var(--blue)}
+.st.done{color:var(--blue)}
+.st.now i{background:var(--amber);border-color:#FFFFFF;box-shadow:0 0 0 4px rgba(var(--amber-rgb),.25)}
+.st.now{color:var(--warn)}
+.viz.play .mailtoast{animation:drop2 .8s var(--ease) .3s both}
+.viz.play .steps .fill{animation:fillstep 1s var(--ease) 1.2s both}
+.viz.play .st.now i{animation:pop .5s var(--ease) 2s both}
+.viz.play .appcard .chip.good{animation:pop .5s var(--ease) 2.4s both}
+@keyframes drop2{from{opacity:0;transform:translateY(-24px)}}
+@keyframes fillstep{from{width:40%}}
+
+/* trio */
+.trio{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.tcard{padding:24px;border-radius:24px;display:flex;flex-direction:column;gap:10px}
+.tcard h3{font-size:20px}
+.tcard p{font-size:15px;color:var(--text);margin:0}
+.tcard svg{width:100%;height:auto;margin-top:auto}
+.tcard svg.priv{max-height:none;margin-top:auto;margin-bottom:-6px}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;border-radius:14px;background:rgba(var(--blue-rgb),.07)}
+.seg button{min-height:44px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:var(--text);font:600 13px var(--f-ui);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--blue);color:#FFFFFF}
+.ai-out{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;padding:12px 14px;border-radius:12px;background:var(--paper);border:1px solid var(--line)}
+.ai-out dt{color:var(--muted)}.ai-out dd{margin:0;color:var(--ink);font-weight:600}
+.ai-out .where{color:var(--good)}
+/* AI choice: three facts with icons instead of a table, no nested boxes */
+.facts{display:flex;flex-direction:column;gap:14px;margin-top:auto;padding-top:6px}
+.fact{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px}
+.fi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;transition:background .3s,color .3s}
+.fi svg{width:20px;height:20px}
+.fi.lock{background:var(--good-bg);color:var(--good)}
+.fi.lock.warn{background:var(--warn-bg);color:var(--warn)}
+.fi.coin{background:var(--info-bg);color:var(--blue)}
+.fi.tool{background:var(--step-bg);color:var(--step)}
+.fact small{display:block;font-size:12px;line-height:1.3;color:var(--muted)}
+.fact b{display:block;font-size:15px;line-height:1.35;color:var(--ink)}
+.effort{display:flex;gap:4px}
+.effort i{width:8px;height:8px;border-radius:50%;background:#E1E6EF;transition:background .3s,transform .3s}
+.effort i.on{background:var(--step);transform:scale(1.15)}
+.facts.swap b{animation:fade .45s var(--ease) both}
+.facts.swap .fact:nth-child(2) b{animation-delay:.06s}.facts.swap .fact:nth-child(3) b{animation-delay:.12s}
+.bars{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.bar span{white-space:nowrap}
+.bar{display:grid;grid-template-columns:96px minmax(0,1fr) 40px;align-items:center;gap:8px;font-size:13px;color:var(--text)}
+.bar div{height:10px;border-radius:5px;background:#E4E8F0;overflow:hidden}
+.bar div i{display:block;height:100%;border-radius:5px;background:var(--blue);transform-origin:left}
+.bar b{font-variant-numeric:tabular-nums;color:var(--blue)}
+.viz.play .bar div i{animation:grow 1s var(--ease) .3s both}
+.viz.play .cloudline{animation:dash 1.4s linear .3s both}
+
+/* tour, blog, cta */
+.tour{padding:14px;border-radius:28px;max-width:908px;margin-inline:auto}
+.win{border-radius:16px;overflow:hidden;background:var(--paper);border:1px solid var(--line)}
+.win-bar{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.win-bar i{width:10px;height:10px;border-radius:50%;background:#D7DCE6}
+.win img{display:block;width:100%;height:auto}
+.posts{border-radius:24px;padding:8px 24px}
+.post{display:flex;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);color:var(--ink);font-weight:600}
+.post:last-child{border-bottom:0}
+.post span{font-weight:500;color:var(--muted);font-size:14px;white-space:nowrap}
+.cta{margin:120px 0 40px;padding:48px;border-radius:32px;display:flex;flex-direction:column;gap:16px;align-items:flex-start;background:linear-gradient(135deg,rgba(var(--blue-rgb),.10),rgba(255,255,255,.6))}
+.cta h2{font-size:clamp(1.8rem,3.6vw,2.7rem);letter-spacing:-.025em;line-height:1.1;color:var(--ink)}
+.cta p{color:var(--text);margin:0}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 28px;justify-content:space-between;padding-block:32px 48px;font-size:14px;color:var(--muted);border-top:1px solid var(--line)}
+footer nav{display:flex;flex-wrap:wrap;gap:18px}
+footer a{color:var(--text)}
+
+/* motion for the remaining parts */
+.seg{position:relative}
+.seg .thumb{position:absolute;z-index:0;border-radius:10px;background:var(--blue);box-shadow:0 6px 16px rgba(var(--blue-rgb),.3);transition:left .35s var(--ease),top .35s var(--ease),width .35s var(--ease),height .35s var(--ease)}
+.seg button{position:relative;z-index:1;transition:color .25s}
+.seg button:focus:not(:focus-visible){outline:none}
+.seg button:focus-visible{outline:2px solid var(--amber);outline-offset:-3px}
+.seg.js button[aria-pressed="true"]{background:transparent;color:var(--blue)}
+.ai-out.swap dd{animation:fade .45s var(--ease) both}
+.ai-out.swap dd+dt+dd{animation-delay:.08s}
+.win{position:relative}
+.win::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);transform:translateX(-120%);opacity:0}
+.tour.play .win{animation:lift .9s var(--ease) both}
+.tour.play .win::after{animation:sheen 1.6s ease .6s both}
+@keyframes lift{from{opacity:0;transform:translateY(30px) scale(.97)}}
+@keyframes sheen{0%{opacity:1;transform:translateX(-120%)}100%{opacity:1;transform:translateX(120%)}}
+.post{transition:transform .25s var(--ease),color .25s}
+.post:hover{transform:translateX(6px)}
+.posts.play .post{animation:fade .55s var(--ease) both;animation-delay:calc(var(--i)*130ms)}
+.cta{background-size:220% 220%;animation:ctaflow 14s ease-in-out infinite alternate}
+@keyframes ctaflow{to{background-position:100% 100%}}
+.cta .btn-primary{animation:breathe 3.2s ease-in-out infinite}
+@keyframes breathe{50%{box-shadow:0 10px 34px rgba(var(--blue-rgb),.45),0 0 0 7px rgba(var(--blue-rgb),.10)}}
+.cta.play h2{animation:fade .7s var(--ease) both}
+
+/* glass while moving: frosted layer clears as the element settles, a light sheen crosses it once.
+   No backdrop blur on moving things (too heavy for phones), only gradients. */
+.gm{overflow:hidden}
+.scard,.mailtoast{position:relative}
+.gm::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:5;opacity:0;
+  background:linear-gradient(160deg,rgba(255,255,255,.78),rgba(240,244,255,.42));
+  box-shadow:inset 0 1px 0 #FFFFFF,inset 0 0 0 1px rgba(255,255,255,.85)}
+.gm::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:6;opacity:0;
+  background:linear-gradient(115deg,transparent 28%,rgba(255,255,255,.85) 46%,rgba(255,255,255,.2) 54%,transparent 72%);transform:translateX(-130%)}
+.play .gm::after{animation:defog var(--gt,1s) var(--ease) var(--gd,0s) both}
+.play .gm::before{animation:sheen 1.1s ease calc(var(--gd,0s) + var(--gt,1s)*.45) both}
+@keyframes defog{from{opacity:1}to{opacity:0}}
+.seg .thumb{overflow:hidden;background-color:#FFFFFF;background-image:linear-gradient(180deg,rgba(255,255,255,1),rgba(239,244,255,.9));box-shadow:inset 0 0 0 1px rgba(var(--blue-rgb),.28),inset 0 1px 0 #FFFFFF,0 6px 16px rgba(23,37,84,.12)}
+.seg .thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(var(--blue-rgb),.18) 50%,transparent 70%);transform:translateX(-130%)}
+.seg .thumb.moving::after{animation:sheen .6s ease both}
+
+/* private: data flows in a loop inside your computer, anything heading out stops at the lock */
+.priv .loop{stroke-dasharray:1 7;stroke-linecap:round;animation:flowdots 1.1s linear infinite}
+@keyframes flowdots{to{stroke-dashoffset:-16}}
+.priv .bounce{transform-box:fill-box;animation:bounce 2.6s ease-in-out infinite}
+@keyframes bounce{0%{transform:translateX(-8px);opacity:0}25%{opacity:1}55%{transform:translateX(9px);opacity:1}68%{transform:translateX(5px);opacity:.5}100%{transform:translateX(-8px);opacity:0}}
+.priv .lockpulse{transform-box:fill-box;transform-origin:center;animation:lockp 2.6s ease-in-out infinite}
+@keyframes lockp{0%,45%,75%,100%{transform:scale(1)}57%{transform:scale(1.14)}}
+.priv .nocloud{transform-box:fill-box;transform-origin:center;animation:lockp 2.6s ease-in-out infinite}
+
+/* wide and curved monitors: scale the whole page up in steps so it fills the screen instead of sitting in a narrow column.
+   zoom keeps every proportion; reading lines stay under about 70 characters because text widths are set in em. */
+@media (min-width:1600px){body{zoom:1.12}.tour{zoom:.893}}
+@media (min-width:1920px){body{zoom:1.25}.tour{zoom:.8}}
+@media (min-width:2400px){body{zoom:1.45}.tour{zoom:.69}}
+@media (min-width:3000px){body{zoom:1.7}.tour{zoom:.588}}
+@media (min-width:3600px){body{zoom:2}.tour{zoom:.5}}
+
+/* mouse motion (desktop only): light follows the cursor on glass, the hero tilts, Download leans toward the pointer, the aurora drifts the other way */
+.glass{background-image:radial-gradient(420px circle at var(--mx,-999px) var(--my,-999px),rgba(var(--blue-rgb),.09),rgba(var(--blue-rgb),0) 60%)}
+.cta.glass{background-image:linear-gradient(135deg,rgba(var(--blue-rgb),.10),rgba(255,255,255,.6))}
+.stage{transition:transform .35s var(--ease);transform-style:preserve-3d}
+.btn-primary{transition:transform .25s var(--ease),background .2s,box-shadow .2s}
+.aurora{transition:transform 1.2s var(--ease)}
+
+/* measured: top 10 as squares fills the card, AUC bars get a 0.5 random line for scale */
+.t10lbl{margin:14px 0 8px;font-size:14px;color:var(--text)}
+.t10lbl b{color:var(--good)}
+.top10{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
+.top10 i{aspect-ratio:1;border-radius:6px;background:var(--good);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.top10 i.no{background:#E1E6EF;box-shadow:none}
+.viz.play .top10 i{animation:pop .35s var(--ease) both;animation-delay:calc(.2s + var(--i)*70ms)}
+.bar div{position:relative}
+.bar div::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--ink);opacity:.35}
+.rnd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.rnd i{width:2px;height:12px;background:var(--ink);opacity:.35}
+
+/* responsive */
+@media (max-width:900px){
+  .hero,.row,.row.flip,.trio{grid-template-columns:minmax(0,1fr)}
+  .row.flip .txt{order:0}
+  .hero{gap:32px;padding-top:32px}
+  .row{gap:24px;margin-bottom:72px}
+  .sec-head{margin-top:88px}
+}
+@media (max-width:640px){
+  .nav-links{display:none}
+  .stage{padding:16px}
+  .job{margin-top:72px;padding:16px}
+  .rail{padding:18px 4px 16px}
+  .rail::before{top:38px}
+  .rail .dot{top:32px}
+  .rail .ic{width:40px;height:40px}
+  .rail .ic svg{width:19px;height:19px}
+  .rail span{display:none}
+  .rail b{font-size:13px}
+  .rail a{padding:0 2px}
+  .f1{grid-template-columns:minmax(0,1fr);gap:14px}
+  .srcs{flex-direction:row;flex-wrap:wrap}
+  .flow{display:none}
+  .scard{gap:12px;padding:0 12px}
+  .f4{grid-template-columns:minmax(0,1fr)}
+  .f4 .ad-doc{display:none}
+  .letter2{width:60%}
+  .cta{padding:32px 22px}
+  .viz{padding:16px}
+  .aurora span{animation-duration:70s}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .replay{display:none}
+}
+</style>
+
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><i aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></i>Stellenpilot</a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#how" data-t="nav_how">How it works</a>
+      <a href="#features" data-t="nav_features">Features</a>
+      <a href="#blog" data-t="nav_blog">Blog</a>
+      <a href="https://github.com/srvskr1/stellenpilot">GitHub</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="lang-en" aria-pressed="true">EN</button>
+      <button type="button" id="lang-de" aria-pressed="false">DE</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <section class="hero">
+    <div>
+      <h1 data-t="h1">Wake up to jobs that fit, with a tailored CV ready.</h1>
+      <p class="lede" data-t="lede">Every morning Stellenpilot <b>finds new jobs in Germany</b>, scores them against your CV and writes the CV and cover letter for the best ones. <b>Free, on your own computer, no account.</b></p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://github.com/srvskr1/stellenpilot/releases/latest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg><span data-t="dl_win">Download for Windows</span></a>
+        <a class="btn btn-ghost" href="https://github.com/srvskr1/stellenpilot/releases/latest" data-t="dl_mac">Download for Mac</a>
+      </div>
+      <div class="pip"><span>pip install stellenpilot</span><button type="button" id="copy" data-t="copy">Copy</button></div>
+      <p class="fine" data-t="fine">Windows, macOS and Linux. Open source, MIT license.</p>
+    </div>
+
+    <div class="stage glass play" id="hero-stage" aria-label="Example: a job being scored">
+      <div class="sheet letter gm" style="--gd:2.3s" aria-hidden="true"><b data-t="cover">Cover letter</b><i></i><i></i><i style="width:80%"></i><i></i><i style="width:60%"></i></div>
+      <div class="sheet cv gm" style="--gd:2.2s" aria-hidden="true"><b data-t="cv_tailored">CV, tailored</b><i class="hl"></i><i class="hl" style="width:85%"></i><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i></div>
+      <div class="job gm" style="--gt:.9s">
+        <div class="job-head">
+          <div>
+            <h3>Data Engineer (Werkstudent)</h3>
+            <div class="meta">Example GmbH, Essen</div>
+          </div>
+          <div class="status"><span class="chip info is-new">New</span><span class="chip good is-ready" data-t="ready">Ready to send</span></div>
+        </div>
+        <div class="job-top" style="margin-top:10px">
+          <div class="ring"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="track" cx="32" cy="32" r="26"/><circle class="val" cx="32" cy="32" r="26"/></svg><span id="hero-score">87</span></div>
+          <p class="reason" style="margin:0" data-t="reason">Python, SQL and Airflow match your projects. Strong fit.</p>
+        </div>
+        <div class="chips" style="margin-top:12px">
+          <span class="chip warn" data-t="gap1">dbt: still learning</span>
+          <span class="chip warn" data-t="gap2">German B2 asked, you have B1</span>
+        </div>
+      </div>
+      <button type="button" class="replay" id="replay" data-t="replay">Play again</button>
+    </div>
+  </section>
+
+  <nav class="rail glass" id="how" aria-label="How it runs">
+    <span class="dot" aria-hidden="true"></span>
+    <a href="#f1"><i style="--k:0" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></i><b data-t="r1">Collect</b><span data-t="r1s">6 job boards and about 200 company sites</span></a>
+    <a href="#f2"><i style="--k:1" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/></svg></i><b data-t="r2">Score</b><span data-t="r2s">0 to 100, with reasons and gaps</span></a>
+    <a href="#f4"><i style="--k:2" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></i><b data-t="r3">Write</b><span data-t="r3s">Tailored CV and cover letter</span></a>
+    <a href="#f6"><i style="--k:3" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></i><b data-t="r4">Track</b><span data-t="r4s">Gmail replies move each status</span></a>
+    <a href="#f5"><i style="--k:4" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></i><b data-t="r5">You decide</b><span data-t="r5s">It never applies for you</span></a>
+  </nav>
+
+  <div class="sec-head" id="features">
+    <h2 data-t="feat_h">What happens while you sleep</h2>
+    <p data-t="feat_p">Each step below is the real thing Stellenpilot does every day, shown with example data.</p>
+  </div>
+
+  <section class="row" id="f1">
+    <div class="txt">
+      <div class="kicker" data-t="k1">Collect</div>
+      <h3 data-t="t1">Finds jobs everywhere</h3>
+      <p data-t="p1">Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive and the career pages of <b>about 200 companies</b>. The same job posted twice <b>shows up once</b>.</p>
+    </div>
+    <div class="viz glass" aria-hidden="true">
+      <div class="f1">
+        <div class="srcs">
+          <div class="src" style="--i:0">Bundesagentur für Arbeit</div>
+          <div class="src" style="--i:1">Arbeitnow</div>
+          <div class="src" style="--i:2">Adzuna</div>
+          <div class="src" style="--i:3">TheirStack</div>
+          <div class="src" style="--i:4">Jobicy</div>
+          <div class="src" style="--i:5">Remotive</div>
+          <div class="src many" style="--i:6" data-t="200">+ about 200 company sites</div>
+        </div>
+        <div class="flow"><svg viewBox="0 0 40 120"><path d="M0 10 C20 10 20 60 40 60M0 60 H40M0 110 C20 110 20 60 40 60"/></svg></div>
+        <div class="list">
+          <div class="lrow" style="--i:0">Data Engineer<span>Essen</span></div>
+          <div class="dup-wrap"><div class="lrow" style="--i:1">Junior Data Analyst<span>Dortmund</span></div><div class="lrow dup">Junior Data Analyst<span>Dortmund</span></div></div>
+          <div class="lrow" style="--i:2">BI Developer<span>Düsseldorf</span></div>
+          <div class="lrow" style="--i:3">ML Werkstudent<span>Bochum</span></div>
+          <div class="note"><span class="chip good" data-t="dupnote">1 duplicate removed</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row flip" id="f2">
+    <div class="txt">
+      <div class="kicker" data-t="k2">Score</div>
+      <h3 data-t="t2">Scores every job, honestly</h3>
+      <p data-t="p2"><b>A match from 0 to 100</b>, a one line reason and <b>your real gaps</b>. Mark jobs good or bad and the next search leans toward what you liked.</p>
+    </div>
+    <div class="viz glass" aria-hidden="true">
+      <div class="sortlist">
+        <div class="scard s91 gm" style="--gd:.4s"><div class="ring"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="19.5"/><circle class="val" cx="24" cy="24" r="19.5" style="stroke-dashoffset:11"/></svg><span>91</span></div><div class="sinfo"><b>Analytics Engineer</b><small data-t="s91"><span class="v g">Strong fit.</span> dbt and SQL match</small></div></div>
+        <div class="scard s74 gm" style="--gd:.4s"><div class="ring mid"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="19.5"/><circle class="val" cx="24" cy="24" r="19.5" style="stroke-dashoffset:31.9"/></svg><span>74</span></div><div class="sinfo"><b>Data Engineer</b><small data-t="s74"><span class="v b">Good fit.</span> Spark is asked</small></div></div>
+        <div class="scard s52 gm" style="--gd:.4s"><div class="ring low"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="19.5"/><circle class="val" cx="24" cy="24" r="19.5" style="stroke-dashoffset:58.8"/></svg><span>52</span></div><div class="sinfo"><b>Senior Data Architect</b><small data-t="s52"><span class="v w">Weak fit.</span> 5 years leading</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row" id="f3">
+    <div class="txt">
+      <div class="kicker" data-t="k3">Understand</div>
+      <h3 data-t="t3">Reads German job ads for you</h3>
+      <p data-t="p3">It finds <b>the German level an ad really needs</b>, compares it with yours, and writes <b>an English summary of every German ad</b>.</p>
+    </div>
+    <div class="viz glass" aria-hidden="true">
+      <div class="ad">Wir bieten spannende Projekte im Datenteam. Sie bringen <mark>verhandlungssichere Deutschkenntnisse</mark> und Erfahrung mit Python mit.</div>
+      <div class="lvl-legend">
+        <span class="k me"><i></i><span data-t="you">You: B1</span></span>
+        <span class="k need"><i></i><span data-t="need">Ad needs: C1</span></span>
+        <span class="chip warn" data-t="gapv">2 levels above you</span>
+      </div>
+      <div class="meter"><span class="needle" aria-hidden="true"></span>
+        <div class="seg6"><i class="have" style="--i:0"></i><i class="have" style="--i:1"></i><i class="have" style="--i:2"></i><i class="gap" style="--i:0"></i><i class="gap" style="--i:1"></i><i></i></div>
+        <div class="lab6"><span>A1</span><span>A2</span><span class="me">B1</span><span>B2</span><span class="need">C1</span><span>C2</span></div>
+      </div>
+      <div class="summary"><b data-t="sumlbl">In English:</b> <span class="typed" data-t="sum">data team role, Python needed, business fluent German (C1).</span></div>
+    </div>
+  </section>
+
+  <section class="row flip" id="f4">
+    <div class="txt">
+      <div class="kicker" data-t="k4">Write</div>
+      <h3 data-t="t4">A CV and cover letter for each job</h3>
+      <p data-t="p4">It picks and orders what matters <b>from your own CV</b> and writes a cover letter for that company, <b>as Word and PDF</b>. German letters only if your German is B2 or better.</p>
+    </div>
+    <div class="viz glass" aria-hidden="true" style="padding-bottom:40px">
+      <div class="f4">
+        <div class="doc">
+          <h4 data-t="yourcv">Your CV, reordered</h4>
+          <div class="cvline m up1">Airflow pipeline, NYC taxi data</div>
+          <div class="cvline m up2">SQL reporting, 3 years</div>
+          <div class="cvline dn">Customer support team</div>
+          <div class="cvline dn">Event volunteering</div>
+          <div class="badges" style="margin-top:auto"><span class="chip info">Word</span><span class="chip info">PDF</span></div>
+        </div>
+        <div class="doc ad-doc">
+          <h4 data-t="thead">The job ad</h4>
+          <div>We need <span class="tag m">Airflow</span> pipelines, strong <span class="tag m">SQL</span>, cloud basics and a calm, structured way of working with stakeholders.</div>
+        </div>
+        <div class="letter2 gm" style="--gd:2.3s"><b style="font-size:12px;color:var(--title)" data-t="cover">Cover letter</b><i></i><i style="width:90%"></i><i></i><i style="width:70%"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row" id="f5">
+    <div class="txt">
+      <div class="kicker" data-t="k5">Stay honest</div>
+      <h3 data-t="t5">Never invents experience</h3>
+      <p data-t="p5">The truth guard <b>rejects any sentence your CV does not back up</b>: numbers, tools, language levels. Skills you are still learning are <b>never sold as experience</b>. It never applies for you and never contacts a company.</p>
+    </div>
+    <div class="viz glass" aria-hidden="true">
+      <div class="gen">
+        <div class="gline"><span class="lbl" data-t="draft">AI draft</span><span class="strike" data-t="claim">I bring 5 years of Kubernetes experience.</span></div>
+        <div><span class="chip bad" data-t="notcv">Not in your CV, removed</span></div>
+        <div class="gline fixed gm" style="--gd:1.8s;--gt:.7s"><span class="lbl" data-t="kept">What goes in your letter</span><span data-t="truth">I have deployed data pipelines with Docker and I am learning Kubernetes.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row flip" id="f6">
+    <div class="txt">
+      <div class="kicker" data-t="k6">Track</div>
+      <h3 data-t="t6">Keeps track of replies</h3>
+      <p data-t="p6"><b>Connect Gmail, read only.</b> Confirmations, interview invitations and rejections move each application forward. <b>Interviews get a prep pack.</b></p>
+    </div>
+    <div class="viz glass" aria-hidden="true">
+      <div class="track6">
+        <div class="mailtoast gm" style="--gd:.3s;--gt:.8s">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          <div class="who"><b>Example GmbH</b><small>Einladung zum Vorstellungsgespräch</small></div>
+          <span class="chip info" data-t="invite">Interview invite found</span>
+        </div>
+        <div class="appcard">
+          <div class="apphead"><div><b>Analytics Engineer</b><small>Example GmbH, Dortmund</small></div><span class="chip good" data-t="prep">Prep pack ready</span></div>
+          <div class="steps"><span class="fill"></span>
+            <div class="st done"><i></i><span data-t="c_new">New</span></div>
+            <div class="st done"><i></i><span data-t="c_ready">Ready</span></div>
+            <div class="st done"><i></i><span data-t="c_applied">Applied</span></div>
+            <div class="st now"><i></i><span data-t="c_int">Interview</span></div>
+            <div class="st"><i></i><span data-t="c_offer">Offer</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="trio">
+    <div class="tcard glass viz">
+      <h3 data-t="t7">Private by design</h3>
+      <p data-t="p7">The built in AI runs on your computer. <b>Your CV never leaves it.</b></p>
+      <svg class="priv" viewBox="14 16 284 154" aria-hidden="true">
+        <path d="M22 72 L95 24 L168 72" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/>
+        <rect x="34" y="66" width="122" height="78" rx="10" fill="var(--paper)" stroke="var(--blue)" stroke-opacity=".35" stroke-width="2"/>
+        <rect x="46" y="84" width="38" height="46" rx="5" fill="var(--info-bg)"/>
+        <text x="65" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="var(--blue)" font-family="Geist, sans-serif">CV</text>
+        <rect x="106" y="84" width="38" height="46" rx="5" fill="var(--step-bg)"/>
+        <text x="125" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="var(--step)" font-family="Geist, sans-serif">AI</text>
+        <path class="loop" d="M84 96 C93 84 97 84 106 96" fill="none" stroke="var(--blue)" stroke-width="3.5"/>
+        <path class="loop" d="M106 118 C97 130 93 130 84 118" fill="none" stroke="var(--step)" stroke-width="3.5"/>
+        <circle class="bounce" cx="146" cy="104" r="3.5" fill="var(--step)"/>
+        <g class="lockpulse"><circle cx="170" cy="104" r="12" fill="var(--good)"/><rect x="164.5" y="103" width="11" height="8" rx="1.5" fill="#FFFFFF"/><path d="M166.5 103v-3a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="#FFFFFF" stroke-width="1.8"/></g>
+        <path d="M186 104 H226" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="3 5"/>
+        <path d="M240 112a13 13 0 0 1 4-25 19 19 0 0 1 36 6 11 11 0 0 1-2 21z" fill="none" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="4 4"/>
+        <g class="nocloud" stroke="var(--bad)" stroke-width="3.2" stroke-linecap="round"><path d="M252 90 L268 106"/><path d="M268 90 L252 106"/></g>
+        <text x="262" y="134" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="Geist, sans-serif" data-t="cloudlbl">cloud</text>
+        <text x="95" y="162" text-anchor="middle" font-size="12" font-weight="600" fill="var(--title)" font-family="Geist, sans-serif" data-t="yourpc">Your computer</text>
+      </svg>
+    </div>
+    <div class="tcard glass">
+      <h3 data-t="t8">Choose your AI</h3>
+      <div class="seg" role="group" aria-label="AI options" id="seg"><span class="thumb" aria-hidden="true"></span>
+        <button type="button" aria-pressed="true" data-k="0" data-t="ai0">Built in</button>
+        <button type="button" aria-pressed="false" data-k="1">Ollama</button>
+        <button type="button" aria-pressed="false" data-k="2">Claude, OpenAI</button>
+        <button type="button" aria-pressed="false" data-k="3" data-t="ai3">No AI</button>
+      </div>
+      <div class="facts">
+        <div class="fact"><span class="fi lock" id="ai-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><div><small data-t="where">Your CV</small><b id="ai-where" style="color:var(--good)">Stays on your computer</b></div></div>
+        <div class="fact"><span class="fi coin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5a3 3 0 0 0-5.6 1.5v2a3 3 0 0 0 5.6 1.5M7.5 11h5M7.5 13h5"/></svg></span><div><small data-t="cost">Cost</small><b id="ai-cost">Free</b></div></div>
+        <div class="fact"><span class="fi tool" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span><div><small data-t="setup">Setup</small><b id="ai-setup">One Download button</b></div><span class="effort" id="ai-effort" role="img" aria-label="Setup effort"><i class="on"></i><i></i><i></i></span></div>
+      </div>
+    </div>
+    <div class="tcard glass viz">
+      <h3 data-t="t9">Measured</h3>
+      <p data-t="p9">Tested on <b>28 real jobs</b>, labeled by hand.</p>
+      <div class="t10lbl" data-t="t10">Top 10 ranked jobs: <b>9 worth applying</b></div>
+      <div class="top10" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i><i style="--i:6"></i><i style="--i:7"></i><i style="--i:8"></i><i style="--i:9" class="no"></i></div>
+      <div class="bars"><small style="font-size:13px;color:var(--text)" data-t="auc">Ranking quality (AUC, higher is better)</small>
+        <div class="bar"><span data-t="b1">Stored score</span><div><i style="width:73%"></i></div><b>0.73</b></div>
+        <div class="bar"><span data-t="b2">Keywords</span><div><i style="width:75%"></i></div><b>0.75</b></div>
+        <div class="rnd"><i></i><span data-t="rnd">Line at 0.5 means a random guess</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sec-head">
+    <h2 data-t="tour_h">See the whole app in a minute</h2>
+    <p data-t="tour_p">Setup, home, jobs, applications and settings. All names in the demo are fictional.</p>
+  </div>
+  <div class="tour glass"><div class="win"><div class="win-bar"><i></i><i></i><i></i></div><img src="demo.gif" alt="Stellenpilot app tour: setup, home, jobs, applications and settings" width="880" height="523" loading="lazy"></div></div>
+
+  <div class="sec-head" id="blog">
+    <h2 data-t="blog_h">From the blog</h2>
+    <p data-t="blog_p">Guides for job hunting in Germany. First posts are being written.</p>
+  </div>
+  <div class="posts glass">
+    <div class="post" style="--i:0"><span data-t="post1" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">How to tailor your CV for a Werkstudent role</span><span data-t="soon">Coming soon</span></div>
+    <div class="post" style="--i:1"><span data-t="post2" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">Job hunting in Germany without fluent German</span><span data-t="soon">Coming soon</span></div>
+    <div class="post" style="--i:2"><span data-t="post3" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">What "verhandlungssicher" really means in a job ad</span><span data-t="soon">Coming soon</span></div>
+  </div>
+
+  <section class="cta glass">
+    <h2 data-t="cta_h">Start tomorrow morning with a shortlist.</h2>
+    <p data-t="cta_p"><b>Free and open source</b>, MIT license. Windows, macOS and Linux.</p>
+    <div class="cta-row" style="margin:0">
+      <a class="btn btn-primary" href="https://github.com/srvskr1/stellenpilot/releases/latest" data-t="dl">Download Stellenpilot</a>
+      <a class="btn btn-ghost" href="https://github.com/srvskr1/stellenpilot" data-t="gh">View on GitHub</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-t="foot">Stellenpilot by Sourav Sarker, MIT license</span>
+    <nav aria-label="Footer"><a href="https://github.com/srvskr1/stellenpilot">GitHub</a><a href="https://pypi.org/project/stellenpilot/">PyPI</a><a href="https://github.com/srvskr1/stellenpilot/releases" data-t="changelog">Changelog</a><a href="datenschutz.html">Datenschutz</a></nav>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var DE={
+    nav_how:"So funktioniert's",nav_features:"Funktionen",nav_blog:"Blog",
+    h1:"Morgens passende Jobs, mit fertigem Lebenslauf.",
+    lede:"Jeden Morgen <b>findet Stellenpilot neue Jobs in Deutschland</b>, bewertet sie anhand deines Lebenslaufs und schreibt Lebenslauf und Anschreiben für die besten. <b>Kostenlos, auf deinem eigenen Computer, ohne Konto.</b>",
+    dl_win:"Für Windows laden",dl_mac:"Für Mac laden",copy:"Kopieren",fine:"Windows, macOS und Linux. Open Source, MIT-Lizenz.",
+    cover:"Anschreiben",cv_tailored:"Lebenslauf, angepasst",ready:"Bereit zum Senden",
+    reason:"Python, SQL und Airflow passen zu deinen Projekten. Starke Übereinstimmung.",
+    gap1:"dbt: lernst du noch",gap2:"Deutsch B2 gefragt, du hast B1",replay:"Nochmal abspielen",
+    r1:"Sammeln",r1s:"6 Jobbörsen und rund 200 Firmenseiten",r2:"Bewerten",r2s:"0 bis 100, mit Gründen und Lücken",r3:"Schreiben",r3s:"Angepasster Lebenslauf und Anschreiben",r4:"Verfolgen",r4s:"Gmail-Antworten aktualisieren den Status",r5:"Du entscheidest",r5s:"Es bewirbt sich nie für dich",
+    feat_h:"Was passiert, während du schläfst",feat_p:"Jeder Schritt ist das, was Stellenpilot jeden Tag wirklich tut, gezeigt mit Beispieldaten.",
+    k1:"Sammeln",t1:"Findet Jobs überall",p1:"Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive und die Karriereseiten von <b>rund 200 Firmen</b>. Dieselbe Stelle, zweimal ausgeschrieben, <b>erscheint nur einmal</b>.","200":"+ rund 200 Firmenseiten",dupnote:"1 Duplikat entfernt",
+    k2:"Bewerten",t2:"Bewertet jeden Job, ehrlich",p2:"<b>Eine Übereinstimmung von 0 bis 100</b>, ein Satz Begründung und <b>deine echten Lücken</b>. Markiere Jobs als gut oder schlecht, und die nächste Suche richtet sich danach.",
+    s91:"<span class=\"v g\">Passt stark.</span> dbt und SQL",s74:"<span class=\"v b\">Passt gut.</span> Spark gefragt",s52:"<span class=\"v w\">Passt kaum.</span> 5 Jahre Führung",
+    k3:"Verstehen",t3:"Liest deutsche Stellenanzeigen für dich",p3:"Es erkennt <b>das Deutschniveau, das eine Anzeige wirklich verlangt</b>, vergleicht es mit deinem und schreibt <b>eine englische Zusammenfassung jeder deutschen Anzeige</b>.",
+    you:"Du: B1",need:"Anzeige verlangt: C1",gapv:"2 Stufen über dir",sumlbl:"Auf Englisch:",sum:"data team role, Python needed, business fluent German (C1).",
+    k4:"Schreiben",t4:"Lebenslauf und Anschreiben für jede Stelle",p4:"Es wählt und ordnet das Wichtigste <b>aus deinem eigenen Lebenslauf</b> und schreibt ein Anschreiben für diese Firma, <b>als Word und PDF</b>. Deutsche Anschreiben nur ab Deutsch B2.",yourcv:"Dein Lebenslauf, neu geordnet",thead:"Die Stellenanzeige",
+    k5:"Ehrlich bleiben",t5:"Erfindet nie Erfahrung",p5:"Der Wahrheitsfilter <b>lehnt jeden Satz ab, den dein Lebenslauf nicht belegt</b>: Zahlen, Tools, Sprachniveaus. Was du noch lernst, wird <b>nie als Erfahrung verkauft</b>. Es bewirbt sich nie für dich und kontaktiert keine Firma.",
+    draft:"KI-Entwurf",claim:"Ich bringe 5 Jahre Kubernetes-Erfahrung mit.",notcv:"Nicht in deinem Lebenslauf, entfernt",kept:"Was in dein Anschreiben kommt",truth:"Ich habe Datenpipelines mit Docker ausgeliefert und lerne gerade Kubernetes.",
+    k6:"Verfolgen",t6:"Behält Antworten im Blick",p6:"<b>Gmail verbinden, nur lesend.</b> Eingangsbestätigungen, Einladungen und Absagen bringen jede Bewerbung voran. <b>Für Interviews gibt es ein Vorbereitungspaket.</b>",
+    c_new:"Neu",c_ready:"Bereit",c_applied:"Beworben",c_int:"Interview",c_offer:"Angebot",prep:"Vorbereitung bereit",invite:"Interview-Einladung erkannt",
+    t7:"Privat von Anfang an",yourpc:"Dein Computer",cloudlbl:"Cloud",p7:"Die eingebaute KI läuft auf deinem Computer. <b>Dein Lebenslauf verlässt ihn nie.</b>",
+    t8:"Wähle deine KI",ai0:"Eingebaut",ai3:"Ohne KI",setup:"Einrichtung",cost:"Kosten",where:"Dein Lebenslauf",
+    t9:"Gemessen",p9:"Getestet mit <b>28 echten Stellen</b>, von Hand bewertet.",t10:"Top 10 der Rangliste: <b>9 lohnen eine Bewerbung</b>",rnd:"Linie bei 0,5 heißt Zufall",auc:"Qualität der Rangfolge (AUC, höher ist besser)",b1:"Gespeichert",b2:"Stichwörter",b3:"Top 10",
+    tour_h:"Die ganze App in einer Minute",tour_p:"Einrichtung, Start, Jobs, Bewerbungen und Einstellungen. Alle Namen in der Demo sind erfunden.",
+    blog_h:"Aus dem Blog",blog_p:"Ratgeber für die Jobsuche in Deutschland. Die ersten Beiträge entstehen gerade.",
+    post1:"Lebenslauf für eine Werkstudentenstelle anpassen",post2:"Jobsuche in Deutschland ohne fließendes Deutsch",post3:"Was „verhandlungssicher“ in einer Anzeige wirklich heißt",soon:"Bald",
+    cta_h:"Starte morgen früh mit einer Auswahl.",cta_p:"<b>Kostenlos und Open Source</b>, MIT-Lizenz. Windows, macOS und Linux.",dl:"Stellenpilot laden",gh:"Auf GitHub ansehen",
+    foot:"Stellenpilot von Sourav Sarker, MIT-Lizenz",changelog:"Änderungen"
+  };
+  var AI={en:[["One Download button","Free","Stays on your computer"],["Install the app, pull a model","Free","Stays on your computer"],["Paste an API key","A few cents a day","Sent to the AI provider"],["Nothing","Free","Stays on your computer"]],
+          de:[["Ein Klick auf Download","Kostenlos","Bleibt auf deinem Computer"],["App installieren, Modell laden","Kostenlos","Bleibt auf deinem Computer"],["API-Schlüssel einfügen","Ein paar Cent pro Tag","Geht an den KI-Anbieter"],["Nichts","Kostenlos","Bleibt auf deinem Computer"]]};
+  var nodes=[].slice.call(document.querySelectorAll("[data-t]"));
+  var EN={};nodes.forEach(function(n){EN[n.dataset.t]=n.innerHTML});
+  var lang="en",aiK=0;
+  function setLang(l){
+    lang=l;document.documentElement.lang=l;
+    nodes.forEach(function(n){var k=n.dataset.t;n.innerHTML=(l==="de"&&DE[k]!==undefined)?DE[k]:EN[k]});
+    document.getElementById("lang-en").setAttribute("aria-pressed",l==="en");
+    document.getElementById("lang-de").setAttribute("aria-pressed",l==="de");
+    setAI(aiK,true);try{localStorage.setItem("sp-lang",l)}catch(e){}
+  }
+  document.getElementById("lang-en").onclick=function(){setLang("en")};
+  document.getElementById("lang-de").onclick=function(){setLang("de")};
+
+  var seg=document.getElementById("seg"),thumb=seg.querySelector(".thumb"),out=document.querySelector(".facts"),EFF=[1,2,1,0];seg.classList.add("js");
+  function moveThumb(){var b=seg.querySelector('button[aria-pressed="true"]');if(!b)return;thumb.style.left=b.offsetLeft+"px";thumb.style.top=b.offsetTop+"px";thumb.style.width=b.offsetWidth+"px";thumb.style.height=b.offsetHeight+"px"}
+  function setAI(k,anim){aiK=k;
+    [].forEach.call(seg.querySelectorAll("button"),function(b){b.setAttribute("aria-pressed",+b.dataset.k===k);b.style.color=+b.dataset.k===k?"var(--blue)":""});
+    document.getElementById("ai-setup").textContent=AI[lang][k][0];document.getElementById("ai-cost").textContent=AI[lang][k][1];var w=document.getElementById("ai-where");w.textContent=AI[lang][k][2];w.style.color=k===2?"var(--warn)":"var(--good)";document.getElementById("ai-lock").classList.toggle("warn",k===2);[].forEach.call(document.querySelectorAll("#ai-effort i"),function(d,j){d.classList.toggle("on",j<EFF[k])});
+    moveThumb();if(anim){thumb.classList.remove("moving");void thumb.offsetWidth;thumb.classList.add("moving");out.classList.remove("swap");void out.offsetWidth;out.classList.add("swap")}}
+  moveThumb();addEventListener("resize",moveThumb);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(moveThumb);
+  [].forEach.call(document.querySelectorAll("#seg button"),function(b){b.onclick=function(){setAI(+b.dataset.k,true)}});
+
+  var copyBtn=document.getElementById("copy");
+  copyBtn.onclick=function(){
+    var done=function(){copyBtn.textContent=lang==="de"?"Kopiert":"Copied";setTimeout(function(){copyBtn.textContent=lang==="de"?DE.copy:EN.copy},1500)};
+    try{navigator.clipboard.writeText("pip install stellenpilot").then(done,function(){selectPip()})}catch(e){selectPip()}
+  };
+  function selectPip(){var r=document.createRange();r.selectNodeContents(copyBtn.previousElementSibling);var s=getSelection();s.removeAllRanges();s.addRange(r)}
+
+  var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var score=document.getElementById("hero-score"),stage=document.getElementById("hero-stage");
+  function count(){if(reduce)return;var t0=null;function f(t){if(!t0)t0=t;var p=Math.min(1,(t-t0-500)/1300);if(p<0){requestAnimationFrame(f);return}score.textContent=Math.round(87*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)}requestAnimationFrame(f)}
+  function replayHero(){stage.classList.remove("play");void stage.offsetWidth;stage.classList.add("play");count()}
+  document.getElementById("replay").onclick=replayHero;
+  count();
+
+  // every visual rests in its final state and replays its story each time it comes back into view
+  if(!reduce&&"IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){var t=e.target;
+      if(e.isIntersecting){if(!t.classList.contains("play")){t.classList.add("play");if(t===stage)count();var ty=t.querySelector(".typed");if(ty)typeIt(ty)}}
+      else t.classList.remove("play")})},{rootMargin:"12% 0px 12% 0px",threshold:0});
+    [].forEach.call(document.querySelectorAll("main .viz, #hero-stage, .tour, .posts, .cta"),function(v){io.observe(v)});
+  }
+
+  function typeIt(el){if(el.dataset.typing)return;el.dataset.typing=1;var full=el.textContent,i=0;el.textContent="";var c=document.createElement("span");c.className="caret";el.after(c);
+    setTimeout(function step(){i++;el.textContent=full.slice(0,i);if(i<full.length)setTimeout(step,28);else setTimeout(function(){c.remove();delete el.dataset.typing},900)},3300)}
+
+  // mouse motion, only with a real mouse and motion allowed
+  if(!reduce&&matchMedia("(hover:hover) and (pointer:fine)").matches){
+    var px=-1,py=-1,raf=0,lit=null,aur=document.querySelector(".aurora"),mags=[].slice.call(document.querySelectorAll(".btn-primary"));
+    addEventListener("pointermove",function(e){px=e.clientX;py=e.clientY;if(!raf)raf=requestAnimationFrame(frame)},{passive:true});
+    document.addEventListener("pointerleave",function(){px=-1;frame()});
+    function frame(){raf=0;
+      var g=px<0?null:(document.elementFromPoint(px,py)||{closest:function(){return null}}).closest(".glass");
+      if(lit&&lit!==g){lit.style.removeProperty("--mx");lit.style.removeProperty("--my")}
+      if(g){var r=g.getBoundingClientRect();g.style.setProperty("--mx",(px-r.left)+"px");g.style.setProperty("--my",(py-r.top)+"px")}lit=g;
+      var sr=stage.getBoundingClientRect();
+      if(px>=sr.left&&px<=sr.right&&py>=sr.top&&py<=sr.bottom){var dx=(px-sr.left)/sr.width-.5,dy=(py-sr.top)/sr.height-.5;stage.style.transform="perspective(1000px) rotateY("+(dx*7).toFixed(2)+"deg) rotateX("+(-dy*7).toFixed(2)+"deg)"}
+      else stage.style.transform="";
+      mags.forEach(function(b){var r=b.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,ddx=px-cx,ddy=py-cy,d=Math.hypot(ddx,ddy);
+        b.style.transform=(px>=0&&d<110)?"translate("+(ddx/d*Math.min(7,(110-d)/8)||0).toFixed(1)+"px,"+(ddy/d*Math.min(7,(110-d)/8)||0).toFixed(1)+"px)":""});
+      if(px>=0)aur.style.transform="translate3d("+((px/innerWidth-.5)*-36).toFixed(1)+"px,"+((py/innerHeight-.5)*-36).toFixed(1)+"px,0)"}
+  }
+
+  var nav=document.getElementById("nav");
+  addEventListener("scroll",function(){nav.classList.toggle("scrolled",scrollY>40)},{passive:true});
+
+  try{var saved=localStorage.getItem("sp-lang");if(saved==="de")setLang("de");else if(!saved&&/^de/i.test(navigator.language||""))setLang("de")}catch(e){}
+})();
+</script>
+
+</body></html>
