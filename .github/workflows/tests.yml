@@ -32,6 +32,14 @@ jobs:
           stellenpilot doctor
           stellenpilot --help
 
+  website:
+    # Fails when docs/de/index.html was not rebuilt after a change to docs/index.html.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: python3 scripts/build_de_page.py --check
+      - run: python3 scripts/check_german_level_js.py
+
   audit:
     # Fails when an installed dependency has a known vulnerability (see the security audit, S2).
     runs-on: ubuntu-latest

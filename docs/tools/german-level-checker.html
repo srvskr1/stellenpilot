@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>German level checker for job ads · Stellenpilot</title>
+<meta name="description" content="Paste a job ad and see which German level it really requires (A1 to C2) and whether German is a must or only nice to have. Free, runs in your browser.">
+<link rel="canonical" href="https://stellenpilot.dev/tools/german-level-checker.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://stellenpilot.dev/tools/german-level-checker.html">
+<meta property="og:title" content="German level checker for job ads">
+<meta property="og:description" content="Paste a job ad, see the German level it really requires. Free, nothing is uploaded.">
+<meta property="og:image" content="https://stellenpilot.dev/social-preview.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"German level checker for job ads","url":"https://stellenpilot.dev/tools/german-level-checker.html","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (runs in the browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"author":{"@type":"Person","name":"Sourav Sarker","url":"https://stellenpilot.dev/about.html"},"isPartOf":{"@type":"WebSite","name":"Stellenpilot","url":"https://stellenpilot.dev/"}}</script>
+<style>
+@font-face{font-family:"Geist";src:url(../fonts/geist.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{color-scheme:light;--bg:#F6F7F9;--ink:#172554;--text:#3B4A6B;--muted:#52627F;--blue:#1D4ED8;--soft:#EFF4FF;--line:rgba(16,24,40,.10);--good:#047857;--good-bg:#E7F6EF;--warn:#B45309;--warn-bg:#FEF3E2;--bad:#B91C1C;--bad-bg:#FDECEC}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.7 "Geist","Segoe UI",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:40px 16px 72px}
+h1,h2{color:var(--ink);line-height:1.25;text-wrap:balance}
+h1{font-size:2.1rem;margin:28px 0 6px}
+h2{font-size:1.3rem;margin:40px 0 8px}
+a{color:var(--blue)}
+.lede{font-size:19px;color:var(--ink)}
+label{display:block;font-weight:600;color:var(--ink);margin:20px 0 6px}
+textarea,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#fff;border:1px solid rgba(16,24,40,.18);border-radius:12px;padding:12px 14px}
+textarea{min-height:200px;resize:vertical}
+textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+.row>div{flex:1 1 200px}
+button{font:inherit;font-weight:600;border-radius:10px;padding:10px 18px;cursor:pointer;border:1px solid rgba(16,24,40,.18);background:#fff;color:var(--ink)}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.examples{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:15px}
+.examples button{padding:6px 12px;font-weight:500;font-size:15px}
+#result{margin:28px 0;border-radius:16px;padding:20px 22px;background:#fff;border:1px solid var(--line)}
+#result[hidden]{display:none}
+.lvl{font-size:44px;font-weight:700;color:var(--ink);line-height:1}
+.verdict{font-weight:600;margin:10px 0 0}
+.quote{margin:14px 0 0;padding:10px 14px;border-left:3px solid var(--blue);background:var(--soft);border-radius:0 10px 10px 0;font-size:16px;color:var(--ink)}
+.gap{display:inline-block;margin-top:14px;padding:4px 12px;border-radius:999px;font-size:15px;font-weight:600}
+.gap.ok{background:var(--good-bg);color:var(--good)}.gap.near{background:var(--warn-bg);color:var(--warn)}.gap.far{background:var(--bad-bg);color:var(--bad)}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:16px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{color:var(--ink)}
+.box{background:var(--soft);border-radius:14px;padding:18px 20px;margin:36px 0}
+.box p{margin:0 0 8px}
+.cta{display:inline-block;background:var(--blue);color:#fff;text-decoration:none;font-weight:600;padding:10px 18px;border-radius:10px}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<a href="../">← Stellenpilot</a>
+<h1>German level checker for job ads</h1>
+<p class="lede">Paste a job ad in German or English. The checker finds the German level it asks for, from A1 to C2, and tells you whether German is required or only nice to have. It runs in your browser, so the text never leaves your computer.</p>
+
+<label for="ad">Job ad</label>
+<textarea id="ad" placeholder="Paste the whole ad or just the requirements"></textarea>
+<div class="examples" aria-label="Examples"><span>Try:</span>
+<button type="button" data-ex="Ihr Profil: Abgeschlossenes Studium der Informatik. Verhandlungssichere Deutschkenntnisse, Englisch von Vorteil.">verhandlungssicher</button>
+<button type="button" data-ex="Requirements: experience with Python and SQL, fluent English. German skills are a plus.">German is a plus</button>
+<button type="button" data-ex="Du bringst Erfahrung mit Airflow mit. Deutschkenntnisse auf mind. B2-Niveau.">mind. B2</button>
+</div>
+<div class="row">
+<div><label for="mine">Your German</label>
+<select id="mine"><option value="">Not set</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></div>
+<div style="flex:0 0 auto"><button type="button" class="primary" id="go">Check the ad</button></div>
+</div>
+
+<div id="result" hidden aria-live="polite">
+<div class="lvl" id="r-level"></div>
+<p class="verdict" id="r-verdict"></p>
+<div class="quote" id="r-quote" hidden></div>
+<span class="gap" id="r-gap" hidden></span>
+</div>
+
+<h2>How it reads an ad</h2>
+<p>It looks at each sentence that mentions German, takes a CEFR level if the ad names one, and otherwise reads the describing word next to it. A word next to "English" counts for English, so "fluent English and basic German" comes out as A2. If the same sentence says "von Vorteil", "a plus" or "nice to have", German is treated as optional.</p>
+<table>
+<thead><tr><th>Words in the ad</th><th>Read as</th></tr></thead>
+<tbody>
+<tr><td>Grundkenntnisse, basic</td><td>A2</td></tr>
+<tr><td>gut, sicher, fließend, fluent</td><td>B2</td></tr>
+<tr><td>sehr gut, verhandlungssicher, excellent</td><td>C1</td></tr>
+<tr><td>Muttersprache, native</td><td>C2</td></tr>
+</tbody>
+</table>
+<p>Employers use these words loosely, so one fixed reading can be a level off for a given company. Our guide on <a href="../blog/verhandlungssicher.html">what "verhandlungssicher" really means</a> shows the usual ranges.</p>
+
+<div class="box">
+<p>This is the same rule <b>Stellenpilot</b> runs on every job it finds. Each morning it collects new jobs in Germany, scores them against your CV and flags the ones whose German level is out of reach. Free, open source, and it runs on your own computer.</p>
+<a class="cta" href="../">See how it works</a>
+</div>
+<footer>Stellenpilot, MIT license · <a href="../">Home</a> · <a href="../blog/">Blog</a> · <a href="../about.html">About</a> · <a href="../datenschutz.html">Datenschutz</a></footer>
+</main>
+<script src="german-level.js"></script>
+<script>
+(function(){
+  var L=["A1","A2","B1","B2","C1","C2"],ad=document.getElementById("ad"),mine=document.getElementById("mine"),box=document.getElementById("result");
+  function $(id){return document.getElementById(id)}
+  function run(){
+    var text=ad.value.trim();
+    if(!text){box.hidden=true;return}
+    var r=germanLevel(text);box.hidden=false;
+    $("r-level").textContent=r.level||"None";
+    $("r-verdict").textContent=r.level?"German at "+r.level+" is required.":r.optional?"German is mentioned only as nice to have.":"No German requirement found.";
+    $("r-quote").hidden=!r.sentence;$("r-quote").textContent=r.sentence;
+    var gap=$("r-gap"),have=mine.value;
+    if(r.level&&have){
+      var d=L.indexOf(r.level)-L.indexOf(have);gap.hidden=false;
+      gap.className="gap "+(d<=0?"ok":d===1?"near":"far");
+      gap.textContent=d<=0?"Your level is enough":d===1?"One level above you":d+" levels above you";
+    }else gap.hidden=true;
+    try{localStorage.setItem("sp-mine",have)}catch(e){}
+  }
+  try{mine.value=localStorage.getItem("sp-mine")||""}catch(e){}
+  $("go").onclick=run;mine.onchange=run;
+  [].forEach.call(document.querySelectorAll("[data-ex]"),function(b){b.onclick=function(){ad.value=b.dataset.ex;run()}});
+})();
+</script>
+</body>
+</html>
