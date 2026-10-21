@@ -36,6 +36,7 @@ Drop your CV, say what you want, press **Download** for the built in AI, switch 
 * **Private.** The built in AI runs on your computer. Your CV never leaves it.
 * **Honest.** A truth guard rejects any sentence your CV does not back up, and every score comes with your real gaps.
 * **Made for Germany.** 7 job boards plus about 200 company career pages, and it reads which German level an ad really needs. The app speaks English and German.
+* **Easy to find.** Filter by word, source, type, place, day, match or status. The place and day lists follow your own settings, so what you search for is one click away.
 * **You stay in control.** It never applies for you and never contacts a company.
 
 ## How it works
