@@ -11,6 +11,15 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
+### What is new in 0.10.0
+
+* **A seventh job source.** workingstudentjobs.de brings Werkstudent and internship roles from German cities. It is on by default, no key needed.
+* **Filter the Jobs page.** By word, source, type, place, day, match or status. The place and day lists follow the city and the number of days from your own settings, so the place you search for is one click away.
+* **A wider search.** The search box now also looks at the place, the source, the job type, the skills that match and the gaps an ad names, not only the title and the company.
+* **Fixes.** A date range in your CV is no longer read as a phone number, a match score of "85%" is read as 85, and the demo interview keeps the right time when the clocks change.
+
+Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
+
 **Windows and Mac:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed ([Mac first start](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md))
 
 **Linux or Python:**
@@ -154,7 +163,7 @@ Something broken? **Report a bug** in the sidebar or in Settings opens the bug r
 
 ### Windows: download the app (easiest)
 
-**[Download Stellenpilot for Windows](https://github.com/srvskr1/stellenpilot/releases/latest)** (the file `Stellenpilot-Setup-X.Y.Z.exe`, about 26 MB). Python is included, nothing else to install. Run it, then double click **Stellenpilot** on your desktop.
+**[Download Stellenpilot for Windows](https://github.com/srvskr1/stellenpilot/releases/latest)** (the file `Stellenpilot-Setup-X.Y.Z.exe`, about 27 MB). Python is included, nothing else to install. Run it, then double click **Stellenpilot** on your desktop.
 
 Windows may say "Windows protected your PC" because the app is not code signed yet. Click **More info**, then **Run anyway**. The installer is built by GitHub straight from this repository.
 
