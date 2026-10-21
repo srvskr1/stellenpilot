@@ -492,8 +492,8 @@ footer a{color:var(--text)}
       <h1 data-t="h1">Wake up to jobs that fit, with a tailored CV ready.</h1>
       <p class="lede" data-t="lede">Every morning Stellenpilot <b>finds new jobs in Germany</b>, scores them against your CV and writes the CV and cover letter for the best ones. <b>Free, on your own computer, no account.</b></p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://github.com/srvskr1/stellenpilot/releases/latest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg><span data-t="dl_win">Download for Windows</span></a>
-        <a class="btn btn-ghost" href="https://github.com/srvskr1/stellenpilot/releases/latest" data-t="dl_mac">Download for Mac</a>
+        <a class="btn btn-primary" href="https://github.com/srvskr1/stellenpilot/releases/latest" data-dl="win"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg><span data-t="dl_win">Download for Windows</span></a>
+        <a class="btn btn-ghost" href="https://github.com/srvskr1/stellenpilot/releases/latest" data-dl="mac" data-t="dl_mac">Download for Mac</a>
       </div>
       <div class="pip"><span>pip install stellenpilot</span><button type="button" id="copy" data-t="copy">Copy</button></div>
       <p class="fine" data-t="fine">Windows, macOS and Linux. Open source, MIT license.</p>
@@ -738,7 +738,7 @@ footer a{color:var(--text)}
     <h2 data-t="cta_h">Start tomorrow morning with a shortlist.</h2>
     <p data-t="cta_p"><b>Free and open source</b>, MIT license. Windows, macOS and Linux.</p>
     <div class="cta-row" style="margin:0">
-      <a class="btn btn-primary" href="https://github.com/srvskr1/stellenpilot/releases/latest" data-t="dl">Download Stellenpilot</a>
+      <a class="btn btn-primary" href="https://github.com/srvskr1/stellenpilot/releases/latest" data-dl="auto" data-t="dl">Download Stellenpilot</a>
       <a class="btn btn-ghost" href="https://github.com/srvskr1/stellenpilot" data-t="gh">View on GitHub</a>
     </div>
   </section>
@@ -855,4 +855,14 @@ footer a{color:var(--text)}
 })();
 </script>
 
+<script>
+/* Point the download buttons at the newest installer. Falls back to the releases page if GitHub can't be reached. */
+fetch("https://api.github.com/repos/srvskr1/stellenpilot/releases/latest").then(function(r){return r.ok?r.json():null}).then(function(rel){
+  if(!rel)return;
+  var find=function(re){var a=rel.assets.filter(function(x){return re.test(x.name)})[0];return a&&a.browser_download_url};
+  var url={win:find(/Setup.*\.exe$/i),mac:find(/mac.*\.dmg$/i)};
+  var ua=navigator.userAgent;url.auto=/Mac/.test(ua)&&!/iPhone|iPad/.test(ua)?url.mac:/Windows/.test(ua)?url.win:null;
+  document.querySelectorAll("[data-dl]").forEach(function(a){var u=url[a.dataset.dl];if(u)a.href=u;});
+}).catch(function(){});
+</script>
 </body></html>
