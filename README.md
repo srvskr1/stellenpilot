@@ -143,7 +143,7 @@ Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips an
 Five calm pages, in your browser, on your computer:
 
 * **Home**: what is ready to apply, interviews coming up, the newest matches, and a small 3D office where you can watch the agent work.
-* **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep. Filter by word, source, type, match or status.
+* **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep. Filter by word, source, type, place, day, match or status.
 * **Applications**: a board you drag cards across (Applied, Interview, Offer, Rejected), with reply rates by source, the skill gaps employers mention most, and a weekly summary.
 * **My CV**: your profile, with tips to improve your matches.
 * **Settings**: language (English or Deutsch), job sources, the AI, the daily search and Gmail, with step by step help for every key.

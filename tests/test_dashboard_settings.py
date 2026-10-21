@@ -123,5 +123,5 @@ class LanguageTest(unittest.TestCase):
         self.assertTrue(ids)
         for i in ids:
             self.assertIn(f'id="{i}"', html, f"the Jobs page has no #{i}")
-        for i in ("fsrc", "ftype"):  # the source and type lists are built from the jobs that are there
-            self.assertIn(f'["{i}"', code)
+        for i in ("fsrc", "ftype", "floc", "fday"):  # the lists are built from the jobs that are there
+            self.assertIn(f'"{i}"', code)

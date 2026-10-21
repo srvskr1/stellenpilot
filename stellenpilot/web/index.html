@@ -137,7 +137,7 @@ h2{font:600 1.25rem/1.3 var(--f-ui);margin:0}
 /* Jobs */
 .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;flex:1 1 420px}
 .tools .input[type=search]{flex:1 1 220px;max-width:340px}
-.tools select.input{width:auto}
+.tools select.input{width:auto;max-width:200px}
 .tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--border)}
 .tab{font:600 .9375rem var(--f-ui);min-height:44px;padding:0 14px;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;color:var(--text-secondary);cursor:pointer}
 .tab span{font-weight:500;color:var(--text-tertiary);margin-left:4px}
@@ -802,6 +802,8 @@ body.wizopen{overflow:hidden}
           <input class="input" id="q" type="search" placeholder="Search title, company or location" aria-label="Search title, company or location">
           <label class="check" style="gap:8px">Source <select class="input" id="fsrc"></select></label>
           <label class="check" style="gap:8px">Type <select class="input" id="ftype"></select></label>
+          <label class="check" style="gap:8px">Location <select class="input" id="floc"></select></label>
+          <label class="check" style="gap:8px">Day <select class="input" id="fday"></select></label>
           <label class="check" style="gap:8px">Match <select class="input" id="minm"><option value="0">Any</option><option value="60">60 or more</option><option value="70">70 or more</option><option value="80">80 or more</option></select></label>
           <button class="btn sec" id="addBtn" type="button" aria-expanded="false" aria-controls="addPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add a job</span></button>
         </div>
@@ -1114,6 +1116,7 @@ const DE={
 // Jobs
 "Match":"Passung","Any":"Alle","60 or more":"60 oder mehr","70 or more":"70 oder mehr","80 or more":"80 oder mehr",
 "Search title, company or location":"Titel, Firma oder Ort suchen","Source":"Quelle","Type":"Stellenart","Add a job":"Job hinzufügen",
+"Day":"Tag","Today":"Heute","Yesterday":"Gestern","Last {n} days":"Letzte {n} Tage",
 "Add a job yourself":"Selbst einen Job hinzufügen","Found it on LinkedIn, a company site or through a friend":"Gefunden auf LinkedIn, einer Firmenseite oder über Freunde","Link to the ad":"Link zur Anzeige",
 "(company careers pages; for LinkedIn or StepStone paste the text below)":"(Karriereseiten von Firmen; bei LinkedIn oder StepStone füge unten den Text ein)","Or paste the ad text":"Oder füge den Anzeigentext ein",
 "Copy the whole job ad here":"Kopiere die ganze Anzeige hierher","needed when pasting text":"nötig beim Einfügen von Text","Location":"Ort","e.g. Essen or Remote":"z. B. Essen oder Remote",
@@ -1277,7 +1280,7 @@ if(LANG==="de"){
 <script>
 const STAGES=[["new","New"],["ready","Ready"],["applied","Applied"],["interview","Interview"],["offer","Offer"],["rejected","Rejected"],["skipped","Skipped"]].map(([k,l])=>[k,t(l)]);
 const LABEL=Object.fromEntries(STAGES);
-let jobs=[], runs=[], runLog=[], filter=null, db=null, canWrite=true, firstName="";
+let jobs=[], runs=[], runLog=[], filter=null, db=null, canWrite=true, firstName="", searchCfg={};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"#";
@@ -1296,21 +1299,40 @@ const seen=j=>$("showDe").checked||j.lang!=="German needed";
 let sel=null;
 /* What the search box looks at: title, company, place, source, type and what the ad is about. */
 const hay=j=>[j.title,j.company,j.location,j.source,j.jobType,j.why,j.gaps].filter(Boolean).join(" ").toLowerCase();
+/* The city is the first part of the place, and remote jobs answer to "Remote". */
+const cityOf=j=>(j.location||"").split(",")[0].trim();
+const isRemotePlace=j=>!!j.remote||/^remote/i.test(j.location||"");
+const placeOk=(j,loc)=>loc==="remote"?isRemotePlace(j):cityOf(j).toLowerCase()===loc.toLowerCase();
+/* How old a posting is, in days. The date it was posted, or the day we found it. */
+const ageOf=j=>{const d=new Date((j.postedAt||j.foundAt||"")+"T00:00:00");if(isNaN(d))return 9999;
+  const t=new Date();t.setHours(0,0,0,0);return Math.round((t-d)/86400000);};
+const dayOk=(j,day)=>!day||(day==="today"?ageOf(j)===0:day==="yesterday"?ageOf(j)===1:ageOf(j)<Number(day));
 function visible(){
   const q=$("q").value.trim().toLowerCase(), min=Number($("minm").value)||0, src=$("fsrc").value, typ=$("ftype").value;
+  const loc=$("floc").value, day=$("fday").value;
   return jobs.filter(j=>seen(j)&&(!filter||j.status===filter)&&(!src||j.source===src)&&(!typ||j.jobType===typ)
+    &&(!loc||placeOk(j,loc))&&(!day||dayOk(j,day))
     &&(!q||hay(j).includes(q))&&(!min||Number(j.match)>=min||!(Number(j.match)>0)))
     .sort((a,b)=>(b.match||0)-(a.match||0));
 }
-/* The source and type lists follow the jobs that are there, most used first. */
+/* The source, type, place and day lists follow the jobs that are there, most used first.
+   The city and the number of days you search for come first, they are your own settings. */
 function fillFilters(){
   const uniq=f=>{const c=new Map();jobs.forEach(j=>{const v=f(j);if(v)c.set(v,(c.get(v)||0)+1)});
     return [...c].sort((a,b)=>b[1]-a[1]).map(x=>x[0]);};
-  for(const [id,vals] of [["fsrc",uniq(j=>j.source)],["ftype",uniq(j=>j.jobType)]]){
-    const el=$(id),keep=el.value;
-    el.innerHTML=`<option value="">${t("Any")}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
-    el.value=vals.includes(keep)?keep:"";
-  }
+  const city=(searchCfg.city||"").trim();
+  const places=uniq(j=>cityOf(j)).filter(p=>!/^remote$/i.test(p));
+  if(city){const i=places.findIndex(p=>p.toLowerCase()===city.toLowerCase());
+    if(i>0)places.unshift(...places.splice(i,1));else if(i<0)places.unshift(city);}
+  const days=[...new Set([Number(searchCfg.max_age_days)||0,7,14])].filter(n=>n>=3).sort((a,b)=>a-b);
+  const set=(id,pairs)=>{const el=$(id),keep=el.value;
+    el.innerHTML=`<option value="">${t("Any")}</option>`+pairs.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join("");
+    el.value=pairs.some(p=>p[0]===keep)?keep:"";};
+  set("fsrc",uniq(j=>j.source).map(v=>[v,v]));
+  set("ftype",uniq(j=>j.jobType).map(v=>[v,v]));
+  set("floc",[...places.map(v=>[v,v]),["remote",t("Remote")]]);
+  set("fday",[["today",t("Today")],["yesterday",t("Yesterday")],
+    ...days.map(n=>[String(n),t("Last {n} days",{n:n})])]);
 }
 function renderPipe(){
   const base=jobs.filter(seen), n=k=>base.filter(j=>j.status===k).length;
@@ -1390,7 +1412,7 @@ function fmtPrep(t){let o="",inList=false;for(const raw of String(t).split("\n")
 async function save(id,fields,msg){try{await api("PATCH","/api/jobs/"+encodeURIComponent(id),fields);if(msg)toast(msg);refresh()}
   catch(err){if(err&&err.code==="invalid_argument"){canWrite=false;renderList();toast("You can view this board but not change it")}else toast("Could not save. Try again in a moment.")}}
 function goJob(id,openSel){const j=jobs.find(x=>x._id===id);if(!j)return;
-  if(filter&&j.status!==filter)filter=null;if(!seen(j))$("showDe").checked=true;$("q").value="";$("minm").value="0";$("fsrc").value="";$("ftype").value="";
+  if(filter&&j.status!==filter)filter=null;if(!seen(j))$("showDe").checked=true;$("q").value="";$("minm").value="0";$("fsrc").value="";$("ftype").value="";$("floc").value="";$("fday").value="";
   if(openSel==="prep")openPrep.add(id);sel=id;location.hash="#jobs";render();
   requestAnimationFrame(()=>{const b=document.querySelector(`[data-pick="${CSS.escape(id)}"]`);if(b)b.scrollIntoView({block:"nearest"});
     if(innerWidth<=1100)$("detail").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})})}
@@ -1489,6 +1511,7 @@ let goto="";document.addEventListener("click",e=>{const a=e.target.closest("a[da
 $("pipe").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;filter=b.dataset.k||null;render()});
 $("q").addEventListener("input",renderList);$("minm").addEventListener("change",renderList);
 $("fsrc").addEventListener("change",renderList);$("ftype").addEventListener("change",renderList);
+$("floc").addEventListener("change",renderList);$("fday").addEventListener("change",renderList);
 $("showDe").addEventListener("change",render);
 const main=document.querySelector(".main");
 main.addEventListener("click",async e=>{
@@ -2051,7 +2074,7 @@ async function refresh(){
     if(sig===lastState)return;
     lastState=sig;
     jobs=st.jobs;runs=st.runs;runLog=st.history||[];weekly=st.weekly;
-    fillFilters();
+    searchCfg=st.search||{};fillFilters();
     $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();
     if(!st.profileReady&&!cvPrompted){cvPrompted=true;openSetup()}

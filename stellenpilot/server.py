@@ -337,6 +337,7 @@ def make_handler(settings, port: int = 8765):
                     "firstName": (str(settings.profile.get("person", {}).get("name") or "").split() or [""])[0],
                     "run": run_state,
                     "schedule": settings["schedule"],
+                    "search": settings["search"],
                     "profileReady": bool(settings.profile) and settings.profile.get("person", {}).get("name") != "Alex Example",
                 })
             if self.path == "/api/settings":
