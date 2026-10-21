@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://stellenpilot.dev/</loc><lastmod>2026-10-22</lastmod></url>
-  <url><loc>https://stellenpilot.dev/datenschutz.html</loc><lastmod>2026-10-22</lastmod></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>https://stellenpilot.dev/</loc><lastmod>2026-10-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://stellenpilot.dev/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://stellenpilot.dev/de/"/></url>
+  <url><loc>https://stellenpilot.dev/de/</loc><lastmod>2026-10-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://stellenpilot.dev/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://stellenpilot.dev/de/"/></url>
+  <url><loc>https://stellenpilot.dev/blog/werkstudent-cv.html</loc><lastmod>2026-10-22</lastmod></url>
+  <url><loc>https://stellenpilot.dev/blog/job-hunting-germany-without-fluent-german.html</loc><lastmod>2026-10-22</lastmod></url>
+  <url><loc>https://stellenpilot.dev/blog/verhandlungssicher.html</loc><lastmod>2026-10-22</lastmod></url>
+  <url><loc>https://stellenpilot.dev/blog/</loc><lastmod>2026-10-22</lastmod></url>
+  <url><loc>https://stellenpilot.dev/tools/german-level-checker.html</loc><lastmod>2026-10-22</lastmod></url>
+  <url><loc>https://stellenpilot.dev/about.html</loc><lastmod>2026-10-22</lastmod></url>
 </urlset>

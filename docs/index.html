@@ -3,6 +3,9 @@
 <meta name="description" content="Stellenpilot finds new jobs in Germany every morning, scores them against your CV and writes a tailored CV and cover letter. Free, local, no account.">
 <style>@font-face{font-family:"Geist";src:url(fonts/geist.woff2) format("woff2");font-weight:100 900;font-display:swap}@font-face{font-family:"Geist Mono";src:url(fonts/geist-mono.woff2) format("woff2");font-weight:100 900;font-display:swap}</style>
 <link rel="canonical" href="https://stellenpilot.dev/">
+<link rel="alternate" hreflang="en" href="https://stellenpilot.dev/">
+<link rel="alternate" hreflang="de" href="https://stellenpilot.dev/de/">
+<link rel="alternate" hreflang="x-default" href="https://stellenpilot.dev/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://stellenpilot.dev/">
 <meta property="og:title" content="Stellenpilot: wake up to jobs that fit">
@@ -357,7 +360,7 @@ section{scroll-margin-top:80px}
 .win{border-radius:16px;overflow:hidden;background:var(--paper);border:1px solid var(--line)}
 .win-bar{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .win-bar i{width:10px;height:10px;border-radius:50%;background:#D7DCE6}
-.win img{display:block;width:100%;height:auto}
+.win img,.win video{display:block;width:100%;height:auto}
 .posts{border-radius:24px;padding:8px 24px}
 .post{display:flex;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);color:var(--ink);font-weight:600}
 .post:last-child{border-bottom:0}
@@ -738,16 +741,17 @@ footer a{color:var(--text)}
     <h2 data-t="tour_h">See the whole app in a minute</h2>
     <p data-t="tour_p">Setup, home, jobs, applications and settings. All names in the demo are fictional.</p>
   </div>
-  <div class="tour glass"><div class="win"><div class="win-bar"><i></i><i></i><i></i></div><img src="demo.gif" alt="Stellenpilot app tour: setup, home, jobs, applications and settings" width="880" height="523" loading="lazy"></div></div>
+  <div class="tour glass"><div class="win"><div class="win-bar"><i></i><i></i><i></i></div><video id="tour-video" src="demo.mp4" poster="demo-poster.jpg" width="880" height="523" muted loop playsinline preload="none" aria-label="Stellenpilot app tour: setup, home, jobs, applications and settings"></video></div></div>
 
   <div class="sec-head" id="blog">
     <h2 data-t="blog_h">From the blog</h2>
-    <p data-t="blog_p">Guides for job hunting in Germany. First posts are being written.</p>
+    <p data-t="blog_p">Guides for job hunting in Germany.</p>
   </div>
   <div class="posts glass">
-    <div class="post" style="--i:0"><span data-t="post1" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">How to tailor your CV for a Werkstudent role</span><span data-t="soon">Coming soon</span></div>
-    <div class="post" style="--i:1"><span data-t="post2" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">Job hunting in Germany without fluent German</span><span data-t="soon">Coming soon</span></div>
-    <div class="post" style="--i:2"><span data-t="post3" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">What "verhandlungssicher" really means in a job ad</span><span data-t="soon">Coming soon</span></div>
+    <a class="post" href="blog/werkstudent-cv.html" style="--i:0"><span data-t="post1" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">How to tailor your CV for a Werkstudent role</span><span data-t="read">Read</span></a>
+    <a class="post" href="blog/job-hunting-germany-without-fluent-german.html" style="--i:1"><span data-t="post2" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">Job hunting in Germany without fluent German</span><span data-t="read">Read</span></a>
+    <a class="post" href="blog/verhandlungssicher.html" style="--i:2"><span data-t="post3" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">What "verhandlungssicher" really means in a job ad</span><span data-t="read">Read</span></a>
+    <a class="post" href="tools/german-level-checker.html" style="--i:3"><span data-t="post4" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">Free tool: check the German level a job ad really needs</span><span data-t="open">Open</span></a>
   </div>
 
   <section class="cta glass">
@@ -763,7 +767,7 @@ footer a{color:var(--text)}
 <footer>
   <div class="wrap">
     <span data-t="foot">Stellenpilot by Sourav Sarker, MIT license</span>
-    <nav aria-label="Footer"><a href="https://github.com/srvskr1/stellenpilot">GitHub</a><a href="https://pypi.org/project/stellenpilot/">PyPI</a><a href="https://github.com/srvskr1/stellenpilot/releases" data-t="changelog">Changelog</a><a href="datenschutz.html">Datenschutz</a></nav>
+    <nav aria-label="Footer"><a href="https://github.com/srvskr1/stellenpilot">GitHub</a><a href="https://pypi.org/project/stellenpilot/">PyPI</a><a href="https://github.com/srvskr1/stellenpilot/releases" data-t="changelog">Changelog</a><a href="blog/">Blog</a><a href="about.html" data-t="about">About</a><a href="datenschutz.html">Datenschutz</a></nav>
   </div>
 </footer>
 
@@ -793,8 +797,8 @@ footer a{color:var(--text)}
     t8:"Wähle deine KI",ai0:"Eingebaut",ai3:"Ohne KI",setup:"Einrichtung",cost:"Kosten",where:"Dein Lebenslauf",
     t9:"Gemessen",p9:"Getestet mit <b>28 echten Stellen</b>, von Hand bewertet.",t10:"Top 10 der Rangliste: <b>9 lohnen eine Bewerbung</b>",rnd:"Linie bei 0,5 heißt Zufall",auc:"Qualität der Rangfolge (AUC, höher ist besser)",b1:"Gespeichert",b2:"Stichwörter",b3:"Top 10",
     tour_h:"Die ganze App in einer Minute",tour_p:"Einrichtung, Start, Jobs, Bewerbungen und Einstellungen. Alle Namen in der Demo sind erfunden.",
-    blog_h:"Aus dem Blog",blog_p:"Ratgeber für die Jobsuche in Deutschland. Die ersten Beiträge entstehen gerade.",
-    post1:"Lebenslauf für eine Werkstudentenstelle anpassen",post2:"Jobsuche in Deutschland ohne fließendes Deutsch",post3:"Was „verhandlungssicher“ in einer Anzeige wirklich heißt",soon:"Bald",
+    blog_h:"Aus dem Blog",blog_p:"Ratgeber für die Jobsuche in Deutschland, auf Englisch.",
+    post1:"Lebenslauf für eine Werkstudentenstelle anpassen",post2:"Jobsuche in Deutschland ohne fließendes Deutsch",post3:"Was „verhandlungssicher“ in einer Anzeige wirklich heißt",read:"Lesen",open:"Öffnen",about:"Über",post4:"Kostenloses Tool: welches Deutsch-Niveau eine Anzeige wirklich verlangt",
     cta_h:"Starte morgen früh mit einer Auswahl.",cta_p:"<b>Kostenlos und Open Source</b>, MIT-Lizenz. Windows, macOS und Linux.",dl:"Stellenpilot laden",gh:"Auf GitHub ansehen",
     foot:"Stellenpilot von Sourav Sarker, MIT-Lizenz",changelog:"Änderungen"
   };
@@ -810,10 +814,12 @@ footer a{color:var(--text)}
     document.getElementById("lang-de").setAttribute("aria-pressed",l==="de");
     setAI(aiK,true);try{localStorage.setItem("sp-lang",l)}catch(e){}
   }
-  document.getElementById("lang-en").onclick=function(){setLang("en")};
-  document.getElementById("lang-de").onclick=function(){setLang("de")};
+  function go(l,u){try{localStorage.setItem("sp-lang",l)}catch(e){}location.href=u}
+  document.getElementById("lang-en").onclick=function(){go("en","/")};
+  document.getElementById("lang-de").onclick=function(){go("de","/de/")};
 
   var seg=document.getElementById("seg"),thumb=seg.querySelector(".thumb"),out=document.querySelector(".facts"),EFF=[1,2,1,0];seg.classList.add("js");
+  (function(){var v=document.getElementById("tour-video");if(!v||!("IntersectionObserver" in window))return;new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var p=v.play();if(p)p.catch(function(){})}else v.pause()})},{threshold:.25}).observe(v)})();
   function moveThumb(){var b=seg.querySelector('button[aria-pressed="true"]');if(!b)return;thumb.style.left=b.offsetLeft+"px";thumb.style.top=b.offsetTop+"px";thumb.style.width=b.offsetWidth+"px";thumb.style.height=b.offsetHeight+"px"}
   function setAI(k,anim){aiK=k;
     [].forEach.call(seg.querySelectorAll("button"),function(b){b.setAttribute("aria-pressed",+b.dataset.k===k);b.style.color=+b.dataset.k===k?"var(--blue)":""});
@@ -867,7 +873,7 @@ footer a{color:var(--text)}
   var nav=document.getElementById("nav");
   addEventListener("scroll",function(){nav.classList.toggle("scrolled",scrollY>40)},{passive:true});
 
-  try{var saved=localStorage.getItem("sp-lang");if(saved==="de")setLang("de");else if(!saved&&/^de/i.test(navigator.language||""))setLang("de")}catch(e){}
+  try{var saved=localStorage.getItem("sp-lang");if(saved==="de"||(!saved&&/^de/i.test(navigator.language||"")))location.replace("/de/")}catch(e){}
 })();
 </script>
 
