@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   why TEXT NOT NULL DEFAULT '',
   gaps TEXT NOT NULL DEFAULT '',
   gap_tags TEXT NOT NULL DEFAULT '[]',
+  skills TEXT NOT NULL DEFAULT '[]',
   status TEXT NOT NULL DEFAULT 'new',
   status_source TEXT NOT NULL DEFAULT 'run',
   status_updated_at TEXT,
@@ -105,7 +106,7 @@ class DB:
     def _migrate(self) -> None:
         """Add columns introduced after a user's database was created."""
         have = {r[1] for r in self.conn.execute("PRAGMA table_info(jobs)")}
-        for col in ("german_level", "summary_en"):
+        for col in ("german_level", "summary_en", "skills"):
             if col not in have:
                 self.conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
         # Before run_log existed, each day kept one row in runs and a second search the same day
@@ -143,6 +144,7 @@ class DB:
             "status_updated_at": now(), **job,
         }
         row["gap_tags"] = json.dumps(row.get("gap_tags") or [])
+        row["skills"] = json.dumps(row.get("skills") or [])
         row["remote"] = int(bool(row.get("remote")))
         cols = [c for c in row if c in self._columns()]
         sql = f"INSERT OR IGNORE INTO jobs ({','.join(cols)}) VALUES ({','.join('?' * len(cols))})"
@@ -181,6 +183,7 @@ class DB:
         for r in rows:
             d = dict(r)
             d["gap_tags"] = json.loads(d["gap_tags"] or "[]")
+            d["skills"] = json.loads(d["skills"] or "[]")
             d["remote"] = bool(d["remote"])
             d["closed"] = bool(d["closed"])
             out.append(d)

@@ -1,5 +1,6 @@
 """Offline tests. Run with: python -m unittest discover -s tests"""
 import json
+import sqlite3
 import tempfile
 import tomllib
 import unittest
@@ -11,7 +12,7 @@ from unittest import mock
 from stellenpilot import sources
 from stellenpilot.config import Settings
 from stellenpilot.db import DB
-from stellenpilot.score import keyword_score, score_job
+from stellenpilot.score import keyword_score, llm_score, score_job
 from stellenpilot.tailor import _valid_plan, make_plan, tailor_job, unsupported_claims
 from stellenpilot.text import dedupe_key, requires_fluent_german, strip_html
 
@@ -47,6 +48,46 @@ class ScoreTests(unittest.TestCase):
         r = score_job(job, PROFILE)
         self.assertEqual(r["lang"], "German needed")
         self.assertEqual(r["status"], "skipped")
+
+    def test_the_matched_skills_are_kept_for_the_dashboard(self):
+        r = keyword_score(JOB, PROFILE)
+        self.assertIn("Python", r["skills"])
+        self.assertIn("SQL", r["skills"])
+        self.assertNotIn("Snowflake", r["skills"])
+        # The tools of the ad that the profile does not have stay out of the matched list.
+        job = {**JOB, "description": JOB["description"] + " Snowflake and Kafka experience."}
+        self.assertNotIn("Snowflake", keyword_score(job, PROFILE)["skills"])
+
+    def test_the_ai_path_also_keeps_the_matched_skills(self):
+        llm = mock.Mock(max_chars=4000)
+        llm.complete_json.return_value = {"match": 70, "fit": "Possible", "why": "ok", "gaps": "Asks for dbt.",
+                                          "gap_tags": ["dbt"]}
+        r = llm_score(llm, JOB, PROFILE)
+        self.assertIn("Python", r["skills"])
+
+    def test_the_database_keeps_the_matched_skills(self):
+        with tempfile.TemporaryDirectory() as d:
+            db = DB(Path(d) / "t.db")
+            db.insert_job({**JOB, "skills": ["Python", "SQL"], "gap_tags": ["dbt"]})
+            row = db.jobs()[0]
+            self.assertEqual(row["skills"], ["Python", "SQL"])
+            self.assertEqual(row["gap_tags"], ["dbt"])
+            db.conn.close()
+
+    def test_an_old_database_gains_the_column(self):
+        from stellenpilot.db import SCHEMA
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "old.db"
+            conn = sqlite3.connect(path)
+            conn.executescript(SCHEMA.replace("  skills TEXT NOT NULL DEFAULT '[]',\n", ""))
+            conn.execute("INSERT INTO jobs (id, source, title, found_at, match) "
+                         "VALUES ('old-1', 'Test', 'Old job', '2026-10-01', 50)")
+            conn.commit()
+            conn.close()
+            db = DB(path)
+            self.assertIn("skills", {r[1] for r in db.conn.execute("PRAGMA table_info(jobs)")})
+            self.assertEqual(db.jobs()[0]["skills"], [])  # an old row has no skills yet
+            db.conn.close()
 
 
 class TruthGuardTests(unittest.TestCase):

@@ -168,6 +168,7 @@ h2{font:600 1.25rem/1.3 var(--f-ui);margin:0}
 a.chip:hover{color:var(--accent)}
 .chip.de{background:var(--low-bg);color:var(--low-fg)} .chip.remote{background:var(--mid-bg);color:var(--mid-fg)}
 .chip.closed{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg)} .chip.int{background:var(--pill-interview-bg);color:var(--pill-interview-fg)}
+.chip.ok{background:var(--ok-bg);color:var(--ok-fg)} .chip.gap{background:var(--low-bg);color:var(--low-fg)}
 .verdict{display:flex;gap:16px;align-items:center;padding:16px;border-radius:12px;background:var(--sb)}
 .verdict .big{font-size:2.25rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--sf)}
 .verdict strong{display:block;color:var(--text)}
@@ -1117,6 +1118,7 @@ const DE={
 "Match":"Passung","Any":"Alle","60 or more":"60 oder mehr","70 or more":"70 oder mehr","80 or more":"80 oder mehr",
 "Search title, company or location":"Titel, Firma oder Ort suchen","Source":"Quelle","Type":"Stellenart","Add a job":"Job hinzufügen",
 "Day":"Tag","Today":"Heute","Yesterday":"Gestern","Last {n} days":"Letzte {n} Tage",
+"Skills in this ad":"Werkzeuge in dieser Anzeige","In your CV":"In deinem Lebenslauf","Not in your CV":"Nicht in deinem Lebenslauf",
 "Add a job yourself":"Selbst einen Job hinzufügen","Found it on LinkedIn, a company site or through a friend":"Gefunden auf LinkedIn, einer Firmenseite oder über Freunde","Link to the ad":"Link zur Anzeige",
 "(company careers pages; for LinkedIn or StepStone paste the text below)":"(Karriereseiten von Firmen; bei LinkedIn oder StepStone füge unten den Text ein)","Or paste the ad text":"Oder füge den Anzeigentext ein",
 "Copy the whole job ad here":"Kopiere die ganze Anzeige hierher","needed when pasting text":"nötig beim Einfügen von Text","Location":"Ort","e.g. Essen or Remote":"z. B. Essen oder Remote",
@@ -1293,6 +1295,10 @@ const tone=m=>m>=75?"--sb:var(--ok-bg);--sf:var(--ok-fg)":m>=60?"--sb:var(--mid-
 const verdict=m=>m>=75?"Strong match":m>=60?"Good match":"Possible match";
 const pill=st=>`<span class="pill" style="background:var(--pill-${esc(st||"new")}-bg);color:var(--pill-${esc(st||"new")}-fg)">${esc(LABEL[st]||"New")}</span>`;
 const isRemote=j=>/remote/i.test(j.location||"")||/^remote/i.test(j.why||"");
+/* The keyword score keeps the missing tools as a plain list, so the chips below say it better. */
+const onlyTools=j=>{const g=(j.gaps||"").toLowerCase().replace(/[,\s]+/g," ").trim();
+  const t=(j.gapTags||[]).map(x=>x.toLowerCase());
+  return !!g&&t.length>0&&g===t.join(" ");};
 const langText=j=>j.source==="Found in Gmail"?"":t(j.lang==="German needed"?"Needs German":j.lang==="German ad"?"German ad":"English");
 const metaLine=j=>[j.company,j.location,j.jobType,langText(j)].filter(Boolean).map(esc).join(" · ");
 const seen=j=>$("showDe").checked||j.lang!=="German needed";
@@ -1365,7 +1371,11 @@ function renderDetail(){
     <h2><a href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">${esc(j.title)}</a></h2><div class="chips">${chips}</div></div>
     ${m>0?`<div class="verdict"><span class="big">${m}</span><span><strong>${verdict(m)}</strong>${esc(j.why||"")}</span></div>`
       :`<div class="verdict" style="--sb:var(--surface-alt)"><span class="big" style="color:var(--text-tertiary)">${MAIL}</span><span><strong>Found in your Gmail</strong>An application you sent yourself. Status updates come from Gmail.</span></div>`}
-    ${j.gaps?`<div><h3>Honest gaps</h3><p>${esc(j.gaps)}</p></div>`:""}
+    ${j.gaps&&!onlyTools(j)?`<div><h3>Honest gaps</h3><p>${esc(j.gaps)}</p></div>`:""}
+    ${(j.skills&&j.skills.length)||(j.gapTags&&j.gapTags.length)?`<div><h3>Skills in this ad</h3>
+      ${j.skills&&j.skills.length?`<p class="small">In your CV</p><div class="chips">${j.skills.map(s=>`<span class="chip ok">${esc(s)}</span>`).join("")}</div>`:""}
+      ${j.gapTags&&j.gapTags.length?`<p class="small">Not in your CV</p><div class="chips">${j.gapTags.map(s=>`<span class="chip gap">${esc(s)}</span>`).join("")}</div>`:""}
+    </div>`:""}
     ${j.summaryEn?`<details class="xtra"><summary>English summary of this German ad</summary><div class="prepbody"><p>${esc(j.summaryEn)}</p></div></details>`:""}
     ${m>0?`<div><h3>Your documents</h3>${j.folder?`<div class="btnrow"><button class="btn sec" data-doc="cv" data-id="${esc(j._id)}">Open CV</button><button class="btn sec" data-doc="letter" data-id="${esc(j._id)}">Open cover letter</button><button class="linkbtn" data-open-folder="${esc(j._id)}">Open folder</button></div>`
       :`<div class="btnrow"><button class="btn sec" data-make="${esc(j._id)}" ${dis}>Make CV and cover letter</button></div><p class="small" style="margin-top:6px">Takes a few seconds, or a minute or two with a local AI.</p>`}</div>`:""}
