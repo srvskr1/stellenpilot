@@ -72,14 +72,22 @@ def _mentioned(text: str) -> set[str]:
     return {v for v, rx in RE_CACHE.items() if rx.search(text or "")}
 
 
-def keyword_score(job: dict, profile: dict) -> dict:
-    """No-LLM fallback: share of tools named in the ad that the profile also has."""
+def skill_overlap(job: dict, profile: dict) -> tuple[list[str], list[str]]:
+    """The tools the ad names that the profile has, and the ones it does not.
+
+    The count decides the keyword score; the lists are shown in the dashboard, so the
+    person can see which tools were counted and which ones they are missing.
+    """
     have = _mentioned(profile_text(profile, include_learning=False))
     want = _mentioned(job["title"] + "\n" + job["description"])
-    overlap = want & have
-    missing = sorted(want - have)
+    return sorted(want & have), sorted(want - have)
+
+
+def keyword_score(job: dict, profile: dict) -> dict:
+    """No-LLM fallback: share of tools named in the ad that the profile also has."""
+    overlap, missing = skill_overlap(job, profile)
     # Ads that name few tools give weak evidence, so divide by at least 3.
-    base = 35 + int(45 * len(overlap) / max(len(want), 3))
+    base = 35 + int(45 * len(overlap) / max(len(overlap) + len(missing), 3))
     title = job["title"].lower()
     if any(w in title for w in ("werkstudent", "working student", "junior", "student")):
         base += 10
@@ -89,9 +97,10 @@ def keyword_score(job: dict, profile: dict) -> dict:
     return {
         "match": match,
         "fit": "Strong" if match >= 75 else "Possible" if match >= 55 else "Stretch",
-        "why": f"Keyword match: {', '.join(sorted(overlap)) or 'few tools named'}.",
+        "why": f"Keyword match: {', '.join(overlap) or 'few tools named'}.",
         "gaps": ", ".join(missing[:5]) or "",
         "gap_tags": missing[:4],
+        "skills": overlap,
     }
 
 
@@ -118,12 +127,16 @@ def llm_score(llm, job: dict, profile: dict, taste: str = "") -> dict:
     # Local models sometimes answer "85%", "85.0" or "85/100" instead of a bare integer.
     m = re.search(r"\d+(?:\.\d+)?", str(out.get("match") or ""))
     match = round(float(m.group(0))) if m else 0
+    # The model counted in its head; the same cheap word matching tells the person which
+    # tools were counted, so the dashboard can show them.
+    overlap, _ = skill_overlap(job, profile)
     return {
         "match": max(0, min(100, match)),
         "fit": str(out.get("fit", "")),
         "why": str(out.get("why", "")),
         "gaps": str(out.get("gaps", "")),
         "gap_tags": ([out["gap_tags"]] if isinstance(out.get("gap_tags"), str) else [str(t) for t in (out.get("gap_tags") or [])])[:4],
+        "skills": overlap,
         "_german": bool(out.get("german_fluency_required")),
         "summary_en": str(out.get("summary_en") or "")[:800],
     }

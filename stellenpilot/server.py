@@ -189,6 +189,22 @@ def check_credentials(text: str) -> str:
     return text
 
 
+def fill_skills(jobs: list[dict], profile: dict) -> None:
+    """The tools the ad names that the profile has, for jobs scored before this was stored.
+
+    New jobs carry the list from the scoring run. For the older ones it is worked out here,
+    so the dashboard can show the skills of every job, not only the newest.
+    """
+    if not profile:
+        return
+    from .score import skill_overlap
+    for j in jobs:
+        if j.get("skills") or not j.get("description"):
+            continue
+        overlap, _ = skill_overlap(j, profile)
+        j["skills"] = overlap
+
+
 def find_doc(job, kind: str, out_root: Path) -> Path | None:
     """The CV or cover letter in a job's folder, PDF first. Only inside the output folder."""
     if not job or not job["folder"] or kind not in ("cv", "letter"):
@@ -327,6 +343,7 @@ def make_handler(settings, port: int = 8765):
                 return self._send(200, fonts[self.path], "font/woff2")
             if self.path == "/api/state":
                 jobs = db.jobs()
+                fill_skills(jobs, settings.profile)
                 return self._send(200, {
                     "jobs": [camel(j) for j in jobs],
                     "runs": [camel(r) for r in db.runs()],
