@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 from collections import Counter
 from datetime import date, timedelta
+from functools import lru_cache
 
 from .text import ad_language, german_too_high, required_german_level
 from .llm import job_ad
@@ -70,8 +71,10 @@ def profile_gaps(profile: dict) -> str:
     return ""
 
 
-def _mentioned(text: str) -> set[str]:
-    return {v for v, rx in RE_CACHE.items() if rx.search(text or "")}
+@lru_cache(maxsize=4096)  # ponytail: bounded by count, not bytes; a few MB of ad text at most
+def _mentioned(text: str) -> frozenset[str]:
+    """The VOCAB tools a text names. Cached: /api/state rescores the same ads on every refresh."""
+    return frozenset(v for v, rx in RE_CACHE.items() if rx.search(text or ""))
 
 
 def skill_overlap(job: dict, profile: dict) -> tuple[list[str], list[str]]:
@@ -206,7 +209,8 @@ def score_job(job: dict, profile: dict, llm=None, taste: str = "", skip_german: 
 
 NICE = re.compile(r"nice to have|von vorteil|wünschenswert|idealerweise|\bplus\b|bonus|preferred|wäre schön", re.I)
 MUST = re.compile(r"required|\bmust\b|zwingend|setzen\s+\w*\s*voraus|erforderlich|vorausgesetzt|you have|du hast|sie haben|bringst mit|mitbringen", re.I)
-MIN_JOBS = 50  # below this a ranking is noise
+MIN_JOBS = 10  # below this there is nothing to rank
+STEADY_JOBS = 50  # below this the ranking still moves with every new ad, so the panel says so
 
 
 def _skill_rx(skill: str):
@@ -228,6 +232,20 @@ def _keyword_scored(job: dict) -> bool:
     return str(job.get("why", "")).startswith("Keyword match")
 
 
+def _with(profile: dict, skill: str) -> dict:
+    return {**profile, "skills": {**(profile.get("skills") or {}), "Added": [skill]}}
+
+
+def lifts(job: dict, profile: dict) -> list[dict]:
+    """For one keyword scored job: the score it would get with each missing skill, best first.
+    AI scores are a different scale and too slow to redo, so they get none."""
+    if not _keyword_scored(job) or not job.get("match"):
+        return []
+    out = [{"skill": t, "match": keyword_score(job, _with(profile, t))["match"]}
+           for t in job.get("gap_tags") or [] if t != "German"]
+    return sorted((r for r in out if r["match"] > job["match"]), key=lambda r: -r["match"])
+
+
 def unlocks(jobs: list[dict], profile: dict, threshold: int = 70, today: date | None = None, days: int = 90) -> dict:
     """Which missing skill would lift the most recent jobs to a good match.
 
@@ -238,7 +256,7 @@ def unlocks(jobs: list[dict], profile: dict, threshold: int = 70, today: date | 
     since = ((today or date.today()) - timedelta(days=days)).isoformat()
     window = [j for j in jobs if (j.get("found_at") or "") >= since and not j.get("closed") and (j.get("match") or 0) > 0]
     if len(window) < MIN_JOBS:
-        return {"enough": False, "jobs": len(window), "need": MIN_JOBS, "rows": []}
+        return {"enough": False, "jobs": len(window), "need": MIN_JOBS, "steady": STEADY_JOBS, "rows": []}
     hits: dict[str, list[dict]] = {}
     for j in window:
         tags = j.get("gap_tags") or []
@@ -246,7 +264,7 @@ def unlocks(jobs: list[dict], profile: dict, threshold: int = 70, today: date | 
                 j["match"] >= threshold or (tags == ["German"] and j["match"] >= threshold - 15)):
             hits.setdefault(f"German {j['german_level']}", []).append(j)
     for skill, _ in Counter(t for j in window for t in j.get("gap_tags") or [] if t != "German").most_common(30):
-        boosted = {**profile, "skills": {**(profile.get("skills") or {}), "Added": [skill]}}
+        boosted = _with(profile, skill)
         for j in window:
             if j["match"] >= threshold or skill not in (j.get("gap_tags") or []):
                 continue
@@ -260,4 +278,4 @@ def unlocks(jobs: list[dict], profile: dict, threshold: int = 70, today: date | 
         rows.append({"skill": skill, "jobs": len(js), "must": must,
                      "examples": [f"{j['title']} at {j['company']}" for j in js[:3]]})
     rows.sort(key=lambda r: (r["must"] + 0.5 * (r["jobs"] - r["must"]), r["jobs"]), reverse=True)
-    return {"enough": True, "jobs": len(window), "need": MIN_JOBS, "rows": rows[:8]}
+    return {"enough": True, "jobs": len(window), "need": MIN_JOBS, "steady": STEADY_JOBS, "rows": rows[:8]}

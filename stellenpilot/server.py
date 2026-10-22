@@ -17,7 +17,7 @@ from urllib.parse import unquote
 
 from . import schedule
 from .db import DB, STATUSES, local_day
-from .score import unlocks
+from .score import lifts, unlocks
 
 CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "statusUpdatedAt",
          "status_note": "statusNote", "gap_tags": "gapTags", "cv_style": "cvStyle", "interview_at": "interviewAt",
@@ -207,6 +207,12 @@ def fill_skills(jobs: list[dict], profile: dict) -> None:
         j["skills"] = overlap
 
 
+def fill_lifts(jobs: list[dict], profile: dict) -> None:
+    """"With dbt this job would score 78" for open keyword scored jobs below the match line."""
+    for j in jobs:
+        j["lift"] = lifts(j, profile) if profile and not j.get("closed") else []
+
+
 def find_doc(job, kind: str, out_root: Path) -> Path | None:
     """The CV or cover letter in a job's folder, PDF first. Only inside the output folder."""
     if not job or not job["folder"] or kind not in ("cv", "letter"):
@@ -346,6 +352,7 @@ def make_handler(settings, port: int = 8765):
             if self.path == "/api/state":
                 jobs = db.jobs()
                 fill_skills(jobs, settings.profile)
+                fill_lifts(jobs, settings.profile)
                 return self._send(200, {
                     "jobs": [camel(j) for j in jobs],
                     "runs": [camel(r) for r in db.runs()],
