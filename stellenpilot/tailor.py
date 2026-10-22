@@ -205,6 +205,18 @@ def _para(doc, text: str, size: float | None = None, bold: bool = False):
     return p
 
 
+# CV layouts. Layout only: content always comes from the plan, so the truth guard covers every style.
+EN_HEADS = {"summary": "Professional Summary", "skills": "Skills", "experience": "Experience",
+            "projects": "Projects", "education": "Education", "languages": "Languages"}
+DE_HEADS = {"summary": "Profil", "skills": "Kenntnisse", "experience": "Berufserfahrung",
+            "projects": "Projekte", "education": "Ausbildung", "languages": "Sprachen"}
+CV_STYLES = {
+    "classic": {"size": 10.5, "margin": 50, "heads": EN_HEADS, "dates_first": False},
+    "compact": {"size": 9.5, "margin": 36, "heads": EN_HEADS, "dates_first": False},
+    "lebenslauf": {"size": 10.5, "margin": 50, "heads": DE_HEADS, "dates_first": True},
+}
+
+
 def _heading(doc, text):
     p = _para(doc, text.upper(), 10.5, bold=True)
     p.runs[0].font.color.rgb = RGBColor(0x1E, 0x3A, 0x8A)
@@ -212,13 +224,13 @@ def _heading(doc, text):
     p.paragraph_format.space_after = Pt(2)
 
 
-def _base_doc() -> Document:
+def _base_doc(size: float = 10.5, margin: int = 50) -> Document:
     doc = Document()
     st = doc.styles["Normal"]
     st.font.name = "Calibri"
-    st.font.size = Pt(10.5)
+    st.font.size = Pt(size)
     for s in doc.sections:
-        s.left_margin = s.right_margin = s.top_margin = s.bottom_margin = Pt(50)
+        s.left_margin = s.right_margin = s.top_margin = s.bottom_margin = Pt(margin)
     return doc
 
 
@@ -229,9 +241,11 @@ def _contact(person: dict, links: bool = True) -> str:
     return " | ".join(x for x in parts if x)
 
 
-def build_cv(profile: dict, plan: dict, path: Path) -> None:
+def build_cv(profile: dict, plan: dict, path: Path, style: str = "classic") -> None:
+    st = CV_STYLES.get(style, CV_STYLES["classic"])
+    h = st["heads"]
     person = profile.get("person") or {}
-    doc = _base_doc()
+    doc = _base_doc(st["size"], st["margin"])
     _para(doc, person.get("name", ""), 20, bold=True)
     heads = person.get("headlines") or []
     if heads:
@@ -239,12 +253,12 @@ def build_cv(profile: dict, plan: dict, path: Path) -> None:
     _para(doc, _contact(person), 9.5)
 
     if plan["summary"]:
-        _heading(doc, "Professional Summary")
+        _heading(doc, h["summary"])
         _para(doc, plan["summary"])
 
     skills = profile.get("skills") or {}
     if skills:
-        _heading(doc, "Skills")
+        _heading(doc, h["skills"])
         for g in plan["skill_groups"]:
             p = doc.add_paragraph()
             p.add_run(f"{g}: ").bold = True
@@ -253,11 +267,13 @@ def build_cv(profile: dict, plan: dict, path: Path) -> None:
 
     exp = profile.get("experience") or []
     if exp:
-        _heading(doc, "Experience")
+        _heading(doc, h["experience"])
         for e, idx in zip(exp, plan["experience"]):
             p = doc.add_paragraph()
+            if st["dates_first"] and e.get("dates"):
+                p.add_run(f"{e['dates']}    ").italic = True
             p.add_run(", ".join(x for x in (e.get("title"), e.get("company")) if x)).bold = True
-            if e.get("dates"):
+            if e.get("dates") and not st["dates_first"]:
                 p.add_run(f"    {e['dates']}").italic = True
             p.paragraph_format.space_after = Pt(0)
             for j in idx:
@@ -265,7 +281,7 @@ def build_cv(profile: dict, plan: dict, path: Path) -> None:
 
     projs = profile.get("projects") or []
     if projs:
-        _heading(doc, "Projects")
+        _heading(doc, h["projects"])
         for i in plan["projects"]:
             pr = projs[i]
             p = doc.add_paragraph()
@@ -277,7 +293,7 @@ def build_cv(profile: dict, plan: dict, path: Path) -> None:
                 doc.add_paragraph(b, style="List Bullet")
 
     if profile.get("education"):
-        _heading(doc, "Education")
+        _heading(doc, h["education"])
         for ed in profile["education"]:
             p = doc.add_paragraph()
             p.add_run(ed.get("degree", "")).bold = True
@@ -286,7 +302,7 @@ def build_cv(profile: dict, plan: dict, path: Path) -> None:
                 p.add_run(f", {rest}")
             p.paragraph_format.space_after = Pt(0)
     if person.get("languages"):
-        _heading(doc, "Languages")
+        _heading(doc, h["languages"])
         _para(doc, ", ".join(person["languages"]))
     doc.save(path)
 
@@ -441,7 +457,7 @@ def slug(s: str, n: int = 40) -> str:
 
 
 def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: bool = True,
-               letter_setting: str = "auto", my_german: str = "A2") -> dict:
+               letter_setting: str = "auto", my_german: str = "A2", cv_style: str = "classic") -> dict:
     person = profile.get("person") or {}
     # Company plus title, so two roles at one company never overwrite each other.
     folder = out_root / date.today().isoformat() / f"{slug(job['company'], 30)}__{slug(job['title'], 40)}"
@@ -452,7 +468,7 @@ def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: boo
     plan = make_plan(job, profile, llm)
     who = slug(person.get("name", "CV"))
     cv = folder / f"{who}_CV_{slug(job['company'], 30)}.docx"
-    build_cv(profile, plan, cv)
+    build_cv(profile, plan, cv, cv_style)
     lang = letter_language(job, letter_setting, llm, my_german)
     progress.stage("Writing the cover letter", expect=1500, step=2, steps=steps)
     body, note = letter_body(job, profile, plan, llm, lang)
@@ -479,4 +495,4 @@ def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: boo
         progress.stage("Making the PDF files", step=4, steps=steps)
     pdfs = to_pdf([cv, letter]) if make_pdf else []
     return {"folder": str(folder), "files": [str(p) for p in (cv, letter, report, *pdfs)],
-            "coverage": plan["coverage"]}
+            "coverage": plan["coverage"], "cv_style": cv_style if cv_style in CV_STYLES else "classic"}

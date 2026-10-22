@@ -709,6 +709,8 @@ body.wizopen{overflow:hidden}
               <label>Make documents for matches from <input class="input" name="min_match" type="number" min="0" max="100"></label>
               <label>Cover letter language
                 <select class="input" name="letter_language"><option value="auto">Automatic</option><option value="en">Always English</option><option value="de">Always German</option></select></label>
+              <label>CV layout
+                <select class="input" name="cv_style"><option value="classic">Classic, one column</option><option value="compact">Compact, fits more on a page</option><option value="lebenslauf">German Lebenslauf, dates first</option></select></label>
             </div>
             <p class="hint">Match goes from 0 to 100. Automatic writes German letters only if your German is B2 or better.</p>
           </section>
@@ -845,7 +847,7 @@ body.wizopen{overflow:hidden}
         <div class="sechead"><h2 id="ins-h">Insights</h2><span>What works and what to learn next</span></div>
         <div class="insights">
           <div class="panel"><h3>Reply rate by channel</h3><p class="hint">Replies count interviews, offers and rejections out of applications sent.</p><div id="chan"></div></div>
-          <div class="panel"><h3>Skill gaps across job ads</h3><p class="hint">How many matched ads named each gap. Learn the top ones first.</p><div id="gapsBox"></div></div>
+          <div class="panel"><h3>What to learn next</h3><p class="hint">Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.</p><div id="gapsBox"></div></div>
           <div class="panel wk"><h3>Weekly summary</h3><div id="weekly"><p class="muted">The first weekly summary arrives on Sunday evening.</p></div></div>
         </div>
       </section>
@@ -1037,7 +1039,7 @@ const DE={
 "Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.":"Dein Profil hat noch keine Jobs oder Projekte. Die KI kann deinen Lebenslauf erneut lesen und sie eintragen.","Read my CV again":"Lebenslauf erneut lesen",
 "Starting…":"Startet…","✓ Your CV is read and saved. Check it under My CV.":"✓ Dein Lebenslauf ist gelesen und gespeichert. Prüfe ihn unter Mein Lebenslauf.",
 "Documents and German":"Unterlagen und Deutsch","When CVs and letters are made, and in which language.":"Wann Lebensläufe und Anschreiben erstellt werden, und in welcher Sprache.","My German level":"Mein Deutschniveau","From my CV":"Aus meinem Lebenslauf",
-"Make documents for matches from":"Unterlagen erstellen ab einer Passung von","Cover letter language":"Sprache der Anschreiben","Automatic":"Automatisch","Always English":"Immer Englisch","Always German":"Immer Deutsch",
+"Make documents for matches from":"Unterlagen erstellen ab einer Passung von","Cover letter language":"Sprache der Anschreiben","CV layout":"Lebenslauf Layout","Classic, one column":"Klassisch, eine Spalte","Compact, fits more on a page":"Kompakt, mehr pro Seite","German Lebenslauf, dates first":"Deutscher Lebenslauf, Datum zuerst","Classic":"Klassisch","Compact":"Kompakt","Automatic":"Automatisch","Always English":"Immer Englisch","Always German":"Immer Deutsch",
 "Match goes from 0 to 100. Automatic writes German letters only if your German is B2 or better.":"Die Passung reicht von 0 bis 100. Automatisch schreibt deutsche Anschreiben nur, wenn dein Deutsch B2 oder besser ist.",
 "Search for new jobs every day without opening Stellenpilot.":"Jeden Tag nach neuen Jobs suchen, ohne Stellenpilot zu öffnen.","Search every day":"Jeden Tag suchen","The dashboard does not need to be open.":"Das Dashboard muss dafür nicht offen sein.","At":"Um",
 "Your computer must be on. On Windows a missed search runs when you log in; on Mac and Linux it runs when you open Stellenpilot.":"Dein Computer muss an sein. Unter Windows läuft eine verpasste Suche bei der Anmeldung nach; auf Mac und Linux, wenn du Stellenpilot öffnest.",
@@ -1143,7 +1145,7 @@ const DE={
 "Everything you sent, and how it is going":"Alles, was du geschickt hast, und wie es läuft","Check email":"E-Mails prüfen","Connect Gmail to update statuses by itself":"Verbinde Gmail, damit sich der Status von selbst aktualisiert",
 "Your applications":"Deine Bewerbungen","Insights":"Auswertung","What works and what to learn next":"Was funktioniert und was du als Nächstes lernen solltest","Reply rate by channel":"Antwortquote nach Kanal",
 "Replies count interviews, offers and rejections out of applications sent.":"Als Antwort zählen Gespräche, Angebote und Absagen im Verhältnis zu gesendeten Bewerbungen.",
-"Skill gaps across job ads":"Lücken über alle Anzeigen","How many matched ads named each gap. Learn the top ones first.":"Wie viele passende Anzeigen jede Lücke nannten. Lerne die obersten zuerst.",
+"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Not enough jobs yet: {n} of {m} scored jobs in the last 90 days.":"Noch zu wenige Jobs: {n} von {m} bewerteten Jobs der letzten 90 Tage.","No single skill would lift a job over your match line yet.":"Noch hebt keine einzelne Fähigkeit einen Job über deine Passungsgrenze.",
 "Weekly summary":"Wochenrückblick","The first weekly summary arrives on Sunday evening.":"Der erste Wochenrückblick kommt am Sonntagabend.",
 "Nothing sent yet. When you press I applied on a job, it shows up here, and Gmail can move it forward by itself.":"Noch nichts gesendet. Wenn du bei einem Job auf Beworben klickst, erscheint er hier, und Gmail kann ihn von selbst weiterschieben.",
 "Moved here by Gmail":"Von Gmail hierher verschoben","None":"Keine","Source":"Quelle","Role type":"Art der Stelle","Full time":"Vollzeit","Working student":"Werkstudent","On site or hybrid":"Vor Ort oder hybrid",
@@ -1412,7 +1414,7 @@ const ICO={
  ext:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
  copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`};
 const openNotes=new Set(), openPrep=new Set();
-let weekly=[], pendingRender=false;
+let weekly=[], unlocksData=null, pendingRender=false;
 function fmtWhen(s){const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleString(LOC,{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
 function fmtPrep(t){let o="",inList=false;for(const raw of String(t).split("\n")){const l=raw.trim();
   if(/^[-*] /.test(l)){if(!inList){o+="<ul>";inList=true}o+=`<li>${esc(l.slice(2))}</li>`;continue}
@@ -1480,18 +1482,18 @@ const SRCLINK={Adzuna:"https://www.adzuna.de",Arbeitnow:"https://www.arbeitnow.c
 const srcChip=s=>SRCLINK[s]?`<a class="chip" href="${SRCLINK[s]}" target="_blank" rel="noopener">${esc(s)}</a>`:`<span class="chip">${esc(s)}</span>`;
 const SRC=s=>/arbeitsagentur/i.test(s)?"Bundesagentur":/arbeitnow/i.test(s)?"Arbeitnow":/theirstack/i.test(s)?"TheirStack":/jobicy/i.test(s)?"Jobicy":/remotive/i.test(s)?"Remotive":/workingstudentjobs/i.test(s)?"workingstudentjobs.de":/adzuna/i.test(s)?"Adzuna":/linkedin/i.test(s)?"LinkedIn":/stepstone/i.test(s)?"StepStone":/indeed/i.test(s)?"Indeed":/gmail/i.test(s)?"Found in Gmail":/jobswithoutgerman|firecrawl/i.test(s)?"jobswithoutgerman.de":"Other";
 const SENT=["applied","interview","offer","rejected"],REPLY=["interview","offer","rejected"];
-const GAPDICT=[["German",/german/i],["dbt",/\bdbt\b/i],["Snowflake",/snowflake/i],["Kafka",/kafka/i],["Terraform",/terraform/i],["Spark",/spark/i],["Kubernetes",/kubernetes|k8s/i],["GCP",/\bgcp\b|google cloud/i],["Java or Scala",/\bjava\b|scala/i],["AWS CDK",/\bcdk\b/i],["Professional DE experience",/professional|years of experience/i]];
 function bars(rows,max,warm){return rows.map(r=>`<div class="brow"><span>${esc(r.k)}</span><span class="bt"><i class="${warm?"w":""}" style="width:${max?Math.round(r.v/max*100):0}%"></i></span><span class="nm">${r.lbl}</span></div>`).join("")}
 function renderInsights(){
   const sent=jobs.filter(j=>SENT.includes(j.status));
   const grp=(fn)=>{const m={};sent.forEach(j=>{const k=fn(j);if(!k)return;(m[k]??={n:0,r:0,i:0}).n++;if(REPLY.includes(j.status))m[k].r++;if(j.status==="interview"||j.status==="offer")m[k].i++});
     return Object.entries(m).map(([k,x])=>({k,v:x.n?x.r/x.n:0,lbl:`${x.r} of ${x.n}${x.i?`, ${x.i} interview${x.i>1?"s":""}`:""}`})).sort((a,b)=>b.v-a.v)};
   const row=(t,rs)=>rs.length?`<div class="grp">${t}</div>`+bars(rs,1):"";
-  $("chan").innerHTML=sent.length?row("Source",grp(j=>SRC(j.source||"")))+row("Role type",grp(j=>/full/i.test(j.jobType||"")?"Full time":/werk|student/i.test((j.jobType||"")+" "+(j.title||""))?"Working student":null))+row("Location",grp(j=>/remote/i.test(j.location||"")?"Remote":j.location?"On site or hybrid":null))
+  $("chan").innerHTML=sent.length?row("Source",grp(j=>SRC(j.source||"")))+row("Role type",grp(j=>/full/i.test(j.jobType||"")?"Full time":/werk|student/i.test((j.jobType||"")+" "+(j.title||""))?"Working student":null))+row("Location",grp(j=>/remote/i.test(j.location||"")?"Remote":j.location?"On site or hybrid":null))+row("CV layout",grp(j=>({classic:"Classic",compact:"Compact",lebenslauf:"Lebenslauf"})[j.cvStyle]||null))
     +`<p class="hint">Small numbers for now. This gets reliable after about 20 applications.</p>`:`<p class="muted">No applications sent yet.</p>`;
-  const cnt={};jobs.filter(j=>Number(j.match)>0).forEach(j=>{let tags=Array.isArray(j.gapTags)?j.gapTags:GAPDICT.filter(([,rx])=>rx.test(j.gaps||"")).map(([k])=>k);new Set(tags).forEach(t=>cnt[t]=(cnt[t]||0)+1)});
-  const g=Object.entries(cnt).map(([k,v])=>({k,v,lbl:`${v} ad${v>1?"s":""}`})).sort((a,b)=>b.v-a.v).slice(0,8);
-  $("gapsBox").innerHTML=g.length?bars(g,g[0].v,true):`<p class="muted">No gaps recorded yet.</p>`;
+  const u=unlocksData||{rows:[]};
+  const g=u.rows.map(r=>({k:r.skill,v:r.jobs,lbl:t(r.must?"{n} jobs, {m} require it":"{n} jobs, nice to have",{n:r.jobs,m:r.must}),ex:r.examples}));
+  $("gapsBox").innerHTML=!u.enough?`<p class="muted">${esc(t("Not enough jobs yet: {n} of {m} scored jobs in the last 90 days.",{n:u.jobs||0,m:u.need||50}))}</p>`
+    :g.length?bars(g,g[0].v,true)+g.map(r=>`<details class="small"><summary>${esc(r.k)}</summary>${r.ex.map(x=>`<div>${esc(x)}</div>`).join("")}</details>`).join(""):`<p class="muted">${esc(t("No single skill would lift a job over your match line yet."))}</p>`;
   const w=[...weekly].sort((a,b)=>String(b.weekOf).localeCompare(String(a.weekOf)))[0];
   if(w)$("weekly").innerHTML=`<p class="hint">Week of ${esc(fmtDate(w.weekOf))}</p><div class="nums"><div><b>${esc(w.applied??0)}</b><span>applied</span></div><div><b>${esc(w.replies??0)}</b><span>replies</span></div><div><b>${esc(w.interviews??0)}</b><span>interviews</span></div></div>${w.topGap?`<p>Top gap: <b>${esc(w.topGap)}</b></p>`:""}${w.summary?`<p>${esc(w.summary)}</p>`:""}`;
 }
@@ -1745,7 +1747,7 @@ $("cvSave").addEventListener("click",async()=>{
 let cvPrompted=false;
 
 /* ---------- Settings ---------- */
-const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive","workingstudentjobs"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language"],schedule:["enabled","time"],watch:["starter_list"],ui:["language"]};
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive","workingstudentjobs"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language","cv_style"],schedule:["enabled","time"],watch:["starter_list"],ui:["language"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,.keyhelp,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 $("setForm").addEventListener("click",async e=>{const b=e.target.closest("[data-clear-key]");if(!b)return;e.preventDefault();
@@ -2083,7 +2085,7 @@ async function refresh(){
     const sig=JSON.stringify(st);
     if(sig===lastState)return;
     lastState=sig;
-    jobs=st.jobs;runs=st.runs;runLog=st.history||[];weekly=st.weekly;
+    jobs=st.jobs;runs=st.runs;runLog=st.history||[];weekly=st.weekly;unlocksData=st.unlocks;
     searchCfg=st.search||{};fillFilters();
     $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();

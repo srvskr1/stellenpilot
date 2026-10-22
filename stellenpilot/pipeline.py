@@ -192,11 +192,12 @@ def _run(settings, db: DB, tailor: bool) -> dict:
         for i, job in enumerate(todo, 1):
             db.stage("tailor", f"Tailoring CV {i} of {len(todo)}: {job['company']}")
             try:
-                res = tailor_job(job, profile, out_root, llm, t.get("make_pdf", True), t.get("letter_language", "auto"), my_de)
+                res = tailor_job(job, profile, out_root, llm, t.get("make_pdf", True), t.get("letter_language", "auto"), my_de,
+                                 t.get("cv_style", "classic"))
             except Exception as e:
                 problems.append(f"tailoring {job['id']}: {e}")
                 continue
-            db.mark_ready(job["id"], res["folder"], f"Your experience shows {res['coverage']}% of the tools the ad names")
+            db.mark_ready(job["id"], res["folder"], f"Your experience shows {res['coverage']}% of the tools the ad names", res["cv_style"])
             docs += len(res["files"])
 
     db.stage("score", "Checking if open postings are still online")

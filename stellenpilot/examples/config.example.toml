@@ -112,6 +112,8 @@ only_english_ads = true
 # "auto" writes German for German ads only if your German is B2 or better (and an LLM is set).
 # Below B2 it writes English: a polished German letter would suggest a level you do not have.
 letter_language = "auto"
+# CV layout: "classic", "compact" or "lebenslauf" (German, dates first). Layout only, the content is the same.
+cv_style = "classic"
 
 [notify]
 # A short digest to yourself after each run. Secrets go in .env, see docs/digest.md.

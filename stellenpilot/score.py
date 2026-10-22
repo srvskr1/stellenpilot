@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
+from datetime import date, timedelta
 
 from .text import ad_language, german_too_high, required_german_level
 from .llm import job_ad
@@ -198,3 +200,64 @@ def score_job(job: dict, profile: dict, llm=None, taste: str = "", skip_german: 
             and result.get("status") != "skipped"):
         result["summary_en"] = english_summary(llm, job)
     return result
+
+
+# ---------------------------------------------------------------- what to learn next
+
+NICE = re.compile(r"nice to have|von vorteil|wünschenswert|idealerweise|\bplus\b|bonus|preferred|wäre schön", re.I)
+MUST = re.compile(r"required|\bmust\b|zwingend|setzen\s+\w*\s*voraus|erforderlich|vorausgesetzt|you have|du hast|sie haben|bringst mit|mitbringen", re.I)
+MIN_JOBS = 50  # below this a ranking is noise
+
+
+def _skill_rx(skill: str):
+    if skill == "German":
+        return re.compile(r"german|deutsch", re.I)
+    return RE_CACHE.get(skill) or re.compile(rf"(?<![\w/]){re.escape(skill)}(?![\w/])", re.I)
+
+
+def is_must_have(description: str, skill: str) -> bool:
+    """True when a sentence naming the skill marks it as required and does not mark it optional."""
+    rx = _skill_rx(skill)
+    for s in re.split(r"(?<=[.!?\n])", description or ""):
+        if rx.search(s) and not NICE.search(s) and MUST.search(s):
+            return True
+    return False
+
+
+def _keyword_scored(job: dict) -> bool:
+    return str(job.get("why", "")).startswith("Keyword match")
+
+
+def unlocks(jobs: list[dict], profile: dict, threshold: int = 70, today: date | None = None, days: int = 90) -> dict:
+    """Which missing skill would lift the most recent jobs to a good match.
+
+    Keyword scored jobs are rescored with the skill added. AI scores are a different scale and too slow
+    to redo, so an AI scored job counts only when the skill is its single gap and it is within 15 points.
+    German is a level, not a skill: a job counts for "German B2" when it already scores well and German is what blocks it.
+    """
+    since = ((today or date.today()) - timedelta(days=days)).isoformat()
+    window = [j for j in jobs if (j.get("found_at") or "") >= since and not j.get("closed") and (j.get("match") or 0) > 0]
+    if len(window) < MIN_JOBS:
+        return {"enough": False, "jobs": len(window), "need": MIN_JOBS, "rows": []}
+    hits: dict[str, list[dict]] = {}
+    for j in window:
+        tags = j.get("gap_tags") or []
+        if "German" in tags and j.get("german_level") and (
+                j["match"] >= threshold or (tags == ["German"] and j["match"] >= threshold - 15)):
+            hits.setdefault(f"German {j['german_level']}", []).append(j)
+    for skill, _ in Counter(t for j in window for t in j.get("gap_tags") or [] if t != "German").most_common(30):
+        boosted = {**profile, "skills": {**(profile.get("skills") or {}), "Added": [skill]}}
+        for j in window:
+            if j["match"] >= threshold or skill not in (j.get("gap_tags") or []):
+                continue
+            if (keyword_score(j, boosted)["match"] >= threshold if _keyword_scored(j)
+                    else j["gap_tags"] == [skill] and j["match"] >= threshold - 15):
+                hits.setdefault(skill, []).append(j)
+    rows = []
+    for skill, js in hits.items():
+        bare = skill.split()[0] if skill.startswith("German ") else skill
+        must = sum(1 for j in js if is_must_have(j.get("description", ""), bare))
+        rows.append({"skill": skill, "jobs": len(js), "must": must,
+                     "examples": [f"{j['title']} at {j['company']}" for j in js[:3]]})
+    rows.sort(key=lambda r: (r["must"] + 0.5 * (r["jobs"] - r["must"]), r["jobs"]), reverse=True)
+    return {"enough": True, "jobs": len(window), "need": MIN_JOBS, "rows": rows[:8]}
