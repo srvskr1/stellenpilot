@@ -8,7 +8,7 @@ from pathlib import Path
 
 from docx import Document
 
-from stellenpilot.score import is_must_have, keyword_score, unlocks
+from stellenpilot.score import is_must_have, keyword_score, lifts, unlocks
 from stellenpilot.tailor import tailor_job
 
 PROFILE = tomllib.loads(resources.files("stellenpilot").joinpath("examples/profile.example.toml").read_text(encoding="utf-8"))
@@ -50,6 +50,23 @@ class UnlockTests(unittest.TestCase):
               {**job(202, "x"), "why": "Good fit.", "match": 40, "gap_tags": ["Snowflake"]}]
         rows = {r["skill"]: r["jobs"] for r in unlocks(base + ai, PROFILE, 70, TODAY)["rows"]}
         self.assertEqual(rows.get("Snowflake"), 1)
+
+
+class LiftTests(unittest.TestCase):
+    def test_keyword_job_shows_score_with_each_missing_skill(self):
+        j = job(1, "We use Python and SQL. Kafka experience is required.")
+        self.assertEqual(lifts(j, PROFILE), [{"skill": "Kafka", "match": 80}])
+
+    def test_ai_scored_job_gets_no_guess(self):
+        j = {**job(2, "Python, SQL, Kafka."), "why": "Good fit."}
+        self.assertEqual(lifts(j, PROFILE), [])
+
+    def test_ranking_starts_at_ten_jobs(self):
+        few = [job(i, "We use Python and SQL. Kafka is required.") for i in range(10)]
+        out = unlocks(few, PROFILE, 70, TODAY)
+        self.assertTrue(out["enough"])
+        self.assertLess(out["jobs"], out["steady"])
+        self.assertFalse(unlocks(few[:9], PROFILE, 70, TODAY)["enough"])
 
 
 class CvStyleTests(unittest.TestCase):
