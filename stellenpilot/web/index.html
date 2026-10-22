@@ -690,6 +690,11 @@ body.wizopen{overflow:hidden}
 @media (max-width:1180px){.ins{grid-template-columns:1fr 1fr}.ins .c-wide,.ins .c-full{grid-column:1/-1}}
 @media (max-width:760px){.rrow{grid-template-columns:minmax(80px,110px) minmax(0,1fr) 40px}.rrow em{display:none}.rsum{gap:20px}.ins{grid-template-columns:1fr}.fring{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:16px}.fst+.fst::before{display:none}}
 @media (prefers-reduced-motion: reduce){.ins .ic:hover,.st:hover{transform:none}.fu summary::before{animation:none}}
+/* update banner: appears once per new version, on Home */
+.upd{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-radius:12px;background:var(--accent-soft);color:var(--accent-hover);margin-bottom:16px;font-size:.9375rem}
+.upd b{color:var(--text)}.upd .sp{flex:1 1 auto}
+.upd code{font:500 .8125rem var(--f-mono);background:var(--surface);padding:4px 8px;border-radius:6px;color:var(--text);overflow-wrap:anywhere}
+.upd .btn:active{transform:scale(.97)}
 </style>
 </head>
 <body>
@@ -746,6 +751,7 @@ body.wizopen{overflow:hidden}
           <section class="box scard" id="s-lang"><h2>Language</h2><p class="hint">The language of Stellenpilot itself. Your CVs and cover letters have their own setting under Documents.</p>
             <div class="g3"><label>Show Stellenpilot in
               <select class="input" name="language"><option value="auto">Automatic (browser)</option><option value="en" lang="en" translate="no">English</option><option value="de" lang="de" translate="no">Deutsch</option></select></label></div>
+            <label class="check"><input type="checkbox" name="check_updates"> Tell me when a new version is out <span class="muted">Asks GitHub once a day. Nothing about you is sent.</span></label>
           </section>
           <section class="box scard" id="s-search"><h2>Job search</h2><p class="hint">What you are looking for and where.</p>
             <label>Job titles <span class="muted">One per line, written the way companies write them.</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
@@ -902,6 +908,7 @@ body.wizopen{overflow:hidden}
         <div><h1 id="hello">Welcome</h1><p id="helloSub">Loading your jobs</p></div>
         <button class="btn sec" id="runBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span>Search now</span></button>
       </header>
+      <div class="upd" id="upd" role="status" hidden></div>
       <p class="runmsg" id="runMsg" role="status"></p>
       <div class="box strip" id="strip" role="status"><span class="muted">No search yet. Press Search now to find your first jobs.</span></div>
       <section aria-labelledby="off-h">
@@ -1278,7 +1285,10 @@ const DE={
 "Everything you sent, and how it is going":"Alles, was du geschickt hast, und wie es läuft","Check email":"E-Mails prüfen","Connect Gmail to update statuses by itself":"Verbinde Gmail, damit sich der Status von selbst aktualisiert",
 "Your applications":"Deine Bewerbungen","Insights":"Auswertung","What works and what to learn next":"Was funktioniert und was du als Nächstes lernen solltest","Reply rate by channel":"Antwortquote nach Kanal",
 "Replies count interviews, offers and rejections out of applications sent.":"Als Antwort zählen Gespräche, Angebote und Absagen im Verhältnis zu gesendeten Bewerbungen.",
-"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Where your applications stop":"Wo deine Bewerbungen hängen bleiben","Sent, answered, interviews and offers, counted from your own applications.":"Gesendet, beantwortet, Gespräche und Angebote, gezählt aus deinen eigenen Bewerbungen.","sent":"gesendet","answered":"beantwortet","offers":"Angebote","Copy":"Kopieren","Copied":"Kopiert","Hidden German":"Verstecktes Deutsch","English ads from the last 90 days that still ask for German B2 or higher.":"Englische Anzeigen der letzten 90 Tage, die trotzdem Deutsch auf B2 oder höher verlangen.","of English ads":"der englischen Anzeigen","No English ads in the last 90 days yet.":"Noch keine englischen Anzeigen in den letzten 90 Tagen.","{k} of {n} English ads ask for German B2+":"{k} von {n} englischen Anzeigen verlangen Deutsch B2+","Jobs from the last 90 days this skill would lift over your match line.":"Jobs der letzten 90 Tage, die diese Fähigkeit über deine Passungsgrenze heben würde.","{p}% of the step before":"{p}% des vorigen Schritts","Full circle = the skill that opens the most jobs":"Voller Kreis = die Fähigkeit, die die meisten Jobs öffnet","job":"Job","jobs":"Jobs","replied":"geantwortet","biggest drop":"größter Verlust","Tap a skill to see its jobs":"Tippe auf eine Fähigkeit für ihre Jobs","of your {n} applications got a reply":"deiner {n} Bewerbungen bekamen eine Antwort","replies most: {p}% ({r} of {n})":"antwortet am meisten: {p}% ({r} von {n})","Group replies by":"Antworten gruppieren nach","Too few applications to tell":"Zu wenige Bewerbungen für eine Aussage","{r} of {n}":"{r} von {n}","your average":"dein Durchschnitt","fewer than 3 applications, too few to tell":"weniger als 3 Bewerbungen, zu wenig für eine Aussage","CV layout":"Lebenslauf Layout","Application funnel":"Bewerbungstrichter","ads require it":"Anzeigen setzen es voraus","nice to have":"von Vorteil","{n} job":"{n} Job","{n} jobs":"{n} Jobs","{m} require it":"{m} setzen es voraus","Week of":"Woche vom","Source":"Quelle","Role type":"Art der Stelle","Location":"Ort","Full time":"Vollzeit","Working student":"Werkstudent","Remote":"Remote","On site or hybrid":"Vor Ort oder hybrid",
+"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Where your applications stop":"Wo deine Bewerbungen hängen bleiben","Sent, answered, interviews and offers, counted from your own applications.":"Gesendet, beantwortet, Gespräche und Angebote, gezählt aus deinen eigenen Bewerbungen.","sent":"gesendet","answered":"beantwortet","offers":"Angebote","Copy":"Kopieren","Copied":"Kopiert","What is new":"Was ist neu","Update now":"Jetzt aktualisieren","Download":"Herunterladen","Later":"Später","Downloading…":"Wird geladen…",
+"Stellenpilot {v} is available.":"Stellenpilot {v} ist da.","You have {v}. Your jobs and settings stay as they are.":"Du hast {v}. Deine Jobs und Einstellungen bleiben, wie sie sind.",
+"Installing {v}.":"{v} wird installiert.","Stellenpilot closes and opens again in about a minute.":"Stellenpilot schließt sich und öffnet sich in etwa einer Minute wieder.",
+"Tell me when a new version is out":"Sag mir, wenn eine neue Version da ist","Asks GitHub once a day. Nothing about you is sent.":"Fragt einmal am Tag bei GitHub nach. Es wird nichts über dich gesendet.","Hidden German":"Verstecktes Deutsch","English ads from the last 90 days that still ask for German B2 or higher.":"Englische Anzeigen der letzten 90 Tage, die trotzdem Deutsch auf B2 oder höher verlangen.","of English ads":"der englischen Anzeigen","No English ads in the last 90 days yet.":"Noch keine englischen Anzeigen in den letzten 90 Tagen.","{k} of {n} English ads ask for German B2+":"{k} von {n} englischen Anzeigen verlangen Deutsch B2+","Jobs from the last 90 days this skill would lift over your match line.":"Jobs der letzten 90 Tage, die diese Fähigkeit über deine Passungsgrenze heben würde.","{p}% of the step before":"{p}% des vorigen Schritts","Full circle = the skill that opens the most jobs":"Voller Kreis = die Fähigkeit, die die meisten Jobs öffnet","job":"Job","jobs":"Jobs","replied":"geantwortet","biggest drop":"größter Verlust","Tap a skill to see its jobs":"Tippe auf eine Fähigkeit für ihre Jobs","of your {n} applications got a reply":"deiner {n} Bewerbungen bekamen eine Antwort","replies most: {p}% ({r} of {n})":"antwortet am meisten: {p}% ({r} von {n})","Group replies by":"Antworten gruppieren nach","Too few applications to tell":"Zu wenige Bewerbungen für eine Aussage","{r} of {n}":"{r} von {n}","your average":"dein Durchschnitt","fewer than 3 applications, too few to tell":"weniger als 3 Bewerbungen, zu wenig für eine Aussage","CV layout":"Lebenslauf Layout","Application funnel":"Bewerbungstrichter","ads require it":"Anzeigen setzen es voraus","nice to have":"von Vorteil","{n} job":"{n} Job","{n} jobs":"{n} Jobs","{m} require it":"{m} setzen es voraus","Week of":"Woche vom","Source":"Quelle","Role type":"Art der Stelle","Location":"Ort","Full time":"Vollzeit","Working student":"Werkstudent","Remote":"Remote","On site or hybrid":"Vor Ort oder hybrid",
 "{c}: no news for {n} days after the interview":"{c}: seit {n} Tagen keine Nachricht nach dem Gespräch","A short follow up after two quiet weeks is normal in Germany.":"Eine kurze Nachfrage nach zwei stillen Wochen ist in Deutschland üblich.",
 "{k} of {n} English ads from the last 90 days ask for German B2 or higher.":"{k} von {n} englischen Anzeigen der letzten 90 Tage verlangen Deutsch auf B2 oder höher.",
 "Fewer than 10 applications so far, too early to say where they stop.":"Weniger als 10 Bewerbungen bisher, zu früh für eine Aussage.",
@@ -2006,7 +2016,7 @@ $("cvSave").addEventListener("click",async()=>{
 let cvPrompted=false;
 
 /* ---------- Settings ---------- */
-const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive","workingstudentjobs"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language","cv_style"],schedule:["enabled","time"],watch:["starter_list"],ui:["language"]};
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive","workingstudentjobs"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language","cv_style"],schedule:["enabled","time"],watch:["starter_list"],ui:["language","check_updates"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,.keyhelp,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 $("setForm").addEventListener("click",async e=>{const b=e.target.closest("[data-clear-key]");if(!b)return;e.preventDefault();
@@ -2356,6 +2366,24 @@ route();refresh();setInterval(refresh,5000);
 (()=>{let k=null;try{k=sessionStorage.getItem("sp-setup");sessionStorage.removeItem("sp-setup")}catch{}
   if(k!==null){cvPrompted=true;openSetup().then(()=>{if(+k>0&&+k<3)wShow(+k)})}})();
 render();renderOffice();
+// Update check: the engine asks GitHub at most once a day and decides what this install can do.
+async function checkUpdate(){
+  let u;try{u=await api("GET","/api/update")}catch{return}
+  const box=$("upd");let later="";try{later=localStorage.getItem("updLater")||""}catch{}
+  if(!u||!u.available||later===u.latest){box.hidden=true;return}
+  const page=`<a href="${esc(u.page)}" target="_blank" rel="noopener">${esc(t("What is new"))}</a>`;
+  const act=u.oneClick?`<button class="btn" type="button" id="updGo">${esc(t("Update now"))}</button>`
+    :u.command?`<code>${esc(u.command)}</code><button class="btn sec" type="button" id="updCopy">${esc(t("Copy"))}</button>`
+    :`<a class="btn" href="${esc(u.page)}" target="_blank" rel="noopener">${esc(t("Download"))}</a>`;
+  box.innerHTML=`<span><b>${esc(t("Stellenpilot {v} is available.",{v:u.latest}))}</b> ${esc(t("You have {v}. Your jobs and settings stay as they are.",{v:u.current}))}</span><span class="sp"></span>${page}${act}<button class="btn sec" type="button" id="updLater">${esc(t("Later"))}</button>`;
+  box.hidden=false;
+  $("updLater").onclick=()=>{try{localStorage.setItem("updLater",u.latest)}catch{}box.hidden=true};
+  const cp=$("updCopy");if(cp)cp.onclick=()=>{try{navigator.clipboard.writeText(u.command);cp.textContent=t("Copied")}catch{}};
+  const go=$("updGo");if(go)go.onclick=async()=>{go.disabled=true;go.textContent=t("Downloading…");
+    try{await api("POST","/api/update/install");box.innerHTML=`<span><b>${esc(t("Installing {v}.",{v:u.latest}))}</b> ${esc(t("Stellenpilot closes and opens again in about a minute."))}</span>`}
+    catch(e){go.disabled=false;go.textContent=t("Update now");box.insertAdjacentHTML("beforeend",`<span>${esc(e.message)}</span>`)}};
+}
+checkUpdate();
 </script>
 </body>
 </html>

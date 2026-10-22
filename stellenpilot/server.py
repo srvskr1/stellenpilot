@@ -35,7 +35,7 @@ EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remo
             "tailor": ("min_match", "letter_language", "cv_style"),
             "schedule": ("enabled", "time"),
             "watch": ("starter_list",),
-            "ui": ("language",)}
+            "ui": ("language", "check_updates")}
 CHOICES = {("llm", "provider"): {"none", "builtin", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
            ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
            ("tailor", "letter_language"): {"auto", "en", "de"},
@@ -367,6 +367,9 @@ def make_handler(settings, port: int = 8765):
                 from . import progress
                 task = (parse_qs(urlsplit(self.path).query).get("task") or [""])[0]
                 return self._send(200, progress.snapshot(task))
+            if self.path == "/api/update":  # asks GitHub at most once a day, may wait 10 s, so no lock
+                from . import update
+                return self._send(200, update.status(settings.home, bool(settings["ui"].get("check_updates", True))))
             if self.path == "/api/check":  # may wait up to 10 s for a local model server, so no lock
                 from .cli import setup_checks
                 return self._send(200, {"checks": setup_checks(settings)})
@@ -381,6 +384,16 @@ def make_handler(settings, port: int = 8765):
 
         def do_POST(self):
             if not self._guard():
+                return
+            if self.path == "/api/update/install":  # Windows app only; downloads and verifies, so no lock
+                from . import update
+                try:
+                    version = update.install(settings.home)
+                except Exception as e:
+                    return self._send(400, {"error": str(e)})
+                self._send(200, {"ok": True, "version": version})
+                # step aside so the installer can replace the files; it starts the new version itself
+                threading.Timer(3, lambda: os._exit(0)).start()
                 return
             if self.path in SLOW_POSTS or self.path.startswith("/api/docs/"):
                 # Adding a job (fetch, AI scoring, maybe tailoring) and Gmail sync can take minutes with a
