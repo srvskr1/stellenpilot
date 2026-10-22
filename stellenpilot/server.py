@@ -132,6 +132,53 @@ def weekly_summary(jobs: list[dict], today: date | None = None) -> list[dict]:
              "topGap": top[0][0] if top else "", "summary": " ".join(tips)}]
 
 
+STAGE = {"applied": 1, "interview": 2, "offer": 3}
+FOLLOW_UP_DAYS = 14
+
+
+def _reached(j: dict) -> int:
+    """How far an application got: 1 sent, 2 interview, 3 offer. Imported rows may lack the column."""
+    r = j.get("reached") or (j["status"] if j["status"] in STAGE else "applied" if j["status"] == "rejected" else "")
+    return STAGE.get(r, 0)
+
+
+def diagnosis(jobs: list[dict], today: date | None = None) -> dict:
+    """Where applications stop, said in one sentence, plus interviews gone quiet and the hidden German count.
+    Thresholds are rules of thumb, not statistics; the numbers are shown next to the sentence."""
+    today = today or date.today()
+    sent = [j for j in jobs if _reached(j)]
+    interviews = sum(1 for j in sent if _reached(j) >= 2)
+    offers = sum(1 for j in sent if _reached(j) == 3)
+    answered = sum(1 for j in sent if _reached(j) >= 2 or j["status"] == "rejected")
+    n = len(sent)
+    if n < 10:
+        stage, text = "early", "Fewer than 10 applications so far, too early to say where they stop."
+    elif answered == 0:
+        stage, text = "silent", "No company has answered yet. That points at your CV or the jobs you pick, not at interviews. If Gmail is not connected, mark replies by hand so this stays right."
+    elif interviews == 0 or interviews / n < 0.05:
+        stage, text = "screening", "Companies answer, but almost none invite you. Your CV is read and loses at the first check: compare it with the ads that turned you down."
+    elif offers == 0 and interviews >= 3:
+        stage, text = "interview", "You get interviews but no offer yet. Your CV works; practise for the interviews."
+    else:
+        stage, text = "ok", "Your applications move through every step. Keep the pace."
+    quiet = []
+    for j in jobs:
+        if j["status"] != "interview" or j.get("closed"):
+            continue
+        last = max(local_day(j.get("status_updated_at")), (j.get("interview_at") or "")[:10])
+        days = (today - date.fromisoformat(last)).days if last else 0
+        if days >= FOLLOW_UP_DAYS:
+            quiet.append({"id": j["id"], "company": j["company"], "title": j["title"], "days": days})
+    from .text import ad_language
+    since = (today - timedelta(days=90)).isoformat()
+    english = [j for j in jobs if (j.get("found_at") or "") >= since
+               and ad_language(j["title"] + "\n" + (j.get("description") or "")) == "en"]
+    return {"sent": n, "answered": answered, "interviews": interviews, "offers": offers,
+            "stage": stage, "text": text, "followUps": sorted(quiet, key=lambda q: -q["days"]),
+            "englishAds": len(english),
+            "englishAskB2": sum(1 for j in english if j.get("german_level") in ("B2", "C1", "C2"))}
+
+
 def _sync_closing(sync, settings):
     own = DB(settings.db_path)
     try:
@@ -359,6 +406,7 @@ def make_handler(settings, port: int = 8765):
                     "history": [camel(r) for r in db.history()],
                     "weekly": weekly_summary(jobs),
                     "unlocks": unlocks(jobs, settings.profile, settings["tailor"]["min_match"]),
+                    "diagnosis": diagnosis(jobs),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
                     "subtitle": subtitle(),
                     "firstName": (str(settings.profile.get("person", {}).get("name") or "").split() or [""])[0],

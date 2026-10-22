@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import html
 import re
+from functools import lru_cache
 
 _TAG = re.compile(r"<[^>]+>")
 _WS = re.compile(r"[ \t]+")
@@ -152,6 +153,7 @@ def requires_fluent_german(text: str) -> bool:
     return bool(lvl) and LEVELS.index(lvl) >= LEVELS.index("B2")
 
 
+@lru_cache(maxsize=4096)  # /api/state checks every ad on each refresh
 def ad_language(text: str) -> str:
     """'en' or 'de' by counting common words. Good enough to sort ads, not a classifier."""
     en, de = len(_EN_WORDS.findall(text or "")), len(_DE_WORDS.findall(text or ""))

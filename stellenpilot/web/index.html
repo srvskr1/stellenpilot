@@ -848,6 +848,7 @@ body.wizopen{overflow:hidden}
         <div class="insights">
           <div class="panel"><h3>Reply rate by channel</h3><p class="hint">Replies count interviews, offers and rejections out of applications sent.</p><div id="chan"></div></div>
           <div class="panel"><h3>What to learn next</h3><p class="hint">Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.</p><div id="gapsBox"></div></div>
+          <div class="panel"><h3>Where your applications stop</h3><p class="hint">Sent, answered, interviews and offers, counted from your own applications.</p><div id="diag"></div></div>
           <div class="panel wk"><h3>Weekly summary</h3><div id="weekly"><p class="muted">The first weekly summary arrives on Sunday evening.</p></div></div>
         </div>
       </section>
@@ -1145,7 +1146,14 @@ const DE={
 "Everything you sent, and how it is going":"Alles, was du geschickt hast, und wie es läuft","Check email":"E-Mails prüfen","Connect Gmail to update statuses by itself":"Verbinde Gmail, damit sich der Status von selbst aktualisiert",
 "Your applications":"Deine Bewerbungen","Insights":"Auswertung","What works and what to learn next":"Was funktioniert und was du als Nächstes lernen solltest","Reply rate by channel":"Antwortquote nach Kanal",
 "Replies count interviews, offers and rejections out of applications sent.":"Als Antwort zählen Gespräche, Angebote und Absagen im Verhältnis zu gesendeten Bewerbungen.",
-"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Based on {n} jobs. This will shift as more come in.":"Basiert auf {n} Jobs. Das verschiebt sich, wenn mehr dazukommen.","With {s} this job would score {m}.":"Mit {s} käme dieser Job auf {m}.","Not enough jobs yet: {n} of {m} scored jobs in the last 90 days.":"Noch zu wenige Jobs: {n} von {m} bewerteten Jobs der letzten 90 Tage.","No single skill would lift a job over your match line yet.":"Noch hebt keine einzelne Fähigkeit einen Job über deine Passungsgrenze.",
+"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Where your applications stop":"Wo deine Bewerbungen hängen bleiben","Sent, answered, interviews and offers, counted from your own applications.":"Gesendet, beantwortet, Gespräche und Angebote, gezählt aus deinen eigenen Bewerbungen.","sent":"gesendet","answered":"beantwortet","offers":"Angebote","Copy":"Kopieren","Copied":"Kopiert",
+"{c}: no news for {n} days after the interview":"{c}: seit {n} Tagen keine Nachricht nach dem Gespräch","A short follow up after two quiet weeks is normal in Germany.":"Eine kurze Nachfrage nach zwei stillen Wochen ist in Deutschland üblich.",
+"{k} of {n} English ads from the last 90 days ask for German B2 or higher.":"{k} von {n} englischen Anzeigen der letzten 90 Tage verlangen Deutsch auf B2 oder höher.",
+"Fewer than 10 applications so far, too early to say where they stop.":"Weniger als 10 Bewerbungen bisher, zu früh für eine Aussage.",
+"No company has answered yet. That points at your CV or the jobs you pick, not at interviews. If Gmail is not connected, mark replies by hand so this stays right.":"Noch keine Firma hat geantwortet. Das spricht für deinen Lebenslauf oder die Auswahl der Stellen, nicht für die Gespräche. Ohne Gmail trag Antworten von Hand ein, damit das stimmt.",
+"Companies answer, but almost none invite you. Your CV is read and loses at the first check: compare it with the ads that turned you down.":"Firmen antworten, laden dich aber kaum ein. Dein Lebenslauf wird gelesen und scheidet in der ersten Runde aus: vergleiche ihn mit den Anzeigen, die abgesagt haben.",
+"You get interviews but no offer yet. Your CV works; practise for the interviews.":"Du bekommst Gespräche, aber noch kein Angebot. Dein Lebenslauf funktioniert, übe die Gespräche.",
+"Your applications move through every step. Keep the pace.":"Deine Bewerbungen kommen durch alle Schritte. Bleib dran.","Based on {n} jobs. This will shift as more come in.":"Basiert auf {n} Jobs. Das verschiebt sich, wenn mehr dazukommen.","With {s} this job would score {m}.":"Mit {s} käme dieser Job auf {m}.","Not enough jobs yet: {n} of {m} scored jobs in the last 90 days.":"Noch zu wenige Jobs: {n} von {m} bewerteten Jobs der letzten 90 Tage.","No single skill would lift a job over your match line yet.":"Noch hebt keine einzelne Fähigkeit einen Job über deine Passungsgrenze.",
 "Weekly summary":"Wochenrückblick","The first weekly summary arrives on Sunday evening.":"Der erste Wochenrückblick kommt am Sonntagabend.",
 "Nothing sent yet. When you press I applied on a job, it shows up here, and Gmail can move it forward by itself.":"Noch nichts gesendet. Wenn du bei einem Job auf Beworben klickst, erscheint er hier, und Gmail kann ihn von selbst weiterschieben.",
 "Moved here by Gmail":"Von Gmail hierher verschoben","None":"Keine","Source":"Quelle","Role type":"Art der Stelle","Full time":"Vollzeit","Working student":"Werkstudent","On site or hybrid":"Vor Ort oder hybrid",
@@ -1415,7 +1423,7 @@ const ICO={
  ext:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
  copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`};
 const openNotes=new Set(), openPrep=new Set();
-let weekly=[], unlocksData=null, pendingRender=false;
+let weekly=[], unlocksData=null, diagData=null, pendingRender=false;
 function fmtWhen(s){const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleString(LOC,{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
 function fmtPrep(t){let o="",inList=false;for(const raw of String(t).split("\n")){const l=raw.trim();
   if(/^[-*] /.test(l)){if(!inList){o+="<ul>";inList=true}o+=`<li>${esc(l.slice(2))}</li>`;continue}
@@ -1484,6 +1492,9 @@ const srcChip=s=>SRCLINK[s]?`<a class="chip" href="${SRCLINK[s]}" target="_blank
 const SRC=s=>/arbeitsagentur/i.test(s)?"Bundesagentur":/arbeitnow/i.test(s)?"Arbeitnow":/theirstack/i.test(s)?"TheirStack":/jobicy/i.test(s)?"Jobicy":/remotive/i.test(s)?"Remotive":/workingstudentjobs/i.test(s)?"workingstudentjobs.de":/adzuna/i.test(s)?"Adzuna":/linkedin/i.test(s)?"LinkedIn":/stepstone/i.test(s)?"StepStone":/indeed/i.test(s)?"Indeed":/gmail/i.test(s)?"Found in Gmail":/jobswithoutgerman|firecrawl/i.test(s)?"jobswithoutgerman.de":"Other";
 const SENT=["applied","interview","offer","rejected"],REPLY=["interview","offer","rejected"];
 function bars(rows,max,warm){return rows.map(r=>`<div class="brow"><span>${esc(r.k)}</span><span class="bt"><i class="${warm?"w":""}" style="width:${max?Math.round(r.v/max*100):0}%"></i></span><span class="nm">${r.lbl}</span></div>`).join("")}
+// The follow up email, in the language of the dashboard. Plain and short on purpose.
+const FOLLOWUP={en:"Hello, thank you again for the interview for the {title} role. I am still very interested and wanted to ask how things stand and when I can expect to hear back. Kind regards",
+  de:"Guten Tag, vielen Dank noch einmal für das Gespräch zur Stelle {title}. Ich bin weiterhin sehr interessiert und wollte fragen, wie der aktuelle Stand ist und wann ich mit einer Rückmeldung rechnen kann. Viele Grüße"};
 function renderInsights(){
   const sent=jobs.filter(j=>SENT.includes(j.status));
   const grp=(fn)=>{const m={};sent.forEach(j=>{const k=fn(j);if(!k)return;(m[k]??={n:0,r:0,i:0}).n++;if(REPLY.includes(j.status))m[k].r++;if(j.status==="interview"||j.status==="offer")m[k].i++});
@@ -1495,6 +1506,16 @@ function renderInsights(){
   const g=u.rows.map(r=>({k:r.skill,v:r.jobs,lbl:t(r.must?"{n} jobs, {m} require it":"{n} jobs, nice to have",{n:r.jobs,m:r.must}),ex:r.examples}));
   $("gapsBox").innerHTML=!u.enough?`<p class="muted">${esc(t("Not enough jobs yet: {n} of {m} scored jobs in the last 90 days.",{n:u.jobs||0,m:u.need||50}))}</p>`
     :g.length?(u.jobs<u.steady?`<p class="hint">${esc(t("Based on {n} jobs. This will shift as more come in.",{n:u.jobs}))}</p>`:"")+bars(g,g[0].v,true)+g.map(r=>`<details class="small"><summary>${esc(r.k)}</summary>${r.ex.map(x=>`<div>${esc(x)}</div>`).join("")}</details>`).join(""):`<p class="muted">${esc(t("No single skill would lift a job over your match line yet."))}</p>`;
+  const d=diagData;
+  if(d){
+    const nums=[["sent",d.sent],["answered",d.answered],["interviews",d.interviews],["offers",d.offers]];
+    const fu=(d.followUps||[]).map(q=>{const draft=(LANG==="de"?FOLLOWUP.de:FOLLOWUP.en).replace("{title}",q.title);
+      return `<details class="small"><summary>${esc(t("{c}: no news for {n} days after the interview",{c:q.company,n:q.days}))}</summary><p>${esc(draft)}</p><button type="button" class="btn sec" data-copy="${esc(draft)}">${esc(t("Copy"))}</button></details>`}).join("");
+    $("diag").innerHTML=`<div class="nums">${nums.map(([k,v])=>`<div><b>${esc(v)}</b><span>${esc(t(k))}</span></div>`).join("")}</div><p>${esc(t(d.text))}</p>`
+      +(fu?`<p class="hint">${esc(t("A short follow up after two quiet weeks is normal in Germany."))}</p>`+fu:"")
+      +(d.englishAds?`<p class="hint">${esc(t("{k} of {n} English ads from the last 90 days ask for German B2 or higher.",{k:d.englishAskB2,n:d.englishAds}))}</p>`:"");
+    $("diag").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{try{navigator.clipboard.writeText(b.dataset.copy);b.textContent=t("Copied")}catch{}});
+  }
   const w=[...weekly].sort((a,b)=>String(b.weekOf).localeCompare(String(a.weekOf)))[0];
   if(w)$("weekly").innerHTML=`<p class="hint">Week of ${esc(fmtDate(w.weekOf))}</p><div class="nums"><div><b>${esc(w.applied??0)}</b><span>applied</span></div><div><b>${esc(w.replies??0)}</b><span>replies</span></div><div><b>${esc(w.interviews??0)}</b><span>interviews</span></div></div>${w.topGap?`<p>Top gap: <b>${esc(w.topGap)}</b></p>`:""}${w.summary?`<p>${esc(w.summary)}</p>`:""}`;
 }
@@ -2086,7 +2107,7 @@ async function refresh(){
     const sig=JSON.stringify(st);
     if(sig===lastState)return;
     lastState=sig;
-    jobs=st.jobs;runs=st.runs;runLog=st.history||[];weekly=st.weekly;unlocksData=st.unlocks;
+    jobs=st.jobs;runs=st.runs;runLog=st.history||[];weekly=st.weekly;unlocksData=st.unlocks;diagData=st.diagnosis;
     searchCfg=st.search||{};fillFilters();
     $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();
