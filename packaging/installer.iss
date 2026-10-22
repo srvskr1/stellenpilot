@@ -39,8 +39,16 @@ Name: "{autodesktop}\Stellenpilot"; Filename: "{app}\Stellenpilot.exe"; Comment:
 
 [Run]
 Filename: "{app}\Stellenpilot.exe"; Description: "Start Stellenpilot now"; Flags: nowait postinstall skipifsilent
-; A one click update from the dashboard runs this installer silently: start the new version afterwards.
-Filename: "{app}\Stellenpilot.exe"; Flags: nowait skipifnotsilent
+
+[Code]
+// The same AppId means this installer updates an existing install in place. Say so before it starts.
+procedure InitializeWizard();
+var
+  Prev: String;
+begin
+  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{6E1C2F4B-7A3D-4C5E-9B2A-5D8F1E0C3A71}_is1', 'DisplayVersion', Prev) then
+    WizardForm.ReadyLabel.Caption := 'Stellenpilot ' + Prev + ' is installed. This updates it to {#AppVersion}. Your jobs, CVs and settings stay as they are.';
+end;
 
 [UninstallRun]
 ; Remove the daily search task, if one was set up, so nothing runs after uninstalling.
