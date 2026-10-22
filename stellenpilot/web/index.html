@@ -569,6 +569,11 @@ body.wizopen{overflow:hidden}
 .ins.anim .ic{animation:icIn .35s cubic-bezier(.25,.46,.45,.94) both;animation-delay:calc(var(--i)*60ms)}
 @keyframes icIn{from{opacity:0;transform:translateY(12px)}}
 .ih{display:flex;gap:12px;align-items:flex-start}.ih h3{margin:0 0 2px}
+/* spacing inside each card: one rhythm, 12px between blocks, 4px inside a block */
+#diag,#gapsBox,#weekly,#chan{display:flex;flex-direction:column;gap:12px}
+
+.ins .wk .nums{margin:4px 0}.ins .wk .nums div{display:flex;flex-direction:column;gap:4px}
+.ins .wk p{margin:0;line-height:1.55}
 .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent)}
 .ico svg{width:18px;height:18px}
 /* rings */
