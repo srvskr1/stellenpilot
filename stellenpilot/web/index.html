@@ -904,6 +904,11 @@ body.wizopen{overflow:hidden}
       </header>
       <p class="runmsg" id="runMsg" role="status"></p>
       <div class="box strip" id="strip" role="status"><span class="muted">No search yet. Press Search now to find your first jobs.</span></div>
+      <section aria-labelledby="off-h">
+        <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
+        <p id="off-note"></p>
+        <div class="office" id="office" role="img" aria-label="Agent office"></div>
+      </section>
       <section aria-labelledby="ready-h">
         <div class="sechead"><h2 id="ready-h">Ready to apply</h2><span>Read your documents, then send them yourself</span></div>
         <div id="ready"></div>
@@ -916,10 +921,15 @@ body.wizopen{overflow:hidden}
         <div class="sechead"><h2 id="today-h">Also needs a look</h2><span id="today-count"></span></div>
         <div class="panel" id="today"></div>
       </section>
-      <section aria-labelledby="off-h">
-        <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
-        <p id="off-note"></p>
-        <div class="office" id="office" role="img" aria-label="Agent office"></div>
+      <section aria-labelledby="ins-h">
+        <div class="sechead"><h2 id="ins-h">Insights</h2><span>What works and what to learn next</span></div>
+        <div class="insights ins">
+          <article class="panel ic c-wide" style="--i:0"><header class="ih"><div><h3>Where your applications stop</h3></div></header><div id="diag"></div></article>
+          <article class="panel ic" style="--i:1"><header class="ih"><div><h3>Hidden German</h3></div></header><div id="deRing"></div></article>
+          <article class="panel ic c-wide" style="--i:2"><header class="ih"><div><h3>What to learn next</h3><p class="hint">Jobs from the last 90 days this skill would lift over your match line.</p></div></header><div id="gapsBox"></div></article>
+          <article class="panel ic wk" style="--i:3"><header class="ih"><div><h3>Weekly summary</h3></div></header><div id="weekly"><p class="muted">The first weekly summary arrives on Sunday evening.</p></div></article>
+          <article class="panel ic c-full" style="--i:4"><header class="ih"><div><h3>Reply rate by channel</h3><p class="hint">Replies count interviews, offers and rejections out of applications sent.</p></div></header><div id="chan"></div></article>
+        </div>
       </section>
       <details class="history"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><span>Search history</span><span class="cnt" id="runsCount"></span></summary>
         <div class="runs"><table>
@@ -974,16 +984,6 @@ body.wizopen{overflow:hidden}
       </header>
       <div class="gmailbox" id="gmailBox" hidden></div>
       <section aria-labelledby="sent-h"><div class="sechead"><h2 id="sent-h">Your applications</h2><span id="gm-count"></span></div><div class="board" id="board"></div></section>
-      <section aria-labelledby="ins-h">
-        <div class="sechead"><h2 id="ins-h">Insights</h2><span>What works and what to learn next</span></div>
-        <div class="insights ins">
-          <article class="panel ic c-wide" style="--i:0"><header class="ih"><div><h3>Where your applications stop</h3></div></header><div id="diag"></div></article>
-          <article class="panel ic" style="--i:1"><header class="ih"><div><h3>Hidden German</h3></div></header><div id="deRing"></div></article>
-          <article class="panel ic c-wide" style="--i:2"><header class="ih"><div><h3>What to learn next</h3><p class="hint">Jobs from the last 90 days this skill would lift over your match line.</p></div></header><div id="gapsBox"></div></article>
-          <article class="panel ic wk" style="--i:3"><header class="ih"><div><h3>Weekly summary</h3></div></header><div id="weekly"><p class="muted">The first weekly summary arrives on Sunday evening.</p></div></article>
-          <article class="panel ic c-full" style="--i:4"><header class="ih"><div><h3>Reply rate by channel</h3><p class="hint">Replies count interviews, offers and rejections out of applications sent.</p></div></header><div id="chan"></div></article>
-        </div>
-      </section>
     </section>
   </main>
 </div>
