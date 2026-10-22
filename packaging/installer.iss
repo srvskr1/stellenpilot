@@ -39,6 +39,8 @@ Name: "{autodesktop}\Stellenpilot"; Filename: "{app}\Stellenpilot.exe"; Comment:
 
 [Run]
 Filename: "{app}\Stellenpilot.exe"; Description: "Start Stellenpilot now"; Flags: nowait postinstall skipifsilent
+; A one click update from the dashboard runs this installer silently: start the new version afterwards.
+Filename: "{app}\Stellenpilot.exe"; Flags: nowait skipifnotsilent
 
 [UninstallRun]
 ; Remove the daily search task, if one was set up, so nothing runs after uninstalling.
