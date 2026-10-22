@@ -11,12 +11,13 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-### What is new in 0.10.0
+### What is new in 0.11.0
 
-* **A seventh job source.** workingstudentjobs.de brings Werkstudent and internship roles from German cities. It is on by default, no key needed.
-* **Filter the Jobs page.** By word, source, type, place, day, match or status. The place and day lists follow the city and the number of days from your own settings, so the place you search for is one click away.
-* **A wider search.** The search box now also looks at the place, the source, the job type, the skills that match and the gaps an ad names, not only the title and the company.
-* **Fixes.** A date range in your CV is no longer read as a phone number, a match score of "85%" is read as 85, and the demo interview keeps the right time when the clocks change.
+* **What to learn next.** Insights ranks the skills and German levels that would lift the most of your recent jobs over your match line, and says whether the ads require them or call them nice to have. Job details show the score a job would get with each missing skill.
+* **Where your applications stop.** Insights counts what you sent, what got an answer, interviews and offers, and says in one sentence where things break: your CV, the first check or the interviews. Interviews with no news for two weeks get a short follow up email you can copy.
+* **Hidden German.** Insights shows how many English ads from the last 90 days still ask for German B2 or higher.
+* **CV layouts.** Pick Classic, Compact or a German Lebenslauf with dates first under Settings. Only the layout changes, the content still goes through the truth guard.
+* **Faster dashboard.** Tool matching is cached, so a large database loads in well under a second after the first refresh.
 
 Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
 
@@ -66,7 +67,7 @@ Every day, by itself:
 * **Reads your CV.** Drop a PDF or Word file and it becomes a structured profile. A CV with clear headings is sorted in about a second, without any AI; for other layouts the AI only points at line numbers, so even a laptop needs just a minute or two. Every word is copied from your CV, and anything left out is flagged.
 * **Scores every job** from 0 to 100 with a one line reason and the honest gaps (for example "asks for dbt, which you are still learning").
 * **Understands German job ads.** It finds the German level an ad really needs (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and writes an English summary of every German ad.
-* **Tailors your CV.** It picks and orders the experience, projects and skills from your profile that matter most for this job, and chooses the best fitting headline.
+* **Tailors your CV.** It picks and orders the experience, projects and skills from your profile that matter most for this job, and chooses the best fitting headline. Three layouts: Classic, Compact, or a German Lebenslauf with dates first.
 * **Writes the cover letter** in natural language for that company and role, plus a short report: what the ad asks for, what you cover, and which gaps to be honest about. German letters only if your German is B2 or better.
 * **Prepares interviews** with likely questions and questions to ask them.
 * **Learns your taste.** Mark jobs as a good match or not for you, and the next search leans toward what you liked.
@@ -153,8 +154,8 @@ Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips an
 Five calm pages, in your browser, on your computer:
 
 * **Home**: what is ready to apply, interviews coming up, the newest matches, and a small 3D office where you can watch the agent work.
-* **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep. Filter by word, source, type, place, day, match or status, and see which tools of the ad you have and which ones you are missing.
-* **Applications**: a board you drag cards across (Applied, Interview, Offer, Rejected), with reply rates by source, the skill gaps employers mention most, and a weekly summary.
+* **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep. Filter by word, source, type, place, day, match or status, and see which tools of the ad you have, which ones you are missing, and what the job would score with each of them.
+* **Applications**: a board you drag cards across (Applied, Interview, Offer, Rejected). Below it, Insights shows reply rates by source and CV layout, where your applications stop (CV, first check or interviews), a follow up email for interviews that went quiet, how many English ads still want good German, the skills that would open the most jobs for you, and a weekly summary.
 * **My CV**: your profile, with tips to improve your matches.
 * **Settings**: language (English or Deutsch), job sources, the AI, the daily search and Gmail, with step by step help for every key.
 
