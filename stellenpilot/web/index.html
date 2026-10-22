@@ -283,7 +283,7 @@ label.btn{cursor:pointer}
 .brow .nm{font:500 .8125rem var(--f-ui);color:var(--text-tertiary)}
 .wk .nums b{font:700 1.375rem var(--f-ui)}
 /* Applications board */
-.board{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:16px;align-items:start}
+.board{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:16px;align-items:start;overflow-x:auto;padding-bottom:4px}
 .col{background:var(--surface-alt);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:160px;transition:background .15s ease,box-shadow .15s ease}
 .col.over{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
 .colhead{display:flex;align-items:center;gap:8px;padding:4px 4px 2px;font-weight:600}
@@ -561,10 +561,12 @@ body.wizopen{overflow:hidden}
 @media (max-width:600px){.wtop{display:grid;grid-template-columns:1fr auto;gap:12px}.wtop .right{display:contents}.wtop #wLater{justify-self:end}}
 /* Insights: one theme. Blue shades from --accent for data, --accent-2 (amber) only to highlight.
    Motion runs once per data change, never on every refresh. */
-.ins{--b1:var(--accent);--b2:#3B6FE8;--b3:#7EA2F2;--b4:#BFD0FA;--hi:var(--accent-2);grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.ins{--b1:#1E40AF;--b2:#1D4ED8;--b3:#3B6FE8;--b4:#5B8DEF;--hi:#D97706;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.ins .panel{padding:24px;border-radius:14px}
+.ins h3{font:600 1rem/1.3 var(--f-ui)}
 .ins .c-wide{grid-column:span 2}.ins .c-full{grid-column:1/-1}
 .ins .ic{gap:16px}
-.ins.anim .ic{animation:icIn .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*70ms)}
+.ins.anim .ic{animation:icIn .35s cubic-bezier(.25,.46,.45,.94) both;animation-delay:calc(var(--i)*60ms)}
 @keyframes icIn{from{opacity:0;transform:translateY(12px)}}
 .ih{display:flex;gap:12px;align-items:flex-start}.ih h3{margin:0 0 2px}
 .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent)}
@@ -576,14 +578,13 @@ body.wizopen{overflow:hidden}
 .rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.1}
 .rc b{font:700 1.375rem var(--f-ui);font-variant-numeric:tabular-nums;color:var(--text)}
 .rc small{font-size:.6875rem;color:var(--text-tertiary)}
-.ins.anim .rf{animation:draw 1s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.15s + var(--d,0)*90ms)}
+.ins.anim .rf{animation:draw .6s cubic-bezier(.25,.46,.45,.94) both;animation-delay:calc(.15s + var(--d,0)*60ms)}
 @keyframes draw{from{stroke-dasharray:0 var(--c)}}
 /* funnel */
 .fring{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;position:relative}
 .fst{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
 .fst .lb{font-size:.8125rem;font-weight:600;color:var(--text-secondary)}
-.fst .cv2{font-size:.6875rem;color:var(--text-tertiary)}
-.fst .cv2.big{color:#B45309;font-weight:600}
+.fst .fdrop{font-size:.75rem;color:#B45309;font-weight:600}
 .call{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;background:var(--accent-soft);color:var(--accent-hover);font-size:.875rem;line-height:1.45}
 .call svg{width:18px;height:18px;flex:none;margin-top:1px}
 .call.ok{background:var(--ok-bg);color:var(--ok-fg)}.call.screening,.call.silent{background:var(--tint-warn);color:#93370D}
@@ -599,9 +600,9 @@ body.wizopen{overflow:hidden}
 .lg{display:flex;gap:14px;font-size:.75rem;color:var(--text-tertiary);flex-wrap:wrap}
 .lg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
 .skg{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
-.st{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:12px;border:1px solid transparent;cursor:pointer;text-align:center;transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.st{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:12px;border:1px solid transparent;cursor:pointer;text-align:center;transition:background .2s ease,border-color .2s ease,transform .2s ease}
 .st:hover{background:var(--surface-hover);transform:translateY(-1px)}.st:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.st[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--b4)}
+.st[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
 .st .nmk{font-weight:600;font-size:.875rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .st .sub{font-size:.6875rem;color:var(--text-tertiary)}
 .skx{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s ease}.skx.open{grid-template-rows:1fr}.skx>div{overflow:hidden}
@@ -614,7 +615,7 @@ body.wizopen{overflow:hidden}
 .chr{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
 .chi{display:flex;flex-direction:column;align-items:center;gap:4px;width:84px;text-align:center}
 .chi span{font-size:.75rem;color:var(--text-secondary);line-height:1.25}.chi em{font-style:normal;font-size:.6875rem;color:var(--text-tertiary)}
-.wk .nums div{background:var(--accent-soft)}.wk .nums b{color:var(--accent)}
+.ins .wk .nums div{background:none;padding:0;text-align:left;border-left:2px solid var(--border);padding-left:12px}.ins .wk .nums b{color:var(--text);font:700 1.5rem var(--f-ui)}
 @media (max-width:1180px){.ins{grid-template-columns:1fr 1fr}.ins .c-wide,.ins .c-full{grid-column:1/-1}}
 @media (max-width:760px){.ins{grid-template-columns:1fr}.fring{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:16px}.fst+.fst::before{display:none}}
 @media (prefers-reduced-motion: reduce){.ins .ic:hover,.st:hover{transform:none}.fu summary::before{animation:none}}
@@ -1206,7 +1207,7 @@ const DE={
 "Everything you sent, and how it is going":"Alles, was du geschickt hast, und wie es läuft","Check email":"E-Mails prüfen","Connect Gmail to update statuses by itself":"Verbinde Gmail, damit sich der Status von selbst aktualisiert",
 "Your applications":"Deine Bewerbungen","Insights":"Auswertung","What works and what to learn next":"Was funktioniert und was du als Nächstes lernen solltest","Reply rate by channel":"Antwortquote nach Kanal",
 "Replies count interviews, offers and rejections out of applications sent.":"Als Antwort zählen Gespräche, Angebote und Absagen im Verhältnis zu gesendeten Bewerbungen.",
-"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Where your applications stop":"Wo deine Bewerbungen hängen bleiben","Sent, answered, interviews and offers, counted from your own applications.":"Gesendet, beantwortet, Gespräche und Angebote, gezählt aus deinen eigenen Bewerbungen.","sent":"gesendet","answered":"beantwortet","offers":"Angebote","Copy":"Kopieren","Copied":"Kopiert","Hidden German":"Verstecktes Deutsch","English ads from the last 90 days that still ask for German B2 or higher.":"Englische Anzeigen der letzten 90 Tage, die trotzdem Deutsch auf B2 oder höher verlangen.","of English ads":"der englischen Anzeigen","No English ads in the last 90 days yet.":"Noch keine englischen Anzeigen in den letzten 90 Tagen.","{k} of {n} English ads ask for German B2+":"{k} von {n} englischen Anzeigen verlangen Deutsch B2+","Jobs from the last 90 days this skill would lift over your match line.":"Jobs der letzten 90 Tage, die diese Fähigkeit über deine Passungsgrenze heben würde.","{p}% of the step before":"{p}% des vorigen Schritts","Full circle = the skill that opens the most jobs":"Voller Kreis = die Fähigkeit, die die meisten Jobs öffnet","job":"Job","jobs":"Jobs","replied":"geantwortet","biggest drop":"größter Verlust","Application funnel":"Bewerbungstrichter","ads require it":"Anzeigen setzen es voraus","nice to have":"von Vorteil","{n} job":"{n} Job","{n} jobs":"{n} Jobs","{m} require it":"{m} setzen es voraus","Week of":"Woche vom","Source":"Quelle","Role type":"Art der Stelle","Location":"Ort","Full time":"Vollzeit","Working student":"Werkstudent","Remote":"Remote","On site or hybrid":"Vor Ort oder hybrid",
+"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Where your applications stop":"Wo deine Bewerbungen hängen bleiben","Sent, answered, interviews and offers, counted from your own applications.":"Gesendet, beantwortet, Gespräche und Angebote, gezählt aus deinen eigenen Bewerbungen.","sent":"gesendet","answered":"beantwortet","offers":"Angebote","Copy":"Kopieren","Copied":"Kopiert","Hidden German":"Verstecktes Deutsch","English ads from the last 90 days that still ask for German B2 or higher.":"Englische Anzeigen der letzten 90 Tage, die trotzdem Deutsch auf B2 oder höher verlangen.","of English ads":"der englischen Anzeigen","No English ads in the last 90 days yet.":"Noch keine englischen Anzeigen in den letzten 90 Tagen.","{k} of {n} English ads ask for German B2+":"{k} von {n} englischen Anzeigen verlangen Deutsch B2+","Jobs from the last 90 days this skill would lift over your match line.":"Jobs der letzten 90 Tage, die diese Fähigkeit über deine Passungsgrenze heben würde.","{p}% of the step before":"{p}% des vorigen Schritts","Full circle = the skill that opens the most jobs":"Voller Kreis = die Fähigkeit, die die meisten Jobs öffnet","job":"Job","jobs":"Jobs","replied":"geantwortet","biggest drop":"größter Verlust","Tap a skill to see its jobs":"Tippe auf eine Fähigkeit für ihre Jobs","Application funnel":"Bewerbungstrichter","ads require it":"Anzeigen setzen es voraus","nice to have":"von Vorteil","{n} job":"{n} Job","{n} jobs":"{n} Jobs","{m} require it":"{m} setzen es voraus","Week of":"Woche vom","Source":"Quelle","Role type":"Art der Stelle","Location":"Ort","Full time":"Vollzeit","Working student":"Werkstudent","Remote":"Remote","On site or hybrid":"Vor Ort oder hybrid",
 "{c}: no news for {n} days after the interview":"{c}: seit {n} Tagen keine Nachricht nach dem Gespräch","A short follow up after two quiet weeks is normal in Germany.":"Eine kurze Nachfrage nach zwei stillen Wochen ist in Deutschland üblich.",
 "{k} of {n} English ads from the last 90 days ask for German B2 or higher.":"{k} von {n} englischen Anzeigen der letzten 90 Tage verlangen Deutsch auf B2 oder höher.",
 "Fewer than 10 applications so far, too early to say where they stop.":"Weniger als 10 Bewerbungen bisher, zu früh für eine Aussage.",
@@ -1554,10 +1555,10 @@ const SENT=["applied","interview","offer","rejected"],REPLY=["interview","offer"
 // The follow up email, in the language of the dashboard. Plain and short on purpose.
 const FOLLOWUP={en:"Hello, thank you again for the interview for the {title} role. I am still very interested and wanted to ask how things stand and when I can expect to hear back. Kind regards",
   de:"Guten Tag, vielen Dank noch einmal für das Gespräch zur Stelle {title}. Ich bin weiterhin sehr interessiert und wollte fragen, wie der aktuelle Stand ist und wann ich mit einer Rückmeldung rechnen kann. Viele Grüße"};
-let insSig="",openSkill="";
+let insSig="",openSkill="",insObs=null;
 const CHEV='<svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
 const CALLICON={early:'<path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/>',silent:'<path d="M3 3l18 18"/><path d="M8 8H4v8h4l5 4V13M13 5v3"/>',screening:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',interview:'<path d="M4 5h16v10H8l-4 4z"/>',ok:'<path d="m5 12 5 5L20 7"/>'};
-function countUp(root){if(reduce)return;root.querySelectorAll("[data-n]").forEach(el=>{const to=+el.dataset.n,t0=performance.now(),dur=700;
+function countUp(root){if(reduce)return;root.querySelectorAll("[data-n]").forEach(el=>{const to=+el.dataset.n,t0=performance.now(),dur=600;
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e);if(k<1)requestAnimationFrame(step)};el.textContent="0";requestAnimationFrame(step)})}
 const plural=(n,one,many)=>t(n===1?one:many,{n});
 function ring(size,sw,segs,center,d){const r=(size-sw)/2,C=2*Math.PI*r,cx=size/2;let off=0;
@@ -1574,8 +1575,8 @@ function renderInsights(){
     const st=[["sent",d.sent,"var(--b1)"],["answered",d.answered,"var(--b2)"],["interviews",d.interviews,"var(--b3)"],["offers",d.offers,"var(--b4)"]];
     const conv=st.map((x,k)=>k&&st[k-1][1]?x[1]/st[k-1][1]:null);
     const worst=d.sent>=10?conv.reduce((w,r,k)=>r!==null&&(w<0||r<conv[w])?k:w,-1):-1;
-    const fun=st.map(([k,v,c],x)=>`<div class="fst" role="listitem">${ring(96,10,[{v:d.sent?v/d.sent:0,c}],`<b data-n="${v}">${v}</b>`,x)}
-      <span class="lb">${esc(t(k))}</span></div>`).join("");
+    const fun=st.map(([k,v,c],x)=>`<div class="fst" role="listitem">${ring(96,10,[{v:d.sent?v/d.sent:0,c:x===worst?"var(--hi)":c}],`<b data-n="${v}">${v}</b>`,x)}
+      <span class="lb">${esc(t(k))}</span>${x===worst?`<span class="fdrop">${esc(t("biggest drop"))}: ${Math.round(conv[x]*100)}%</span>`:""}</div>`).join("");
     const fu=(d.followUps||[]).map(q=>{const draft=(LANG==="de"?FOLLOWUP.de:FOLLOWUP.en).replace("{title}",q.title);
       return `<details class="fu"><summary>${esc(t("{c}: no news for {n} days after the interview",{c:q.company,n:q.days}))}</summary><p>${esc(draft)}</p><button type="button" class="btn sec" data-copy="${esc(draft)}">${esc(t("Copy"))}</button></details>`}).join("");
     $("diag").innerHTML=`<div class="fring" role="list" aria-label="${esc(t("Application funnel"))}">${fun}</div>
@@ -1591,8 +1592,8 @@ function renderInsights(){
   else if(!u.rows.length)$("gapsBox").innerHTML=`<p class="muted">${esc(t("No single skill would lift a job over your match line yet."))}</p>`;
   else{const max=Math.max(...u.rows.map(r=>r.jobs)),cur=u.rows.find(r=>r.skill===openSkill);
     $("gapsBox").innerHTML=(u.jobs<u.steady?`<p class="hint">${esc(t("Based on {n} jobs. This will shift as more come in.",{n:u.jobs}))}</p>`:"")
-      +`<div class="lg"><span><i style="background:var(--b1)"></i>${esc(t("ads require it"))}</span><span><i style="background:var(--b4)"></i>${esc(t("nice to have"))}</span></div><div class="skg">`
-      +u.rows.map((r,x)=>`<button type="button" class="st" data-skill="${esc(r.skill)}" aria-pressed="${openSkill===r.skill}" aria-controls="skx">${ring(76,9,[{v:r.must/max,c:"var(--b1)"},{v:(r.jobs-r.must)/max,c:"var(--b4)"}],`<b data-n="${r.jobs}">${r.jobs}</b>`,x)}
+      +`<div class="lg"><span><i style="background:var(--b1)"></i>${esc(t("ads require it"))}</span><span><i style="background:var(--b4)"></i>${esc(t("nice to have"))}</span><span>${esc(t("Tap a skill to see its jobs"))}</span></div><div class="skg">`
+      +u.rows.map((r,x)=>`<button type="button" class="st" data-skill="${esc(r.skill)}" aria-pressed="${openSkill===r.skill}" aria-controls="skx" aria-label="${esc(r.skill+": "+plural(r.jobs,"{n} job","{n} jobs")+(r.must?", "+t("{m} require it",{m:r.must}):""))}">${ring(76,9,[{v:r.must/max,c:"var(--b1)"},{v:(r.jobs-r.must)/max,c:"var(--b4)"}],`<b data-n="${r.jobs}">${r.jobs}</b>`,x)}
         <span class="nmk">${esc(r.skill)}</span></button>`).join("")
       +`</div><div class="skx${cur?" open":""}" id="skx"><div>${cur?`<ul><li><b>${esc(cur.skill)}</b></li>${cur.examples.map(e=>`<li>${esc(e)}</li>`).join("")}</ul>`:""}</div></div>`;
     $("gapsBox").querySelectorAll(".st").forEach(b=>b.onclick=()=>{const sk=b.dataset.skill,on=openSkill!==sk;openSkill=on?sk:"";
@@ -1607,7 +1608,9 @@ function renderInsights(){
     +`</div><p class="hint">${esc(t("Small numbers for now. This gets reliable after about 20 applications."))}</p>`:`<p class="muted">${esc(t("No applications sent yet."))}</p>`;
   const w=[...weekly].sort((a,b)=>String(b.weekOf).localeCompare(String(a.weekOf)))[0];
   if(w)$("weekly").innerHTML=`<p class="hint">${esc(t("Week of"))} ${esc(fmtDate(w.weekOf))}</p><div class="nums"><div><b data-n="${+(w.applied??0)}">${esc(w.applied??0)}</b><span>${esc(t("applied"))}</span></div><div><b data-n="${+(w.replies??0)}">${esc(w.replies??0)}</b><span>${esc(t("replies"))}</span></div><div><b data-n="${+(w.interviews??0)}">${esc(w.interviews??0)}</b><span>${esc(t("interviews"))}</span></div></div>${w.topGap?`<p>${esc(t("Top gap:"))} <b>${esc(w.topGap)}</b></p>`:""}${w.summary?`<p>${esc(w.summary)}</p>`:""}`;
-  if(box&&!reduce){box.classList.remove("anim");void box.offsetWidth;box.classList.add("anim");countUp(box)}
+  if(box&&!reduce){box.classList.remove("anim");
+    // play when the section scrolls into view, not while it is off screen
+    insObs?.disconnect();insObs=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){insObs.disconnect();void box.offsetWidth;box.classList.add("anim");countUp(box)}},{threshold:.15});insObs.observe(box)}
 }
 function render(){renderPipe();renderList();renderHome();renderApps();renderInsights()}
 
