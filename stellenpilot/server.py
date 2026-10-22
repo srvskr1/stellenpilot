@@ -17,9 +17,10 @@ from urllib.parse import unquote
 
 from . import schedule
 from .db import DB, STATUSES, local_day
+from .score import unlocks
 
 CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "statusUpdatedAt",
-         "status_note": "statusNote", "gap_tags": "gapTags", "interview_at": "interviewAt",
+         "status_note": "statusNote", "gap_tags": "gapTags", "cv_style": "cvStyle", "interview_at": "interviewAt",
          "found_at": "foundAt", "posted_at": "postedAt", "job_type": "jobType", "closed_at": "closedAt",
          "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote",
          "finished_at": "finishedAt"}
@@ -31,13 +32,14 @@ EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remo
             "sources": ("arbeitsagentur", "arbeitnow", "adzuna", "theirstack", "jobicy", "remotive", "workingstudentjobs"),
             "llm": ("provider", "model", "base_url"),
             "language": ("my_german_level",),
-            "tailor": ("min_match", "letter_language"),
+            "tailor": ("min_match", "letter_language", "cv_style"),
             "schedule": ("enabled", "time"),
             "watch": ("starter_list",),
             "ui": ("language",)}
 CHOICES = {("llm", "provider"): {"none", "builtin", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
            ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
            ("tailor", "letter_language"): {"auto", "en", "de"},
+           ("tailor", "cv_style"): {"classic", "compact", "lebenslauf"},
            ("ui", "language"): {"auto", "en", "de"}}
 SECRETS = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ADZUNA_APP_ID", "ADZUNA_APP_KEY", "THEIRSTACK_API_KEY")
 
@@ -349,6 +351,7 @@ def make_handler(settings, port: int = 8765):
                     "runs": [camel(r) for r in db.runs()],
                     "history": [camel(r) for r in db.history()],
                     "weekly": weekly_summary(jobs),
+                    "unlocks": unlocks(jobs, settings.profile, settings["tailor"]["min_match"]),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
                     "subtitle": subtitle(),
                     "firstName": (str(settings.profile.get("person", {}).get("name") or "").split() or [""])[0],

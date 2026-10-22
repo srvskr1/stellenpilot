@@ -302,6 +302,7 @@ def make_docs(settings, db, job_id: str, llm=None) -> dict:
         raise AddError("Unknown job")
     t = settings["tailor"]
     res = tailor_job(job, settings.profile, (Path(settings.home) / t["output_dir"]).resolve(), llm or LLM(settings),
-                     t.get("make_pdf", True), t.get("letter_language", "auto"), my_german_level(settings))
-    db.mark_ready(job_id, res["folder"], f"Your experience shows {res['coverage']}% of the tools the ad names")
+                     t.get("make_pdf", True), t.get("letter_language", "auto"), my_german_level(settings),
+                     t.get("cv_style", "classic"))
+    db.mark_ready(job_id, res["folder"], f"Your experience shows {res['coverage']}% of the tools the ad names", res["cv_style"])
     return res

@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   notes TEXT NOT NULL DEFAULT '',
   dedupe_key TEXT NOT NULL DEFAULT '',
   german_level TEXT NOT NULL DEFAULT '',
-  summary_en TEXT NOT NULL DEFAULT ''
+  summary_en TEXT NOT NULL DEFAULT '',
+  cv_style TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS jobs_dedupe ON jobs(dedupe_key);
 CREATE TABLE IF NOT EXISTS runs (
@@ -106,7 +107,7 @@ class DB:
     def _migrate(self) -> None:
         """Add columns introduced after a user's database was created."""
         have = {r[1] for r in self.conn.execute("PRAGMA table_info(jobs)")}
-        for col in ("german_level", "summary_en", "skills"):
+        for col in ("german_level", "summary_en", "skills", "cv_style"):
             if col not in have:
                 self.conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
         # Before run_log existed, each day kept one row in runs and a second search the same day
@@ -164,9 +165,9 @@ class DB:
         self.conn.execute(sql, [fields[c] for c in cols] + [job_id])
         self.conn.commit()
 
-    def mark_ready(self, job_id: str, folder: str, note: str) -> None:
-        """Store the folder; move to 'ready' only if the user has not changed the status meanwhile."""
-        self.conn.execute("UPDATE jobs SET folder = ? WHERE id = ?", (folder, job_id))
+    def mark_ready(self, job_id: str, folder: str, note: str, cv_style: str = "") -> None:
+        """Store the folder and CV layout; move to 'ready' only if the user has not changed the status meanwhile."""
+        self.conn.execute("UPDATE jobs SET folder = ?, cv_style = ? WHERE id = ?", (folder, cv_style, job_id))
         self.conn.execute("UPDATE jobs SET status = 'ready', status_source = 'run', status_updated_at = ?, "
                           "status_note = ? WHERE id = ? AND status = 'new'", (now(), note, job_id))
         self.conn.commit()
