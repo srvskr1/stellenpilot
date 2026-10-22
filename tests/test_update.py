@@ -1,7 +1,4 @@
-"""Update check and the Windows one click install. No real network: GitHub and downloads are faked."""
-import hashlib
-import io
-import json
+"""Update check: offers the right download for a newer release. No real network: GitHub is faked."""
 import tempfile
 import unittest
 import urllib.request
@@ -11,22 +8,13 @@ from unittest import mock
 from stellenpilot import update
 
 PAGE = "https://github.com/srvskr1/stellenpilot/releases/tag/v0.12.0"
-DL = "https://github.com/srvskr1/stellenpilot/releases/download/v0.12.0/Stellenpilot-Setup-0.12.0.exe"
-PAYLOAD = b"MZ fake installer"
-DIGEST = "sha256:" + hashlib.sha256(PAYLOAD).hexdigest()
+DL = "https://github.com/srvskr1/stellenpilot/releases/download/v0.12.0/"
 
 
-def release(tag="v0.12.0", url=DL, digest=DIGEST, page=PAGE, name="Stellenpilot-Setup-0.12.0.exe"):
+def release(tag="v0.12.0", page=PAGE, base=DL, version="0.12.0"):
+    names = [f"Stellenpilot-Setup-{version}.exe", f"Stellenpilot-{version}-mac.dmg", f"Stellenpilot-Portable-{version}.zip"]
     return lambda: {"tag_name": tag, "html_url": page,
-                    "assets": [{"name": name, "browser_download_url": url, "digest": digest, "size": len(PAYLOAD)}]}
-
-
-class Resp(io.BytesIO):
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *a):
-        self.close()
+                    "assets": [{"name": n, "browser_download_url": base + n} for n in names]}
 
 
 class StatusTests(unittest.TestCase):
@@ -37,22 +25,31 @@ class StatusTests(unittest.TestCase):
     def tearDown(self):
         self.d.cleanup()
 
-    def test_newer_release_is_offered_once_a_day(self):
-        calls = []
-        def fetch():
-            calls.append(1)
-            return release()()
-        with mock.patch.object(update, "kind", return_value="windows"):
-            s = update.status(self.home, current="0.11.1", fetch=fetch, now=1000)
-            update.status(self.home, current="0.11.1", fetch=fetch, now=1000 + 3600)
-        self.assertEqual((s["available"], s["latest"], s["oneClick"], s["page"]), (True, "0.12.0", True, PAGE))
-        self.assertEqual(len(calls), 1)  # second check within a day came from the cache
+    def status(self, plat="windows", **kw):
+        with mock.patch.object(update, "platform", return_value=plat):
+            return update.status(self.home, current="0.11.1", **{"now": 1, **kw})
+
+    def test_newer_release_offers_the_installer_for_this_computer(self):
+        win = self.status("windows", fetch=release())
+        self.assertEqual((win["available"], win["latest"], win["download"]), (True, "0.12.0", DL + "Stellenpilot-Setup-0.12.0.exe"))
+        (self.home / update.CACHE).unlink()
+        mac = self.status("mac", fetch=release())
+        self.assertEqual(mac["download"], DL + "Stellenpilot-0.12.0-mac.dmg")
+
+    def test_linux_gets_the_release_page(self):
+        self.assertEqual(self.status("other", fetch=release())["download"], PAGE)
+
+    def test_github_is_asked_at_most_once_a_day(self):
+        fetch = mock.Mock(side_effect=release())
+        self.status(fetch=fetch, now=1000)
+        self.status(fetch=fetch, now=1000 + 3600)
+        self.assertEqual(fetch.call_count, 1)
 
     def test_same_or_older_version_is_not_offered(self):
         for tag in ("v0.11.1", "v0.10.0", "not-a-version"):
             with self.subTest(tag=tag):
                 (self.home / update.CACHE).unlink(missing_ok=True)
-                self.assertFalse(update.status(self.home, current="0.11.1", fetch=release(tag=tag), now=1)["available"])
+                self.assertFalse(self.status(fetch=release(tag=tag))["available"])
 
     def test_switched_off_or_dev_checkout_never_asks(self):
         fetch = mock.Mock(side_effect=AssertionError("must not ask GitHub"))
@@ -60,94 +57,41 @@ class StatusTests(unittest.TestCase):
         self.assertFalse(update.status(self.home, current="dev", fetch=fetch)["available"])
 
     def test_offline_keeps_what_it_knew(self):
-        update.status(self.home, current="0.11.1", fetch=release(), now=1)
-        s = update.status(self.home, current="0.11.1", fetch=mock.Mock(side_effect=OSError("offline")), now=1 + 2 * 86400)
+        self.status(fetch=release(), now=1)
+        s = self.status(fetch=mock.Mock(side_effect=OSError("offline")), now=1 + 2 * 86400)
         self.assertTrue(s["available"])
 
-    def test_foreign_links_are_never_used(self):
-        fetch = release(url="https://evil.example/Stellenpilot-Setup-0.12.0.exe", page="https://evil.example/")
-        with mock.patch.object(update, "kind", return_value="windows"):
-            s = update.status(self.home, current="0.11.1", fetch=fetch, now=1)
-        self.assertFalse(s["oneClick"])  # no verified installer, so no one click install
+    def test_links_outside_the_repository_are_never_offered(self):
+        s = self.status(fetch=release(page="https://evil.example/", base="https://evil.example/"))
+        self.assertTrue(s["download"].startswith(update.PAGE_PREFIX))
         self.assertTrue(s["page"].startswith(update.PAGE_PREFIX))
 
-    def test_installer_without_digest_or_for_another_version_is_ignored(self):
-        for kw in ({"digest": None}, {"digest": "md5:abc"}, {"name": "Stellenpilot-Setup-0.11.9.exe"}):
-            with self.subTest(**kw):
-                self.assertIsNone(update._setup_asset(release(**kw)(), "0.12.0"))
+    def test_installer_of_another_version_is_ignored(self):
+        self.assertEqual(update._downloads(release(version="0.11.9")(), "0.12.0"), {})
 
-    def test_pip_and_docker_get_a_command_not_an_install(self):
-        with mock.patch.object(update, "kind", return_value="pip"):
-            s = update.status(self.home, current="0.11.1", fetch=release(), now=1)
+    def test_pip_install_also_gets_the_command(self):
+        with mock.patch("stellenpilot.launch.frozen", return_value=False):
+            s = self.status(fetch=release())
         self.assertIn("pip install -U stellenpilot", s["command"])
-        self.assertFalse(s["oneClick"])
 
-
-class InstallTests(unittest.TestCase):
-    def setUp(self):
-        self.d = tempfile.TemporaryDirectory()
-        self.dest = Path(self.d.name) / "setup.exe"
-
-    def tearDown(self):
-        self.d.cleanup()
-
-    def test_matching_checksum_is_kept(self):
-        setup = {"url": DL, "sha256": DIGEST[7:]}
-        update.download(setup, self.dest, opener=lambda req, timeout: Resp(PAYLOAD))
-        self.assertEqual(self.dest.read_bytes(), PAYLOAD)
-
-    def test_tampered_installer_is_deleted_and_not_run(self):
-        setup = {"url": DL, "sha256": DIGEST[7:]}
-        with self.assertRaises(ValueError):
-            update.download(setup, self.dest, opener=lambda req, timeout: Resp(b"MZ something else"))
-        self.assertFalse(self.dest.exists())
-
-    def test_download_from_elsewhere_is_refused_before_connecting(self):
-        opener = mock.Mock(side_effect=AssertionError("must not connect"))
-        with self.assertRaises(ValueError):
-            update.download({"url": "https://evil.example/x.exe", "sha256": DIGEST[7:]}, self.dest, opener=opener)
-
-    def test_oversized_download_stops(self):
-        with mock.patch.object(update, "MAX_BYTES", 4), self.assertRaises(ValueError):
-            update.download({"url": DL, "sha256": DIGEST[7:]}, self.dest, opener=lambda req, timeout: Resp(PAYLOAD))
-
-    def test_install_only_in_the_windows_app_and_only_upwards(self):
-        with tempfile.TemporaryDirectory() as h:
-            with mock.patch.object(update, "kind", return_value="pip"), self.assertRaises(ValueError):
-                update.install(Path(h), current="0.11.1")
-            with mock.patch.object(update, "kind", return_value="windows"), \
-                    mock.patch.object(update, "_fetch", release(tag="v0.11.0")), self.assertRaises(ValueError):
-                update.install(Path(h), current="0.11.1")
-
-    def test_install_starts_the_verified_installer_silently(self):
-        with tempfile.TemporaryDirectory() as h, \
-                mock.patch.object(update, "kind", return_value="windows"), \
-                mock.patch.object(update, "_fetch", release()), \
-                mock.patch.object(update.urllib.request, "urlopen", lambda req, timeout: Resp(PAYLOAD)), \
-                mock.patch.object(update.subprocess, "Popen") as popen:
-            self.assertEqual(update.install(Path(h), current="0.11.1"), "0.12.0")
-        args = popen.call_args[0][0]
-        self.assertTrue(args[0].endswith("Stellenpilot-Setup.exe"))
-        self.assertIn("/SILENT", args)
-        self.assertFalse(popen.call_args[1].get("shell"))
+    def test_app_gets_no_command(self):
+        with mock.patch("stellenpilot.launch.frozen", return_value=True):
+            self.assertNotIn("command", self.status(fetch=release()))
 
 
 class RouteTests(unittest.TestCase):
-    def test_install_route_needs_the_dashboard_header(self):
-        from helpers import http_error, running
+    def test_update_route_answers_and_nothing_can_install(self):
+        from helpers import fetch_json, http_error, running
         from stellenpilot.config import Settings
         from stellenpilot.server import make_handler
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d, running(make_handler(Settings(Path(d)))) as srv:
-            req = urllib.request.Request(f"{srv.base}/api/update/install", data=b"{}", method="POST")
-            self.assertEqual(http_error(req)[0], 403)
-            req = urllib.request.Request(f"{srv.base}/api/update/install", data=b"{}", method="POST",
-                                         headers={"X-Jobhunt": "1", "Origin": "https://evil.example"})
-            self.assertEqual(http_error(req)[0], 403)
-            req = urllib.request.Request(f"{srv.base}/api/update/install", data=b"{}", method="POST",
-                                         headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
-            code, body = http_error(req)  # not the Windows app, so refused with a reason, nothing runs
-            self.assertEqual(code, 400)
-            self.assertIn("Windows app", body["error"])
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
+            settings = Settings(Path(d))
+            settings["ui"]["check_updates"] = False  # no network in tests
+            with running(make_handler(settings)) as srv:
+                self.assertFalse(fetch_json(f"{srv.base}/api/update")["available"])
+                req = urllib.request.Request(f"{srv.base}/api/update/install", data=b"{}", method="POST",
+                                             headers={"X-Jobhunt": "1", "Content-Type": "application/json"})
+                self.assertEqual(http_error(req)[0], 404)  # there is no install route at all
 
 
 if __name__ == "__main__":

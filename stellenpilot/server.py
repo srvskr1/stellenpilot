@@ -385,16 +385,6 @@ def make_handler(settings, port: int = 8765):
         def do_POST(self):
             if not self._guard():
                 return
-            if self.path == "/api/update/install":  # Windows app only; downloads and verifies, so no lock
-                from . import update
-                try:
-                    version = update.install(settings.home)
-                except Exception as e:
-                    return self._send(400, {"error": str(e)})
-                self._send(200, {"ok": True, "version": version})
-                # step aside so the installer can replace the files; it starts the new version itself
-                threading.Timer(3, lambda: os._exit(0)).start()
-                return
             if self.path in SLOW_POSTS or self.path.startswith("/api/docs/"):
                 # Adding a job (fetch, AI scoring, maybe tailoring) and Gmail sync can take minutes with a
                 # local model. They use their own database connection so the dashboard stays responsive.
