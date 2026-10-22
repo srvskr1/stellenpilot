@@ -563,9 +563,7 @@ body.wizopen{overflow:hidden}
    Motion runs once per data change, never on every refresh. */
 .ins{--b1:var(--accent);--b2:#3B6FE8;--b3:#7EA2F2;--b4:#BFD0FA;--hi:var(--accent-2);grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .ins .c-wide{grid-column:span 2}.ins .c-full{grid-column:1/-1}
-.ins .ic{position:relative;overflow:hidden;gap:14px;transition:transform .2s ease,box-shadow .2s ease}
-.ins .ic:hover{transform:translateY(-2px);box-shadow:var(--shadow-2)}
-.ins .ic::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--b1),var(--b3))}
+.ins .ic{gap:16px}
 .ins.anim .ic{animation:icIn .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*70ms)}
 @keyframes icIn{from{opacity:0;transform:translateY(12px)}}
 .ih{display:flex;gap:12px;align-items:flex-start}.ih h3{margin:0 0 2px}
@@ -583,7 +581,6 @@ body.wizopen{overflow:hidden}
 /* funnel */
 .fring{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;position:relative}
 .fst{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
-.fst+.fst::before{content:"";position:absolute;left:-14px;top:44px;width:20px;height:2px;background:var(--border-strong)}
 .fst .lb{font-size:.8125rem;font-weight:600;color:var(--text-secondary)}
 .fst .cv2{font-size:.6875rem;color:var(--text-tertiary)}
 .fst .cv2.big{color:#B45309;font-weight:600}
@@ -611,7 +608,9 @@ body.wizopen{overflow:hidden}
 .skx ul{margin:0;padding:10px 14px;list-style:none;background:var(--surface-alt);border-radius:10px;font-size:.8125rem;color:var(--text-secondary)}
 .skx li{padding:3px 0}.skx h4{margin:0 0 4px;font-size:.8125rem}
 /* reply rates */
-.chg{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.chg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 32px}
+.cr{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.875rem}
+.cr b{font-variant-numeric:tabular-nums;color:var(--accent)}.cr em{font-style:normal;color:var(--text-tertiary);font-size:.75rem;margin-left:8px}
 .chr{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
 .chi{display:flex;flex-direction:column;align-items:center;gap:4px;width:84px;text-align:center}
 .chi span{font-size:.75rem;color:var(--text-secondary);line-height:1.25}.chi em{font-style:normal;font-size:.6875rem;color:var(--text-tertiary)}
@@ -906,11 +905,11 @@ body.wizopen{overflow:hidden}
       <section aria-labelledby="ins-h">
         <div class="sechead"><h2 id="ins-h">Insights</h2><span>What works and what to learn next</span></div>
         <div class="insights ins">
-          <article class="panel ic c-wide" style="--i:0"><header class="ih"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg></span><div><h3>Where your applications stop</h3><p class="hint">Sent, answered, interviews and offers, counted from your own applications.</p></div></header><div id="diag"></div></article>
-          <article class="panel ic" style="--i:1"><header class="ih"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H8l-4 4z"/></svg></span><div><h3>Hidden German</h3><p class="hint">English ads from the last 90 days that still ask for German B2 or higher.</p></div></header><div id="deRing"></div></article>
-          <article class="panel ic c-wide" style="--i:2"><header class="ih"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5z"/><path d="M6 10.5V16c3 2 9 2 12 0v-5.5"/></svg></span><div><h3>What to learn next</h3><p class="hint">Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.</p></div></header><div id="gapsBox"></div></article>
-          <article class="panel ic wk" style="--i:3"><header class="ih"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><div><h3>Weekly summary</h3></div></header><div id="weekly"><p class="muted">The first weekly summary arrives on Sunday evening.</p></div></article>
-          <article class="panel ic c-full" style="--i:4"><header class="ih"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><div><h3>Reply rate by channel</h3><p class="hint">Replies count interviews, offers and rejections out of applications sent.</p></div></header><div id="chan"></div></article>
+          <article class="panel ic c-wide" style="--i:0"><header class="ih"><div><h3>Where your applications stop</h3></div></header><div id="diag"></div></article>
+          <article class="panel ic" style="--i:1"><header class="ih"><div><h3>Hidden German</h3></div></header><div id="deRing"></div></article>
+          <article class="panel ic c-wide" style="--i:2"><header class="ih"><div><h3>What to learn next</h3><p class="hint">Jobs from the last 90 days this skill would lift over your match line.</p></div></header><div id="gapsBox"></div></article>
+          <article class="panel ic wk" style="--i:3"><header class="ih"><div><h3>Weekly summary</h3></div></header><div id="weekly"><p class="muted">The first weekly summary arrives on Sunday evening.</p></div></article>
+          <article class="panel ic c-full" style="--i:4"><header class="ih"><div><h3>Reply rate by channel</h3><p class="hint">Replies count interviews, offers and rejections out of applications sent.</p></div></header><div id="chan"></div></article>
         </div>
       </section>
     </section>
@@ -1207,7 +1206,7 @@ const DE={
 "Everything you sent, and how it is going":"Alles, was du geschickt hast, und wie es läuft","Check email":"E-Mails prüfen","Connect Gmail to update statuses by itself":"Verbinde Gmail, damit sich der Status von selbst aktualisiert",
 "Your applications":"Deine Bewerbungen","Insights":"Auswertung","What works and what to learn next":"Was funktioniert und was du als Nächstes lernen solltest","Reply rate by channel":"Antwortquote nach Kanal",
 "Replies count interviews, offers and rejections out of applications sent.":"Als Antwort zählen Gespräche, Angebote und Absagen im Verhältnis zu gesendeten Bewerbungen.",
-"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Where your applications stop":"Wo deine Bewerbungen hängen bleiben","Sent, answered, interviews and offers, counted from your own applications.":"Gesendet, beantwortet, Gespräche und Angebote, gezählt aus deinen eigenen Bewerbungen.","sent":"gesendet","answered":"beantwortet","offers":"Angebote","Copy":"Kopieren","Copied":"Kopiert","Hidden German":"Verstecktes Deutsch","English ads from the last 90 days that still ask for German B2 or higher.":"Englische Anzeigen der letzten 90 Tage, die trotzdem Deutsch auf B2 oder höher verlangen.","of English ads":"der englischen Anzeigen","No English ads in the last 90 days yet.":"Noch keine englischen Anzeigen in den letzten 90 Tagen.","of all you sent":"von allen gesendeten","{p}% of the step before":"{p}% des vorigen Schritts","Full circle = the skill that opens the most jobs":"Voller Kreis = die Fähigkeit, die die meisten Jobs öffnet","job":"Job","jobs":"Jobs","replied":"geantwortet","biggest drop":"größter Verlust","Application funnel":"Bewerbungstrichter","ads require it":"Anzeigen setzen es voraus","nice to have":"von Vorteil","{n} job":"{n} Job","{n} jobs":"{n} Jobs","{m} require it":"{m} setzen es voraus","Week of":"Woche vom","Source":"Quelle","Role type":"Art der Stelle","Location":"Ort","Full time":"Vollzeit","Working student":"Werkstudent","Remote":"Remote","On site or hybrid":"Vor Ort oder hybrid",
+"What to learn next":"Was du als Nächstes lernen solltest","Jobs from the last 90 days that would reach your match line if you had this. A count of jobs, not a promise of interviews.":"Jobs der letzten 90 Tage, die mit dieser Fähigkeit deine Passungsgrenze erreichen würden. Eine Zahl von Jobs, kein Versprechen auf Gespräche.","{n} jobs, {m} require it":"{n} Jobs, {m} setzen es voraus","{n} jobs, nice to have":"{n} Jobs, von Vorteil","Where your applications stop":"Wo deine Bewerbungen hängen bleiben","Sent, answered, interviews and offers, counted from your own applications.":"Gesendet, beantwortet, Gespräche und Angebote, gezählt aus deinen eigenen Bewerbungen.","sent":"gesendet","answered":"beantwortet","offers":"Angebote","Copy":"Kopieren","Copied":"Kopiert","Hidden German":"Verstecktes Deutsch","English ads from the last 90 days that still ask for German B2 or higher.":"Englische Anzeigen der letzten 90 Tage, die trotzdem Deutsch auf B2 oder höher verlangen.","of English ads":"der englischen Anzeigen","No English ads in the last 90 days yet.":"Noch keine englischen Anzeigen in den letzten 90 Tagen.","{k} of {n} English ads ask for German B2+":"{k} von {n} englischen Anzeigen verlangen Deutsch B2+","Jobs from the last 90 days this skill would lift over your match line.":"Jobs der letzten 90 Tage, die diese Fähigkeit über deine Passungsgrenze heben würde.","{p}% of the step before":"{p}% des vorigen Schritts","Full circle = the skill that opens the most jobs":"Voller Kreis = die Fähigkeit, die die meisten Jobs öffnet","job":"Job","jobs":"Jobs","replied":"geantwortet","biggest drop":"größter Verlust","Application funnel":"Bewerbungstrichter","ads require it":"Anzeigen setzen es voraus","nice to have":"von Vorteil","{n} job":"{n} Job","{n} jobs":"{n} Jobs","{m} require it":"{m} setzen es voraus","Week of":"Woche vom","Source":"Quelle","Role type":"Art der Stelle","Location":"Ort","Full time":"Vollzeit","Working student":"Werkstudent","Remote":"Remote","On site or hybrid":"Vor Ort oder hybrid",
 "{c}: no news for {n} days after the interview":"{c}: seit {n} Tagen keine Nachricht nach dem Gespräch","A short follow up after two quiet weeks is normal in Germany.":"Eine kurze Nachfrage nach zwei stillen Wochen ist in Deutschland üblich.",
 "{k} of {n} English ads from the last 90 days ask for German B2 or higher.":"{k} von {n} englischen Anzeigen der letzten 90 Tage verlangen Deutsch auf B2 oder höher.",
 "Fewer than 10 applications so far, too early to say where they stop.":"Weniger als 10 Bewerbungen bisher, zu früh für eine Aussage.",
@@ -1575,8 +1574,8 @@ function renderInsights(){
     const st=[["sent",d.sent,"var(--b1)"],["answered",d.answered,"var(--b2)"],["interviews",d.interviews,"var(--b3)"],["offers",d.offers,"var(--b4)"]];
     const conv=st.map((x,k)=>k&&st[k-1][1]?x[1]/st[k-1][1]:null);
     const worst=d.sent>=10?conv.reduce((w,r,k)=>r!==null&&(w<0||r<conv[w])?k:w,-1):-1;
-    const fun=st.map(([k,v,c],x)=>`<div class="fst" role="listitem">${ring(96,10,[{v:d.sent?v/d.sent:0,c}],`<b data-n="${v}">${v}</b><small>${d.sent?Math.round(v/d.sent*100):0}%</small>`,x)}
-      <span class="lb">${esc(t(k))}</span><span class="cv2${x===worst?" big":""}">${x===0?esc(t("of all you sent")):conv[x]===null?"–":esc(t("{p}% of the step before",{p:Math.round(conv[x]*100)}))}${x===worst?" · "+esc(t("biggest drop")):""}</span></div>`).join("");
+    const fun=st.map(([k,v,c],x)=>`<div class="fst" role="listitem">${ring(96,10,[{v:d.sent?v/d.sent:0,c}],`<b data-n="${v}">${v}</b>`,x)}
+      <span class="lb">${esc(t(k))}</span></div>`).join("");
     const fu=(d.followUps||[]).map(q=>{const draft=(LANG==="de"?FOLLOWUP.de:FOLLOWUP.en).replace("{title}",q.title);
       return `<details class="fu"><summary>${esc(t("{c}: no news for {n} days after the interview",{c:q.company,n:q.days}))}</summary><p>${esc(draft)}</p><button type="button" class="btn sec" data-copy="${esc(draft)}">${esc(t("Copy"))}</button></details>`}).join("");
     $("diag").innerHTML=`<div class="fring" role="list" aria-label="${esc(t("Application funnel"))}">${fun}</div>
@@ -1585,16 +1584,16 @@ function renderInsights(){
     $("diag").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{try{navigator.clipboard.writeText(b.dataset.copy);b.textContent=t("Copied")}catch{}});
     const n=d.englishAds||0,k=d.englishAskB2||0,pct=n?Math.round(k/n*100):0;
     $("deRing").innerHTML=n?`<div class="dering">${ring(140,14,[{v:k/n,c:"var(--hi)"}],`<b><span data-n="${pct}">${pct}</span>%</b><small>${esc(t("of English ads"))}</small>`,2)}
-      <p>${esc(t("{k} of {n} English ads from the last 90 days ask for German B2 or higher.",{k,n}))}</p></div>`:`<p class="muted">${esc(t("No English ads in the last 90 days yet."))}</p>`;
+      <p>${esc(t("{k} of {n} English ads ask for German B2+",{k,n}))}</p></div>`:`<p class="muted">${esc(t("No English ads in the last 90 days yet."))}</p>`;
   }
   const u=unlocksData||{rows:[]};
   if(!u.enough)$("gapsBox").innerHTML=`<p class="muted">${esc(t("Not enough jobs yet: {n} of {m} scored jobs in the last 90 days.",{n:u.jobs||0,m:u.need||10}))}</p>`;
   else if(!u.rows.length)$("gapsBox").innerHTML=`<p class="muted">${esc(t("No single skill would lift a job over your match line yet."))}</p>`;
   else{const max=Math.max(...u.rows.map(r=>r.jobs)),cur=u.rows.find(r=>r.skill===openSkill);
     $("gapsBox").innerHTML=(u.jobs<u.steady?`<p class="hint">${esc(t("Based on {n} jobs. This will shift as more come in.",{n:u.jobs}))}</p>`:"")
-      +`<div class="lg"><span><i style="background:var(--b1)"></i>${esc(t("ads require it"))}</span><span><i style="background:var(--b4)"></i>${esc(t("nice to have"))}</span><span>${esc(t("Full circle = the skill that opens the most jobs"))}</span></div><div class="skg">`
-      +u.rows.map((r,x)=>`<button type="button" class="st" data-skill="${esc(r.skill)}" aria-pressed="${openSkill===r.skill}" aria-controls="skx">${ring(76,9,[{v:r.must/max,c:"var(--b1)"},{v:(r.jobs-r.must)/max,c:"var(--b4)"}],`<b data-n="${r.jobs}">${r.jobs}</b><small>${esc(r.jobs===1?t("job"):t("jobs"))}</small>`,x)}
-        <span class="nmk">${esc(r.skill)}</span><span class="sub">${r.must?esc(t("{m} require it",{m:r.must})):esc(t("nice to have"))}</span></button>`).join("")
+      +`<div class="lg"><span><i style="background:var(--b1)"></i>${esc(t("ads require it"))}</span><span><i style="background:var(--b4)"></i>${esc(t("nice to have"))}</span></div><div class="skg">`
+      +u.rows.map((r,x)=>`<button type="button" class="st" data-skill="${esc(r.skill)}" aria-pressed="${openSkill===r.skill}" aria-controls="skx">${ring(76,9,[{v:r.must/max,c:"var(--b1)"},{v:(r.jobs-r.must)/max,c:"var(--b4)"}],`<b data-n="${r.jobs}">${r.jobs}</b>`,x)}
+        <span class="nmk">${esc(r.skill)}</span></button>`).join("")
       +`</div><div class="skx${cur?" open":""}" id="skx"><div>${cur?`<ul><li><b>${esc(cur.skill)}</b></li>${cur.examples.map(e=>`<li>${esc(e)}</li>`).join("")}</ul>`:""}</div></div>`;
     $("gapsBox").querySelectorAll(".st").forEach(b=>b.onclick=()=>{const sk=b.dataset.skill,on=openSkill!==sk;openSkill=on?sk:"";
       $("gapsBox").querySelectorAll(".st").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.skill===openSkill)));
@@ -1603,7 +1602,7 @@ function renderInsights(){
       pane.classList.toggle("open",!!r)});}
   const grp=(fn)=>{const m={};sent.forEach(j=>{const k=fn(j);if(!k)return;(m[k]??={n:0,r:0}).n++;if(REPLY.includes(j.status))m[k].r++});
     return Object.entries(m).map(([k,x])=>({k,v:x.n?x.r/x.n:0,lbl:`${x.r} / ${x.n}`})).sort((a,b)=>b.v-a.v)};
-  const blk=(h,rs)=>rs.length?`<div><div class="grp">${esc(t(h))}</div><div class="chr">`+rs.map((r,x)=>`<div class="chi">${ring(60,7,[{v:r.v,c:"var(--b1)"}],`<b style="font-size:.75rem">${Math.round(r.v*100)}%</b>`,x)}<span>${esc(t(r.k))}</span><em>${esc(r.lbl)} ${esc(t("replied"))}</em></div>`).join("")+`</div></div>`:"";
+  const blk=(h,rs)=>rs.length?`<div><div class="grp">${esc(t(h))}</div>`+rs.map(r=>`<div class="cr"><span>${esc(t(r.k))}</span><span><b>${Math.round(r.v*100)}%</b><em>${esc(r.lbl)}</em></span></div>`).join("")+`</div>`:"";
   $("chan").innerHTML=sent.length?`<div class="chg">`+blk("Source",grp(j=>SRC(j.source||"")))+blk("Role type",grp(j=>/full/i.test(j.jobType||"")?"Full time":/werk|student/i.test((j.jobType||"")+" "+(j.title||""))?"Working student":null))+blk("Location",grp(j=>/remote/i.test(j.location||"")?"Remote":j.location?"On site or hybrid":null))+blk("CV layout",grp(j=>({classic:"Classic",compact:"Compact",lebenslauf:"Lebenslauf"})[j.cvStyle]||null))
     +`</div><p class="hint">${esc(t("Small numbers for now. This gets reliable after about 20 applications."))}</p>`:`<p class="muted">${esc(t("No applications sent yet."))}</p>`;
   const w=[...weekly].sort((a,b)=>String(b.weekOf).localeCompare(String(a.weekOf)))[0];
