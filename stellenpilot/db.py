@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   dedupe_key TEXT NOT NULL DEFAULT '',
   german_level TEXT NOT NULL DEFAULT '',
   summary_en TEXT NOT NULL DEFAULT '',
-  cv_style TEXT NOT NULL DEFAULT ''
+  cv_style TEXT NOT NULL DEFAULT '',
+  reached TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS jobs_dedupe ON jobs(dedupe_key);
 CREATE TABLE IF NOT EXISTS runs (
@@ -69,6 +70,7 @@ CREATE TABLE IF NOT EXISTS run_log (
 """
 
 STATUSES = ("new", "ready", "applied", "interview", "offer", "rejected", "skipped")
+REACHED = ("applied", "interview", "offer")
 # Fields the user owns. The pipeline never overwrites them.
 USER_FIELDS = ("rating", "notes")
 EDITABLE = {"status", "status_note", "rating", "notes", "closed", "interview_at", "prep", "folder"}
@@ -107,9 +109,14 @@ class DB:
     def _migrate(self) -> None:
         """Add columns introduced after a user's database was created."""
         have = {r[1] for r in self.conn.execute("PRAGMA table_info(jobs)")}
-        for col in ("german_level", "summary_en", "skills", "cv_style"):
+        for col in ("german_level", "summary_en", "skills", "cv_style", "reached"):
             if col not in have:
                 self.conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
+        if "reached" not in have:
+            # Best guess for old rows: a rejection with an interview date had reached the interview.
+            self.conn.execute("UPDATE jobs SET reached = CASE WHEN status IN ('applied', 'interview', 'offer') THEN status "
+                              "WHEN status = 'rejected' THEN CASE WHEN interview_at IS NOT NULL THEN 'interview' ELSE 'applied' END "
+                              "ELSE '' END")
         # Before run_log existed, each day kept one row in runs and a second search the same day
         # overwrote it. Carry those day rows over once so the history starts complete.
         if not self.conn.execute("SELECT 1 FROM run_log LIMIT 1").fetchone():
@@ -175,8 +182,14 @@ class DB:
     def set_status(self, job_id: str, status: str, *, source: str, note: str = "") -> None:
         if status not in STATUSES:
             raise ValueError(f"unknown status {status}")
-        self.update_job(job_id, {"status": status, "status_source": source,
-                                 "status_updated_at": now(), "status_note": note}, by_user=True)
+        fields = {"status": status, "status_source": source, "status_updated_at": now(), "status_note": note}
+        # reached: the furthest step an application got to. A rejection keeps it, so "rejected after the
+        # interview" stays different from "rejected from the CV". Moving back to new or ready means it was never sent.
+        if status in REACHED:
+            fields["reached"] = status
+        elif status in ("new", "ready"):
+            fields["reached"] = ""
+        self.update_job(job_id, fields, by_user=True)
 
     def jobs(self, where: str = "1=1", params: tuple = ()) -> list[dict]:
         rows = self.conn.execute(f"SELECT * FROM jobs WHERE {where} ORDER BY match DESC NULLS LAST, found_at DESC", params)
