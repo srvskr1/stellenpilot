@@ -11,6 +11,13 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
+### What is new in 0.11.1
+
+* **A calmer Insights page.** Your applications, the skills that would open the most jobs and the hidden German share are now shown as circles in one blue theme. Tap a skill to see the jobs it would lift.
+* **Clearer reply rates.** Your overall reply rate comes first, then one grouping at a time (source, role type, place, CV layout) as sorted bars with a line for your average. Groups with fewer than 3 applications are greyed out, so a single reply never shows up as 100%.
+* **A new agent office.** A small robot now does the work. It sits at each desk and types while code runs on its screen, walks between desks, and rests on the sofa with a coffee between searches. Desks, chairs and the room were redrawn.
+* **Smoother motion.** Animations follow one set of easing curves, move only what the browser can animate cheaply, and stop when your system asks for reduced motion.
+
 ### What is new in 0.11.0
 
 * **What to learn next.** Insights ranks the skills and German levels that would lift the most of your recent jobs over your match line, and says whether the ads require them or call them nice to have. Job details show the score a job would get with each missing skill.
@@ -153,7 +160,7 @@ Full setup for Ollama, LM Studio, llama.cpp, vLLM and Docker, plus speed tips an
 
 Five calm pages, in your browser, on your computer:
 
-* **Home**: what is ready to apply, interviews coming up, the newest matches, and a small 3D office where you can watch the agent work.
+* **Home**: what is ready to apply, interviews coming up, the newest matches, and a small 3D office where a robot works through each step of the search.
 * **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep. Filter by word, source, type, place, day, match or status, and see which tools of the ad you have, which ones you are missing, and what the job would score with each of them.
 * **Applications**: a board you drag cards across (Applied, Interview, Offer, Rejected). Below it, Insights shows reply rates by source and CV layout, where your applications stop (CV, first check or interviews), a follow up email for interviews that went quiet, how many English ads still want good German, the skills that would open the most jobs for you, and a weekly summary.
 * **My CV**: your profile, with tips to improve your matches.
