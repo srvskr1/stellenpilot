@@ -11,6 +11,12 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
+### What is new in 0.11.2
+
+* **Update notice.** Once a day Stellenpilot checks whether a newer version is out and shows a **Download** button on Home. Run the installer and it updates your app in place; your jobs, CVs and settings stay. You can switch the check off under Settings, Language.
+* **A new Home.** The agent office now sits at the top, and Insights moved from Applications to Home.
+* The Windows installer now tells you when it is updating an existing install.
+
 ### What is new in 0.11.1
 
 * **A calmer Insights page.** Your applications, the skills that would open the most jobs and the hidden German share are now shown as circles in one blue theme. Tap a skill to see the jobs it would lift.
