@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stellenpilot"
-version = "0.10.0"
+version = "0.11.0"
 description = "Local job search assistant for Germany: finds jobs daily, scores them against your CV, and writes truthful tailored CVs and cover letters."
 readme = "README.md"
 license = "MIT"
