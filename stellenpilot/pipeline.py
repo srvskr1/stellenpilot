@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import http.client
 import logging
+import re
 import urllib.error
 from datetime import date, timedelta
 import urllib.parse
@@ -115,7 +116,28 @@ Under 3500 characters. Do not use hyphens or dashes as punctuation inside senten
 Return JSON: {"prep": "..."}"""
 
 
+def basic_prep(job: dict, profile: dict) -> str:
+    """Prep pack without AI: built only from the ad and the tools the CV has or lacks."""
+    from .score import skill_overlap
+    have, missing = skill_overlap(job, profile) if profile else ([], [])
+    missing = list(dict.fromkeys(list(job.get("gap_tags") or []) + missing))[:4]
+    company = job.get("company") or "the company"
+    ad = re.sub(r"\s+", " ", job.get("description") or "").strip()
+    about = " ".join(re.split(r"(?<=[.!?])\s+", ad)[:2])[:400] or "The ad says little about them. Look at their website."
+    qs = ["Tell us about yourself and why this role.", f"Why do you want to work at {company}?"]
+    qs += [f"Tell us about a project where you used {s}." for s in have[:3]]
+    qs += [f"How would you get up to speed with {g}?" for g in missing[:2]]
+    out = [f"## About {company}", about, "## Likely questions", *[f"- {q}" for q in qs], "## Your gaps and how to answer"]
+    out += [f"- {g}: say honestly it is new to you, name the closest tool you know, and how you would learn it." for g in missing] \
+        or ["- The ad names nothing that is missing from your CV."]
+    out += ["## Questions to ask them", "- What would my first three months look like?",
+            "- How does the team work together day to day?", "- What are the next steps after this interview?"]
+    return "\n".join(out)
+
+
 def make_prep(job: dict, profile: dict, llm) -> str:
+    if not getattr(llm, "enabled", False):
+        return basic_prep(job, profile)
     user = f"CANDIDATE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job_ad(job.get('description', ''), llm.max_chars)}"
     text = str(llm.complete_json(PREP_SYSTEM, user, max_tokens=1800).get("prep") or "")
     # Stories must be true: drop story lines the truth guard rejects.

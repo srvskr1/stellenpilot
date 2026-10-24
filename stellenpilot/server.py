@@ -17,10 +17,11 @@ from urllib.parse import unquote
 
 from . import schedule
 from .db import DB, STATUSES, local_day
+from .pay import BLUE_CARD, fill_pay
 from .score import lifts, unlocks
 
 CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "statusUpdatedAt",
-         "status_note": "statusNote", "gap_tags": "gapTags", "cv_style": "cvStyle", "interview_at": "interviewAt",
+         "status_note": "statusNote", "gap_tags": "gapTags", "cv_style": "cvStyle", "interview_at": "interviewAt", "prep_done": "prepDone",
          "found_at": "foundAt", "posted_at": "postedAt", "job_type": "jobType", "closed_at": "closedAt",
          "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote",
          "finished_at": "finishedAt"}
@@ -35,7 +36,7 @@ EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remo
             "tailor": ("min_match", "letter_language", "cv_style"),
             "schedule": ("enabled", "time"),
             "watch": ("starter_list",),
-            "ui": ("language", "check_updates")}
+            "ui": ("language", "check_updates", "visa_hints")}
 CHOICES = {("llm", "provider"): {"none", "builtin", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
            ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
            ("tailor", "letter_language"): {"auto", "en", "de"},
@@ -385,7 +386,7 @@ def make_handler(settings, port: int = 8765):
         def do_POST(self):
             if not self._guard():
                 return
-            if self.path in SLOW_POSTS or self.path.startswith("/api/docs/"):
+            if self.path in SLOW_POSTS or self.path.startswith(("/api/docs/", "/api/prep/")):
                 # Adding a job (fetch, AI scoring, maybe tailoring) and Gmail sync can take minutes with a
                 # local model. They use their own database connection so the dashboard stays responsive.
                 return self._post()
@@ -403,6 +404,7 @@ def make_handler(settings, port: int = 8765):
                 jobs = db.jobs()
                 fill_skills(jobs, settings.profile)
                 fill_lifts(jobs, settings.profile)
+                fill_pay(jobs)
                 return self._send(200, {
                     "jobs": [camel(j) for j in jobs],
                     "runs": [camel(r) for r in db.runs()],
@@ -410,6 +412,8 @@ def make_handler(settings, port: int = 8765):
                     "weekly": weekly_summary(jobs),
                     "unlocks": unlocks(jobs, settings.profile, settings["tailor"]["min_match"]),
                     "diagnosis": diagnosis(jobs),
+                    "blueCard": BLUE_CARD,
+                    "visaHints": bool(settings["ui"].get("visa_hints")),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
                     "subtitle": subtitle(),
                     "firstName": (str(settings.profile.get("person", {}).get("name") or "").split() or [""])[0],
@@ -457,6 +461,11 @@ def make_handler(settings, port: int = 8765):
                         raise ValueError("rating must be 1, -1 or null")
                 if "notes" in body:
                     fields["notes"] = str(body["notes"])[:5000]
+                if "prepDone" in body:  # ticked steps of the interview checklist, like "0,2"
+                    done = sorted({int(x) for x in str(body["prepDone"]).split(",") if x.strip()})
+                    if any(not 0 <= x < 4 for x in done):
+                        raise ValueError("prepDone steps are 0 to 3")
+                    fields["prep_done"] = ",".join(map(str, done))
                 if "closed" in body:
                     fields["closed"] = int(_as_bool(body["closed"], "closed"))
                 if fields:
@@ -494,6 +503,25 @@ def make_handler(settings, port: int = 8765):
                     return self._send(400, {"error": str(e)})
                 except Exception as e:
                     return self._send(500, {"error": f"Could not make the documents: {e}"})
+                finally:
+                    own.conn.close()
+                return self._send(200, {"ok": True})
+            if self.path.startswith("/api/prep/"):
+                from .pipeline import make_prep
+                from .llm import LLM
+                from . import progress
+                own = DB(settings.db_path)
+                job_id = unquote(self.path[len("/api/prep/"):])
+                try:
+                    job = own.job(job_id)
+                    if not job:
+                        return self._send(404, {"error": "unknown job"})
+                    with progress.track("prep:" + job_id, "Writing your interview prep"):
+                        own.update_job(job_id, {"prep": make_prep(job, settings.profile, LLM(settings)), "prep_done": ""}, by_user=True)
+                except progress.Busy:
+                    return self._send(409, {"error": "The prep is already being written."})
+                except Exception as e:
+                    return self._send(500, {"error": f"Could not write the prep: {e}"})
                 finally:
                     own.conn.close()
                 return self._send(200, {"ok": True})

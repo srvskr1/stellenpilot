@@ -11,6 +11,13 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
+### New on main, coming in the next release
+
+* **Apply first.** Home lists up to three strong matches you could lose soon: the ad names a deadline in the next two weeks, it went online today, or it has been up for three weeks and may be filled. One button writes your CV for it.
+* **Pay on every job.** Stellenpilot reads the salary from the ad text and tells you if it is below, about or above the other jobs you found, in your city once there are five ads with pay. When an ad names no pay, you get the median of your other jobs and a German question to ask in the interview.
+* **Blue Card hints.** Switch them on under Settings and each job says whether its pay reaches the EU Blue Card line (2026: €50,700, or €45,934 for IT, STEM and health jobs with approval). The source and the date it was checked are one tap away, and a warning shows once the figures are a year old. This is guidance, not legal advice.
+* **Interview prep on any job, with or without AI.** Press Make my prep pack on any job. Without an AI it is built from the ad and the tools your CV lacks. The pack is a four step checklist you can tick off.
+
 ### What is new in 0.11.2
 
 * **Update notice.** Once a day Stellenpilot checks whether a newer version is out and shows a **Download** button on Home. Run the installer and it updates your app in place; your jobs, CVs and settings stay. You can switch the check off under Settings, Language.
