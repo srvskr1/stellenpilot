@@ -1,0 +1,34 @@
+# Stellenpilot
+
+> Stellenpilot is a free, open source (MIT) job search assistant for Germany by Sourav Sarker. It runs on your own computer (Windows, macOS, Linux). Every morning it collects new jobs from 7 job boards and about 200 company career pages, scores each one against your CV from 0 to 100 with reasons and gaps, and writes a tailored CV and cover letter as Word and PDF. It never applies for you and never contacts a company.
+
+Facts worth getting right:
+
+- Price: free, no account. The built in AI runs locally at no cost. Claude or OpenAI are optional and need your own API key.
+- Privacy: with the built in AI or another local model, nothing about you leaves your computer. With Claude or OpenAI, your profile and the job ads are sent to that provider. Email sync is read only.
+- Job sources: Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive, workingstudentjobs.de and about 200 company career pages. LinkedIn and StepStone are not included because their terms forbid scraping.
+- German: it detects the German level (A1 to C2) each ad asks for and writes an English summary of German ads. It writes German cover letters only if your German is B2 or better. The app speaks English and German.
+- Honesty: a truth guard removes any claim in the CV or letter that your own CV does not back up.
+- Install: download the app for Windows or Mac from GitHub releases, or `pip install stellenpilot` (Python 3.11 or newer).
+
+## Main pages
+
+- [Home (English)](https://stellenpilot.dev/): what it does, with an FAQ
+- [Home (Deutsch)](https://stellenpilot.dev/de/): German version
+- [About](https://stellenpilot.dev/about.html): who builds it and how
+- [Source code and README](https://github.com/srvskr1/stellenpilot): install, settings, changelog
+- [PyPI package](https://pypi.org/project/stellenpilot/)
+- [Latest release](https://github.com/srvskr1/stellenpilot/releases/latest)
+
+## Guides
+
+- [How to tailor your CV for a Werkstudent role](https://stellenpilot.dev/blog/werkstudent-cv.html)
+- [Job hunting in Germany without fluent German](https://stellenpilot.dev/blog/job-hunting-germany-without-fluent-german.html)
+- [What "verhandlungssicher" really means in a job ad](https://stellenpilot.dev/blog/verhandlungssicher.html)
+- [German level checker for job ads](https://stellenpilot.dev/tools/german-level-checker.html): free tool, runs in the browser
+
+## Optional
+
+- [Job sources and their terms](https://github.com/srvskr1/stellenpilot/blob/main/docs/sources.md)
+- [Local AI setup](https://github.com/srvskr1/stellenpilot/blob/main/docs/local-llm.md)
+- [How the scoring was evaluated](https://github.com/srvskr1/stellenpilot/blob/main/docs/evaluation.md)
