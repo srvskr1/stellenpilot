@@ -11,7 +11,7 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-### New on main, coming in the next release
+### What is new in 0.12.0
 
 * **Apply first.** Home lists up to three strong matches you could lose soon: the ad names a deadline in the next two weeks, it went online today, or it has been up for three weeks and may be filled. One button writes your CV for it.
 * **Pay on every job.** Stellenpilot reads the salary from the ad text and tells you if it is below, about or above the other jobs you found, in your city once there are five ads with pay. When an ad names no pay, you get the median of your other jobs and a German question to ask in the interview.
