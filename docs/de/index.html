@@ -8,7 +8,7 @@
 <link rel="alternate" hreflang="x-default" href="https://stellenpilot.dev/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://stellenpilot.dev/de/">
-<meta property="og:title" content="Stellenpilot: wake up to jobs that fit">
+<meta property="og:title" content="Stellenpilot: morgens passende Jobs, mit fertigem Lebenslauf">
 <meta property="og:description" content="Stellenpilot findet jeden Morgen neue Jobs in Deutschland, bewertet sie anhand deines Lebenslaufs und schreibt Lebenslauf und Anschreiben. Kostenlos, Open Source, auf deinem Computer.">
 <meta property="og:image" content="https://stellenpilot.dev/social-preview.jpg">
 <meta property="og:image:width" content="1280"><meta property="og:image:height" content="640">
@@ -18,9 +18,13 @@
 "applicationCategory":"BusinessApplication","operatingSystem":"Windows, macOS, Linux",
 "offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"license":"https://opensource.org/licenses/MIT",
 "downloadUrl":"https://github.com/srvskr1/stellenpilot/releases/latest","image":"https://stellenpilot.dev/social-preview.jpg",
-"author":{"@type":"Person","name":"Sourav Sarker"},
+"description":"Free, open source job search assistant for Germany. Every morning it collects new jobs from 7 job boards and about 200 company career pages, scores them against your CV and writes a tailored CV and cover letter. Runs on your own computer.",
+"isAccessibleForFree":true,"inLanguage":["en","de"],
+"featureList":["Daily job search in Germany from 7 job boards and about 200 company career pages","Match score from 0 to 100 with reasons and gaps","Detects the German level a job ad requires","Tailored CV and cover letter as Word and PDF","Truth guard that removes claims your CV does not back up","Read only email sync for application status","Built in local AI, or Ollama, Claude or OpenAI"],
+"author":{"@type":"Person","name":"Sourav Sarker","url":"https://stellenpilot.dev/about.html"},
 "sameAs":["https://github.com/srvskr1/stellenpilot","https://pypi.org/project/stellenpilot/"]}
 </script>
+<script type="application/ld+json" id="faq-ld">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Was ist Stellenpilot?","acceptedAnswer":{"@type":"Answer","text":"Stellenpilot ist ein kostenloser Open-Source-Assistent für die Jobsuche in Deutschland. Er läuft auf deinem eigenen Computer, sammelt jeden Morgen neue Stellen von 7 Jobbörsen und rund 200 Karriereseiten, bewertet jede von 0 bis 100 anhand deines Lebenslaufs und schreibt für die besten einen angepassten Lebenslauf und ein Anschreiben."}},{"@type":"Question","name":"Ist Stellenpilot kostenlos?","acceptedAnswer":{"@type":"Answer","text":"Ja. Es ist kostenlos und Open Source unter der MIT-Lizenz, ein Konto brauchst du nicht. Die eingebaute KI läuft auf deinem Computer und kostet nichts. Nimmst du stattdessen Claude oder OpenAI, zahlst du den Anbieter mit deinem eigenen API-Schlüssel nach Verbrauch."}},{"@type":"Question","name":"Bewirbt sich Stellenpilot für mich?","acceptedAnswer":{"@type":"Answer","text":"Nein. Es verschickt nie eine Bewerbung und kontaktiert keine Firma. Du liest die Auswahl, prüfst Lebenslauf und Anschreiben und bewirbst dich selbst."}},{"@type":"Question","name":"Verlässt mein Lebenslauf meinen Computer?","acceptedAnswer":{"@type":"Answer","text":"Mit der eingebauten KI oder einem anderen lokalen Modell (Ollama, LM Studio, llama.cpp) verlässt nichts über dich deinen Computer. Wechselst du zu Claude oder OpenAI, gehen dein Profil und die Stellenanzeigen an diesen Anbieter. Die E-Mail-Verbindung liest nur und verschickt, verschiebt oder löscht keine Mails."}},{"@type":"Question","name":"Welche Jobseiten durchsucht es?","acceptedAnswer":{"@type":"Answer","text":"Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive und workingstudentjobs.de, dazu die Karriereseiten von rund 200 Firmen. LinkedIn und StepStone fehlen, weil ihre Nutzungsbedingungen Scraping verbieten, und Indeed hat keine öffentliche Job-API für Open-Source-Tools."}},{"@type":"Question","name":"Kann ich es ohne fließendes Deutsch nutzen?","acceptedAnswer":{"@type":"Answer","text":"Ja. Es erkennt das Deutschniveau, das jede Anzeige wirklich verlangt, vergleicht es mit deinem und schreibt eine englische Zusammenfassung jeder deutschen Anzeige. Deutsche Anschreiben schreibt es nur ab Deutsch B2. Die App selbst gibt es auf Englisch und Deutsch."}},{"@type":"Question","name":"Erfindet es Erfahrung für eine bessere Bewertung?","acceptedAnswer":{"@type":"Answer","text":"Nie. Ein Wahrheitsfilter prüft jeden Satz von Lebenslauf und Anschreiben gegen deinen eigenen Lebenslauf und entfernt jede Zahl, jedes Tool und jedes Sprachniveau, das dein Lebenslauf nicht belegt. Was du noch lernst, steht auch so drin."}},{"@type":"Question","name":"Auf welchen Computern läuft es?","acceptedAnswer":{"@type":"Answer","text":"Windows, macOS und Linux. Fertige Apps gibt es für Windows und für Macs mit Apple-Chip (M1 oder neuer). Unter Linux oder auf einem Intel-Mac installierst du es mit pip install stellenpilot (Python 3.11 oder neuer)."}}]}</script>
 <style>
 /* Layout: light frosted glass over a slow aurora in the app's own colors; one hero moment, then text and visual rows that each tell one feature. */
 :root{
@@ -362,6 +366,10 @@ section{scroll-margin-top:80px}
 .win-bar i{width:10px;height:10px;border-radius:50%;background:#D7DCE6}
 .win img,.win video{display:block;width:100%;height:auto}
 .posts{border-radius:24px;padding:8px 24px}
+.faq{border-radius:24px;padding:36px 40px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 48px}
+.faq h3{font-size:18px;line-height:1.3;color:var(--ink);margin-bottom:6px}
+.faq p{color:var(--text);font-size:16px}
+.faq code{font:500 14px var(--f-mono);color:var(--ink)}
 .post{display:flex;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);color:var(--ink);font-weight:600}
 .post:last-child{border-bottom:0}
 .post span{font-weight:500;color:var(--muted);font-size:14px;white-space:nowrap}
@@ -455,6 +463,7 @@ footer a{color:var(--text)}
   .hero{gap:32px;padding-top:32px}
   .row{gap:24px;margin-bottom:72px}
   .sec-head{margin-top:88px}
+  .faq{grid-template-columns:minmax(0,1fr);padding:24px}
 }
 @media (max-width:640px){
   .nav-links{display:none}
@@ -494,6 +503,7 @@ footer a{color:var(--text)}
     <nav class="nav-links" aria-label="Main">
       <a href="#how" data-t="nav_how">So funktioniert's</a>
       <a href="#features" data-t="nav_features">Funktionen</a>
+      <a href="#faq" data-t="nav_faq">FAQ</a>
       <a href="#blog" data-t="nav_blog">Blog</a>
       <a href="https://github.com/srvskr1/stellenpilot">GitHub</a>
     </nav>
@@ -544,7 +554,7 @@ footer a{color:var(--text)}
 
   <nav class="rail glass" id="how" aria-label="How it runs">
     <span class="dot" aria-hidden="true"></span>
-    <a href="#f1"><i style="--k:0" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></i><b data-t="r1">Sammeln</b><span data-t="r1s">6 Jobbörsen und rund 200 Firmenseiten</span></a>
+    <a href="#f1"><i style="--k:0" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></i><b data-t="r1">Sammeln</b><span data-t="r1s">7 Jobbörsen und rund 200 Firmenseiten</span></a>
     <a href="#f2"><i style="--k:1" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/></svg></i><b data-t="r2">Bewerten</b><span data-t="r2s">0 bis 100, mit Gründen und Lücken</span></a>
     <a href="#f4"><i style="--k:2" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></i><b data-t="r3">Schreiben</b><span data-t="r3s">Angepasster Lebenslauf und Anschreiben</span></a>
     <a href="#f6"><i style="--k:3" class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></i><b data-t="r4">Verfolgen</b><span data-t="r4s">Gmail-Antworten aktualisieren den Status</span></a>
@@ -560,7 +570,7 @@ footer a{color:var(--text)}
     <div class="txt">
       <div class="kicker" data-t="k1">Sammeln</div>
       <h3 data-t="t1">Findet Jobs überall</h3>
-      <p data-t="p1">Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive und die Karriereseiten von <b>rund 200 Firmen</b>. Dieselbe Stelle, zweimal ausgeschrieben, <b>erscheint nur einmal</b>.</p>
+      <p data-t="p1">Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive, workingstudentjobs.de und die Karriereseiten von <b>rund 200 Firmen</b>. Dieselbe Stelle, zweimal ausgeschrieben, <b>erscheint nur einmal</b>.</p>
     </div>
     <div class="viz glass" aria-hidden="true">
       <div class="f1">
@@ -571,7 +581,8 @@ footer a{color:var(--text)}
           <div class="src" style="--i:3">TheirStack</div>
           <div class="src" style="--i:4">Jobicy</div>
           <div class="src" style="--i:5">Remotive</div>
-          <div class="src many" style="--i:6" data-t="200">+ rund 200 Firmenseiten</div>
+          <div class="src" style="--i:6">workingstudentjobs.de</div>
+          <div class="src many" style="--i:7" data-t="200">+ rund 200 Firmenseiten</div>
         </div>
         <div class="flow"><svg viewBox="0 0 40 120"><path d="M0 10 C20 10 20 60 40 60M0 60 H40M0 110 C20 110 20 60 40 60"/></svg></div>
         <div class="list">
@@ -754,6 +765,21 @@ footer a{color:var(--text)}
     <a class="post" href="/tools/german-level-checker.html" style="--i:3"><span data-t="post4" style="color:var(--ink);font-weight:600;white-space:normal;font-size:17px">Kostenloses Tool: welches Deutsch-Niveau eine Anzeige wirklich verlangt</span><span data-t="open">Öffnen</span></a>
   </div>
 
+  <div class="sec-head" id="faq">
+    <h2 data-t="faq_h">Häufige Fragen</h2>
+    <p data-t="faq_p">Kurze Antworten, bevor du es installierst.</p>
+  </div>
+  <div class="faq glass">
+    <div class="qa"><h3 data-t="fq1">Was ist Stellenpilot?</h3><p data-t="fa1">Stellenpilot ist ein kostenloser Open-Source-Assistent für die Jobsuche in Deutschland. Er läuft auf deinem eigenen Computer, sammelt jeden Morgen neue Stellen von 7 Jobbörsen und rund 200 Karriereseiten, bewertet jede von 0 bis 100 anhand deines Lebenslaufs und schreibt für die besten einen angepassten Lebenslauf und ein Anschreiben.</p></div>
+    <div class="qa"><h3 data-t="fq2">Ist Stellenpilot kostenlos?</h3><p data-t="fa2">Ja. Es ist kostenlos und Open Source unter der MIT-Lizenz, ein Konto brauchst du nicht. Die eingebaute KI läuft auf deinem Computer und kostet nichts. Nimmst du stattdessen Claude oder OpenAI, zahlst du den Anbieter mit deinem eigenen API-Schlüssel nach Verbrauch.</p></div>
+    <div class="qa"><h3 data-t="fq3">Bewirbt sich Stellenpilot für mich?</h3><p data-t="fa3">Nein. Es verschickt nie eine Bewerbung und kontaktiert keine Firma. Du liest die Auswahl, prüfst Lebenslauf und Anschreiben und bewirbst dich selbst.</p></div>
+    <div class="qa"><h3 data-t="fq4">Verlässt mein Lebenslauf meinen Computer?</h3><p data-t="fa4">Mit der eingebauten KI oder einem anderen lokalen Modell (Ollama, LM Studio, llama.cpp) verlässt nichts über dich deinen Computer. Wechselst du zu Claude oder OpenAI, gehen dein Profil und die Stellenanzeigen an diesen Anbieter. Die E-Mail-Verbindung liest nur und verschickt, verschiebt oder löscht keine Mails.</p></div>
+    <div class="qa"><h3 data-t="fq5">Welche Jobseiten durchsucht es?</h3><p data-t="fa5">Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive und workingstudentjobs.de, dazu die Karriereseiten von rund 200 Firmen. LinkedIn und StepStone fehlen, weil ihre Nutzungsbedingungen Scraping verbieten, und Indeed hat keine öffentliche Job-API für Open-Source-Tools.</p></div>
+    <div class="qa"><h3 data-t="fq6">Kann ich es ohne fließendes Deutsch nutzen?</h3><p data-t="fa6">Ja. Es erkennt das Deutschniveau, das jede Anzeige wirklich verlangt, vergleicht es mit deinem und schreibt eine englische Zusammenfassung jeder deutschen Anzeige. Deutsche Anschreiben schreibt es nur ab Deutsch B2. Die App selbst gibt es auf Englisch und Deutsch.</p></div>
+    <div class="qa"><h3 data-t="fq7">Erfindet es Erfahrung für eine bessere Bewertung?</h3><p data-t="fa7">Nie. Ein Wahrheitsfilter prüft jeden Satz von Lebenslauf und Anschreiben gegen deinen eigenen Lebenslauf und entfernt jede Zahl, jedes Tool und jedes Sprachniveau, das dein Lebenslauf nicht belegt. Was du noch lernst, steht auch so drin.</p></div>
+    <div class="qa"><h3 data-t="fq8">Auf welchen Computern läuft es?</h3><p data-t="fa8">Windows, macOS und Linux. Fertige Apps gibt es für Windows und für Macs mit Apple-Chip (M1 oder neuer). Unter Linux oder auf einem Intel-Mac installierst du es mit <code>pip install stellenpilot</code> (Python 3.11 oder neuer).</p></div>
+  </div>
+
   <section class="cta glass">
     <h2 data-t="cta_h">Starte morgen früh mit einer Auswahl.</h2>
     <p data-t="cta_p"><b>Kostenlos und Open Source</b>, MIT-Lizenz. Windows, macOS und Linux.</p>
@@ -774,16 +800,16 @@ footer a{color:var(--text)}
 <script>
 (function(){
   var DE={
-    nav_how:"So funktioniert's",nav_features:"Funktionen",nav_blog:"Blog",
+    nav_how:"So funktioniert's",nav_features:"Funktionen",nav_blog:"Blog",nav_faq:"FAQ",
     h1:"Morgens passende Jobs, mit fertigem Lebenslauf.",
     lede:"Jeden Morgen <b>findet Stellenpilot neue Jobs in Deutschland</b>, bewertet sie anhand deines Lebenslaufs und schreibt Lebenslauf und Anschreiben für die besten. <b>Kostenlos, auf deinem eigenen Computer, ohne Konto.</b>",
     dl_win:"Für Windows laden",dl_mac:"Für Mac laden",copy:"Kopieren",fine:"Windows, macOS und Linux. Open Source, MIT-Lizenz.",
     cover:"Anschreiben",cv_tailored:"Lebenslauf, angepasst",ready:"Bereit zum Senden",
     reason:"Python, SQL und Airflow passen zu deinen Projekten. Starke Übereinstimmung.",
     gap1:"dbt: lernst du noch",gap2:"Deutsch B2 gefragt, du hast B1",replay:"Nochmal abspielen",
-    r1:"Sammeln",r1s:"6 Jobbörsen und rund 200 Firmenseiten",r2:"Bewerten",r2s:"0 bis 100, mit Gründen und Lücken",r3:"Schreiben",r3s:"Angepasster Lebenslauf und Anschreiben",r4:"Verfolgen",r4s:"Gmail-Antworten aktualisieren den Status",r5:"Du entscheidest",r5s:"Es bewirbt sich nie für dich",
+    r1:"Sammeln",r1s:"7 Jobbörsen und rund 200 Firmenseiten",r2:"Bewerten",r2s:"0 bis 100, mit Gründen und Lücken",r3:"Schreiben",r3s:"Angepasster Lebenslauf und Anschreiben",r4:"Verfolgen",r4s:"Gmail-Antworten aktualisieren den Status",r5:"Du entscheidest",r5s:"Es bewirbt sich nie für dich",
     feat_h:"Was passiert, während du schläfst",feat_p:"Jeder Schritt ist das, was Stellenpilot jeden Tag wirklich tut, gezeigt mit Beispieldaten.",
-    k1:"Sammeln",t1:"Findet Jobs überall",p1:"Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive und die Karriereseiten von <b>rund 200 Firmen</b>. Dieselbe Stelle, zweimal ausgeschrieben, <b>erscheint nur einmal</b>.","200":"+ rund 200 Firmenseiten",dupnote:"1 Duplikat entfernt",
+    k1:"Sammeln",t1:"Findet Jobs überall",p1:"Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive, workingstudentjobs.de und die Karriereseiten von <b>rund 200 Firmen</b>. Dieselbe Stelle, zweimal ausgeschrieben, <b>erscheint nur einmal</b>.","200":"+ rund 200 Firmenseiten",dupnote:"1 Duplikat entfernt",
     k2:"Bewerten",t2:"Bewertet jeden Job, ehrlich",p2:"<b>Eine Übereinstimmung von 0 bis 100</b>, ein Satz Begründung und <b>deine echten Lücken</b>. Markiere Jobs als gut oder schlecht, und die nächste Suche richtet sich danach.",
     s91:"<span class=\"v g\">Passt stark.</span> dbt und SQL",s74:"<span class=\"v b\">Passt gut.</span> Spark gefragt",s52:"<span class=\"v w\">Passt kaum.</span> 5 Jahre Führung",
     k3:"Verstehen",t3:"Liest deutsche Stellenanzeigen für dich",p3:"Es erkennt <b>das Deutschniveau, das eine Anzeige wirklich verlangt</b>, vergleicht es mit deinem und schreibt <b>eine englische Zusammenfassung jeder deutschen Anzeige</b>.",
@@ -797,6 +823,7 @@ footer a{color:var(--text)}
     t8:"Wähle deine KI",ai0:"Eingebaut",ai3:"Ohne KI",setup:"Einrichtung",cost:"Kosten",where:"Dein Lebenslauf",
     t9:"Gemessen",p9:"Getestet mit <b>28 echten Stellen</b>, von Hand bewertet.",t10:"Top 10 der Rangliste: <b>9 lohnen eine Bewerbung</b>",rnd:"Linie bei 0,5 heißt Zufall",auc:"Qualität der Rangfolge (AUC, höher ist besser)",b1:"Gespeichert",b2:"Stichwörter",b3:"Top 10",
     tour_h:"Die ganze App in einer Minute",tour_p:"Einrichtung, Start, Jobs, Bewerbungen und Einstellungen. Alle Namen in der Demo sind erfunden.",
+    faq_h:"Häufige Fragen",faq_p:"Kurze Antworten, bevor du es installierst.",fq1:"Was ist Stellenpilot?",fa1:"Stellenpilot ist ein kostenloser Open-Source-Assistent für die Jobsuche in Deutschland. Er läuft auf deinem eigenen Computer, sammelt jeden Morgen neue Stellen von 7 Jobbörsen und rund 200 Karriereseiten, bewertet jede von 0 bis 100 anhand deines Lebenslaufs und schreibt für die besten einen angepassten Lebenslauf und ein Anschreiben.",fq2:"Ist Stellenpilot kostenlos?",fa2:"Ja. Es ist kostenlos und Open Source unter der MIT-Lizenz, ein Konto brauchst du nicht. Die eingebaute KI läuft auf deinem Computer und kostet nichts. Nimmst du stattdessen Claude oder OpenAI, zahlst du den Anbieter mit deinem eigenen API-Schlüssel nach Verbrauch.",fq3:"Bewirbt sich Stellenpilot für mich?",fa3:"Nein. Es verschickt nie eine Bewerbung und kontaktiert keine Firma. Du liest die Auswahl, prüfst Lebenslauf und Anschreiben und bewirbst dich selbst.",fq4:"Verlässt mein Lebenslauf meinen Computer?",fa4:"Mit der eingebauten KI oder einem anderen lokalen Modell (Ollama, LM Studio, llama.cpp) verlässt nichts über dich deinen Computer. Wechselst du zu Claude oder OpenAI, gehen dein Profil und die Stellenanzeigen an diesen Anbieter. Die E-Mail-Verbindung liest nur und verschickt, verschiebt oder löscht keine Mails.",fq5:"Welche Jobseiten durchsucht es?",fa5:"Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive und workingstudentjobs.de, dazu die Karriereseiten von rund 200 Firmen. LinkedIn und StepStone fehlen, weil ihre Nutzungsbedingungen Scraping verbieten, und Indeed hat keine öffentliche Job-API für Open-Source-Tools.",fq6:"Kann ich es ohne fließendes Deutsch nutzen?",fa6:"Ja. Es erkennt das Deutschniveau, das jede Anzeige wirklich verlangt, vergleicht es mit deinem und schreibt eine englische Zusammenfassung jeder deutschen Anzeige. Deutsche Anschreiben schreibt es nur ab Deutsch B2. Die App selbst gibt es auf Englisch und Deutsch.",fq7:"Erfindet es Erfahrung für eine bessere Bewertung?",fa7:"Nie. Ein Wahrheitsfilter prüft jeden Satz von Lebenslauf und Anschreiben gegen deinen eigenen Lebenslauf und entfernt jede Zahl, jedes Tool und jedes Sprachniveau, das dein Lebenslauf nicht belegt. Was du noch lernst, steht auch so drin.",fq8:"Auf welchen Computern läuft es?",fa8:"Windows, macOS und Linux. Fertige Apps gibt es für Windows und für Macs mit Apple-Chip (M1 oder neuer). Unter Linux oder auf einem Intel-Mac installierst du es mit <code>pip install stellenpilot</code> (Python 3.11 oder neuer).",
     blog_h:"Aus dem Blog",blog_p:"Ratgeber für die Jobsuche in Deutschland, auf Englisch.",
     post1:"Lebenslauf für eine Werkstudentenstelle anpassen",post2:"Jobsuche in Deutschland ohne fließendes Deutsch",post3:"Was „verhandlungssicher“ in einer Anzeige wirklich heißt",read:"Lesen",open:"Öffnen",about:"Über",post4:"Kostenloses Tool: welches Deutsch-Niveau eine Anzeige wirklich verlangt",
     cta_h:"Starte morgen früh mit einer Auswahl.",cta_p:"<b>Kostenlos und Open Source</b>, MIT-Lizenz. Windows, macOS und Linux.",dl:"Stellenpilot laden",gh:"Auf GitHub ansehen",
