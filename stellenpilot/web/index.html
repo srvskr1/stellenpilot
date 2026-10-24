@@ -97,6 +97,43 @@ h2{font:600 1.25rem/1.3 var(--f-ui);margin:0}
 /* Home */
 .rcard{padding:22px 24px;display:flex;flex-wrap:wrap;gap:16px 20px;align-items:center;animation:fadeIn .3s ease both}
 .rcard+.rcard{margin-top:12px}
+/* Apply first, pay card and prep checklist */
+.af{padding:4px 20px}
+.af .job{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;padding:14px 0;border-top:1px solid var(--surface-alt)}
+.af .job:first-child{border-top:0}
+.af .job b{font-weight:600}.af .job .m{font-size:.8125rem;color:var(--text-tertiary)}.af .job .m strong{color:var(--accent)}
+.af .co{display:block;color:var(--text-tertiary);font-size:.875rem}
+.af .why{display:flex;align-items:center;gap:6px;font-size:.875rem;font-weight:600;margin-top:4px}
+.af .why svg{width:18px;height:18px;flex:none}
+.af .why.urgent{color:var(--warning)}.af .why.fresh{color:var(--accent)}.af .why.old{color:var(--text-tertiary)}
+.pq{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:var(--surface-alt);margin-top:10px}
+.pq .pic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent)}
+.pq .pic svg{width:18px;height:18px}
+.pq.ok .pic{background:var(--ok-bg);color:var(--ok-fg)}.pq.warn .pic{background:var(--low-bg);color:var(--low-fg)}.pq.no .pic{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg)}
+.pq small{display:block;color:var(--text-tertiary);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.pq b{display:block;font-size:1.0625rem;margin:2px 0}.pq p{margin:0;color:var(--text-secondary);font-size:.875rem}
+.pq .tx{flex:1;min-width:0}
+.pscale{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:10px 0 4px}
+.pscale i{height:8px;border-radius:99px;background:var(--border)}.pscale i.on{background:var(--accent)}
+.pscale+div{display:grid;grid-template-columns:repeat(3,1fr);font-size:.75rem;color:var(--text-tertiary)}.pscale+div span:nth-child(2){text-align:center}.pscale+div span:last-child{text-align:right}
+.say{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:10px;font-style:italic}
+.say .mini{font-style:normal}
+.psrc{margin-top:10px;font-size:.8125rem;color:var(--text-tertiary)}.psrc summary{cursor:pointer;color:var(--accent);font-weight:600;min-height:32px;display:inline-flex;align-items:center}
+.pbar{height:6px;border-radius:99px;background:var(--surface-alt);margin:6px 0 14px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s var(--ease-out)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.steps>li{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+.steps .tick{width:32px;height:32px;border-radius:50%;border:0;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:700 .875rem var(--f-ui);flex:none;cursor:pointer;margin-top:2px;transition:background .15s ease,transform .1s ease}
+.steps .tick:active{transform:scale(.94)}.steps .tick:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.steps .tick svg{width:16px;height:16px}
+.steps>li.done .tick{background:var(--ok-bg);color:var(--ok-fg)}
+.steps>li.done summary b{color:var(--text-tertiary);text-decoration:line-through;text-decoration-color:var(--border-strong)}
+.steps details{flex:1;min-width:0}.steps summary{cursor:pointer;list-style:none;min-height:36px;padding-top:4px}
+.steps summary::-webkit-details-marker{display:none}
+.steps summary b{display:block;font-weight:600}.steps summary span{display:block;font-size:.8125rem;color:var(--text-tertiary)}
+.steps .prepbody{padding:6px 0 0}
+.steps .prepbody h4:only-of-type{display:none}
+@media(max-width:560px){.af .job{grid-template-columns:1fr}.af .job .btn{width:100%}}
 .ring{flex:none;width:64px;height:64px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;background:var(--sb);color:var(--sf)}
 .ring b{font-size:1.375rem;line-height:1}
 .ring span{font-size:.6875rem;font-weight:600}
@@ -753,6 +790,7 @@ body.wizopen{overflow:hidden}
             <div class="g3"><label>Show Stellenpilot in
               <select class="input" name="language"><option value="auto">Automatic (browser)</option><option value="en" lang="en" translate="no">English</option><option value="de" lang="de" translate="no">Deutsch</option></select></label></div>
             <label class="check"><input type="checkbox" name="check_updates"> Tell me when a new version is out <span class="muted">Asks GitHub once a day. Nothing about you is sent.</span></label>
+            <label class="check"><input type="checkbox" name="visa_hints"> Show Blue Card hints <span class="muted">For people who need a work visa: says if a job's pay is enough for an EU Blue Card.</span></label>
           </section>
           <section class="box scard" id="s-search"><h2>Job search</h2><p class="hint">What you are looking for and where.</p>
             <label>Job titles <span class="muted">One per line, written the way companies write them.</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
@@ -916,6 +954,10 @@ body.wizopen{overflow:hidden}
         <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
         <p id="off-note"></p>
         <div class="office" id="office" role="img" aria-label="Agent office"></div>
+      </section>
+      <section aria-labelledby="af-h" id="afSec" hidden>
+        <div class="sechead"><h2 id="af-h">Apply first</h2><span>Good matches you could lose soon</span></div>
+        <div class="box af" id="applyFirst"></div>
       </section>
       <section aria-labelledby="ready-h">
         <div class="sechead"><h2 id="ready-h">Ready to apply</h2><span>Read your documents, then send them yourself</span></div>
@@ -1367,7 +1409,8 @@ const DE={
 "The answer was not complete. Asking the AI once more":"Die Antwort war unvollständig. Die KI wird noch einmal gefragt",
 "Choosing the experience, projects and skills that fit this job":"Erfahrung, Projekte und Fähigkeiten für diesen Job werden ausgewählt","Writing the cover letter":"Das Anschreiben wird geschrieben",
 "Making the Word files":"Die Word Dateien werden erstellt","Making the PDF files":"Die PDF Dateien werden erstellt","Starting the daily search":"Die tägliche Suche startet",
-"Checking if open postings are still online":"Prüfe, ob offene Anzeigen noch online sind"
+"Checking if open postings are still online":"Prüfe, ob offene Anzeigen noch online sind",
+"Apply first":"Zuerst bewerben","Good matches you could lose soon":"Gute Treffer, die bald weg sein könnten","Show Blue Card hints":"Hinweise zur Blauen Karte zeigen","For people who need a work visa: says if a job's pay is enough for an EU Blue Card.":"Für alle, die ein Arbeitsvisum brauchen: zeigt, ob das Gehalt für eine Blaue Karte EU reicht.","Closes today":"Endet heute","Closes tomorrow":"Endet morgen","Closes in {n} days ({d})":"Endet in {n} Tagen ({d})","Posted yesterday, early applicants get read first":"Seit gestern online, frühe Bewerbungen werden zuerst gelesen","Online for {n} days, may be filled soon":"Seit {n} Tagen online, bald vielleicht besetzt","Get my CV ready":"Lebenslauf vorbereiten"," near {c}":" in der Nähe von {c}","Above most similar jobs you found{w}.":"Über den meisten ähnlichen Stellen, die du gefunden hast{w}.","Below most similar jobs you found{w}.":"Unter den meisten ähnlichen Stellen, die du gefunden hast{w}.","About average for similar jobs you found{w}.":"Etwa Durchschnitt für ähnliche Stellen, die du gefunden hast{w}.","A comparison needs 5 ads with pay. You have {n} so far.":"Für einen Vergleich braucht es 5 Anzeigen mit Gehalt. Bisher hast du {n}.","Is the pay fair?":"Ist das Gehalt fair?","{r} a year":"{r} im Jahr","Below":"Darunter","Average":"Durchschnitt","Above":"Darüber","Yes, with a university degree":"Ja, mit Hochschulabschluss","The {y} line is {r} a year. This job pays more.":"Die Grenze {y} liegt bei {r} im Jahr. Diese Stelle zahlt mehr.","Only for some jobs":"Nur für manche Berufe","Above the {s} line for IT, STEM and health jobs, which needs approval from the Federal Employment Agency. The regular line is {r}.":"Über der Grenze von {s} für IT, MINT und Gesundheitsberufe, dafür muss die Bundesagentur für Arbeit zustimmen. Die reguläre Grenze liegt bei {r}.","No, the pay is too low":"Nein, das Gehalt ist zu niedrig","The {y} line is {s} for IT, STEM and health jobs and {r} for all others.":"Die Grenze {y} liegt bei {s} für IT, MINT und Gesundheitsberufe und bei {r} für alle anderen.","Enough for a Blue Card?":"Reicht es für die Blaue Karte?","These figures are from {y} and may be out of date. Check the official page.":"Diese Zahlen sind von {y} und vielleicht veraltet. Prüfe die offizielle Seite.","No pay in this ad":"Kein Gehalt in der Anzeige","Ask in the interview":"Frag im Gespräch nach","Similar jobs you found pay about {m}.":"Ähnliche Stellen, die du gefunden hast, zahlen etwa {m}.","For a Blue Card you need at least {r}.":"Für die Blaue Karte brauchst du mindestens {r}.","Where is this from?":"Woher kommt das?","Pay is read from the ad text. The comparison uses {n} ads with pay from your own results.":"Das Gehalt wird aus dem Anzeigentext gelesen. Der Vergleich nutzt {n} Anzeigen mit Gehalt aus deinen eigenen Ergebnissen.","Blue Card line: {src}, checked {d}. It changes every January. This is guidance, not legal advice.":"Grenze für die Blaue Karte: {src}, geprüft am {d}. Sie ändert sich jeden Januar. Das ist eine Orientierung, keine Rechtsberatung.","Official page":"Offizielle Seite","Pay":"Gehalt","Make my prep pack":"Vorbereitung erstellen","Get ready for the interview":"Bereit fürs Gespräch","A checklist with likely questions and how to answer your gaps. Works without AI, better with it.":"Eine Checkliste mit wahrscheinlichen Fragen und Antworten zu deinen Lücken. Geht ohne KI, mit KI besser.","Know the company":"Das Unternehmen kennen","What the ad says about them":"Was die Anzeige über sie sagt","Practise the likely questions":"Die wahrscheinlichen Fragen üben","{n} questions and answer ideas":"{n} Fragen und Ideen für Antworten","Questions and answer ideas":"Fragen und Ideen für Antworten","Prepare for {g}":"Bereite dich auf {g} vor","Prepare for your gaps":"Bereite dich auf deine Lücken vor","New today, early applicants get read first":"Neu von heute, frühe Bewerbungen werden zuerst gelesen","Write it again":"Neu schreiben","How to talk about what you have not done yet":"Wie du über das sprichst, was du noch nicht gemacht hast","Not in your CV, so expect questions":"Nicht in deinem Lebenslauf, also rechne mit Fragen","Pick questions to ask them":"Eigene Fragen auswählen","Shows you did your homework":"Zeigt, dass du dich vorbereitet hast","Mark done: {s}":"Als erledigt markieren: {s}","{a} of {b} done":"{a} von {b} erledigt","Apply by {d}":"Bewerben bis {d}","Writing your interview prep…":"Schreibe deine Vorbereitung…","Prep ready":"Vorbereitung fertig","Writing your interview prep":"Schreibe deine Vorbereitung"
 };
 const n1=(n,one,many)=>(+n===1?one:many).replace("{n}",n);
 /* Patterns for text that carries numbers or names. Tried in order after the exact table. */
@@ -1516,7 +1559,8 @@ function renderDetail(){
   const chips=[j.jobType&&`<span class="chip">${esc(j.jobType)}</span>`,
     j.source!=="Found in Gmail"&&`<span class="chip${j.lang==="German needed"?" de":""}">German: ${j.germanLevel?esc(j.germanLevel):j.lang==="German needed"?"needed":"not needed"}</span>`,
     isRemote(j)&&`<span class="chip remote">Remote</span>`, j.source&&srcChip(j.source),
-    j.closed&&`<span class="chip closed">Posting closed</span>`, j.interviewAt&&`<span class="chip int">Interview ${fmtWhen(j.interviewAt)}</span>`].filter(Boolean).join("");
+    j.closed&&`<span class="chip closed">Posting closed</span>`, j.interviewAt&&`<span class="chip int">Interview ${fmtWhen(j.interviewAt)}</span>`,
+    j.deadline&&!j.closed&&`<span class="chip int">${esc(t("Apply by {d}",{d:fmtDate(j.deadline)}))}</span>`].filter(Boolean).join("");
   d.style.cssText=tone(m);
   d.innerHTML=`<div><div class="where">${esc(j.company)}${j.location?" · "+esc(j.location):""}</div>
     <h2><a href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">${esc(j.title)}</a></h2><div class="chips">${chips}</div></div>
@@ -1528,10 +1572,11 @@ function renderDetail(){
       ${j.gapTags&&j.gapTags.length?`<p class="small">Not in your CV</p><div class="chips">${j.gapTags.map(s=>`<span class="chip gap">${esc(s)}</span>`).join("")}</div>`:""}
       ${j.lift&&j.lift.length?`<p class="small">${j.lift.map(l=>esc(t("With {s} this job would score {m}.",{s:l.skill,m:l.match}))).join(" ")}</p>`:""}
     </div>`:""}
+    ${m>0?payCard(j):""}
     ${j.summaryEn?`<details class="xtra"><summary>English summary of this German ad</summary><div class="prepbody"><p>${esc(j.summaryEn)}</p></div></details>`:""}
     ${m>0?`<div><h3>Your documents</h3>${j.folder?`<div class="btnrow"><button class="btn sec" data-doc="cv" data-id="${esc(j._id)}">Open CV</button><button class="btn sec" data-doc="letter" data-id="${esc(j._id)}">Open cover letter</button><button class="linkbtn" data-open-folder="${esc(j._id)}">Open folder</button></div>`
       :`<div class="btnrow"><button class="btn sec" data-make="${esc(j._id)}" ${dis}>Make CV and cover letter</button></div><p class="small" style="margin-top:6px">Takes a few seconds, or a minute or two with a local AI.</p>`}</div>`:""}
-    ${j.prep?`<details class="xtra" ${openPrep.has(j._id)?"open":""} data-prep="${esc(j._id)}"><summary>Interview prep pack</summary><div class="prepbody">${fmtPrep(j.prep)}</div></details>`:""}
+    ${m>0||j.prep?prepCard(j):""}
     <div class="dfoot"><label>Status <select class="status input" data-id="${esc(j._id)}" aria-label="Status for ${esc(j.title)}" ${dis}>${STAGES.map(([k,l])=>`<option value="${k}" ${j.status===k?"selected":""}>${l}</option>`).join("")}</select></label>
       <a href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">Open job ad ${ICO.ext}</a>
       <span class="small" style="flex-basis:100%">${j.statusSource==="gmail"?"Status set from Gmail":j.statusSource==="manual"?"Status set by you":"Status set by the daily search"}${j.statusUpdatedAt?", "+fmtDate(j.statusUpdatedAt):""}${j.statusNote?". "+esc(t(j.statusNote)):""}</span></div>
@@ -1562,9 +1607,15 @@ const ICO={
  x:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>`,
  star:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>`,
  ext:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+ clock:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
+ spark:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>`,
+ hour:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9"/></svg>`,
+ euro:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M17 6a7 7 0 1 0 0 12M4 10h9M4 14h9"/></svg>`,
+ check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>`,
+ chat:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>`,
  copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`};
 const openNotes=new Set(), openPrep=new Set();
-let weekly=[], unlocksData=null, diagData=null, pendingRender=false;
+let blueCard=null, visaHints=false, weekly=[], unlocksData=null, diagData=null, pendingRender=false;
 function fmtWhen(s){const d=new Date(s);return isNaN(d)?esc(s):d.toLocaleString(LOC,{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
 function fmtPrep(t){let o="",inList=false;for(const raw of String(t).split("\n")){const l=raw.trim();
   if(/^[-*] /.test(l)){if(!inList){o+="<ul>";inList=true}o+=`<li>${esc(l.slice(2))}</li>`;continue}
@@ -1575,7 +1626,7 @@ async function save(id,fields,msg){try{await api("PATCH","/api/jobs/"+encodeURIC
   catch(err){if(err&&err.code==="invalid_argument"){canWrite=false;renderList();toast("You can view this board but not change it")}else toast("Could not save. Try again in a moment.")}}
 function goJob(id,openSel){const j=jobs.find(x=>x._id===id);if(!j)return;
   if(filter&&j.status!==filter)filter=null;if(!seen(j))$("showDe").checked=true;$("q").value="";$("minm").value="0";$("fsrc").value="";$("ftype").value="";$("floc").value="";$("fday").value="";
-  if(openSel==="prep")openPrep.add(id);sel=id;location.hash="#jobs";render();
+  if(openSel==="prep")openPrep.add(id+":1");sel=id;location.hash="#jobs";render();
   requestAnimationFrame(()=>{const b=document.querySelector(`[data-pick="${CSS.escape(id)}"]`);if(b)b.scrollIntoView({block:"nearest"});
     if(innerWidth<=1100)$("detail").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})})}
 function readyCard(j){const m=Number(j.match)||0,id=esc(j._id);
@@ -1585,6 +1636,61 @@ function readyCard(j){const m=Number(j.match)||0,id=esc(j._id);
     <a class="btn sec" href="${esc(safeUrl(j.url))}" target="_blank" rel="noopener">Open job ad</a><button class="btn sec" data-go="${id}">Details</button>
     <button class="btn" data-applied="${id}" ${canWrite?"":"disabled"}>I applied</button></div></article>`}
 const MON=d=>d.toLocaleDateString(LOC,{month:"short"}),DAYN=d=>d.getDate();
+const eur=n=>new Intl.NumberFormat(LOC,{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+const daysTo=s=>{const d=new Date(s+"T00:00:00");if(isNaN(d))return null;const n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/86400000)};
+/* Apply first: strong new matches with a reason not to wait. Deadline from the ad, else the posting age. */
+function applyReason(j){const left=j.deadline?daysTo(j.deadline):null,age=ageOf(j);
+  if(left!=null&&left>=0&&left<=14)return {k:"urgent",o:left,ic:ICO.clock,t:left===0?t("Closes today"):left===1?t("Closes tomorrow"):t("Closes in {n} days ({d})",{n:left,d:fmtDate(j.deadline)})};
+  if(age<=1)return {k:"fresh",o:100+age,ic:ICO.spark,t:t(age===0?"New today, early applicants get read first":"Posted yesterday, early applicants get read first")};
+  if(age>=21&&age<=45)return {k:"old",o:200-age,ic:ICO.hour,t:t("Online for {n} days, may be filled soon",{n:age})};
+  return null}
+function renderApplyFirst(){
+  const list=jobs.filter(j=>j.status==="new"&&!j.closed&&seen(j)&&Number(j.match)>=70).map(j=>({j,r:applyReason(j)})).filter(x=>x.r)
+    .sort((a,b)=>a.r.o-b.r.o||(b.j.match||0)-(a.j.match||0)).slice(0,3);
+  $("afSec").hidden=!list.length;
+  $("applyFirst").innerHTML=list.map(({j,r},i)=>`<div class="job"><div><b>${esc(j.title)}</b> <span class="m">· <strong>${esc(j.match)}</strong> ${t("match")}</span>
+    <span class="co">${metaLine(j)}</span><div class="why ${r.k}">${r.ic}<span>${esc(r.t)}</span></div></div>
+    <button class="btn${i?" sec":""}" data-make="${esc(j._id)}" ${canWrite?"":"disabled"}>${t("Get my CV ready")}</button></div>`).join("")}
+/* Pay card: is the pay fair, and (if switched on) is it enough for a Blue Card. Source and date folded away. */
+function payCard(j){const p=j.pay,h=j.payHint,bc=blueCard;if(!p&&!h)return "";
+  const bcLine=bc&&visaHints;let o="";
+  if(p){const range=p.lo===p.hi?eur(p.lo):t("{a} to {b}",{a:eur(p.lo),b:eur(p.hi)}),near=p.near?t(" near {c}",{c:p.near}):"";
+    const fair=p.fair==="above"?t("Above most similar jobs you found{w}.",{w:near}):p.fair==="below"?t("Below most similar jobs you found{w}.",{w:near})
+      :p.fair==="average"?t("About average for similar jobs you found{w}.",{w:near}):t("A comparison needs 5 ads with pay. You have {n} so far.",{n:p.peers||0});
+    o+=`<div class="pq"><span class="pic">${ICO.euro}</span><div class="tx"><small>${t("Is the pay fair?")}</small><b>${esc(t("{r} a year",{r:range}))}</b><p>${esc(fair)}</p>
+      ${p.fair?`<div class="pscale" aria-hidden="true">${["below","average","above"].map(k=>`<i class="${p.fair===k?"on":""}"></i>`).join("")}</div><div aria-hidden="true"><span>${t("Below")}</span><span>${t("Average")}</span><span>${t("Above")}</span></div>`:""}</div></div>`;
+    if(bcLine){const v=p.verdict,yr=bc.year;
+      const [cls,head,sub]=v==="yes"?["ok",t("Yes, with a university degree"),t("The {y} line is {r} a year. This job pays more.",{y:yr,r:eur(bc.regular)})]
+        :v==="shortage"?["warn",t("Only for some jobs"),t("Above the {s} line for IT, STEM and health jobs, which needs approval from the Federal Employment Agency. The regular line is {r}.",{s:eur(bc.shortage),r:eur(bc.regular)})]
+        :["no",t("No, the pay is too low"),t("The {y} line is {s} for IT, STEM and health jobs and {r} for all others.",{y:yr,s:eur(bc.shortage),r:eur(bc.regular)})];
+      o+=`<div class="pq ${cls}"><span class="pic">${v==="yes"?ICO.check:v==="no"?ICO.x:ICO.clock}</span><div class="tx"><small>${t("Enough for a Blue Card?")}</small><b>${esc(head)}</b><p>${esc(sub)}</p>
+        ${p.stale?`<p style="margin-top:6px;color:var(--low-fg);font-weight:600">${esc(t("These figures are from {y} and may be out of date. Check the official page.",{y:yr}))}</p>`:""}</div></div>`}
+  }else{const q="Welche Gehaltsspanne ist für die Position vorgesehen?";
+    o+=`<div class="pq warn"><span class="pic">${ICO.chat}</span><div class="tx"><small>${t("No pay in this ad")}</small><b>${t("Ask in the interview")}</b>
+      <p>${esc(t("Similar jobs you found pay about {m}.",{m:eur(h.median)}))}${bcLine?" "+esc(t("For a Blue Card you need at least {r}.",{r:eur(bc.regular)})):""}</p>
+      <div class="say"><span lang="de" translate="no">“${q}”</span><button type="button" class="mini" data-copytext="${esc(q)}">${ICO.copy}${t("Copy")}</button></div></div></div>`}
+  const n=p?p.peers:h.peers;
+  o+=`<details class="psrc"><summary>${t("Where is this from?")}</summary><p>${esc(t("Pay is read from the ad text. The comparison uses {n} ads with pay from your own results.",{n:n||0}))}</p>
+    ${bcLine?`<p>${esc(t("Blue Card line: {src}, checked {d}. It changes every January. This is guidance, not legal advice.",{src:bc.source,d:fmtDate(bc.checked)}))} <a href="${esc(safeUrl(bc.url))}" target="_blank" rel="noopener">${t("Official page")}</a></p>`:""}</details>`;
+  return `<div><h3>${t("Pay")}</h3>${o}</div>`}
+/* Interview prep as a 4 step checklist. Sections of the pack go under the step they belong to. */
+function prepSteps(text){const steps=[[],[],[],[]];let cur=1;
+  for(const line of String(text).split("\n")){const h=line.match(/^#{1,4}\s+(.*)/);
+    if(h){const x=h[1].toLowerCase();cur=/^about|^über/.test(x)?0:/ask them|to ask|fragen an/.test(x)?3:/gap|lücke/.test(x)?2:1}
+    steps[cur].push(line)}
+  return steps.map(l=>l.join("\n"))}
+function prepCard(j){const id=esc(j._id),dis=canWrite?"":"disabled";
+  const btn=`<button class="btn${j.prep?" sec":""}" data-prepmake="${id}" ${dis}>${t(j.prep?"Write it again":"Make my prep pack")}</button>`;
+  if(!j.prep)return `<div><h3>${t("Get ready for the interview")}</h3><p class="small">${t("A checklist with likely questions and how to answer your gaps. Works without AI, better with it.")}</p><div class="btnrow" style="margin-top:8px">${btn}</div></div>`;
+  const done=new Set(String(j.prepDone||"").split(",").filter(Boolean).map(Number)),parts=prepSteps(j.prep);
+  const gaps=(j.gapTags||[]).slice(0,2),nq=(parts[1].match(/^\s*[-*] /gm)||[]).length;
+  const lab=[[t("Know the company"),t("What the ad says about them")],[t("Practise the likely questions"),nq?t("{n} questions and answer ideas",{n:nq}):t("Questions and answer ideas")],
+    gaps.length?[t("Prepare for {g}",{g:gaps.join(t(" and "))}),t("Not in your CV, so expect questions")]:[t("Prepare for your gaps"),t("How to talk about what you have not done yet")],[t("Pick questions to ask them"),t("Shows you did your homework")]];
+  const items=lab.map(([a,b],i)=>parts[i].trim()?`<li class="${done.has(i)?"done":""}"><button type="button" class="tick" data-tick="${i}" data-id="${id}" aria-pressed="${done.has(i)}" aria-label="${esc(t("Mark done: {s}",{s:a}))}" ${dis}>${done.has(i)?ICO.check:i+1}</button>
+    <details data-pstep="${id}:${i}" ${openPrep.has(j._id+":"+i)?"open":""}><summary><b>${esc(a)}</b><span>${esc(b)}</span></summary><div class="prepbody">${fmtPrep(parts[i])}</div></details></li>`:"").join("");
+  const total=parts.filter(x=>x.trim()).length,nd=[...done].filter(i=>parts[i]&&parts[i].trim()).length;
+  return `<div><h3>${t("Get ready for the interview")}</h3><p class="small">${esc(t("{a} of {b} done",{a:nd,b:total}))}</p><div class="pbar"><i style="width:${total?Math.round(nd/total*100):0}%"></i></div>
+    <ol class="steps">${items}</ol><div class="btnrow" style="margin-top:10px">${btn}</div></div>`}
 function renderHome(){
   const live=j=>!j.closed, ready=jobs.filter(j=>j.status==="ready"&&live(j)).sort((a,b)=>(b.match||0)-(a.match||0));
   const ints=jobs.filter(j=>j.status==="interview").sort((a,b)=>String(a.interviewAt||"9").localeCompare(String(b.interviewAt||"9")));
@@ -1604,7 +1710,7 @@ function renderHome(){
   $("seeAll").textContent=fresh.length?`See all ${fresh.length}`:"";
   $("fresh").innerHTML=top.length?top.map(j=>`<button type="button" class="rowlink" data-go="${esc(j._id)}" style="${tone(Number(j.match))}"><span class="sc">${esc(j.match)}</span><span class="tx"><b>${esc(j.title)}</b><span>${metaLine(j)}</span></span>${ARROW}</button>`).join("")
     :`<div class="empty" style="border:0">No new matches waiting. The next search adds them here.</div>`;
-  renderToday();
+  renderToday();renderApplyFirst();
 }
 function renderToday(){
   const items=[], live=j=>!j.closed;
@@ -1749,11 +1855,18 @@ main.addEventListener("click",async e=>{
   if(b.dataset.skip){await save(b.dataset.skip,{status:"skipped",statusSource:"manual",statusUpdatedAt:new Date().toISOString(),statusNote:"Posting closed"},"Moved to skipped");return}
   if(b.dataset.openFolder){try{await api("POST","/api/open-folder/"+encodeURIComponent(b.dataset.openFolder));toast("Folder opened")}catch(e){toast(e.message)}return}
   if(b.dataset.doc){try{await api("POST","/api/open-doc/"+encodeURIComponent(b.dataset.id)+"/"+b.dataset.doc);toast("Opening the "+(b.dataset.doc==="cv"?"CV":"cover letter"))}catch(e){toast(e.message)}return}
+  if(b.dataset.copytext){try{await navigator.clipboard.writeText(b.dataset.copytext);toast(t("Copied"))}catch{toast(t("Select it and copy"))}return}
+  if(b.dataset.tick){const id=b.dataset.id,j=jobs.find(x=>x._id===id),i=Number(b.dataset.tick);if(!j)return;
+    const s=new Set(String(j.prepDone||"").split(",").filter(Boolean).map(Number));s.has(i)?s.delete(i):s.add(i);
+    j.prepDone=[...s].sort().join(",");renderDetail();await save(id,{prepDone:j.prepDone});return}
+  if(b.dataset.prepmake){const t0=b.textContent,id=b.dataset.prepmake;b.disabled=true;b.textContent=t("Writing your interview prep…");
+    try{await withProgress("prep:"+id,()=>api("POST","/api/prep/"+encodeURIComponent(id)),p=>{b.textContent=`${ts(p.stage)}… ${mmss(p.elapsed||0)}`});
+      toast(t("Prep ready"));lastState="";await refresh()}catch(e){toast(e.message);b.disabled=false;b.textContent=t0}return}
   if(b.dataset.make){const t=b.textContent,id=b.dataset.make;b.disabled=true;b.textContent="Writing your CV and cover letter…";
     try{await withProgress("docs:"+id,()=>api("POST","/api/docs/"+encodeURIComponent(id)),
         p=>{b.textContent=`${p.steps?t("Step {a} of {b}: ",{a:p.step,b:p.steps}):""}${ts(p.stage)}${p.percent!=null?` (${p.percent}%)`:""}… ${mmss(p.elapsed||0)}`});toast("Documents ready");lastState="";await refresh()}catch(e){toast(e.message);b.disabled=false;b.textContent=t}return}
 });
-main.addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches("details[data-prep]"))return;d.open?openPrep.add(d.dataset.prep):openPrep.delete(d.dataset.prep)},true);
+main.addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches("details[data-pstep]"))return;d.open?openPrep.add(d.dataset.pstep):openPrep.delete(d.dataset.pstep)},true);
 main.addEventListener("focusout",async e=>{const t=e.target;if(!t.matches("textarea[data-notes-id]"))return;
   const id=t.dataset.notesId,j=jobs.find(x=>x._id===id);
   if(j&&(j.notes||"")!==t.value)await save(id,{notes:t.value},"Notes saved");
@@ -2015,7 +2128,7 @@ $("cvSave").addEventListener("click",async()=>{
 let cvPrompted=false;
 
 /* ---------- Settings ---------- */
-const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive","workingstudentjobs"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language","cv_style"],schedule:["enabled","time"],watch:["starter_list"],ui:["language","check_updates"]};
+const SETF={search:["keywords","city","radius_km","country","include_remote","max_age_days","exclude_title_words"],sources:["arbeitsagentur","arbeitnow","adzuna","theirstack","jobicy","remotive","workingstudentjobs"],llm:["provider","model","base_url"],language:["my_german_level"],tailor:["min_match","letter_language","cv_style"],schedule:["enabled","time"],watch:["starter_list"],ui:["language","check_updates","visa_hints"]};
 function showKeys(){$("setForm").querySelectorAll(".srcrow").forEach(r=>{const on=r.querySelector('input[type=checkbox]').checked;r.querySelectorAll(".g2,.keyhelp,label:not(.check)").forEach(el=>el.hidden=!on)})}
 $("setForm").addEventListener("change",e=>{if(e.target.closest(".srcrow"))showKeys()});
 $("setForm").addEventListener("click",async e=>{const b=e.target.closest("[data-clear-key]");if(!b)return;e.preventDefault();
@@ -2353,7 +2466,7 @@ async function refresh(){
     const sig=JSON.stringify(st);
     if(sig===lastState)return;
     lastState=sig;
-    jobs=st.jobs;runs=st.runs;runLog=st.history||[];weekly=st.weekly;unlocksData=st.unlocks;diagData=st.diagnosis;
+    jobs=st.jobs;blueCard=st.blueCard||null;visaHints=!!st.visaHints;runs=st.runs;runLog=st.history||[];weekly=st.weekly;unlocksData=st.unlocks;diagData=st.diagnosis;
     searchCfg=st.search||{};fillFilters();
     $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();

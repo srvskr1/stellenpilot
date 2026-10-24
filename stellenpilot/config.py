@@ -39,7 +39,7 @@ DEFAULTS = {
     "watch": {"companies": [], "starter_list": False, "title_words": [], "max_age_days": 30},
     "notify": {"email": False, "telegram": False, "only_when_new": False},
     "schedule": {"enabled": False, "time": "08:45"},
-    "ui": {"language": "auto", "check_updates": True},  # dashboard language: "auto" (from the browser), "en" or "de"
+    "ui": {"language": "auto", "check_updates": True, "visa_hints": False},  # dashboard language: "auto" (from the browser), "en" or "de"
 }
 
 
