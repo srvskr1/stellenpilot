@@ -49,6 +49,15 @@ Older releases are on the [releases page](https://github.com/srvskr1/stellenpilo
 
 **Windows and Mac:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed ([Mac first start](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md))
 
+**Mac or Linux with Homebrew:**
+
+```bash
+brew tap srvskr1/stellenpilot
+brew trust --formula srvskr1/stellenpilot/stellenpilot
+brew install stellenpilot
+stellenpilot serve
+```
+
 **Linux or Python:**
 
 ```bash
