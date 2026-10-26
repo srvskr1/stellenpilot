@@ -5,6 +5,7 @@ This guide takes you from nothing to your first real job search in about 15 minu
 | way | best for | you need |
 |---|---|---|
 | [W. Windows app](#w-windows-app-easiest) | **Windows, the easiest way** | nothing, Python is included |
+| Homebrew | macOS and Linux, if you already use Homebrew | Homebrew. Run `brew install srvskr1/stellenpilot/stellenpilot`, then continue with [First day setup](#first-day-setup). Update with `brew upgrade stellenpilot`. |
 | [A. Python](#a-install-with-python) | macOS and Linux, or if you like the terminal | Python 3.11 or newer |
 | [B. Docker](#b-install-with-docker) | if you already use Docker, or Python gives you trouble | Docker Desktop (Windows, Mac) or Docker Engine (Linux) |
 

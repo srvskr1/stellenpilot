@@ -74,6 +74,18 @@ class StatusTests(unittest.TestCase):
             s = self.status(fetch=release())
         self.assertIn("pip install -U stellenpilot", s["command"])
 
+    def test_homebrew_install_gets_brew_upgrade(self):
+        with mock.patch("stellenpilot.launch.frozen", return_value=False), \
+             mock.patch.object(update, "homebrew", return_value=True):
+            s = self.status(plat="mac", fetch=release())
+        self.assertEqual(s["command"], "brew upgrade stellenpilot")
+
+    def test_homebrew_is_told_apart_by_its_cellar_path(self):
+        self.assertTrue(update.homebrew("/opt/homebrew/Cellar/stellenpilot/0.12.0/libexec"))
+        self.assertTrue(update.homebrew("/usr/local/Cellar/stellenpilot/0.12.0/libexec"))
+        self.assertFalse(update.homebrew("/Users/me/stellenpilot-env"))
+        self.assertFalse(update.homebrew("/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks"))
+
     def test_app_gets_no_command(self):
         with mock.patch("stellenpilot.launch.frozen", return_value=True):
             self.assertNotIn("command", self.status(fetch=release()))
@@ -96,3 +108,20 @@ class RouteTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class HomebrewPathTests(unittest.TestCase):
+    """The daily task and desktop icon must keep working after `brew upgrade` removes the old version."""
+
+    def test_cellar_path_becomes_the_stable_opt_link(self):
+        from stellenpilot.launch import python
+        self.assertEqual(python("/opt/homebrew/Cellar/stellenpilot/0.12.0/libexec/bin/python"),
+                         "/opt/homebrew/opt/stellenpilot/libexec/bin/python")
+        self.assertEqual(python("/usr/local/Cellar/stellenpilot/0.12.0_1/libexec/bin/python3.13"),
+                         "/usr/local/opt/stellenpilot/libexec/bin/python3.13")
+
+    def test_other_pythons_are_left_alone(self):
+        from stellenpilot.launch import python
+        for exe in ("/Users/me/stellenpilot-env/bin/python", r"C:\Python313\python.exe",
+                    "/opt/homebrew/Cellar/python@3.13/3.13.1/bin/python3.13"):
+            self.assertEqual(python(exe), exe)

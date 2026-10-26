@@ -21,8 +21,8 @@ def _icon(ext: str) -> str:
 
 
 def _python() -> str:
-    exe = Path(sys.executable)
-    return str(exe)
+    from .launch import frozen, python
+    return sys.executable if frozen() else python()  # Homebrew: a path that survives `brew upgrade`
 
 
 def _ps(script: str) -> str:
