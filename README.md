@@ -211,7 +211,7 @@ mkdir -p ~/Stellenpilot && cd ~/Stellenpilot
 stellenpilot serve
 ```
 
-Update with `brew upgrade stellenpilot`. The formula moves to each new version on its own a few minutes after the release, and the daily search and desktop icon keep working across updates. Homebrew 7 and newer asks you to trust a tap before installing from it, which is the `brew trust` line. Homebrew builds Stellenpilot on your Mac, so there is no "unidentified developer" warning.
+Update with `brew upgrade stellenpilot`. The formula moves to each new version on its own one to two days after the release (Homebrew waits a day before it takes a new PyPI upload), and the daily search and desktop icon keep working across updates. Homebrew 7 and newer asks you to trust a tap before installing from it, which is the `brew trust` line. Homebrew builds Stellenpilot on your Mac, so there is no "unidentified developer" warning.
 
 ### With Python (Windows, macOS, Linux)
 
