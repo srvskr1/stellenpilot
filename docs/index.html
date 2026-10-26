@@ -103,7 +103,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .inst-tabs button[aria-selected="true"]{background:#FFFFFF;color:var(--blue);box-shadow:0 1px 3px rgba(23,37,84,.12)}
 .inst-tabs button:focus-visible,.pip button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .pip{max-width:100%}.pip span{white-space:pre;overflow-x:auto;line-height:1.6}
-.pip.multi{align-items:flex-end;padding-top:10px;padding-bottom:6px}
+.pip.multi{flex-wrap:wrap;align-items:flex-end;padding-top:10px;padding-bottom:6px;row-gap:6px}.pip.multi button{margin-left:auto}
 @media (max-width:640px){.pip span{font-size:13px}}
 
 /* hero */
