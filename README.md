@@ -201,6 +201,16 @@ Windows may say "Windows protected your PC" because the app is not code signed y
 
 The app is not signed by Apple yet, so macOS stops it the first time: on macOS 15 and newer, open **System Settings, Privacy & Security** and click **Open Anyway**. Step by step, with the fix for older macOS and for a "damaged" message: [docs/mac.md](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md), and the disk image is built by GitHub straight from this repository.
 
+### Mac and Linux: Homebrew
+
+```bash
+brew install srvskr1/stellenpilot/stellenpilot
+mkdir -p ~/Stellenpilot && cd ~/Stellenpilot
+stellenpilot serve
+```
+
+Update with `brew upgrade stellenpilot`. The formula moves to each new version on its own a few minutes after the release, and the daily search and desktop icon keep working across updates. Homebrew builds Stellenpilot on your Mac, so there is no "unidentified developer" warning.
+
 ### With Python (Windows, macOS, Linux)
 
 **New to Python or the terminal?** Follow [INSTALL.md](https://github.com/srvskr1/stellenpilot/blob/main/INSTALL.md): step by step for Windows, macOS, Linux and Docker, from installing Python to your first search.
@@ -330,6 +340,7 @@ Do these steps in order. Steps 1 and 2 matter most: they stop the daily search b
 **3. Remove the program.**
 
 * Windows app: Windows Settings, Apps, Stellenpilot, Uninstall. It also removes the daily search task. Your files in `Documents\Stellenpilot` stay; delete that folder too if you want everything gone.
+* Installed with Homebrew: `brew uninstall stellenpilot`, then `brew untap srvskr1/stellenpilot`. Your workspace folder (for example `~/Stellenpilot`) stays until you delete it.
 * Installed with pip: activate the environment you installed it in, then `pip uninstall stellenpilot`. Delete that environment folder too if you made one just for it (for example `stellenpilot-env` or `.venv`).
 * Installed from source: delete the `stellenpilot` folder you cloned or unzipped (the environment `.venv` is inside it).
 * Docker: in the project folder run `docker compose down`, then `docker rmi ghcr.io/srvskr1/stellenpilot` (and `docker image prune` to free the space of any self built image).

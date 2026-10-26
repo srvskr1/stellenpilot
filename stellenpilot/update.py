@@ -35,6 +35,11 @@ def platform() -> str:
     return "mac" if sys.platform == "darwin" else "other"
 
 
+def homebrew(prefix: str | None = None) -> bool:
+    """Installed with `brew install`: the formula puts its Python under .../Cellar/stellenpilot/<version>/libexec."""
+    return "/Cellar/stellenpilot/" in (sys.prefix if prefix is None else prefix)
+
+
 def _fetch() -> dict:
     from .http import request_json
     data = request_json(API, timeout=10, retries=0)
@@ -96,9 +101,10 @@ def status(home: Path, enabled: bool = True, current: str = __version__, fetch=N
     page = info.get("page") or PAGE_PREFIX + "latest"
     out.update(available=True, latest=info["version"], page=page,
                download=(info.get("downloads") or {}).get(platform()) or page)
-    if not frozen():  # a pip or Docker install updates with a command, the app download is the alternative
+    if not frozen():  # a pip, Homebrew or Docker install updates with a command, the app download is the alternative
         from .schedule import in_docker
         exe = sys.executable
         out["command"] = ("docker compose pull && docker compose up -d" if in_docker()
+                          else "brew upgrade stellenpilot" if homebrew()
                           else f'"{exe}" -m pip install -U stellenpilot' if " " in exe else f"{exe} -m pip install -U stellenpilot")
     return out
