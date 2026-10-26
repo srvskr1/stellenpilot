@@ -204,12 +204,14 @@ The app is not signed by Apple yet, so macOS stops it the first time: on macOS 1
 ### Mac and Linux: Homebrew
 
 ```bash
-brew install srvskr1/stellenpilot/stellenpilot
+brew tap srvskr1/stellenpilot
+brew trust --formula srvskr1/stellenpilot/stellenpilot
+brew install stellenpilot
 mkdir -p ~/Stellenpilot && cd ~/Stellenpilot
 stellenpilot serve
 ```
 
-Update with `brew upgrade stellenpilot`. The formula moves to each new version on its own a few minutes after the release, and the daily search and desktop icon keep working across updates. Homebrew builds Stellenpilot on your Mac, so there is no "unidentified developer" warning.
+Update with `brew upgrade stellenpilot`. The formula moves to each new version on its own a few minutes after the release, and the daily search and desktop icon keep working across updates. Homebrew 7 and newer asks you to trust a tap before installing from it, which is the `brew trust` line. Homebrew builds Stellenpilot on your Mac, so there is no "unidentified developer" warning.
 
 ### With Python (Windows, macOS, Linux)
 
