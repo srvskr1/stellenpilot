@@ -43,6 +43,7 @@ jobs:
           TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
           brew tap srvskr1/stellenpilot
+          brew trust --formula srvskr1/stellenpilot/stellenpilot  # Homebrew 7+ refuses untrusted taps
           dir=$(brew --repository srvskr1/stellenpilot)
           echo "dir=$dir" >> "$GITHUB_OUTPUT"
           git -C "$dir" remote set-url origin "https://x-access-token:${TOKEN}@github.com/srvskr1/homebrew-stellenpilot.git"
