@@ -11,12 +11,23 @@ import statistics
 from datetime import date
 from functools import lru_cache
 
-# Official figures, updated by hand each January. The dashboard shows the source and the date,
-# and warns once the year has passed.
+# Both Blue Card lines are fixed shares of the yearly pension contribution ceiling (Beitragsbemessungsgrenze
+# Rentenversicherung): 50% for all jobs, 45.3% for shortage jobs (IT, STEM, health), new graduates and IT staff
+# without a degree. Add each new year's ceiling once the Bundesrat approves it (usually late November).
+# 2027: cabinet set 106,200 on 7 Oct 2026, Bundesrat still pending, so not added yet.
+PENSION_CEILING = {2025: 96600, 2026: 101400}
+
+
+def blue_card_lines(year: int) -> dict:
+    """The lines for a year, from the newest known ceiling at or before it."""
+    y = max((k for k in PENSION_CEILING if k <= year), default=min(PENSION_CEILING))
+    c = PENSION_CEILING[y]
+    return {"year": y, "regular": round(c * 0.5, 2), "shortage": round(c * 0.453, 2)}
+
+
+# The dashboard shows the source and the date, and warns once the year has passed.
 BLUE_CARD = {
-    "year": 2026,
-    "regular": 50700,
-    "shortage": 45934,  # 45,934.20: shortage jobs (IT, STEM, health), new graduates, IT staff without a degree
+    **blue_card_lines(max(PENSION_CEILING)),
     "source": "Bundesagentur für Arbeit, International Services Spotlight, issue 03/2026 (section 18g AufenthG)",
     "url": "https://www.arbeitsagentur.de/vor-ort/zav/working-and-living-in-germany/iss-en/issue-03-2026/blue-card",
     "checked": "2026-10-24",
@@ -33,6 +44,9 @@ _PAYWORD = re.compile(r"gehalt|vergütung|verguetung|salary|compensation|brutto|
 _NOT_PAY = re.compile(r"budget|bonus|prämie|praemie|zuschuss|umsatz|revenue|funding|kunden|mitarbeiter|employees|"
                       r"weiterbildung|training|relocation|umzug", re.I)
 _MONTH = re.compile(r"monat|month|mtl\.|/m\b|p\.\s?m\.", re.I)
+# "bis zu 60k" / "up to €60k" is a ceiling, not the pay: the real offer can be far lower, which would
+# give a false yes on the Blue Card check. Such ads count as naming no pay.
+_CEILING = re.compile(r"(?:bis zu|up to|maximal|max\.|maximum|höchstens|hoechstens)\s*$", re.I)
 _HOUR = re.compile(r"stunde|hour|/h\b|std\.", re.I)
 
 
@@ -56,6 +70,8 @@ def salary(text: str) -> tuple[int, int] | None:
             continue
         if _HOUR.search(after[:15]):
             continue
+        if not m.group(2) and _CEILING.search(before[-20:]):
+            return None
         lo = _num(m.group(1))
         hi = _num(m.group(2)) if m.group(2) else lo
         if _MONTH.search(after[:20]) or (lo < 12000 and _MONTH.search(before[-30:])):
