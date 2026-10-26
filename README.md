@@ -11,6 +11,12 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
+### What is new in 0.12.1
+
+* **Safer Blue Card check.** "Up to €60k" or "bis zu 60.000 €" is a ceiling, not the pay, so it no longer counts as the salary. Those jobs now show "ask in the interview" instead of a yes they may not deserve.
+* **Blue Card lines follow the pension ceiling.** Both lines are worked out from the yearly pension contribution ceiling (50% and 45.3%), and the shortage line keeps its cents (€45,934.20).
+* **Star on GitHub.** A new link at the bottom of the sidebar. If Stellenpilot helps you, a star helps others find it.
+
 ### What is new in 0.12.0
 
 * **Apply first.** Home lists up to three strong matches you could lose soon: the ad names a deadline in the next two weeks, it went online today, or it has been up for three weeks and may be filled. One button writes your CV for it.
