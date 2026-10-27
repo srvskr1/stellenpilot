@@ -86,6 +86,7 @@ def build(en):
     s = swap(s, 'id="lang-en" aria-pressed="true"', 'id="lang-en" aria-pressed="false"')
     s = swap(s, 'id="lang-de" aria-pressed="false"', 'id="lang-de" aria-pressed="true"')
     s = swap(s, 'var lang="en",aiK=0;', 'var lang="de",aiK=0;')
+    s = swap(s, 'aria-label="Install with"', 'aria-label="Installieren mit"')  # screen reader label, not a data-t text
     s = swap(s, 'document.getElementById("lang-de").onclick=function(){go("de","/de/")};',
              'document.getElementById("lang-de").onclick=function(){};')
     s = swap(s, AUTO_EN, 'try{if(localStorage.getItem("sp-lang")==="en")location.replace("/")}catch(e){}')
