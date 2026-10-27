@@ -6,6 +6,8 @@
 [![Python](https://img.shields.io/pypi/pyversions/stellenpilot)](https://pypi.org/project/stellenpilot/)
 [![tests](https://github.com/srvskr1/stellenpilot/actions/workflows/tests.yml/badge.svg)](https://github.com/srvskr1/stellenpilot/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/srvskr1/stellenpilot/blob/main/LICENSE)
+[![Website](https://img.shields.io/badge/website-stellenpilot.dev-2563eb)](https://stellenpilot.dev)
+[![Product Hunt](https://img.shields.io/badge/Product%20Hunt-Stellenpilot-DA552F?logo=producthunt&logoColor=white)](https://www.producthunt.com/products/stellenpilot)
 
 ![Stellenpilot in about a minute: the four setup steps, Home, the agent office, Jobs, Applications and Settings](https://raw.githubusercontent.com/srvskr1/stellenpilot/main/docs/demo.gif)
 
@@ -21,34 +23,6 @@
 * **Safer Blue Card check.** "Up to €60k" or "bis zu 60.000 €" is a ceiling, not the pay, so it no longer counts as the salary. Those jobs now show "ask in the interview" instead of a yes they may not deserve.
 * **Blue Card lines follow the pension ceiling.** Both lines are worked out from the yearly pension contribution ceiling (50% and 45.3%), and the shortage line keeps its cents (€45,934.20).
 * **Star on GitHub.** A new link at the bottom of the sidebar. If Stellenpilot helps you, a star helps others find it.
-
-### What is new in 0.12.0
-
-* **Apply first.** Home lists up to three strong matches you could lose soon: the ad names a deadline in the next two weeks, it went online today, or it has been up for three weeks and may be filled. One button writes your CV for it.
-* **Pay on every job.** Stellenpilot reads the salary from the ad text and tells you if it is below, about or above the other jobs you found, in your city once there are five ads with pay. When an ad names no pay, you get the median of your other jobs and a German question to ask in the interview.
-* **Blue Card hints.** Switch them on under Settings and each job says whether its pay reaches the EU Blue Card line (2026: €50,700, or €45,934 for IT, STEM and health jobs with approval). The source and the date it was checked are one tap away, and a warning shows once the figures are a year old. This is guidance, not legal advice.
-* **Interview prep on any job, with or without AI.** Press Make my prep pack on any job. Without an AI it is built from the ad and the tools your CV lacks. The pack is a four step checklist you can tick off.
-
-### What is new in 0.11.2
-
-* **Update notice.** Once a day Stellenpilot checks whether a newer version is out and shows a **Download** button on Home. Run the installer and it updates your app in place; your jobs, CVs and settings stay. You can switch the check off under Settings, Language.
-* **A new Home.** The agent office now sits at the top, and Insights moved from Applications to Home.
-* The Windows installer now tells you when it is updating an existing install.
-
-### What is new in 0.11.1
-
-* **A calmer Insights page.** Your applications, the skills that would open the most jobs and the hidden German share are now shown as circles in one blue theme. Tap a skill to see the jobs it would lift.
-* **Clearer reply rates.** Your overall reply rate comes first, then one grouping at a time (source, role type, place, CV layout) as sorted bars with a line for your average. Groups with fewer than 3 applications are greyed out, so a single reply never shows up as 100%.
-* **A new agent office.** A small robot now does the work. It sits at each desk and types while code runs on its screen, walks between desks, and rests on the sofa with a coffee between searches. Desks, chairs and the room were redrawn.
-* **Smoother motion.** Animations follow one set of easing curves, move only what the browser can animate cheaply, and stop when your system asks for reduced motion.
-
-### What is new in 0.11.0
-
-* **What to learn next.** Insights ranks the skills and German levels that would lift the most of your recent jobs over your match line, and says whether the ads require them or call them nice to have. Job details show the score a job would get with each missing skill.
-* **Where your applications stop.** Insights counts what you sent, what got an answer, interviews and offers, and says in one sentence where things break: your CV, the first check or the interviews. Interviews with no news for two weeks get a short follow up email you can copy.
-* **Hidden German.** Insights shows how many English ads from the last 90 days still ask for German B2 or higher.
-* **CV layouts.** Pick Classic, Compact or a German Lebenslauf with dates first under Settings. Only the layout changes, the content still goes through the truth guard.
-* **Faster dashboard.** Tool matching is cached, so a large database loads in well under a second after the first refresh.
 
 Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
 
