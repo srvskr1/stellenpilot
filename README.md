@@ -11,6 +11,11 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
+### What is new in 0.12.2
+
+* **Blue Card check uses today's line.** Each job is checked against the line valid on the day you look, so the switch to new figures happens on 1 January by itself. The 2027 ceiling set by the cabinet (€106,200, so €53,100 and €48,108.60) is already in, marked as expected until the Bundesrat approves it.
+* **Official source for each year.** "Where is this from?" now links the Interior Ministry's notice in the Bundesanzeiger for 2026 and the Federal Government's announcement for 2027. Thanks to Expath for pointing out how the lines are set.
+
 ### What is new in 0.12.1
 
 * **Safer Blue Card check.** "Up to €60k" or "bis zu 60.000 €" is a ceiling, not the pay, so it no longer counts as the salary. Those jobs now show "ask in the interview" instead of a yes they may not deserve.
