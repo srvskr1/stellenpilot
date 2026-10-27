@@ -17,7 +17,7 @@ from urllib.parse import unquote
 
 from . import schedule
 from .db import DB, STATUSES, local_day
-from .pay import BLUE_CARD, fill_pay
+from .pay import blue_card_info, fill_pay
 from .score import lifts, unlocks
 
 CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "statusUpdatedAt",
@@ -412,7 +412,7 @@ def make_handler(settings, port: int = 8765):
                     "weekly": weekly_summary(jobs),
                     "unlocks": unlocks(jobs, settings.profile, settings["tailor"]["min_match"]),
                     "diagnosis": diagnosis(jobs),
-                    "blueCard": BLUE_CARD,
+                    "blueCard": blue_card_info(),
                     "visaHints": bool(settings["ui"].get("visa_hints")),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
                     "subtitle": subtitle(),
