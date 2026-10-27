@@ -13,9 +13,17 @@ from functools import lru_cache
 
 # Both Blue Card lines are fixed shares of the yearly pension contribution ceiling (Beitragsbemessungsgrenze
 # Rentenversicherung): 50% for all jobs, 45.3% for shortage jobs (IT, STEM, health), new graduates and IT staff
-# without a degree. Add each new year's ceiling once the Bundesrat approves it (usually late November).
-# 2027: cabinet set 106,200 on 7 Oct 2026, Bundesrat still pending, so not added yet.
-PENSION_CEILING = {2025: 96600, 2026: 101400}
+# without a degree (section 18g AufenthG). Each year: ceiling, official source, and whether it is final.
+# A year goes in as soon as the cabinet sets it, marked not final until the Bundesrat approves, so the
+# switch on 1 January happens even without a release in between.
+PENSION_CEILING = {2025: 96600, 2026: 101400, 2027: 106200}
+CEILING_SOURCE = {
+    2026: ("Federal Ministry of the Interior, notice on the EU Blue Card salary lines 2026, Bundesanzeiger BAnz AT 18.12.2025 B3",
+           "https://www.bundesanzeiger.de/pub/publication/REViP4bN6jVdpGxPaiQ/content/REViP4bN6jVdpGxPaiQ/BAnz%20AT%2018.12.2025%20B3.pdf", True),
+    2027: ("Federal Government: cabinet sets the 2027 pension ceiling at 106,200 euro (October 2026), Bundesrat approval pending",
+           "https://www.bundesregierung.de/breg-de/aktuelles/beitragsbemessungsgrenzen-2027-2454638", False),
+}
+CHECKED = "2026-10-27"
 
 
 def blue_card_lines(year: int) -> dict:
@@ -25,13 +33,15 @@ def blue_card_lines(year: int) -> dict:
     return {"year": y, "regular": round(c * 0.5, 2), "shortage": round(c * 0.453, 2)}
 
 
-# The dashboard shows the source and the date, and warns once the year has passed.
-BLUE_CARD = {
-    **blue_card_lines(max(PENSION_CEILING)),
-    "source": "Bundesagentur für Arbeit, International Services Spotlight, issue 03/2026 (section 18g AufenthG)",
-    "url": "https://www.arbeitsagentur.de/vor-ort/zav/working-and-living-in-germany/iss-en/issue-03-2026/blue-card",
-    "checked": "2026-10-24",
-}
+def blue_card_info(today: date | None = None) -> dict:
+    """The lines valid today, with their source. Checked against today's date: in practice the day you
+    look is close to the day you apply. stale: the year has no ceiling yet, so last year's lines are shown."""
+    today = today or date.today()
+    lines = blue_card_lines(today.year)
+    source, url, final = CEILING_SOURCE.get(lines["year"], CEILING_SOURCE[max(CEILING_SOURCE)])
+    return {**lines, "source": source, "url": url, "final": final, "checked": CHECKED, "stale": today.year > lines["year"]}
+
+
 MIN_PEERS = 5
 
 _CUR = r"(?:€|EUR\b|Euro\b)"
@@ -117,9 +127,9 @@ def deadline(text: str, found: str = "") -> str:
 
 def blue_card(low: int, today: date | None = None) -> dict:
     """Is this pay enough for an EU Blue Card? "yes", "shortage" (only some jobs, with approval) or "no"."""
-    today = today or date.today()
-    verdict = "yes" if low >= BLUE_CARD["regular"] else "shortage" if low >= BLUE_CARD["shortage"] else "no"
-    return {"verdict": verdict, "stale": today.year > BLUE_CARD["year"]}
+    info = blue_card_info(today)
+    verdict = "yes" if low >= info["regular"] else "shortage" if low >= info["shortage"] else "no"
+    return {"verdict": verdict, "stale": info["stale"]}
 
 
 def _city(job: dict) -> str:
