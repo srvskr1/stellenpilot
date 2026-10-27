@@ -26,7 +26,7 @@
 "isAccessibleForFree":true,"inLanguage":["en","de"],
 "featureList":["Daily job search in Germany from 7 job boards and about 200 company career pages","Match score from 0 to 100 with reasons and gaps","Detects the German level a job ad requires","Tailored CV and cover letter as Word and PDF","Truth guard that removes claims your CV does not back up","Read only email sync for application status","Built in local AI, or Ollama, Claude or OpenAI"],
 "author":{"@type":"Person","name":"Sourav Sarker","url":"https://stellenpilot.dev/about.html"},
-"sameAs":["https://github.com/srvskr1/stellenpilot","https://pypi.org/project/stellenpilot/"]}
+"sameAs":["https://github.com/srvskr1/stellenpilot","https://pypi.org/project/stellenpilot/","https://www.producthunt.com/products/stellenpilot"]}
 </script>
 <script type="application/ld+json" id="faq-ld">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Stellenpilot?","acceptedAnswer":{"@type":"Answer","text":"Stellenpilot is a free, open source job search assistant for Germany. It runs on your own computer, collects new jobs from 7 job boards and about 200 company career pages every morning, scores each one against your CV from 0 to 100 and writes a tailored CV and cover letter for the best ones."}},{"@type":"Question","name":"Is Stellenpilot free?","acceptedAnswer":{"@type":"Answer","text":"Yes. It is free and open source under the MIT license, and you don't need an account. The built in AI runs on your computer at no cost. If you pick Claude or OpenAI instead, you pay that provider for what you use with your own API key."}},{"@type":"Question","name":"Does Stellenpilot apply to jobs for me?","acceptedAnswer":{"@type":"Answer","text":"No. It never sends an application and never contacts a company. You read the shortlist, check the CV and letter, and apply yourself."}},{"@type":"Question","name":"Does my CV leave my computer?","acceptedAnswer":{"@type":"Answer","text":"With the built in AI or another local model (Ollama, LM Studio, llama.cpp), nothing about you leaves your computer. If you switch to Claude or OpenAI, your profile and the job ads go to that provider. Email sync only reads, and never sends, moves or deletes mail."}},{"@type":"Question","name":"Which job sites does it search?","acceptedAnswer":{"@type":"Answer","text":"Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive and workingstudentjobs.de, plus the career pages of about 200 companies. LinkedIn and StepStone are left out because their terms forbid scraping, and Indeed has no public job search API for open source tools."}},{"@type":"Question","name":"Can I use it if my German is not fluent?","acceptedAnswer":{"@type":"Answer","text":"Yes. It finds the German level each ad really asks for, compares it with yours and writes an English summary of every German ad. It only writes German cover letters if your German is B2 or better. The app itself works in English and German."}},{"@type":"Question","name":"Does it make up experience to get a better score?","acceptedAnswer":{"@type":"Answer","text":"Never. A truth guard checks every sentence of the CV and letter against your own CV and removes any number, tool or language level your CV does not back up. Skills you are still learning are written as learning."}},{"@type":"Question","name":"Which computers does it run on?","acceptedAnswer":{"@type":"Answer","text":"Windows, macOS and Linux. There are ready made apps for Windows and for Macs with an Apple chip (M1 or newer). On Linux or an Intel Mac, install it with Homebrew (brew install stellenpilot after trusting the tap, see the install box at the top) or with pip install stellenpilot (Python 3.11 or newer)."}}]}</script>
 <style>
@@ -813,6 +813,7 @@ footer a{color:var(--text)}
     <div class="cta-row" style="margin:0">
       <a class="btn btn-primary" href="https://github.com/srvskr1/stellenpilot/releases/latest" data-dl="auto" data-t="dl">Download Stellenpilot</a>
       <a class="btn btn-ghost" href="https://github.com/srvskr1/stellenpilot" data-t="gh">View on GitHub</a>
+      <a class="btn btn-ghost" href="https://www.producthunt.com/products/stellenpilot"><svg viewBox="0 0 40 40" width="18" height="18" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="#DA552F"/><path d="M22.7 20H17v-6h5.7a3 3 0 010 6zm0-10H13v20h4v-6h5.7a7 7 0 000-14z" fill="#fff"/></svg><span data-t="ph">See it on Product Hunt</span></a>
     </div>
   </section>
 </main>
@@ -820,7 +821,7 @@ footer a{color:var(--text)}
 <footer>
   <div class="wrap">
     <span data-t="foot">Stellenpilot by Sourav Sarker, MIT license</span>
-    <nav aria-label="Footer"><a href="https://github.com/srvskr1/stellenpilot">GitHub</a><a href="https://pypi.org/project/stellenpilot/">PyPI</a><a href="https://github.com/srvskr1/stellenpilot/releases" data-t="changelog">Changelog</a><a href="blog/">Blog</a><a href="about.html" data-t="about">About</a><a href="datenschutz.html">Datenschutz</a></nav>
+    <nav aria-label="Footer"><a href="https://github.com/srvskr1/stellenpilot">GitHub</a><a href="https://pypi.org/project/stellenpilot/">PyPI</a><a href="https://www.producthunt.com/products/stellenpilot">Product Hunt</a><a href="https://github.com/srvskr1/stellenpilot/releases" data-t="changelog">Changelog</a><a href="blog/">Blog</a><a href="about.html" data-t="about">About</a><a href="datenschutz.html">Datenschutz</a></nav>
   </div>
 </footer>
 
@@ -855,6 +856,7 @@ footer a{color:var(--text)}
     post1:"Lebenslauf für eine Werkstudentenstelle anpassen",post2:"Jobsuche in Deutschland ohne fließendes Deutsch",post3:"Was „verhandlungssicher“ in einer Anzeige wirklich heißt",read:"Lesen",open:"Öffnen",about:"Über",post4:"Kostenloses Tool: welches Deutsch-Niveau eine Anzeige wirklich verlangt",
     cta_h:"Starte morgen früh mit einer Auswahl.",cta_p:"<b>Kostenlos und Open Source</b>, MIT-Lizenz. Windows, macOS und Linux.",dl:"Stellenpilot laden",gh:"Auf GitHub ansehen",
 gh_star:"Stern auf GitHub geben",
+ph:"Auf Product Hunt ansehen",
     foot:"Stellenpilot von Sourav Sarker, MIT-Lizenz",changelog:"Änderungen"
   };
   var AI={en:[["One Download button","Free","Stays on your computer"],["Install the app, pull a model","Free","Stays on your computer"],["Paste an API key","A few cents a day","Sent to the AI provider"],["Nothing","Free","Stays on your computer"]],
