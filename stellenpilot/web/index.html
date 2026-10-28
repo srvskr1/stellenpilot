@@ -887,7 +887,7 @@ body.wizopen{overflow:hidden}
               <label>Cover letter language
                 <select class="input" name="letter_language"><option value="auto">Automatic</option><option value="en">Always English</option><option value="de">Always German</option></select></label>
               <label>CV layout
-                <select class="input" name="cv_style"><option value="classic">Classic, one column</option><option value="compact">Compact, fits more on a page</option><option value="lebenslauf">German Lebenslauf, dates first</option></select></label>
+                <select class="input" name="cv_style"><option value="modern">Modern, dates on the right</option><option value="classic">Classic, one column</option><option value="compact">Compact, fits more on a page</option><option value="lebenslauf">German Lebenslauf, dates first</option></select></label>
             </div>
             <p class="hint">Match goes from 0 to 100. Automatic writes German letters only if your German is B2 or better.</p>
           </section>
@@ -1223,7 +1223,7 @@ const DE={
 "Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.":"Dein Profil hat noch keine Jobs oder Projekte. Die KI kann deinen Lebenslauf erneut lesen und sie eintragen.","Read my CV again":"Lebenslauf erneut lesen",
 "Starting…":"Startet…","✓ Your CV is read and saved. Check it under My CV.":"✓ Dein Lebenslauf ist gelesen und gespeichert. Prüfe ihn unter Mein Lebenslauf.",
 "Documents and German":"Unterlagen und Deutsch","When CVs and letters are made, and in which language.":"Wann Lebensläufe und Anschreiben erstellt werden, und in welcher Sprache.","My German level":"Mein Deutschniveau","From my CV":"Aus meinem Lebenslauf",
-"Make documents for matches from":"Unterlagen erstellen ab einer Passung von","Cover letter language":"Sprache der Anschreiben","CV layout":"Lebenslauf Layout","Classic, one column":"Klassisch, eine Spalte","Compact, fits more on a page":"Kompakt, mehr pro Seite","German Lebenslauf, dates first":"Deutscher Lebenslauf, Datum zuerst","Classic":"Klassisch","Compact":"Kompakt","Automatic":"Automatisch","Always English":"Immer Englisch","Always German":"Immer Deutsch",
+"Make documents for matches from":"Unterlagen erstellen ab einer Passung von","Cover letter language":"Sprache der Anschreiben","CV layout":"Lebenslauf Layout","Modern, dates on the right":"Modern, Datum rechts","Classic, one column":"Klassisch, eine Spalte","Modern":"Modern","Compact, fits more on a page":"Kompakt, mehr pro Seite","German Lebenslauf, dates first":"Deutscher Lebenslauf, Datum zuerst","Classic":"Klassisch","Compact":"Kompakt","Automatic":"Automatisch","Always English":"Immer Englisch","Always German":"Immer Deutsch",
 "Match goes from 0 to 100. Automatic writes German letters only if your German is B2 or better.":"Die Passung reicht von 0 bis 100. Automatisch schreibt deutsche Anschreiben nur, wenn dein Deutsch B2 oder besser ist.",
 "Search for new jobs every day without opening Stellenpilot.":"Jeden Tag nach neuen Jobs suchen, ohne Stellenpilot zu öffnen.","Search every day":"Jeden Tag suchen","The dashboard does not need to be open.":"Das Dashboard muss dafür nicht offen sein.","At":"Um",
 "Your computer must be on. On Windows a missed search runs when you log in; on Mac and Linux it runs when you open Stellenpilot.":"Dein Computer muss an sein. Unter Windows läuft eine verpasste Suche bei der Anmeldung nach; auf Mac und Linux, wenn du Stellenpilot öffnest.",
@@ -1794,7 +1794,7 @@ function renderInsights(){
   const grp=(fn)=>{const m={};sent.forEach(j=>{const k=fn(j);if(!k)return;(m[k]??={n:0,r:0}).n++;if(REPLY.includes(j.status))m[k].r++});
     return Object.entries(m).map(([k,x])=>({k,n:x.n,r:x.r,v:x.n?x.r/x.n:0})).sort((a,b)=>(b.n>=3)-(a.n>=3)||b.v-a.v||b.n-a.n)};
   const views=[["Source",j=>SRC(j.source||"")],["Role type",j=>/full/i.test(j.jobType||"")?"Full time":/werk|student/i.test((j.jobType||"")+" "+(j.title||""))?"Working student":null],
-    ["Location",j=>/remote/i.test(j.location||"")?"Remote":j.location?"On site or hybrid":null],["CV layout",j=>({classic:"Classic",compact:"Compact",lebenslauf:"Lebenslauf"})[j.cvStyle]||null]]
+    ["Location",j=>/remote/i.test(j.location||"")?"Remote":j.location?"On site or hybrid":null],["CV layout",j=>({modern:"Modern",classic:"Classic",compact:"Compact",lebenslauf:"Lebenslauf"})[j.cvStyle]||null]]
     .map(([h,fn])=>[h,grp(fn)]).filter(([,rs])=>rs.length);
   if(!sent.length)$("chan").innerHTML=`<p class="muted">${esc(t("No applications sent yet."))}</p>`;
   else{

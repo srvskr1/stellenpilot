@@ -103,7 +103,7 @@ base_url = ""
 # Jobs at or above this match get a tailored CV and cover letter.
 min_match = 70
 max_per_run = 5
-output_dir = "output"
+output_dir = "Stellenpilot"
 # Convert DOCX to PDF with LibreOffice when it is installed.
 make_pdf = true
 # Only tailor for ads written in English. Set false if you also apply in German.
@@ -112,8 +112,8 @@ only_english_ads = true
 # "auto" writes German for German ads only if your German is B2 or better (and an LLM is set).
 # Below B2 it writes English: a polished German letter would suggest a level you do not have.
 letter_language = "auto"
-# CV layout: "classic", "compact" or "lebenslauf" (German, dates first). Layout only, the content is the same.
-cv_style = "classic"
+# CV layout: "modern", "classic", "compact" or "lebenslauf" (German, dates first). Layout only, the content is the same.
+cv_style = "modern"
 
 [notify]
 # A short digest to yourself after each run. Secrets go in .env, see docs/digest.md.

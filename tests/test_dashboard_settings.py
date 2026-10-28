@@ -59,6 +59,20 @@ class FindDocTest(unittest.TestCase):
             self.assertIsNone(find_doc({"folder": d}, "cv", out))  # outside the output folder
             self.assertIsNone(find_doc({"folder": ""}, "cv", out))
 
+    def test_new_layout_and_old_output_folder(self):
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d).resolve() / "Stellenpilot"
+            f = out / "2026-10-29" / "Acme__Data"
+            (f / "edit").mkdir(parents=True)
+            for n in ("Jo_CV.pdf", "Jo_Cover_Letter.pdf", "edit/Jo_CV.docx", "edit/Jo_Cover_Letter.docx", "edit/report.md"):
+                (f / n).write_text("x")
+            self.assertEqual(find_doc({"folder": str(f)}, "cv", out).name, "Jo_CV.pdf")
+            self.assertEqual(find_doc({"folder": str(f)}, "letter", out).name, "Jo_Cover_Letter.pdf")
+            old = Path(d).resolve() / "output" / "2026-10-13" / "Acme__Data"  # made before the rename
+            old.mkdir(parents=True)
+            (old / "Jo_CV_Acme.pdf").write_text("x")
+            self.assertEqual(find_doc({"folder": str(old)}, "cv", out).name, "Jo_CV_Acme.pdf")
+
 
 class CredentialsTest(unittest.TestCase):
     def test_only_desktop_clients(self):

@@ -20,7 +20,9 @@ from datetime import date
 from pathlib import Path
 
 from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
 
 from .score import RE_CACHE, _mentioned, learning_items, profile_text
@@ -211,17 +213,52 @@ EN_HEADS = {"summary": "Professional Summary", "skills": "Skills", "experience":
 DE_HEADS = {"summary": "Profil", "skills": "Kenntnisse", "experience": "Berufserfahrung",
             "projects": "Projekte", "education": "Ausbildung", "languages": "Sprachen"}
 CV_STYLES = {
+    "modern": {"size": 10.5, "margin": 46, "heads": EN_HEADS, "dates_first": False, "modern": True},
     "classic": {"size": 10.5, "margin": 50, "heads": EN_HEADS, "dates_first": False},
     "compact": {"size": 9.5, "margin": 36, "heads": EN_HEADS, "dates_first": False},
     "lebenslauf": {"size": 10.5, "margin": 50, "heads": DE_HEADS, "dates_first": True},
 }
 
 
-def _heading(doc, text):
-    p = _para(doc, text.upper(), 10.5, bold=True)
-    p.runs[0].font.color.rgb = RGBColor(0x1E, 0x3A, 0x8A)
-    p.paragraph_format.space_before = Pt(8)
-    p.paragraph_format.space_after = Pt(2)
+ACCENT, GREY = RGBColor(0x1E, 0x3A, 0x8A), RGBColor(0x55, 0x5B, 0x66)
+
+
+def _heading(doc, text, modern: bool = False):
+    p = _para(doc, text.upper(), 10 if modern else 10.5, bold=True)
+    p.runs[0].font.color.rgb = ACCENT
+    p.paragraph_format.space_before = Pt(10 if modern else 8)
+    p.paragraph_format.space_after = Pt(4 if modern else 2)
+    if modern:  # letter spacing and a thin line under the heading; still plain text for ATS
+        sp = OxmlElement("w:spacing")
+        sp.set(qn("w:val"), "20")
+        p.runs[0]._r.get_or_add_rPr().append(sp)
+        bdr, b = OxmlElement("w:pBdr"), OxmlElement("w:bottom")
+        for k, v in (("w:val", "single"), ("w:sz", "6"), ("w:space", "2"), ("w:color", "1E3A8A")):
+            b.set(qn(k), v)
+        bdr.append(b)
+        p._p.get_or_add_pPr().append(bdr)
+
+
+def _entry(doc, left: str, right: str, sub: str = "") -> None:
+    """Modern layout: bold title, right side flush right on a tab stop, grey second line."""
+    sec = doc.sections[0]
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before, p.paragraph_format.space_after = Pt(4), Pt(0)
+    p.paragraph_format.tab_stops.add_tab_stop(sec.page_width - sec.left_margin - sec.right_margin, WD_TAB_ALIGNMENT.RIGHT)
+    p.add_run(left).bold = True
+    if right:
+        r = p.add_run(f"\t{right}")
+        r.font.size, r.font.color.rgb = Pt(9.5), GREY
+    if sub:
+        s = _para(doc, sub, 10)
+        s.runs[0].italic, s.runs[0].font.color.rgb = True, GREY
+        s.paragraph_format.space_after = Pt(2)
+
+
+def _grey(p):
+    for r in p.runs:
+        r.font.color.rgb = GREY
+    return p
 
 
 def _base_doc(size: float = 10.5, margin: int = 50) -> Document:
@@ -241,24 +278,31 @@ def _contact(person: dict, links: bool = True) -> str:
     return " | ".join(x for x in parts if x)
 
 
-def build_cv(profile: dict, plan: dict, path: Path, style: str = "classic") -> None:
-    st = CV_STYLES.get(style, CV_STYLES["classic"])
+def build_cv(profile: dict, plan: dict, path: Path, style: str = "modern") -> None:
+    st = CV_STYLES.get(style, CV_STYLES["modern"])
     h = st["heads"]
     person = profile.get("person") or {}
+    m = st.get("modern", False)
     doc = _base_doc(st["size"], st["margin"])
-    _para(doc, person.get("name", ""), 20, bold=True)
+    name = _para(doc, person.get("name", ""), 24 if m else 20, bold=True)
+    if m and name.runs:
+        name.runs[0].font.color.rgb = ACCENT
     heads = person.get("headlines") or []
     if heads:
-        _para(doc, heads[plan["headline_index"]], 11.5)
-    _para(doc, _contact(person), 9.5)
+        p = _para(doc, heads[plan["headline_index"]], 12 if m else 11.5)
+        if m:
+            _grey(p).paragraph_format.space_after = Pt(2)
+    contact = _para(doc, _contact(person).replace(" | ", "  ·  ") if m else _contact(person), 9.5)
+    if m:
+        _grey(contact)
 
     if plan["summary"]:
-        _heading(doc, h["summary"])
+        _heading(doc, h["summary"], m)
         _para(doc, plan["summary"])
 
     skills = profile.get("skills") or {}
     if skills:
-        _heading(doc, h["skills"])
+        _heading(doc, h["skills"], m)
         for g in plan["skill_groups"]:
             p = doc.add_paragraph()
             p.add_run(f"{g}: ").bold = True
@@ -267,8 +311,13 @@ def build_cv(profile: dict, plan: dict, path: Path, style: str = "classic") -> N
 
     exp = profile.get("experience") or []
     if exp:
-        _heading(doc, h["experience"])
+        _heading(doc, h["experience"], m)
         for e, idx in zip(exp, plan["experience"]):
+            if m:
+                _entry(doc, e.get("title") or e.get("company", ""), e.get("dates", ""), e.get("company", "") if e.get("title") else "")
+                for j in idx:
+                    doc.add_paragraph(e["bullets"][j], style="List Bullet").paragraph_format.space_after = Pt(1)
+                continue
             p = doc.add_paragraph()
             if st["dates_first"] and e.get("dates"):
                 p.add_run(f"{e['dates']}    ").italic = True
@@ -281,9 +330,14 @@ def build_cv(profile: dict, plan: dict, path: Path, style: str = "classic") -> N
 
     projs = profile.get("projects") or []
     if projs:
-        _heading(doc, h["projects"])
+        _heading(doc, h["projects"], m)
         for i in plan["projects"]:
             pr = projs[i]
+            if m:
+                _entry(doc, pr.get("name", ""), pr.get("link", ""))
+                for b in pr.get("bullets") or []:
+                    doc.add_paragraph(b, style="List Bullet").paragraph_format.space_after = Pt(1)
+                continue
             p = doc.add_paragraph()
             p.add_run(pr.get("name", "")).bold = True
             if pr.get("link"):
@@ -293,8 +347,11 @@ def build_cv(profile: dict, plan: dict, path: Path, style: str = "classic") -> N
                 doc.add_paragraph(b, style="List Bullet")
 
     if profile.get("education"):
-        _heading(doc, h["education"])
+        _heading(doc, h["education"], m)
         for ed in profile["education"]:
+            if m:
+                _entry(doc, ed.get("degree", ""), ed.get("dates", ""), ed.get("school", ""))
+                continue
             p = doc.add_paragraph()
             p.add_run(ed.get("degree", "")).bold = True
             rest = ", ".join(x for x in (ed.get("school"), ed.get("dates")) if x)
@@ -302,7 +359,7 @@ def build_cv(profile: dict, plan: dict, path: Path, style: str = "classic") -> N
                 p.add_run(f", {rest}")
             p.paragraph_format.space_after = Pt(0)
     if person.get("languages"):
-        _heading(doc, h["languages"])
+        _heading(doc, h["languages"], m)
         _para(doc, ", ".join(person["languages"]))
     doc.save(path)
 
@@ -456,18 +513,25 @@ def slug(s: str, n: int = 40) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", (s or "").translate(_UMLAUT)).strip("_")[:n].strip("_") or "job"
 
 
+def short(s: str, words: int) -> str:
+    """First few words, without (m/w/d) style tags: 'Data Engineer (m/w/d)' -> 'Data_Engineer'."""
+    s = re.sub(r"\((m|w|d|f|x|div|all genders?)[/|, *]*[^)]*\)", " ", s or "", flags=re.I)
+    return "_".join(slug(s, 200).split("_")[:words]) or "job"
+
+
 def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: bool = True,
-               letter_setting: str = "auto", my_german: str = "A2", cv_style: str = "classic") -> dict:
+               letter_setting: str = "auto", my_german: str = "A2", cv_style: str = "modern") -> dict:
     person = profile.get("person") or {}
     # Company plus title, so two roles at one company never overwrite each other.
-    folder = out_root / date.today().isoformat() / f"{slug(job['company'], 30)}__{slug(job['title'], 40)}"
-    folder.mkdir(parents=True, exist_ok=True)
+    folder = out_root / date.today().isoformat() / f"{short(job['company'], 3)}__{short(job['title'], 5)}"
+    edit = folder / "edit"  # Word files and notes; the PDFs to send sit on top
+    edit.mkdir(parents=True, exist_ok=True)
     from . import progress
     steps = 4 if make_pdf else 3
     progress.stage("Choosing the experience, projects and skills that fit this job", expect=700, step=1, steps=steps)
     plan = make_plan(job, profile, llm)
     who = slug(person.get("name", "CV"))
-    cv = folder / f"{who}_CV_{slug(job['company'], 30)}.docx"
+    cv = edit / f"{who}_CV.docx"
     build_cv(profile, plan, cv, cv_style)
     lang = letter_language(job, letter_setting, llm, my_german)
     progress.stage("Writing the cover letter", expect=1500, step=2, steps=steps)
@@ -478,9 +542,9 @@ def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: boo
     if lang == "de" and LEVELS.index(normalize_level(my_german) or "A2") < LEVELS.index("B2"):
         level_note = (f"This letter is in German, but your German is {normalize_level(my_german) or 'A2'}. A polished German "
                       "letter suggests a higher level than you have; consider letter_language = \"en\" or say your level in the letter.")
-    letter = folder / f"{who}_{'Anschreiben' if lang == 'de' else 'Cover_Letter'}_{slug(job['company'], 30)}.docx"
+    letter = edit / f"{who}_{'Anschreiben' if lang == 'de' else 'Cover_Letter'}.docx"
     build_letter(job, profile, body, letter, lang)
-    report = folder / "report.md"
+    report = edit / "report.md"
     report.write_text("\n".join([
         f"# {job['title']} at {job['company']}",
         f"Match: {job.get('match')}  |  Tools the ad names that your experience shows: {plan['coverage']}%",
@@ -493,6 +557,8 @@ def tailor_job(job: dict, profile: dict, out_root: Path, llm=None, make_pdf: boo
     ]) + "\n", encoding="utf-8")
     if make_pdf:
         progress.stage("Making the PDF files", step=4, steps=steps)
-    pdfs = to_pdf([cv, letter]) if make_pdf else []
+    pdfs = [f.replace(folder / f.name) for f in to_pdf([cv, letter])] if make_pdf else []
+    if not pdfs:  # no LibreOffice: the Word files are what to send, so they go on top
+        cv, letter = cv.replace(folder / cv.name), letter.replace(folder / letter.name)
     return {"folder": str(folder), "files": [str(p) for p in (cv, letter, report, *pdfs)],
-            "coverage": plan["coverage"], "cv_style": cv_style if cv_style in CV_STYLES else "classic"}
+            "coverage": plan["coverage"], "cv_style": cv_style if cv_style in CV_STYLES else "modern"}

@@ -34,7 +34,7 @@ DEFAULTS = {
         "theirstack_options": {"location_ids": [], "english_only": True},
     },
     "llm": {"provider": "none", "model": "", "base_url": ""},
-    "tailor": {"min_match": 70, "max_per_run": 5, "output_dir": "output", "make_pdf": True, "only_english_ads": True, "letter_language": "auto", "cv_style": "classic"},
+    "tailor": {"min_match": 70, "max_per_run": 5, "output_dir": "Stellenpilot", "make_pdf": True, "only_english_ads": True, "letter_language": "auto", "cv_style": "modern"},
     "gmail": {"enabled": False, "lookback_days": 3, "method": "", "address": "", "imap_host": ""},
     "watch": {"companies": [], "starter_list": False, "title_words": [], "max_age_days": 30},
     "notify": {"email": False, "telegram": False, "only_when_new": False},
