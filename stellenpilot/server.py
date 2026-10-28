@@ -40,7 +40,7 @@ EDITABLE = {"search": ("keywords", "city", "radius_km", "country", "include_remo
 CHOICES = {("llm", "provider"): {"none", "builtin", "ollama", "lmstudio", "llamacpp", "vllm", "local", "anthropic", "openai"},
            ("language", "my_german_level"): {"", "A1", "A2", "B1", "B2", "C1", "C2"},
            ("tailor", "letter_language"): {"auto", "en", "de"},
-           ("tailor", "cv_style"): {"classic", "compact", "lebenslauf"},
+           ("tailor", "cv_style"): {"modern", "classic", "compact", "lebenslauf"},
            ("ui", "language"): {"auto", "en", "de"}}
 SECRETS = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ADZUNA_APP_ID", "ADZUNA_APP_KEY", "THEIRSTACK_API_KEY")
 
@@ -261,15 +261,22 @@ def fill_lifts(jobs: list[dict], profile: dict) -> None:
         j["lift"] = lifts(j, profile) if profile and not j.get("closed") else []
 
 
+def in_output(folder: Path, out_root: Path) -> bool:
+    """Only folders Stellenpilot made: under the output folder, or under the old default "output" next to it."""
+    return folder.is_dir() and any(r in folder.parents for r in (out_root, out_root.parent / "output"))
+
+
 def find_doc(job, kind: str, out_root: Path) -> Path | None:
     """The CV or cover letter in a job's folder, PDF first. Only inside the output folder."""
     if not job or not job["folder"] or kind not in ("cv", "letter"):
         return None
     folder = Path(job["folder"]).resolve()
-    if not folder.is_dir() or out_root not in folder.parents:
+    if not in_output(folder, out_root):
         return None
     marks = ("_CV_",) if kind == "cv" else ("_Cover_Letter_", "_Anschreiben_")
-    found = [f for f in folder.iterdir() if any(m in f.name for m in marks) and f.suffix in (".pdf", ".docx")]
+    # "Jo_CV.pdf" (now) and "Jo_CV_Acme.pdf" (older versions); the Word files may sit in edit/
+    files = [*folder.iterdir(), *((folder / "edit").iterdir() if (folder / "edit").is_dir() else ())]
+    found = [f for f in files if any(m in f.stem + "_" for m in marks) and f.suffix in (".pdf", ".docx")]
     return min(found, key=lambda f: f.suffix != ".pdf", default=None)
 
 
@@ -478,7 +485,7 @@ def make_handler(settings, port: int = 8765):
             if self.path.startswith("/api/open-folder/"):
                 job = db.job(unquote(self.path[len("/api/open-folder/"):]))
                 folder = Path(job["folder"]).resolve() if job and job["folder"] else None
-                if not folder or not folder.is_dir() or out_root not in folder.parents:
+                if not folder or not in_output(folder, out_root):
                     return self._send(400, {"error": "No document folder for this job yet"})
                 open_in_file_manager(str(folder))
                 return self._send(200, {"ok": True})

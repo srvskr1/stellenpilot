@@ -78,11 +78,11 @@ class CvStyleTests(unittest.TestCase):
         self.assertEqual(res["cv_style"], "lebenslauf")
         self.assertIn("BERUFSERFAHRUNG", text)
 
-    def test_unknown_style_falls_back_to_classic(self):
+    def test_unknown_style_falls_back_to_modern(self):
         j = job(2, "Python and SQL.")
         with tempfile.TemporaryDirectory() as d:
             res = tailor_job({**j, "url": "", "source": "t"}, PROFILE, Path(d), make_pdf=False, cv_style="fancy")
-        self.assertEqual(res["cv_style"], "classic")
+        self.assertEqual(res["cv_style"], "modern")
 
 
 if __name__ == "__main__":

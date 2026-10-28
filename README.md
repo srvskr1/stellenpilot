@@ -81,7 +81,7 @@ Every day, by itself:
 * **Reads your CV.** Drop a PDF or Word file and it becomes a structured profile. A CV with clear headings is sorted in about a second, without any AI; for other layouts the AI only points at line numbers, so even a laptop needs just a minute or two. Every word is copied from your CV, and anything left out is flagged.
 * **Scores every job** from 0 to 100 with a one line reason and the honest gaps (for example "asks for dbt, which you are still learning").
 * **Understands German job ads.** It finds the German level an ad really needs (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and writes an English summary of every German ad.
-* **Tailors your CV.** It picks and orders the experience, projects and skills from your profile that matter most for this job, and chooses the best fitting headline. Three layouts: Classic, Compact, or a German Lebenslauf with dates first.
+* **Tailors your CV.** It picks and orders the experience, projects and skills from your profile that matter most for this job, and chooses the best fitting headline. Four layouts: Modern (the default, dates on the right), Classic, Compact, or a German Lebenslauf with dates first. Each job gets one short folder: the PDFs to send on top, the Word files and your gap notes in `edit`.
 * **Writes the cover letter** in natural language for that company and role, plus a short report: what the ad asks for, what you cover, and which gaps to be honest about. German letters only if your German is B2 or better.
 * **Prepares interviews** with likely questions and questions to ask them.
 * **Learns your taste.** Mark jobs as a good match or not for you, and the next search leans toward what you liked.
@@ -270,7 +270,7 @@ Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Job
 
 ## Privacy and safety
 
-* **Local first.** Everything is stored in `jobhunt.db` and the `output` folder next to your config, on your computer. With the built-in AI or another local model, nothing about you leaves it.
+* **Local first.** Everything is stored in `jobhunt.db` and the `Stellenpilot` folder next to your config, on your computer. With the built-in AI or another local model, nothing about you leaves it.
 * With Claude or OpenAI, your profile and the job ads are sent to that provider.
 * The dashboard listens on 127.0.0.1 only, and write requests need a custom header, so other websites cannot change your data through your browser.
 * **Updates.** Once a day Stellenpilot asks GitHub whether a newer version exists. That request carries only the version number, never your data, and you can switch it off under Settings, Language. If there is one, Home shows a **Download** button for the installer from the Stellenpilot releases. Run it and it updates your app in place; your workspace is never touched. Stellenpilot itself never downloads or runs anything.
