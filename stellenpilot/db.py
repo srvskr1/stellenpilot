@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   interview_at TEXT,
   prep TEXT NOT NULL DEFAULT '',
   prep_done TEXT NOT NULL DEFAULT '',
+  mock TEXT NOT NULL DEFAULT '',
   rating INTEGER,
   notes TEXT NOT NULL DEFAULT '',
   dedupe_key TEXT NOT NULL DEFAULT '',
@@ -74,7 +75,7 @@ STATUSES = ("new", "ready", "applied", "interview", "offer", "rejected", "skippe
 REACHED = ("applied", "interview", "offer")
 # Fields the user owns. The pipeline never overwrites them.
 USER_FIELDS = ("rating", "notes", "prep_done")
-EDITABLE = {"status", "status_note", "rating", "notes", "closed", "interview_at", "prep", "prep_done", "folder"}
+EDITABLE = {"status", "status_note", "rating", "notes", "closed", "interview_at", "prep", "prep_done", "mock", "folder"}
 
 
 # One clock everywhere: local time, the clock you live by. Timestamps keep their UTC offset
@@ -110,7 +111,7 @@ class DB:
     def _migrate(self) -> None:
         """Add columns introduced after a user's database was created."""
         have = {r[1] for r in self.conn.execute("PRAGMA table_info(jobs)")}
-        for col in ("german_level", "summary_en", "skills", "cv_style", "reached", "prep_done"):
+        for col in ("german_level", "summary_en", "skills", "cv_style", "reached", "prep_done", "mock"):
             if col not in have:
                 self.conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
         if "reached" not in have:
