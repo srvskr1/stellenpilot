@@ -2,6 +2,20 @@
 
 Checked on 10 October 2026. Terms change, so read the linked pages yourself before relying on this summary.
 
+## At a glance
+
+| source | key | cost and limits | terms you should know |
+|---|---|---|---|
+| Bundesagentur für Arbeit | none | free | Community documented endpoint (jobsuche.api.bund.dev). No published limits, so requests are kept small. |
+| Arbeitnow | none | free | Their terms require a link back to arbeitnow.com. The dashboard shows it. |
+| Adzuna | free, from developer.adzuna.com | default 250 calls a day | Allowed for personal research. Adzuna must be credited; every Adzuna job links to Adzuna. Returns short snippets, not full ads. |
+| TheirStack | free, from theirstack.com | 200 credits a month, 1 credit per job | Keys may not be shared. Each user needs their own. |
+| Jobicy | none | free, one pass an hour at most | Remote jobs only. Credit Jobicy with a link to the listing; the dashboard does this. |
+| Remotive | none | free, about 4 calls a day at most | Remote jobs only, one call per run. Small feed, delayed by a day. Credit and link back to Remotive; the dashboard does this. |
+| workingstudentjobs.de | none | free, one call per city | Free Werkstudent and internship API for German cities. Every job links to its apply_url, and the listings must not be re-hosted as a competing board. The feed has no ad text, so only title, skills, language and field are scored. |
+
+Other countries: set `country` in `config.toml`. Adzuna covers 19 countries, Jobicy and Remotive cover remote roles open to your country, TheirStack and the company watchlist cover any country, and the Bundesagentur, Arbeitnow and workingstudentjobs.de cover Germany only.
+
 ## Bundesagentur für Arbeit
 
 * Endpoint: `https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v6/jobs` with the header `X-API-Key: jobboerse-jobsuche`. Full ad text comes from `/pc/v4/jobdetails/{base64 reference number}`.
