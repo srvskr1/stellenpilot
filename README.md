@@ -13,14 +13,15 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
+### What is new in 0.12.3
+
+* **Mock interview.** Practise your prep pack out loud before the real thing. Stellenpilot asks the likely questions one at a time, you type an answer, and it gives feedback built only on your own CV: what worked, what to add, and a stronger version you can say in your own words. No AI on? You still get the questions and rate your own answers against the ideas in your pack. Everything stays on your computer, so you can come back the day before the interview.
+* **Gmail prompt where it helps.** The interviews list now shows a quiet nudge to connect Gmail, so invitations can land there on their own.
+
 ### What is new in 0.12.2
 
 * **Blue Card check uses today's line.** Each job is checked against the line valid on the day you look, so the switch to new figures happens on 1 January by itself. The 2027 ceiling set by the cabinet (€106,200, so €53,100 and €48,108.60) is already in, marked as expected until the Bundesrat approves it.
 * **Official source for each year.** "Where is this from?" now links the Interior Ministry's notice in the Bundesanzeiger for 2026 and the Federal Government's announcement for 2027. Thanks to Expath for pointing out how the lines are set.
-
-### What is new in 0.12.1
-
-* **Safer Blue Card check.** "Up to €60k" or "bis zu 60.000 €" is a ceiling, not the pay, so it no longer counts as the salary. Those jobs now show "ask in the interview" instead of a yes they may not deserve.
 * **Blue Card lines follow the pension ceiling.** Both lines are worked out from the yearly pension contribution ceiling (50% and 45.3%), and the shortage line keeps its cents (€45,934.20).
 * **Star on GitHub.** A new link at the bottom of the sidebar. If Stellenpilot helps you, a star helps others find it.
 
@@ -69,7 +70,7 @@ Every day, by itself:
 1. **Collect.** Stellenpilot searches the Bundesagentur für Arbeit, Arbeitnow, Adzuna, TheirStack, Jobicy, Remotive and workingstudentjobs.de, plus the career pages of about 200 companies with offices in Germany. Duplicates are removed.
 2. **Score.** The AI reads each ad against your CV and gives a match from 0 to 100, a short reason, and the honest gaps. It reads which German level the ad really asks for and skips ads far above yours.
 3. **Write.** For the best matches it writes a CV and a cover letter tailored to that job, using only facts from your CV, as Word files and PDF.
-4. **Track.** With Gmail connected, confirmations, interview invitations and rejections move each application forward on their own. Interviews get a prep pack.
+4. **Track.** With Gmail connected, confirmations, interview invitations and rejections move each application forward on their own. Interviews get a prep pack and a mock interview to practise with.
 5. **Report.** The dashboard (and, if you like, a Telegram or email digest) shows what is ready to send today.
 
 **It never applies for you and never contacts a company.** The agent prepares; you stay in control of every application.
@@ -83,7 +84,7 @@ Every day, by itself:
 * **Understands German job ads.** It finds the German level an ad really needs (A1 to C2, from phrases like "verhandlungssicher" or "gute Deutschkenntnisse"), compares it with yours, and writes an English summary of every German ad.
 * **Tailors your CV.** It picks and orders the experience, projects and skills from your profile that matter most for this job, and chooses the best fitting headline. Four layouts: Modern (the default, dates on the right), Classic, Compact, or a German Lebenslauf with dates first. Each job gets one short folder: the PDFs to send on top, the Word files and your gap notes in `edit`.
 * **Writes the cover letter** in natural language for that company and role, plus a short report: what the ad asks for, what you cover, and which gaps to be honest about. German letters only if your German is B2 or better.
-* **Prepares interviews** with likely questions and questions to ask them.
+* **Prepares interviews** with likely questions and questions to ask them, and runs a mock interview where you practise your answers and get feedback from your own CV.
 * **Learns your taste.** Mark jobs as a good match or not for you, and the next search leans toward what you liked.
 * **Speaks English and German.** Pick the dashboard language in the first setup step or under Settings, Language. Automatic follows your browser. Your CVs and cover letters keep their own language setting.
 

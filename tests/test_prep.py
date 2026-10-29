@@ -9,7 +9,7 @@ from pathlib import Path
 
 from stellenpilot.config import Settings
 from stellenpilot.db import DB
-from stellenpilot.pipeline import basic_prep, make_prep
+from stellenpilot.pipeline import basic_prep, grade_answer, make_prep, stronger_answer
 
 PROFILE = tomllib.loads(resources.files("stellenpilot").joinpath("examples/profile.example.toml").read_text(encoding="utf-8"))
 JOB = {"id": "p-1", "source": "Test", "title": "Data Engineer", "company": "Ruhr Energie", "location": "Essen",
@@ -19,6 +19,61 @@ JOB = {"id": "p-1", "source": "Test", "title": "Data Engineer", "company": "Ruhr
 
 class NoAI:
     enabled = False
+
+
+class FakeLLM:
+    """Returns whatever the test sets in `reply`, so grading logic is checked without a model."""
+    enabled = True
+    max_chars = 4000
+
+    def __init__(self, reply):
+        self.reply = reply
+
+    def complete_json(self, system, user, max_tokens=0):
+        return self.reply
+
+
+class MockInterviewTests(unittest.TestCase):
+    def test_grade_clamps_rating_and_trims_points(self):
+        g = grade_answer(JOB, PROFILE, "Tell us about a pipeline.", "I built one with Python.",
+                         FakeLLM({"rating": 9, "worked": ["a", "b", "c"], "improve": ["x"]}))
+        self.assertEqual(g["rating"], 2)            # 9 clamped into 0..2
+        self.assertEqual(len(g["worked"]), 2)       # at most two points
+        self.assertEqual(g["improve"], ["x"])
+
+    def test_grade_defaults_to_good_on_junk(self):
+        g = grade_answer(JOB, PROFILE, "q", "a", FakeLLM({"worked": None, "improve": None}))
+        self.assertEqual((g["rating"], g["worked"], g["improve"]), (1, [], []))
+
+    def test_stronger_drops_claims_not_in_the_cv(self):
+        # The first sentence is grounded, the second claims a tool the profile does not have.
+        text = stronger_answer(JOB, PROFILE, "q", "a",
+                               FakeLLM({"stronger": "I built Python pipelines at work. I have shipped production Kafka clusters for years."}))
+        self.assertIn("Python", text)
+        self.assertNotIn("Kafka", text)
+
+    def test_mock_route_needs_ai(self):
+        from helpers import fetch_json, http_error, running
+        from stellenpilot.server import make_handler
+        hdr = {"X-Jobhunt": "1", "Content-Type": "application/json"}
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
+            settings = Settings(Path(d))
+            settings["llm"]["provider"] = "none"
+            db = DB(settings.db_path)
+            db.insert_job(JOB)
+            db.conn.close()
+            with running(make_handler(settings)) as srv:
+                req = lambda body: urllib.request.Request(f"{srv.base}/api/mock/grade", data=json.dumps(body).encode(), method="POST", headers=hdr)
+                self.assertEqual(http_error(req({"id": "p-1", "question": "q", "answer": ""}))[0], 400)   # empty answer
+                self.assertEqual(http_error(req({"id": "p-1", "question": "q", "answer": "Something."}))[0], 400)  # no AI on
+                # mock answers round-trip through the job the same way prep does
+                patch = urllib.request.Request(f"{srv.base}/api/jobs/p-1", data=json.dumps({"mock": '{"answers":{"0":{"a":"hi","self":2}}}'}).encode(), method="PATCH", headers=hdr)
+                urllib.request.urlopen(patch)
+                saved = json.loads(fetch_json(f"{srv.base}/api/state")["jobs"][0]["mock"])
+                self.assertEqual(saved["answers"]["0"], {"a": "hi", "self": 2})
+                # invalid JSON in mock is refused
+                bad = urllib.request.Request(f"{srv.base}/api/jobs/p-1", data=json.dumps({"mock": "{not json"}).encode(), method="PATCH", headers=hdr)
+                self.assertEqual(http_error(bad)[0], 400)
 
 
 class BasicPrepTests(unittest.TestCase):

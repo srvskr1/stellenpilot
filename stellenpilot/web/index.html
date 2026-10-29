@@ -733,6 +733,47 @@ body.wizopen{overflow:hidden}
 .upd code{font:500 .8125rem var(--f-mono);background:var(--surface);padding:4px 8px;border-radius:6px;color:var(--text);overflow-wrap:anywhere}
 .upd .btn:active{transform:scale(.97)}
 .upd .updcmd{flex-basis:100%;font-size:.8125rem;color:var(--text-secondary)}.upd .updcmd summary{cursor:pointer}.upd .updcmd code{display:inline-block;margin-top:6px}
+/* Mock interview: practise the prep-pack questions out loud */
+.mkcta{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:12px;background:var(--accent-soft);margin-top:14px}
+.mkcta .ic{width:40px;height:40px;border-radius:50%;background:var(--surface);color:var(--accent);display:grid;place-items:center;flex:none}
+.mkcta .ic svg{width:20px;height:20px}
+.mkcta b{display:block;font-weight:600}.mkcta p{margin:2px 0 12px;font-size:.875rem;color:var(--text-secondary)}
+.mkov{position:fixed;inset:0;z-index:45;background:rgba(var(--bg-rgb),.72);backdrop-filter:blur(4px);overflow:auto;padding:28px 16px 48px;display:flex;justify-content:center;align-items:flex-start}
+.mkov[hidden]{display:none}
+.mkbox{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:clamp(20px,4vw,30px);display:flex;flex-direction:column;gap:18px;box-shadow:0 12px 40px rgba(16,24,40,.16);margin:auto}
+.mkhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.mkhead h2{margin:0;font-size:1.125rem;font-weight:700}.mkhead p{margin:2px 0 0;font-size:.875rem;color:var(--text-tertiary)}
+.mkx{width:44px;height:44px;margin:-6px -6px 0 0;border:0;border-radius:10px;background:transparent;color:var(--text-tertiary);display:grid;place-items:center;cursor:pointer;flex:none}
+.mkx:hover{background:var(--surface-alt)}.mkx svg{width:20px;height:20px}
+.mkprog{display:flex;justify-content:space-between;font-size:.8125rem;color:var(--text-tertiary);margin-bottom:2px}
+.mkq{padding:18px;border-radius:12px;background:var(--surface-alt)}
+.mkq small{display:block;color:var(--text-tertiary);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.mkq .q{display:block;font-size:1.25rem;line-height:1.35;font-weight:600;margin:6px 0 10px;text-wrap:balance}
+.mkq.sm .q{font-size:1rem;margin-bottom:0}.mkq .chip{background:var(--surface)}
+.mkfld label{display:block;font-weight:600;font-size:.875rem;margin-bottom:6px}
+.mkfld textarea{width:100%;box-sizing:border-box;min-height:140px;resize:vertical;padding:12px 14px;border:1px solid var(--border-strong);border-radius:10px;font:400 .9375rem/1.5 var(--f-ui);color:var(--text);background:var(--surface)}
+.mkfld textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.mkfld .help{display:flex;justify-content:space-between;gap:12px;margin-top:6px;font-size:.8125rem;color:var(--text-tertiary)}
+.mkfld .help span:last-child{white-space:nowrap}
+.mkverd b{display:block;font-size:1.0625rem}
+.mkfb{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.mkfb li{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--text-secondary)}
+.mkfb li svg{width:18px;height:18px;flex:none;margin-top:2px}
+.mkfb.ok svg{color:var(--ok-fg)}.mkfb.up svg{color:var(--low-fg)}
+.mkbetter{border-left:3px solid var(--accent);background:var(--surface-alt);border-radius:0 10px 10px 0;padding:12px 14px;font-size:.9rem;line-height:1.55;color:var(--text);margin:0}
+.mksrc{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:.8125rem;color:var(--text-tertiary)}.mksrc svg{width:15px;height:15px;color:var(--ok-fg);flex:none}
+.mkself{display:flex;flex-wrap:wrap;gap:8px}
+.mkqlist{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.mkqlist li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--surface-alt);font-size:.9rem}
+.mkqlist li:first-child{border-top:0}
+.mkqlist .d{width:10px;height:10px;border-radius:50%}.mkqlist em{font-style:normal;font-size:.8125rem;color:var(--text-tertiary);white-space:nowrap}
+.d-s{background:var(--ok-fg)}.d-g{background:var(--accent)}.d-n{background:var(--warning)}.d-k{background:var(--border-strong)}
+.mklegend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8125rem;color:var(--text-tertiary)}
+.mklegend span{display:inline-flex;gap:6px;align-items:center}.mklegend .d{width:8px;height:8px;border-radius:50%;display:inline-block}
+.mksaved{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:10px;background:var(--ok-bg);color:var(--ok-fg);font-size:.875rem;font-weight:600}
+.mksaved svg{width:18px;height:18px;flex:none}
+.gmnudge{display:flex;gap:10px;align-items:center;padding:10px 14px;margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;font-size:.875rem;color:var(--text-secondary)}
+.gmnudge svg{width:18px;height:18px;flex:none;color:var(--text-tertiary)}.gmnudge a{margin-left:auto;font-weight:600;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1140,6 +1181,7 @@ body.wizopen{overflow:hidden}
   <p class="wfoot">Stellenpilot never applies for you and never contacts companies.</p>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="mkov" id="mockOv" role="dialog" aria-modal="true" aria-label="Mock interview" hidden><div class="mkbox" id="mockBox"></div></div>
 <footer class="credits">Job data from <a href="https://www.arbeitsagentur.de/jobsuche/" target="_blank" rel="noopener">Bundesagentur für Arbeit</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a>, <a href="https://www.adzuna.de" target="_blank" rel="noopener">The Adzuna API</a>, <a href="https://theirstack.com" target="_blank" rel="noopener">TheirStack</a>, <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a>, <a href="https://www.workingstudentjobs.de" target="_blank" rel="noopener">workingstudentjobs.de</a> and <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>, depending on which sources you enable.</footer>
 
 <script>
@@ -1317,6 +1359,17 @@ const DE={
 "Found in your Gmail":"In deinem Gmail gefunden","An application you sent yourself. Status updates come from Gmail.":"Eine Bewerbung, die du selbst geschickt hast. Statusänderungen kommen aus Gmail.",
 "Honest gaps":"Ehrliche Lücken","English summary of this German ad":"Englische Zusammenfassung dieser deutschen Anzeige","Your documents":"Deine Unterlagen","Make CV and cover letter":"Lebenslauf und Anschreiben erstellen",
 "Takes a few seconds, or a minute or two with a local AI.":"Dauert ein paar Sekunden, mit einer lokalen KI ein bis zwei Minuten.","Interview prep pack":"Vorbereitung aufs Gespräch",
+"Mock interview":"Übungsgespräch","Start mock interview":"Übungsgespräch starten","Keep practising":"Weiter üben","Practise before the real one":"Übe vor dem echten Gespräch",
+"{n} questions from your pack. Type an answer, get feedback built on your CV.":"{n} Fragen aus deiner Vorbereitung. Schreib eine Antwort, bekomme Feedback auf Basis deines Lebenslaufs.","{a} of {b} answered. Pick up where you left off.":"{a} von {b} beantwortet. Mach dort weiter, wo du aufgehört hast.",
+"They might ask":"Sie könnten fragen","Your answer":"Deine Antwort","Write it like you would say it. A few sentences is enough.":"Schreib es so, wie du es sagen würdest. Ein paar Sätze reichen.","words":"Wörter",
+"Get feedback":"Feedback holen","Show answer ideas":"Antwortideen zeigen","Skip":"Überspringen","Stop practising":"Üben beenden","Question {a} of {b}":"Frage {a} von {b}","{n} answered":"{n} beantwortet",
+"No AI is on, so you will rate your own answer against the ideas in your pack.":"Es ist keine KI aktiv, also bewertest du deine Antwort selbst anhand der Ideen in deiner Vorbereitung.",
+"Needs work":"Noch ausbaufähig","Good":"Gut","Strong":"Stark","Rating: {r}":"Bewertung: {r}","What worked":"Was gut war","Make it stronger":"Mach es stärker",
+"A stronger version":"Eine stärkere Version","Show a stronger version":"Eine stärkere Version zeigen","Built only from your CV and your answer. Say it in your own words.":"Nur aus deinem Lebenslauf und deiner Antwort gebaut. Sag es in deinen eigenen Worten.",
+"How did it go?":"Wie lief es?","Next question":"Nächste Frage","See summary":"Zusammenfassung ansehen","Try again":"Nochmal versuchen","Answer ideas from your pack":"Antwortideen aus deiner Vorbereitung",
+"You answered {a} of {b}.":"Du hast {a} von {b} beantwortet.","Saved with this job, so you can come back before the interview":"Beim Job gespeichert, damit du vor dem Gespräch zurückkommen kannst","Practise the weak ones":"Die schwachen üben","Close":"Schließen",
+"Good start. Keep going.":"Guter Anfang. Weiter so.","Good. Add a concrete result.":"Gut. Nenn ein konkretes Ergebnis.","Strong answer.":"Starke Antwort.","Good.":"Gut.","Write an answer first.":"Schreib zuerst eine Antwort.",
+"Connect Gmail and interview invites show up here on their own.":"Verbinde Gmail, dann erscheinen Einladungen zu Gesprächen hier von selbst.",
 "Rate this match":"Diesen Treffer bewerten","Is this a good match for you?":"Passt dieser Job zu dir?","Yes":"Ja","Not for me":"Nicht für mich",
 "Contact person, salary, what they said on the phone":"Ansprechperson, Gehalt, was am Telefon gesagt wurde","Marked applied on Home":"Auf der Startseite als beworben markiert",
 "You can view this board but not change it":"Du kannst diese Übersicht ansehen, aber nicht ändern","Could not save. Try again in a moment.":"Speichern ging nicht. Versuch es gleich noch einmal.",
@@ -1691,8 +1744,82 @@ function prepCard(j){const id=esc(j._id),dis=canWrite?"":"disabled";
   const items=lab.map(([a,b],i)=>parts[i].trim()?`<li class="${done.has(i)?"done":""}"><button type="button" class="tick" data-tick="${i}" data-id="${id}" aria-pressed="${done.has(i)}" aria-label="${esc(t("Mark done: {s}",{s:a}))}" ${dis}>${done.has(i)?ICO.check:i+1}</button>
     <details data-pstep="${id}:${i}" ${openPrep.has(j._id+":"+i)?"open":""}><summary><b>${esc(a)}</b><span>${esc(b)}</span></summary><div class="prepbody">${fmtPrep(parts[i])}</div></details></li>`:"").join("");
   const total=parts.filter(x=>x.trim()).length,nd=[...done].filter(i=>parts[i]&&parts[i].trim()).length;
+  const mk=mockState(j),cta=nq?`<div class="mkcta"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></span>
+    <div><b>${t("Practise before the real one")}</b><p>${mk.started?t("{a} of {b} answered. Pick up where you left off.",{a:mk.answered,b:nq}):t("{n} questions from your pack. Type an answer, get feedback built on your CV.",{n:nq})}</p>
+    <button class="btn" data-mock="${id}" ${dis}>${mk.started?t("Keep practising"):t("Start mock interview")}</button></div></div>`:"";
   return `<div><h3>${t("Get ready for the interview")}</h3><p class="small">${esc(t("{a} of {b} done",{a:nd,b:total}))}</p><div class="pbar"><i style="width:${total?Math.round(nd/total*100):0}%"></i></div>
-    <ol class="steps">${items}</ol><div class="btnrow" style="margin-top:10px">${btn}</div></div>`}
+    <ol class="steps">${items}</ol><div class="btnrow" style="margin-top:10px">${btn}</div>${cta}</div>`}
+
+/* ---- Mock interview ---- */
+let aiOn=false, gmailOn=false, mk=null;  // mk: {id, idx, phase:'answer'|'feedback'|'summary', draft}
+const RATE_LABEL=["Needs work","Good","Strong"], RATE_DOT=["d-n","d-g","d-s"];
+function gmailNudge(){return gmailOn?"":`<a class="gmnudge" href="#settings" data-goto="s-gmail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>${t("Connect Gmail and interview invites show up here on their own.")}</span><span>${t("Connect")}</span></a>`;}
+function mockQuestions(j){const likely=prepSteps(j.prep||"")[1]||"";
+  return (likely.match(/^\s*[-*] .+$/gm)||[]).map(l=>l.replace(/^\s*[-*] /,"").trim()).filter(Boolean);}
+function mockData(j){try{const d=JSON.parse(j.mock||"{}");return d&&typeof d==="object"?{answers:d.answers||{},done:!!d.done}:{answers:{},done:false}}catch{return{answers:{},done:false}}}
+function mockState(j){const qs=mockQuestions(j),d=mockData(j);
+  return {questions:qs,answered:Object.keys(d.answers).filter(k=>+k<qs.length&&d.answers[k]&&d.answers[k].a).length,started:Object.keys(d.answers).length>0};}
+function openMock(id){const j=jobs.find(x=>x._id===id);if(!j||!j.prep)return;
+  const qs=mockQuestions(j);if(!qs.length)return;const d=mockData(j);
+  let idx=qs.findIndex((q,i)=>!(d.answers[i]&&d.answers[i].a));if(idx<0)idx=0;
+  mk={id,idx,phase:d.answers[idx]&&d.answers[idx].a?"feedback":"answer",draft:(d.answers[idx]||{}).a||""};
+  $("mockOv").hidden=false;document.body.classList.add("wizopen");renderMock();
+  const ta=$("mockBox").querySelector("textarea");if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}}
+function closeMock(){mk=null;$("mockOv").hidden=true;document.body.classList.remove("wizopen");renderDetail&&renderDetail()}
+function mockSave(){const j=jobs.find(x=>x._id===mk.id);return save(mk.id,{mock:j.mock})}
+function setAns(j,i,patch){const d=mockData(j);d.answers[i]={...(d.answers[i]||{}),...patch};j.mock=JSON.stringify(d);return d;}
+const chk=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
+const uparr=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
+const shield=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`;
+const xico=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>`;
+function mockHead(j,sub){return `<div class="mkhead"><div><h2>${t("Mock interview")}</h2><p>${esc(j.title)} · ${esc(j.company)}</p></div>
+  <button class="mkx" data-mkclose aria-label="${esc(t("Stop practising"))}">${xico}</button></div>${sub||""}`;}
+function renderMock(){if(!mk)return;const j=jobs.find(x=>x._id===mk.id);if(!j)return closeMock();
+  const B=$("mockBox"),qs=mockQuestions(j),d=mockData(j),nq=qs.length;
+  if(mk.phase==="summary"){
+    const rows=qs.map((q,i)=>{const a=d.answers[i];const cls=!a||!a.a?"d-k":a.self!=null?RATE_DOT[a.self]:a.rating!=null?RATE_DOT[a.rating]:"d-g";
+      const lab=!a||!a.a?t("Skipped"):t(RATE_LABEL[a.self!=null?a.self:(a.rating!=null?a.rating:1)]);
+      return `<li><i class="d ${cls}"></i><span>${esc(q)}</span><em>${esc(lab)}</em></li>`}).join("");
+    const weak=qs.map((q,i)=>d.answers[i]).filter(a=>a&&a.a&&((a.self!=null?a.self:a.rating)===0)).length;
+    const answered=qs.filter((q,i)=>d.answers[i]&&d.answers[i].a).length;
+    B.innerHTML=mockHead(j,`<div><p class="small" style="margin:0">${esc(t("You answered {a} of {b}.",{a:answered,b:nq}))}</p></div>`)
+      +`<ul class="mkqlist">${rows}</ul>
+      <div class="mklegend"><span><i class="d d-s"></i>${t("Strong")}</span><span><i class="d d-g"></i>${t("Good")}</span><span><i class="d d-n"></i>${t("Needs work")}</span><span><i class="d d-k"></i>${t("Skipped")}</span></div>
+      <div class="mksaved">${chk}${t("Saved with this job, so you can come back before the interview")}</div>
+      <div class="btnrow">${weak?`<button class="btn" data-mkweak>${t("Practise the weak ones")}</button>`:""}<button class="btn sec" data-mkclose>${t("Close")}</button></div>`;
+    return;}
+  const q=qs[mk.idx],a=d.answers[mk.idx]||{},answered=qs.filter((x,i)=>d.answers[i]&&d.answers[i].a).length;
+  const prog=`<div><div class="mkprog"><span>${esc(t("Question {a} of {b}",{a:mk.idx+1,b:nq}))}</span><span>${esc(t("{n} answered",{n:answered}))}</span></div><div class="pbar"><i style="width:${Math.round((mk.idx)/nq*100)}%"></i></div></div>`;
+  if(mk.phase==="answer"){const gap=(j.gapTags||[])[0];
+    B.innerHTML=mockHead(j,prog)
+      +`<div class="mkq"><small>${t("They might ask")}</small><span class="q">${esc(q)}</span></div>
+      <div class="mkfld"><label for="mkAns">${t("Your answer")}</label><textarea id="mkAns">${esc(mk.draft||"")}</textarea>
+      <div class="help"><span>${t("Write it like you would say it. A few sentences is enough.")}</span><span id="mkWc">${(mk.draft||"").trim().split(/\s+/).filter(Boolean).length} ${t("words")}</span></div></div>
+      ${aiOn?"":`<p class="small">${t("No AI is on, so you will rate your own answer against the ideas in your pack.")}</p>`}
+      <div class="btnrow"><button class="btn" data-mkgrade>${aiOn?t("Get feedback"):t("Show answer ideas")}</button><button class="btn sec" data-mkskip>${t("Skip")}</button></div>`;
+    return;}
+  // feedback. No AI rating on the answer means the person rates it themselves.
+  const self=a.rating==null, rating=self?(a.self!=null?a.self:1):a.rating;
+  const worked=(a.worked||[]),improve=(a.improve||[]);
+  const scale=`<div class="pscale" role="img" aria-label="${esc(t("Rating: {r}",{r:t(RATE_LABEL[rating]||"Good")}))}">${[0,1,2].map(i=>`<i class="${i<=rating?"on":""}"></i>`).join("")}</div><div style="display:grid;grid-template-columns:repeat(3,1fr)"><span>${t("Needs work")}</span><span style="text-align:center">${t("Good")}</span><span style="text-align:right">${t("Strong")}</span></div>`;
+  let body=mockHead(j)+`<div class="mkq sm"><small>${esc(t("Question {a} of {b}",{a:mk.idx+1,b:nq}))}</small><span class="q">${esc(q)}</span></div>`;
+  if(self){
+    body+=`<details open class="xtra"><summary>${t("Answer ideas from your pack")}</summary><div class="prepbody">${fmtPrep(prepSteps(j.prep)[1])}</div></details>
+      <div class="mkfld"><label>${t("Your answer")}</label><p class="mkbetter">${esc(a.a)}</p></div>
+      <div class="mkverd"><b>${t("How did it go?")}</b><div class="mkself" style="margin-top:8px">
+      ${[0,1,2].map(i=>`<button class="btn ${a.self===i?"":"sec"}" data-mkself="${i}">${t(RATE_LABEL[i])}</button>`).join("")}</div></div>`;
+  } else {
+    body+=`<div class="mkverd">${scale}<b style="margin-top:10px">${esc(a.head||t(RATE_LABEL[rating]||"Good"))}</b></div>`;
+    if(worked.length)body+=`<div><h3>${t("What worked")}</h3><ul class="mkfb ok">${worked.map(w=>`<li>${chk}${esc(w)}</li>`).join("")}</ul></div>`;
+    if(improve.length)body+=`<div><h3>${t("Make it stronger")}</h3><ul class="mkfb up">${improve.map(w=>`<li>${uparr}${esc(w)}</li>`).join("")}</ul></div>`;
+    if(a.stronger)body+=`<div><h3>${t("A stronger version")}</h3><p class="mkbetter">${esc(a.stronger)}</p><p class="mksrc">${shield}${t("Built only from your CV and your answer. Say it in your own words.")}</p></div>`;
+    else body+=`<div class="btnrow"><button class="btn sec" data-mkstronger>${t("Show a stronger version")}</button></div>`;
+    body+=`<details class="xtra"><summary>${t("Your answer")}</summary><div class="prepbody"><p>${esc(a.a)}</p></div></details>`;
+  }
+  const last=mk.idx>=nq-1;
+  body+=`<div class="btnrow"><button class="btn" data-mknext>${last?t("See summary"):t("Next question")}</button><button class="btn sec" data-mkretry>${t("Try again")}</button></div>`;
+  B.innerHTML=body;}
+
 function renderHome(){
   const live=j=>!j.closed, ready=jobs.filter(j=>j.status==="ready"&&live(j)).sort((a,b)=>(b.match||0)-(a.match||0));
   const ints=jobs.filter(j=>j.status==="interview").sort((a,b)=>String(a.interviewAt||"9").localeCompare(String(b.interviewAt||"9")));
@@ -1705,8 +1832,8 @@ function renderHome(){
   $("soon").innerHTML=ints.length?ints.map(j=>{const d=j.interviewAt?new Date(j.interviewAt):null,okd=d&&!isNaN(d);
     return `<div class="box soon">${okd?`<div class="cal"><small>${MON(d)}</small><b>${DAYN(d)}</b></div>`:`<div class="cal"><small>Date</small><b>?</b></div>`}
       <div class="tx"><b>Interview with ${esc(j.company)}</b><span>${okd?esc(d.toLocaleString(LOC,{weekday:"long",hour:"2-digit",minute:"2-digit"}))+" · ":""}${esc(j.title)}</span></div>
-      <button class="linkbtn" data-go="${esc(j._id)}" ${j.prep?'data-open="prep"':""}>${j.prep?"Prep pack":"Details"}</button></div>`}).join("")
-    :`<div class="empty">No interviews yet. When Gmail finds an invite, or you set a job to Interview, it shows here.</div>`;
+      <button class="linkbtn" data-go="${esc(j._id)}" ${j.prep?'data-open="prep"':""}>${j.prep?"Prep pack":"Details"}</button></div>`}).join("")+gmailNudge()
+    :`<div class="empty">No interviews yet. When Gmail finds an invite, or you set a job to Interview, it shows here.</div>`+gmailNudge();
   const fresh=jobs.filter(j=>j.status==="new"&&Number(j.match)>0&&live(j)&&seen(j)).sort((a,b)=>String(b.foundAt||"").localeCompare(String(a.foundAt||""))||(b.match||0)-(a.match||0));
   const top=fresh.slice(0,5).sort((a,b)=>(b.match||0)-(a.match||0));
   $("seeAll").textContent=fresh.length?`See all ${fresh.length}`:"";
@@ -1839,6 +1966,41 @@ function route(){
 addEventListener("hashchange",()=>{route();scrollTo(0,0);if(goto){const t=goto;goto="";setTimeout(()=>$(t).scrollIntoView({block:"start"}),50)}});
 let goto="";document.addEventListener("click",e=>{const a=e.target.closest("a[data-goto]");if(a)goto=a.dataset.goto});
 
+// Mock interview overlay
+const mockOv=$("mockOv");
+mockOv.addEventListener("input",e=>{if(e.target.id!=="mkAns"||!mk)return;mk.draft=e.target.value;
+  const wc=$("mockBox").querySelector("#mkWc");if(wc)wc.firstChild.textContent=e.target.value.trim().split(/\s+/).filter(Boolean).length+" ";});
+mockOv.addEventListener("keydown",e=>{if(e.key==="Escape")closeMock()});
+mockOv.addEventListener("click",async e=>{
+  if(e.target===mockOv)return closeMock();
+  const b=e.target.closest("button");if(!b||!mk)return;
+  const j=jobs.find(x=>x._id===mk.id);if(!j)return;
+  if(b.hasAttribute("data-mkclose")){closeMock();return}
+  if(b.hasAttribute("data-mkskip")){mk.phase="summary";renderMock();return}
+  if(b.hasAttribute("data-mkretry")){mk.draft=(mockData(j).answers[mk.idx]||{}).a||"";mk.phase="answer";renderMock();
+    const ta=$("mockBox").querySelector("textarea");if(ta)ta.focus();return}
+  if(b.hasAttribute("data-mknext")){const nq=mockQuestions(j).length;
+    if(mk.idx>=nq-1){const d=mockData(j);d.done=true;j.mock=JSON.stringify(d);mockSave();mk.phase="summary"}
+    else{mk.idx++;mk.draft=(mockData(j).answers[mk.idx]||{}).a||"";mk.phase=(mockData(j).answers[mk.idx]||{}).a?"feedback":"answer"}
+    renderMock();const ta=$("mockBox").querySelector("textarea");if(ta)ta.focus();return}
+  if(b.hasAttribute("data-mkweak")){const qs=mockQuestions(j),d=mockData(j);
+    const i=qs.findIndex((q,x)=>{const a=d.answers[x];return a&&a.a&&((a.self!=null?a.self:a.rating)===0)});
+    if(i>=0){mk.idx=i;mk.draft=d.answers[i].a;mk.phase="answer"}renderMock();return}
+  if(b.hasAttribute("data-mkself")){const v=Number(b.dataset.mkself);setAns(j,mk.idx,{self:v});await mockSave();renderMock();return}
+  if(b.hasAttribute("data-mkgrade")){const ans=(mk.draft||"").trim();if(!ans){toast(t("Write an answer first."));return}
+    const q=mockQuestions(j)[mk.idx];
+    if(!aiOn){setAns(j,mk.idx,{a:ans,self:null});await mockSave();mk.phase="feedback";renderMock();return}
+    const t0=b.textContent;b.disabled=true;
+    try{const r=await withProgress("mock:"+mk.id,()=>api("POST","/api/mock/grade",{id:mk.id,question:q,answer:ans}),p=>{b.textContent=`${ts(p.stage)}… ${mmss(p.elapsed||0)}`});
+      setAns(j,mk.idx,{a:ans,rating:r.rating,worked:r.worked,improve:r.improve,head:t(["Good start. Keep going.","Good. Add a concrete result.","Strong answer."][r.rating]||"Good.")});
+      await mockSave();mk.phase="feedback";renderMock()}
+    catch(err){toast(err.message);b.disabled=false;b.textContent=t0}return}
+  if(b.hasAttribute("data-mkstronger")){const q=mockQuestions(j)[mk.idx],a=mockData(j).answers[mk.idx]||{};const t0=b.textContent;b.disabled=true;
+    try{const r=await withProgress("mock:"+mk.id,()=>api("POST","/api/mock/stronger",{id:mk.id,question:q,answer:a.a||""}),p=>{b.textContent=`${ts(p.stage)}… ${mmss(p.elapsed||0)}`});
+      setAns(j,mk.idx,{stronger:r.stronger});await mockSave();renderMock()}
+    catch(err){toast(err.message);b.disabled=false;b.textContent=t0}return}
+});
+
 $("pipe").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;filter=b.dataset.k||null;render()});
 $("q").addEventListener("input",renderList);$("minm").addEventListener("change",renderList);
 $("fsrc").addEventListener("change",renderList);$("ftype").addEventListener("change",renderList);
@@ -1853,6 +2015,7 @@ main.addEventListener("click",async e=>{
   if(b.dataset.rate){const id=b.dataset.id,j=jobs.find(x=>x._id===id),v=Number(b.dataset.rate);const nv=j&&j.rating===v?{__delete__:true}:v;
     await save(id,{rating:nv,ratedAt:new Date().toISOString()},nv===v?(v>0?"Marked as a good match":"Marked as not for you"):"Rating removed");return}
   if(b.dataset.go){goJob(b.dataset.go,b.dataset.open);return}
+  if(b.dataset.mock){openMock(b.dataset.mock);return}
   if(b.dataset.applied){await save(b.dataset.applied,{status:"applied",statusSource:"manual",statusUpdatedAt:new Date().toISOString(),statusNote:"Marked applied on Home"},"Moved to Applications");return}
   if(b.dataset.skip){await save(b.dataset.skip,{status:"skipped",statusSource:"manual",statusUpdatedAt:new Date().toISOString(),statusNote:"Posting closed"},"Moved to skipped");return}
   if(b.dataset.openFolder){try{await api("POST","/api/open-folder/"+encodeURIComponent(b.dataset.openFolder));toast("Folder opened")}catch(e){toast(e.message)}return}
@@ -2470,7 +2633,7 @@ async function refresh(){
     lastState=sig;
     jobs=st.jobs;blueCard=st.blueCard||null;visaHints=!!st.visaHints;runs=st.runs;runLog=st.history||[];weekly=st.weekly;unlocksData=st.unlocks;diagData=st.diagnosis;
     searchCfg=st.search||{};fillFilters();
-    $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;
+    $("gmailBtn").hidden=!st.gmailEnabled;$("gmHint").hidden=!!st.gmailEnabled;aiOn=!!st.aiEnabled;gmailOn=!!st.gmailEnabled;
     firstName=st.firstName||"";if(st.schedule)sched=st.schedule;renderSched();
     if(!st.profileReady&&!cvPrompted){cvPrompted=true;openSetup()}
     render();renderRuns();showRun(st.run);renderOffice();
