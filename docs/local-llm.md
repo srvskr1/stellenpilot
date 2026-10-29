@@ -12,7 +12,7 @@ In the dashboard choose **Built-in AI** (in setup, or Settings, AI model) and pr
 * Thinking is switched off (Qwen3.5 would otherwise reason at length before every answer, which is slow on a CPU).
 * From the terminal: `python -m stellenpilot.builtin standard` (or `light`) downloads the same files, then set `provider = "builtin"` and `model = "standard"` under `[llm]`.
 
-Speed is described in the README under "Built-in AI". In short: on a typical laptop the Standard model needs about 20 to 40 seconds per job and 1 to 2 minutes per CV and cover letter, and an AI on your own computer reads only the 20 most promising new jobs per search (`max_ai_jobs`), so a daily search takes about 10 to 20 minutes. **Test speed** in Settings measures your computer.
+Speed is described in [The AI](ai.md) under "Choose your AI". In short: on a typical laptop the Standard model needs about 20 to 40 seconds per job and 1 to 2 minutes per CV and cover letter, and an AI on your own computer reads only the 20 most promising new jobs per search (`max_ai_jobs`), so a daily search takes about 10 to 20 minutes. **Test speed** in Settings measures your computer.
 
 ## Option 1: Ollama
 
