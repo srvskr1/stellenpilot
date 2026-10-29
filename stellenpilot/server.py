@@ -393,7 +393,7 @@ def make_handler(settings, port: int = 8765):
         def do_POST(self):
             if not self._guard():
                 return
-            if self.path in SLOW_POSTS or self.path.startswith(("/api/docs/", "/api/prep/")):
+            if self.path in SLOW_POSTS or self.path.startswith(("/api/docs/", "/api/prep/", "/api/mock/")):
                 # Adding a job (fetch, AI scoring, maybe tailoring) and Gmail sync can take minutes with a
                 # local model. They use their own database connection so the dashboard stays responsive.
                 return self._post()
@@ -422,6 +422,7 @@ def make_handler(settings, port: int = 8765):
                     "blueCard": blue_card_info(),
                     "visaHints": bool(settings["ui"].get("visa_hints")),
                     "gmailEnabled": bool(settings["gmail"].get("enabled")),
+                    "aiEnabled": settings["llm"].get("provider", "none") != "none",
                     "subtitle": subtitle(),
                     "firstName": (str(settings.profile.get("person", {}).get("name") or "").split() or [""])[0],
                     "run": run_state,
@@ -473,6 +474,11 @@ def make_handler(settings, port: int = 8765):
                     if any(not 0 <= x < 4 for x in done):
                         raise ValueError("prepDone steps are 0 to 3")
                     fields["prep_done"] = ",".join(map(str, done))
+                if "mock" in body:  # saved mock-interview answers and ratings, a JSON string
+                    raw = str(body["mock"])[:20000]
+                    if raw.strip():
+                        json.loads(raw)  # must be valid JSON; raises ValueError (400) otherwise
+                    fields["mock"] = raw
                 if "closed" in body:
                     fields["closed"] = int(_as_bool(body["closed"], "closed"))
                 if fields:
@@ -532,6 +538,33 @@ def make_handler(settings, port: int = 8765):
                 finally:
                     own.conn.close()
                 return self._send(200, {"ok": True})
+            if self.path in ("/api/mock/grade", "/api/mock/stronger"):
+                from .pipeline import grade_answer, stronger_answer
+                from .llm import LLM
+                from . import progress
+                body = self._body()
+                job_id, question, answer = body.get("id", ""), (body.get("question") or "").strip(), (body.get("answer") or "").strip()
+                if not answer:
+                    return self._send(400, {"error": "Write an answer first."})
+                own = DB(settings.db_path)
+                try:
+                    job = own.job(job_id)
+                    if not job:
+                        return self._send(404, {"error": "unknown job"})
+                    llm = LLM(settings)
+                    if not getattr(llm, "enabled", False):
+                        return self._send(400, {"error": "Turn on an AI in Settings to get feedback, or rate your own answer."})
+                    stronger = self.path.endswith("stronger")
+                    with progress.track("mock:" + job_id, "Reading your answer"):
+                        out = ({"stronger": stronger_answer(job, settings.profile, question, answer, llm)} if stronger
+                               else grade_answer(job, settings.profile, question, answer, llm))
+                except progress.Busy:
+                    return self._send(409, {"error": "Still reading your last answer."})
+                except Exception as e:
+                    return self._send(500, {"error": f"Could not read your answer: {e}"})
+                finally:
+                    own.conn.close()
+                return self._send(200, out)
             if self.path == "/api/add":
                 from .manual import AddError, add_job
                 try:

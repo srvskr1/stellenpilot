@@ -154,6 +154,41 @@ def make_prep(job: dict, profile: dict, llm) -> str:
     return "\n".join(out)[:4000]
 
 
+MOCK_SYSTEM = """You are a kind but honest interview coach. The candidate just answered one interview question out loud, in writing.
+Rate the answer: 0 = needs work, 1 = good, 2 = strong. Judge only this answer, not their whole CV.
+Give at most two short "worked" points (what was good) and at most two short "improve" points (what to add or change).
+Base everything on the answer and the candidate's real background. Never invent experience they do not have.
+Keep each point under 18 words. Do not use hyphens or dashes as punctuation inside sentences.
+Return JSON: {"rating": 0, "worked": ["..."], "improve": ["..."]}"""
+
+STRONGER_SYSTEM = """Rewrite the candidate's interview answer as a stronger version they could say out loud.
+Use ONLY their real experience and the job ad. Keep it to 3 or 4 sentences, first person, concrete, no buzzwords.
+Do not claim any tool or result that is not in their background. Do not use hyphens or dashes as punctuation inside sentences.
+Return JSON: {"stronger": "..."}"""
+
+
+def _mock_user(job: dict, profile: dict, question: str, answer: str, llm) -> str:
+    return (f"CANDIDATE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n"
+            f"{job_ad(job.get('description', ''), llm.max_chars)}\n\nQUESTION\n{question}\n\nTHEIR ANSWER\n{answer}")
+
+
+def grade_answer(job: dict, profile: dict, question: str, answer: str, llm) -> dict:
+    """Rate one spoken answer. Needs AI; the caller checks llm.enabled first and self-rates without it."""
+    r = llm.complete_json(MOCK_SYSTEM, _mock_user(job, profile, question, answer, llm), max_tokens=400)
+    rating = r.get("rating")
+    rating = int(rating) if isinstance(rating, (int, float)) else 1
+    clean = lambda xs: [str(x).strip() for x in (xs or []) if str(x).strip()][:2]
+    return {"rating": max(0, min(2, rating)), "worked": clean(r.get("worked")), "improve": clean(r.get("improve"))}
+
+
+def stronger_answer(job: dict, profile: dict, question: str, answer: str, llm) -> str:
+    """A model answer, built only from the candidate's real background. Truth guarded like the CV."""
+    text = str(llm.complete_json(STRONGER_SYSTEM, _mock_user(job, profile, question, answer, llm), max_tokens=500).get("stronger") or "").strip()
+    # Drop any sentence that claims something the candidate's experience does not support.
+    kept = [s for s in re.split(r"(?<=[.!?])\s+", text) if s and not unsupported_claims(s, profile, job)]
+    return " ".join(kept)[:900]
+
+
 def run(settings, *, tailor: bool = True) -> dict:
     db = DB(settings.db_path)
     try:
