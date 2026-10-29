@@ -17,7 +17,9 @@
 
 ## Install
 
-**Windows and Mac:** [download the app](https://github.com/srvskr1/stellenpilot/releases/latest), no Python needed ([Mac first start](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md))
+[![Download for Windows](https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTMgM2g4LjV2OC41SDN6TTEyLjUgM0gyMXY4LjVoLTguNXpNMyAxMi41aDguNVYyMUgzek0xMi41IDEyLjVIMjFWMjFoLTguNXoiLz48L3N2Zz4%3D)](https://github.com/srvskr1/stellenpilot/releases/latest) [![Download for Mac](https://img.shields.io/badge/Download_for-Mac-3A3A3C?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/srvskr1/stellenpilot/releases/latest)
+
+No Python needed. First time on a Mac? [Read this first](https://github.com/srvskr1/stellenpilot/blob/main/docs/mac.md)
 
 **Mac or Linux with Homebrew:**
 
