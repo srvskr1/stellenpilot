@@ -5,6 +5,7 @@ This guide takes you from nothing to your first real job search in about 15 minu
 | way | best for | you need |
 |---|---|---|
 | [W. Windows app](#w-windows-app-easiest) | **Windows, the easiest way** | nothing, Python is included |
+| [Mac app](docs/mac.md) | **Macs with an Apple chip, the easiest way** | nothing, Python is included |
 | Homebrew | macOS and Linux, if you already use Homebrew | Homebrew. Run `brew tap srvskr1/stellenpilot`, `brew trust --formula srvskr1/stellenpilot/stellenpilot` and `brew install stellenpilot`, then continue with [First day setup](#first-day-setup). Update with `brew upgrade stellenpilot`. |
 | [A. Python](#a-install-with-python) | macOS and Linux, or if you like the terminal | Python 3.11 or newer |
 | [B. Docker](#b-install-with-docker) | if you already use Docker, or Python gives you trouble | Docker Desktop (Windows, Mac) or Docker Engine (Linux) |
@@ -223,7 +224,7 @@ Docker: `git pull`, then `docker compose pull || docker compose build`. Your wor
 
 ## Uninstalling
 
-Turn off **Automatic search** in Settings first, then remove the program and delete your workspace folder (`my-hunt`, or `data` for Docker). Full step by step list, including API keys and Gmail access: [Uninstall completely](https://github.com/srvskr1/stellenpilot#uninstall-completely) in the README.
+Turn off **Automatic search** in Settings first, then remove the program and delete your workspace folder (`my-hunt`, or `data` for Docker). Full step by step list, including API keys and Gmail access: [Uninstall completely](docs/uninstall.md).
 
 ---
 
