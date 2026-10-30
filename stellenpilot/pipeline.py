@@ -5,6 +5,7 @@ import http.client
 import logging
 import re
 import urllib.error
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, timedelta
 import urllib.parse
 import urllib.request
@@ -39,14 +40,26 @@ def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
     excl = settings["search"].get("exclude_title_words", [])
     new, problems = [], []
     country = settings["search"]["country"].lower()
+    todo = []
     for name in enabled:
         covered = getattr(sources.REGISTRY[name], "COUNTRIES", None)
         if covered and country not in covered:
             problems.append(f"{name} skipped: it does not cover country '{country}'")
-            continue
-        db.stage("collect", f"Searching {sources.REGISTRY[name].LABEL}")
+        else:
+            todo.append(name)
+    # Every source is a different site, so all are asked at once and the run takes as long as the slowest.
+    # Results are then handled one by one in ORDER, so the same copy of a duplicate wins as before
+    # and only this thread writes to the database.
+    futures = {}
+    if todo:
+        db.stage("collect", f"Searching {len(todo)} sources")
+        with ThreadPoolExecutor(len(todo)) as pool:
+            futures = {n: pool.submit(sources.REGISTRY[n].fetch, settings) for n in todo}
+            for done, _ in enumerate(as_completed(futures.values()), 1):
+                db.stage("collect", f"Searching {len(todo)} sources, {done} done")
+    for name in todo:
         try:
-            found = sources.REGISTRY[name].fetch(settings)
+            found = futures[name].result()
         except Exception as e:  # one broken source must not stop the run
             problems.append(f"{name}: {friendly_error(e)}")
             log.warning("source %s failed: %s", name, e)
