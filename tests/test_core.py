@@ -298,3 +298,29 @@ class OfflineMessageTest(unittest.TestCase):
         self.assertEqual(new, [])
         self.assertEqual(len(problems), 1)
         self.assertIn("internet connection", problems[0])
+
+
+class ParallelSourcesTest(unittest.TestCase):
+    def test_sources_run_at_once_and_order_still_decides_duplicates(self):
+        import threading
+        from stellenpilot import pipeline
+        st = mock.MagicMock()
+        cfg = {"sources": {"arbeitsagentur": True, "arbeitnow": True, "remotive": True}, "watch": {},
+               "search": {"exclude_title_words": [], "country": "de"}}
+        st.__getitem__.side_effect = lambda k: cfg[k]
+        db = mock.MagicMock(); db.job_ids.return_value = set(); db.dedupe_keys.return_value = set()
+        both = threading.Barrier(2, timeout=5)  # breaks unless both sources are fetching at the same moment
+
+        def fetch(src):
+            def run(_):
+                both.wait()
+                return [{"id": src, "company": "Acme", "title": "Data Engineer", "source": src}]
+            return run
+        with mock.patch.object(pipeline.sources.REGISTRY["arbeitsagentur"], "fetch", fetch("arbeitsagentur")), \
+             mock.patch.object(pipeline.sources.REGISTRY["arbeitnow"], "fetch", fetch("arbeitnow")), \
+             mock.patch.object(pipeline.sources.REGISTRY["remotive"], "fetch", side_effect=RuntimeError("down")), \
+             mock.patch.object(pipeline, "repost_since", return_value=None):
+            new, problems = pipeline.collect(st, db)
+        self.assertEqual([j["id"] for j in new], ["arbeitsagentur"])  # ORDER wins the duplicate
+        self.assertEqual(len(problems), 1)
+        self.assertIn("remotive", problems[0])
