@@ -15,6 +15,8 @@
 
 **New in 0.12.3:** a mock interview. Stellenpilot asks the likely questions one at a time and gives feedback built only on your own CV. Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
 
+**Coming in the next release:** every job source is searched at the same time, so a search takes about as long as the slowest source instead of all of them added up.
+
 ## Install
 
 [![Download for Windows](https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTMgM2g4LjV2OC41SDN6TTEyLjUgM0gyMXY4LjVoLTguNXpNMyAxMi41aDguNVYyMUgzek0xMi41IDEyLjVIMjFWMjFoLTguNXoiLz48L3N2Zz4%3D)](https://github.com/srvskr1/stellenpilot/releases/latest) [![Download for Mac](https://img.shields.io/badge/Download_for-Mac-3A3A3C?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/srvskr1/stellenpilot/releases/latest)
@@ -50,7 +52,7 @@ Drop your CV, say what you want, press **Download** for the built in AI and swit
 
 ```mermaid
 flowchart LR
-    A["🔎 Collect<br/>7 job sources<br/>+ 200 company sites"] --> B["🧠 AI scores<br/>each job 0 to 100<br/>with reasons and gaps"]
+    A["🔎 Collect<br/>7 job sources<br/>+ 200 company sites<br/>all at once"] --> B["🧠 AI scores<br/>each job 0 to 100<br/>with reasons and gaps"]
     B --> C["✍️ AI writes<br/>tailored CV and<br/>cover letter"]
     C --> D["📬 Gmail tracks<br/>replies and moves<br/>statuses forward"]
     D --> E["✅ You decide<br/>read, edit, send"]
