@@ -25,6 +25,24 @@ class AppTest(unittest.TestCase):
             self.assertEqual(launch.cli_command(), [sys.executable])
         self.assertEqual(launch.cli_command()[1:], ["-m", "stellenpilot.cli"])
 
+    def test_dashboard_opens_in_its_own_window_or_falls_back_to_a_tab(self):
+        url = "http://127.0.0.1:8765"
+        with mock.patch.object(launch.shutil, "which", side_effect=lambda c: "/x/edge" if c == "microsoft-edge" else None), \
+                mock.patch.object(launch.subprocess, "Popen") as popen, \
+                mock.patch.object(launch.webbrowser, "open") as tab:
+            launch.open_window(url)
+            popen.assert_called_once_with(["/x/edge", f"--app={url}"])
+            tab.assert_not_called()
+        with mock.patch.object(launch.shutil, "which", return_value="/x/edge"), \
+                mock.patch.object(launch.subprocess, "Popen", side_effect=OSError), \
+                mock.patch.object(launch.webbrowser, "open") as tab:
+            launch.open_window(url)  # browser found but would not start
+            tab.assert_called_once_with(url)
+        with mock.patch.object(launch.shutil, "which", return_value=None), \
+                mock.patch.object(launch.webbrowser, "open") as tab:
+            launch.open_window(url)  # no Edge or Chrome
+            tab.assert_called_once_with(url)
+
 
 if __name__ == "__main__":
     unittest.main()
