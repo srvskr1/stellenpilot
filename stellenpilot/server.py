@@ -835,7 +835,7 @@ def _already_running(port: int) -> bool:
 def serve(settings, port: int = 8765, host: str = "127.0.0.1", open_browser: bool = True) -> None:
     # The Host header check below still only accepts 127.0.0.1 and localhost, so even when
     # Docker listens on all interfaces inside the container, only your own browser gets in.
-    import webbrowser
+    from .launch import open_window
     url = f"http://127.0.0.1:{port}"
     open_browser = open_browser and not os.environ.get("STELLENPILOT_NO_BROWSER") and not schedule.in_docker()
     handler = make_handler(settings, port)
@@ -845,7 +845,7 @@ def serve(settings, port: int = 8765, host: str = "127.0.0.1", open_browser: boo
         if _already_running(port):  # double clicked the icon twice: just show the open one
             print(f"Stellenpilot is already running at {url}. Opening it in your browser.", flush=True)
             if open_browser:
-                webbrowser.open(url)
+                open_window(url)
             return
         raise SystemExit(f"Port {port} is used by another program. Start with: stellenpilot serve --port {port + 1}") from None
 
@@ -864,7 +864,7 @@ def serve(settings, port: int = 8765, host: str = "127.0.0.1", open_browser: boo
             print(f"Note: could not refresh the automatic search ({e}). Open Settings and save to fix it.", flush=True)
     print(f"Stellenpilot running at {url}  (close this window or press Ctrl+C to stop)", flush=True)
     if open_browser:
-        threading.Timer(0.8, webbrowser.open, [url]).start()
+        threading.Timer(0.8, open_window, [url]).start()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

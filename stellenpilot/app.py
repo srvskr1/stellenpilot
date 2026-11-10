@@ -2,16 +2,17 @@
 
 Double click: starts Stellenpilot for the default workspace (Documents/Stellenpilot; on a Mac
 ~/Stellenpilot), opens the
-browser and shows a small window with Open and Stop. With other arguments it acts as the normal
-command line, which the daily task uses: `Stellenpilot.exe --home X run`.
+dashboard in its own window and shows a small window with Open and Stop. With other arguments it
+acts as the normal command line, which the daily task uses: `Stellenpilot.exe --home X run`.
 """
 from __future__ import annotations
 
 import os
 import sys
 import threading
-import webbrowser
 from pathlib import Path
+
+from .launch import open_window
 
 PORT = 8765
 
@@ -58,7 +59,7 @@ def main(argv: list[str] | None = None) -> int:
     url = f"http://127.0.0.1:{PORT}"
     from .server import _already_running, serve
     if _already_running(PORT):
-        webbrowser.open(url)
+        open_window(url)
         return 0
     os.chdir(home)
     from .config import Settings
@@ -93,10 +94,10 @@ def _window(url: str, home: Path, failed: list[str]) -> int:
     frame.grid()
     title = ttk.Label(frame, text="Stellenpilot is running", font=("Segoe UI", 13, "bold"))
     title.grid(column=0, row=0, columnspan=2, sticky="w")
-    body = ttk.Label(frame, text="Your dashboard is open in the browser.\nKeep this window open while you use it.\n"
+    body = ttk.Label(frame, text="Your dashboard is open in its own window.\nKeep this window open while you use it.\n"
                           "The daily search works even when it is closed.", justify="left")
     body.grid(column=0, row=1, columnspan=2, sticky="w", pady=(6, 14))
-    ttk.Button(frame, text="Open dashboard", command=lambda: webbrowser.open(url)).grid(column=0, row=2, sticky="we", padx=(0, 8))
+    ttk.Button(frame, text="Open dashboard", command=lambda: open_window(url)).grid(column=0, row=2, sticky="we", padx=(0, 8))
     ttk.Button(frame, text="Stop Stellenpilot", command=root.destroy).grid(column=1, row=2, sticky="we")
     ttk.Label(frame, text=f"Your files: {home}", foreground="#475467", wraplength=380).grid(column=0, row=3, columnspan=2, sticky="w", pady=(14, 0))
     def check():
