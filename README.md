@@ -13,9 +13,7 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-**New in 0.12.3:** a mock interview. Stellenpilot asks the likely questions one at a time and gives feedback built only on your own CV. Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
-
-**Coming in the next release:** every job source is searched at the same time, so a search takes about as long as the slowest source instead of all of them added up.
+**New in 0.13.0:** every job source is searched at the same time, so a search takes about as long as the slowest source instead of all of them added up. And the dashboard opens in its own window, without browser tabs or an address bar (Edge or Chrome; otherwise a normal browser tab). Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
 
 ## Install
 
