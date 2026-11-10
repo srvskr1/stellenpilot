@@ -47,7 +47,7 @@ class AlreadyRunningTest(unittest.TestCase):
         from stellenpilot import server
         with mock.patch.object(server, "ThreadingHTTPServer", side_effect=OSError("in use")), \
              mock.patch.object(server, "_already_running", return_value=True), \
-             mock.patch("webbrowser.open") as opened, \
+             mock.patch("stellenpilot.launch.open_window") as opened, \
              mock.patch.object(server, "make_handler"):
             server.serve({"schedule": {}}, 8765, open_browser=True)
             opened.assert_called_once()
