@@ -6,7 +6,7 @@
 | `stellenpilot doctor` | check the setup and keys |
 | `stellenpilot run` | search, score, tailor, and sync Gmail if enabled |
 | `stellenpilot run --no-tailor` | search and score only |
-| `stellenpilot serve` | start the dashboard on 127.0.0.1:8765 and open it in the browser (`--no-browser` to skip) |
+| `stellenpilot serve` | start the dashboard on 127.0.0.1:8765 and open it in its own window (Edge or Chrome app mode, otherwise a browser tab; `--no-browser` to skip) |
 | `stellenpilot shortcut` | put a Stellenpilot icon on the desktop that starts this workspace |
 | `stellenpilot gmail` | sync statuses from Gmail once |
 | `stellenpilot gmail --install` | install the Google packages for the own key file way of Gmail sync |

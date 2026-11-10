@@ -34,7 +34,7 @@ xattr -dr com.apple.quarantine /Applications/Stellenpilot.app
 
 ## Using it
 
-* Double click **Stellenpilot**. Your browser opens the dashboard, and a small window with **Open dashboard** and **Stop Stellenpilot** appears. Keep that window open while you use it.
+* Double click **Stellenpilot**. The dashboard opens in its own window (Chrome or Edge; with only Safari it opens as a normal tab), and a small window with **Open dashboard** and **Stop Stellenpilot** appears. Keep that window open while you use it.
 * Your files (CV, settings, the documents it writes) are in the folder **Stellenpilot** in your home folder. In Finder: **Go**, **Home**.
 * The built-in AI works the same as on Windows: press **Download** under **Settings, AI model**. Its engine comes in a ready made version for Apple chips.
 * The daily search runs even when the app is closed, as long as the Mac is awake at that time.
