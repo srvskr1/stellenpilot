@@ -13,9 +13,8 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-**New in 0.13.0:** every job source is searched at the same time, so a search takes about as long as the slowest source instead of all of them added up. And the dashboard opens in its own window, without browser tabs or an address bar (Edge or Chrome; otherwise a normal browser tab). Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
+**New in 0.14.0:** Home is now Today, with what needs you on top. While a search runs, the robot in the agent office shows the job it is reading, its match and the cover letter it is writing, with any sentence the truth guard rejected struck through; each job source gets a card below with its count. New jobs are cards you swipe right if you like them and left if you don't. Settings are split into seven tabs, job titles are chips you add and remove, and every change saves by itself. And when the built-in AI can't download, Stellenpilot tells you whether you are offline, the site is blocked on your network, or the connection keeps dropping. Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
 
-**Coming in the next release (already on main):** Home is now Today, with what needs you on top. Live search shows the agent at work on real jobs: each source, each ad with its match, and the cover letter with any sentence the truth guard rejected. New jobs are cards you swipe right if you like them and left if you don't. And when the built-in AI can't download, Stellenpilot tells you whether you are offline, the site is blocked on your network, or the connection keeps dropping.
 
 ## Install
 

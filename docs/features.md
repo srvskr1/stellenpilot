@@ -12,11 +12,11 @@
 
 Five calm pages, in your browser, on your computer:
 
-* **Today**: what is ready to apply and your next interviews come first. New jobs show up as cards: swipe right if you like one, left if you don't, and say why if you want. While a search runs, Live search shows each source, each job with its match, and the cover letter with any sentence the truth guard rejected. A small 3D office shows a robot working through each step. Newest matches and Insights sit under More.
+* **Today**: what is ready to apply and your next interviews come first. New jobs show up as cards: swipe right if you like one, left if you don't, and say why if you want. While a search runs, the robot in the agent office shows each job it reads with its match, and the cover letter it writes with any sentence the truth guard rejected. Each job source gets a card with its count. Newest matches and Insights sit under More.
 * **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep. Filter by word, source, type, place, day, match or status, and see which tools of the ad you have, which ones you are missing, and what the job would score with each of them.
 * **Applications**: a board you drag cards across (Applied, Interview, Offer, Rejected). Below it, Insights shows reply rates by source and CV layout, where your applications stop (CV, first check or interviews), a follow up email for interviews that went quiet, how many English ads still want good German, the skills that would open the most jobs for you, and a weekly summary.
 * **My CV**: your profile, with tips to improve your matches.
-* **Settings**: language (English or Deutsch), job sources, the AI, the daily search and Gmail, with step by step help for every key.
+* **Settings**: seven tabs (what you are looking for, job sources, the AI, CV and letters, the daily search, email, and the app itself), each with a short status line. Job titles and excluded words are chips, distance is a slider, and every change saves by itself. Step by step help for every key.
 
 Something broken? **Report a bug** in the sidebar or in Settings opens the bug report form on GitHub.
 
