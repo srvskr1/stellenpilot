@@ -279,7 +279,7 @@ def _plain(e: Exception | None) -> str:
         return "Not enough free disk space. The AI needs about 3 GB."
     if isinstance(e, OSError) and "checksum" not in text:  # timeouts, refused, DNS, cut off (WinError 10060 too)
         return ("The connection timed out or was cut off. Try again, try another network such as a phone "
-                "hotspot, or download the file in your browser and press Download again.")
+                "hotspot, or download the file in your browser and press Try again.")
     return text
 
 
