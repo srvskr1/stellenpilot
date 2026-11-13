@@ -139,3 +139,16 @@ class LanguageTest(unittest.TestCase):
             self.assertIn(f'id="{i}"', html, f"the Jobs page has no #{i}")
         for i in ("fsrc", "ftype", "floc", "fday"):  # the lists are built from the jobs that are there
             self.assertIn(f'"{i}"', code)
+
+
+class TodayPageTest(unittest.TestCase):
+    def test_today_keeps_actions_on_top_and_the_rest_under_more(self):
+        html = (Path(__file__).parents[1] / "stellenpilot" / "web" / "index.html").read_text(encoding="utf-8")
+        page = html[html.index('id="page-home"'):html.index('id="page-jobs"')]
+        more = page[page.index('id="moreSec"'):]
+        for inside in ('id="office"', 'id="fresh"', 'id="todaySec"', 'id="ins-h"'):
+            self.assertIn(inside, more)
+        for on_top in ('id="strip"', 'id="ready"', 'id="soon"'):
+            self.assertLess(page.index(on_top), page.index('id="moreSec"'))
+        self.assertIn(">Today</a>", html)
+        self.assertIn('"Today":"Heute"', html)

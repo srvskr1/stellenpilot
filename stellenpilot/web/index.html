@@ -74,6 +74,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* Main and pages */
 .main{padding:40px clamp(16px,4vw,56px) 64px;min-width:0}
 .page{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.more>section{margin-top:32px}
 #page-jobs{max-width:1240px;gap:20px}
 .phead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
 .phead h1{margin:0;font-size:2rem;line-height:1.2;font-weight:700;letter-spacing:-.01em}
@@ -520,8 +521,13 @@ body.wizopen{overflow:hidden}
   .app{grid-template-columns:1fr}
   .side{position:sticky;z-index:5;height:auto;border-right:0;border-bottom:1px solid var(--border);padding:10px 12px;flex-direction:row;align-items:center;gap:8px}
   .brand{padding:0 4px 0 0}.brand b{display:none}
-  .nav{flex-direction:row;overflow-x:auto;scrollbar-width:none}
-  .nav a{white-space:nowrap;padding:0 10px;gap:6px}.nav a svg{display:none}
+  .side{position:fixed;top:auto;bottom:0;left:0;right:0;padding:0 0 env(safe-area-inset-bottom);border-bottom:0;border-top:1px solid var(--border);background:var(--surface)}
+  .brand{display:none}
+  .nav{flex:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0}
+  .nav a{flex-direction:column;justify-content:center;gap:2px;min-height:56px;padding:4px 0;font-size:.6875rem;border-radius:0;white-space:nowrap}.nav a svg{width:22px;height:22px}
+  .nav a{position:relative}.nav .n{position:absolute;top:6px;left:calc(50% + 8px);margin:0;font-size:.625rem;line-height:1;padding:2px 5px;border-radius:999px;background:var(--accent);color:#fff}.nav .n:empty{display:none}
+  .more .cnt{display:none}
+  .main{padding-bottom:88px}
   .sidefoot{display:none}
   .main{padding-top:24px}
   .phead h1{font-size:1.625rem}
@@ -782,7 +788,7 @@ body.wizopen{overflow:hidden}
   <aside class="side">
     <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 20l8-4 8 4z"/></svg></span><b>Stellenpilot</b></div>
     <nav class="nav" aria-label="Main">
-      <a href="#home" data-page="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21H3z"/></svg>Home</a>
+      <a href="#home" data-page="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="12" cy="15.5" r="1.6" fill="currentColor"/></svg>Today</a>
       <a href="#jobs" data-page="jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Jobs<span class="n" id="navJobs"></span></a>
       <a href="#apps" data-page="apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg>Applications<span class="n" id="navApps"></span></a>
       <a href="#cv" data-page="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>My CV</a>
@@ -992,11 +998,6 @@ body.wizopen{overflow:hidden}
       <div class="upd" id="upd" role="status" hidden></div>
       <p class="runmsg" id="runMsg" role="status"></p>
       <div class="box strip" id="strip" role="status"><span class="muted">No search yet. Press Search now to find your first jobs.</span></div>
-      <section aria-labelledby="off-h">
-        <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
-        <p id="off-note"></p>
-        <div class="office" id="office" role="img" aria-label="Agent office"></div>
-      </section>
       <section aria-labelledby="af-h" id="afSec" hidden>
         <div class="sechead"><h2 id="af-h">Apply first</h2><span>Good matches you could lose soon</span></div>
         <div class="box af" id="applyFirst"></div>
@@ -1005,10 +1006,14 @@ body.wizopen{overflow:hidden}
         <div class="sechead"><h2 id="ready-h">Ready to apply</h2><span>Read your documents, then send them yourself</span></div>
         <div id="ready"></div>
       </section>
-      <div class="two">
-        <section aria-labelledby="soon-h"><div class="sechead"><h2 id="soon-h">Coming up</h2></div><div id="soon"></div></section>
+      <section aria-labelledby="soon-h"><div class="sechead"><h2 id="soon-h">Coming up</h2></div><div id="soon"></div></section>
+      <details class="history more" id="moreSec"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><span>More</span><span class="cnt">Agent office, newest matches, insights</span></summary>
+      <section aria-labelledby="off-h">
+        <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
+        <p id="off-note"></p>
+        <div class="office" id="office" role="img" aria-label="Agent office"></div>
+      </section>
         <section aria-labelledby="new-h"><div class="sechead"><h2 id="new-h">Newest matches</h2><a href="#jobs" id="seeAll"></a></div><div class="box rows" id="fresh"></div></section>
-      </div>
       <section aria-labelledby="today-h" id="todaySec" hidden>
         <div class="sechead"><h2 id="today-h">Also needs a look</h2><span id="today-count"></span></div>
         <div class="panel" id="today"></div>
@@ -1023,6 +1028,7 @@ body.wizopen{overflow:hidden}
           <article class="panel ic c-full" style="--i:4"><header class="ih"><div><h3>Reply rate by channel</h3><p class="hint">Replies count interviews, offers and rejections out of applications sent.</p></div></header><div id="chan"></div></article>
         </div>
       </section>
+      </details>
       <details class="history"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><span>Search history</span><span class="cnt" id="runsCount"></span></summary>
         <div class="runs"><table>
           <thead><tr><th>When</th><th>Found</th><th>Shortlisted</th><th>Docs</th><th>Gmail</th><th>Notes</th></tr></thead>
@@ -1197,7 +1203,7 @@ document.documentElement.lang=LANG;
 const LOC=LANG==="de"?"de-DE":"en-GB";
 const DE={
 // navigation and page heads
-"Home":"Start","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
+"Home":"Start","Today":"Heute","More":"Mehr","Agent office, newest matches, insights":"Agentenbüro, neueste Treffer, Einblicke","Searching now":"Suche läuft","Starting the daily search":"Die tägliche Suche startet","Watch the office":"Im Büro zusehen","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
 "Automatic search off":"Automatische Suche aus","Automatic search on":"Automatische Suche an","Every day at {x}":"Jeden Tag um {x}",
 "Turn it on in Settings":"In den Einstellungen einschalten","Run setup again":"Einrichtung erneut starten","Report a bug":"Fehler melden","Star on GitHub":"Stern auf GitHub geben",
 "Main":"Hauptmenü","Language":"Sprache",
@@ -1648,7 +1654,8 @@ function renderRuns(){
 function renderStrip(run){
   const r=[...runs].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0],el=$("strip");
   const ok=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
-  if(run&&run.running){el.innerHTML=`<span class="ok run">Searching now. This takes a few minutes, watch the office below.</span>`;return}
+  const o=officeState();
+  if(run&&run.running||o.st!=="break"&&!o.warn&&!localGmail){el.innerHTML=`<span class="ok run">${t("Searching now")}</span><span>${esc(o.st==="break"?t("Starting the daily search"):o.note)}</span><button type="button" class="linkbtn" data-watch>${t("Watch the office")}</button>`;return}
   if(!r)return;
   const today=r.date===new Date().toLocaleDateString("en-CA");
   el.innerHTML=`<span class="ok">${ok}${today?"Today's search is done":"Last search "+esc(fmtDate(r.date))}</span><span>${esc(r.found??0)} jobs checked</span><span>${esc(r.shortlisted??0)} good matches</span><span>${esc(r.docsMade??0)} CVs and letters made</span>${Number(r.gmailUpdates)?`<span>${esc(r.gmailUpdates)} update${Number(r.gmailUpdates)>1?"s":""} from Gmail</span>`:""}`;
@@ -2279,6 +2286,7 @@ async function importCv(file){
   finally{$("drop").style.pointerEvents="";$("cvFile").value=""}
 }
 $("cvFile").addEventListener("change",e=>importCv(e.target.files[0]));
+document.addEventListener("click",e=>{if(!e.target.closest("[data-watch]"))return;const m=$("moreSec");m.open=true;$("office").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})});
 $("drop").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cvFile").click()}});
 ["dragenter","dragover"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.add("over")}));
 ["dragleave","drop"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.remove("over")}));
