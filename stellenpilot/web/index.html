@@ -1007,12 +1007,12 @@ body.wizopen{overflow:hidden}
         <div id="ready"></div>
       </section>
       <section aria-labelledby="soon-h"><div class="sechead"><h2 id="soon-h">Coming up</h2></div><div id="soon"></div></section>
-      <details class="history more" id="moreSec"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><span>More</span><span class="cnt">Agent office, newest matches, insights</span></summary>
       <section aria-labelledby="off-h">
         <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
         <p id="off-note"></p>
         <div class="office" id="office" role="img" aria-label="Agent office"></div>
       </section>
+      <details class="history more" id="moreSec"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><span>More</span><span class="cnt">Newest matches, insights</span></summary>
         <section aria-labelledby="new-h"><div class="sechead"><h2 id="new-h">Newest matches</h2><a href="#jobs" id="seeAll"></a></div><div class="box rows" id="fresh"></div></section>
       <section aria-labelledby="today-h" id="todaySec" hidden>
         <div class="sechead"><h2 id="today-h">Also needs a look</h2><span id="today-count"></span></div>
@@ -1203,7 +1203,7 @@ document.documentElement.lang=LANG;
 const LOC=LANG==="de"?"de-DE":"en-GB";
 const DE={
 // navigation and page heads
-"Home":"Start","Today":"Heute","More":"Mehr","Agent office, newest matches, insights":"Agentenbüro, neueste Treffer, Einblicke","Searching now":"Suche läuft","Starting the daily search":"Die tägliche Suche startet","Watch the office":"Im Büro zusehen","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
+"Home":"Start","Today":"Heute","More":"Mehr","Newest matches, insights":"Neueste Treffer, Einblicke","Searching now":"Suche läuft","Starting the daily search":"Die tägliche Suche startet","Watch the office":"Im Büro zusehen","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
 "Automatic search off":"Automatische Suche aus","Automatic search on":"Automatische Suche an","Every day at {x}":"Jeden Tag um {x}",
 "Turn it on in Settings":"In den Einstellungen einschalten","Run setup again":"Einrichtung erneut starten","Report a bug":"Fehler melden","Star on GitHub":"Stern auf GitHub geben",
 "Main":"Hauptmenü","Language":"Sprache",
@@ -2286,7 +2286,7 @@ async function importCv(file){
   finally{$("drop").style.pointerEvents="";$("cvFile").value=""}
 }
 $("cvFile").addEventListener("change",e=>importCv(e.target.files[0]));
-document.addEventListener("click",e=>{if(!e.target.closest("[data-watch]"))return;const m=$("moreSec");m.open=true;$("office").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})});
+document.addEventListener("click",e=>{if(!e.target.closest("[data-watch]"))return;$("office").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})});
 $("drop").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cvFile").click()}});
 ["dragenter","dragover"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.add("over")}));
 ["dragleave","drop"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.remove("over")}));
