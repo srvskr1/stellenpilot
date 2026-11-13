@@ -90,6 +90,18 @@ def unsupported_claims(text: str, profile: dict, job: dict | None = None) -> lis
     return list(dict.fromkeys(bad))
 
 
+def sentence_checks(text: str, profile: dict, job: dict | None = None) -> list[dict]:
+    """Each sentence with what the guard found in it: `bad` is not backed by the profile, `backed` are
+    the tools it names that the profile has. For the live view; unsupported_claims() stays the judge."""
+    have = _mentioned(profile_text(profile, include_learning=False))
+
+    def as_written(tokens, s):  # "kafka" back to "Kafka", the way the sentence spells it
+        return [m.group(0) if (m := re.search(re.escape(t), s, re.I)) else t for t in tokens]
+    return [{"text": s.strip(), "bad": as_written(unsupported_claims(s, profile, job), s),
+             "backed": as_written(sorted(_mentioned(s) & have), s)}
+            for s in _SENTENCE.findall(text or "") if s.strip()]
+
+
 # ---------------------------------------------------------------- planning
 
 PLAN_SYSTEM = """You tailor a CV to a job ad WITHOUT inventing anything.
@@ -444,15 +456,18 @@ def letter_body(job: dict, profile: dict, plan: dict, llm=None, lang: str = "en"
     name = (profile.get("person") or {}).get("name", "")
     user = f"CANDIDATE PROFILE\n{profile_text(profile)}\n\nJOB\n{job['title']} at {job['company']}\n{job_ad(job['description'], llm.max_chars)}\n\nCandidate name: {name}"
     bad: list[str] = []
-    for _ in range(2):
+    from . import progress
+    for n in (1, 2):
         try:
             body = str(llm.complete_json(LETTER_SYSTEM_DE if lang == "de" else LETTER_SYSTEM, user, max_tokens=900).get("body") or "")
         except Exception as e:
             return template, f"LLM letter failed ({e}), template used."
         bad = unsupported_claims(body, profile, job)
+        progress.emit("draft", n=n, sentences=sentence_checks(body, profile, job), bad=bad)
         if body and not bad:
             return body, ""
         user += f"\n\nYour previous draft mentioned {bad}, which are not backed by the profile. Remove them. Only if the ad asks for one, you may say plainly that the candidate has not used it yet."
+    progress.emit("template")
     return template, f"LLM drafts mentioned things not in your experience ({bad}), so a template letter was used."
 
 

@@ -53,6 +53,28 @@ def track(task: str, label: str = "", exclusive: bool = True):
             _tasks[task]["ended"] = _now()
 
 
+@contextmanager
+def events_to(sink):
+    """While the block runs, emit() on this thread hands each event to `sink(kind, **data)`."""
+    prev = getattr(_current, "sink", None)
+    _current.sink = sink
+    try:
+        yield
+    finally:
+        _current.sink = prev
+
+
+def emit(kind: str, **data) -> None:
+    """One step of a running search for the live view. Does nothing outside a search, and a
+    failure here must never stop the search."""
+    sink = getattr(_current, "sink", None)
+    if sink:
+        try:
+            sink(kind, **data)
+        except Exception:  # noqa: BLE001, S110
+            pass
+
+
 def current() -> str | None:
     return getattr(_current, "task", None)
 
