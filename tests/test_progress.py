@@ -155,3 +155,50 @@ class EndpointTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LiveEventsTest(unittest.TestCase):
+    """The live view on the dashboard plays these events, so a search has to write them."""
+
+    def test_a_search_writes_its_steps_and_the_next_search_starts_clean(self):
+        import shutil
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+        from stellenpilot import pipeline
+        from stellenpilot.config import Settings
+        from stellenpilot.db import DB
+        with tempfile.TemporaryDirectory() as d:
+            home = Path(d)
+            shutil.copy(Path(pipeline.__file__).parent / "examples" / "profile.example.toml", home / "profile.toml")
+            (home / "config.toml").write_text('[llm]\nprovider = "none"\n[gmail]\nenabled = false\n', encoding="utf-8")
+            settings = Settings(home)
+            jobs = [{"id": "j1", "title": "Data Engineer", "company": "Acme", "location": "Essen", "url": "", "source": "x",
+                     "description": "Python SQL AWS Kafka", "dedupe_key": "k1"}]
+            for _ in range(2):
+                with mock.patch.object(pipeline, "collect", return_value=(jobs, [])), \
+                        mock.patch.object(pipeline, "check_closed", return_value=0):
+                    pipeline.run(settings, tailor=False)
+            db = DB(settings.db_path)
+            ev = db.events()
+            db.conn.close()
+        self.assertEqual([e["kind"] for e in ev], ["job", "done"])  # only the second search is kept
+        self.assertEqual((ev[0]["title"], ev[0]["company"]), ("Data Engineer", "Acme"))
+        self.assertIsInstance(ev[0]["shortlisted"], bool)
+        self.assertEqual(ev[1]["found"], 1)
+
+    def test_sentences_carry_what_the_guard_found(self):
+        from stellenpilot.tailor import sentence_checks
+        profile = {"skills": {"Languages": ["Python", "SQL"]}}
+        out = sentence_checks("I build pipelines in Python. I ran Kafka clusters.", profile, {"title": "", "company": "", "description": ""})
+        self.assertEqual((out[0]["backed"], out[0]["bad"]), (["Python"], []))
+        self.assertEqual(out[1]["bad"], ["Kafka"])
+
+    def test_nothing_is_written_outside_a_search(self):
+        from stellenpilot import progress
+        progress.emit("job", title="x")  # no sink: must not raise
+        got = []
+        with progress.events_to(lambda kind, **d: got.append((kind, d))):
+            progress.emit("job", title="x")
+        progress.emit("job", title="y")
+        self.assertEqual(got, [("job", {"title": "x"})])
