@@ -24,7 +24,7 @@ CAMEL = {"id": "_id", "status_source": "statusSource", "status_updated_at": "sta
          "status_note": "statusNote", "gap_tags": "gapTags", "cv_style": "cvStyle", "interview_at": "interviewAt", "prep_done": "prepDone",
          "found_at": "foundAt", "posted_at": "postedAt", "job_type": "jobType", "closed_at": "closedAt",
          "german_level": "germanLevel", "summary_en": "summaryEn", "docs_made": "docsMade", "gmail_updates": "gmailUpdates", "stage_at": "stageAt", "stage_note": "stageNote",
-         "finished_at": "finishedAt"}
+         "finished_at": "finishedAt", "rating_reason": "ratingReason"}
 SENT = {"applied", "interview", "offer", "rejected"}
 LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]"}
 SLOW_POSTS = {"/api/add", "/api/gmail", "/api/gmail/imap", "/api/cv/import", "/api/cv/reread", "/api/gmail/connect", "/api/builtin/test"}
@@ -472,6 +472,12 @@ def make_handler(settings, port: int = 8765):
                         fields["rating"] = 1 if r > 0 else -1
                     else:
                         raise ValueError("rating must be 1, -1 or null")
+                    fields["rating_reason"] = ""  # a reason belongs to one rating
+                if "ratingReason" in body:  # why a job is not for the user, from the review cards
+                    from .score import PASS_REASONS
+                    if body["ratingReason"] not in PASS_REASONS:
+                        raise ValueError("unknown ratingReason")
+                    fields["rating_reason"] = body["ratingReason"]
                 if "notes" in body:
                     fields["notes"] = str(body["notes"])[:5000]
                 if "prepDone" in body:  # ticked steps of the interview checklist, like "0,2"
