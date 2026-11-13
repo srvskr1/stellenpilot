@@ -247,7 +247,29 @@ tr:last-child td{border-bottom:none}
 /* Settings */
 #setPanel{max-width:1080px}
 #setPanel .phead{margin-bottom:28px}
-.setwrap{display:grid;grid-template-columns:180px minmax(0,1fr);gap:32px;align-items:start}
+.setwrap{display:grid;grid-template-columns:270px minmax(0,1fr);gap:24px;align-items:start}
+.settabs{gap:6px}.scard.offtab{display:none}
+#s-lang .check{align-items:flex-start;flex-wrap:wrap}#s-lang .check .muted{flex-basis:100%;padding-left:26px;margin-top:-6px}
+.settabs button{display:flex;gap:12px;align-items:center;width:100%;min-height:60px;padding:10px 12px;border-radius:12px;border:1px solid transparent;background:none;text-align:left;font:inherit;color:var(--text);cursor:pointer;transition:background .15s ease}
+.settabs button:hover{background:var(--surface-alt)}
+.settabs button[aria-selected=true]{background:var(--surface);border-color:var(--border);box-shadow:var(--shadow-1)}
+.settabs .ic{flex:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--surface-alt);color:var(--text-tertiary)}.settabs .ic svg{width:20px;height:20px}
+.settabs [aria-selected=true] .ic{background:var(--accent-soft);color:var(--accent)}
+.settabs .tx{min-width:0;flex:1}.settabs b{display:block;font-weight:600}.settabs .tx span{display:block;font-size:.8125rem;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.settabs em{flex:none;font-style:normal;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--surface-alt);color:var(--text-tertiary)}.settabs em:empty{display:none}.settabs em.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.q{padding-top:18px;border-top:1px solid var(--border)}.scard .hint+.q{border-top:0;padding-top:0}
+.q>label,.q .ql{display:block;font-size:.9375rem;font-weight:600}.q .qh{margin:2px 0 10px;font-size:.8125rem;color:var(--text-tertiary)}
+.chipbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chipbox .c2{display:inline-flex;align-items:center;gap:4px;padding:4px 4px 4px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:.875rem}
+.chipbox.neg .c2{background:var(--surface-alt);color:var(--text-secondary)}
+.chipbox .c2 button{width:26px;height:26px;border:0;border-radius:50%;background:none;color:inherit;opacity:.65;cursor:pointer;font-size:1rem;line-height:1}.chipbox .c2 button:hover{opacity:1;background:rgba(0,0,0,.06)}
+.chipbox input{flex:1 1 150px;min-width:130px;min-height:36px;border:1px dashed var(--border-strong);border-radius:999px;padding:0 14px;font:inherit;font-size:.875rem;background:none}
+.chipbox input:focus{outline:none;border-style:solid;border-color:var(--accent)}
+.slide{display:flex;align-items:center;gap:14px;margin-bottom:14px}.slide input{flex:1;accent-color:var(--accent);min-height:28px}.slide output{min-width:64px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--border-strong);border-radius:10px;overflow:hidden}
+.seg button{min-height:40px;padding:0 16px;border:0;border-left:1px solid var(--border-strong);background:var(--surface);font:inherit;font-weight:500;font-size:.875rem;cursor:pointer}.seg button:first-child{border-left:0}
+.seg button[aria-checked=true]{background:var(--accent);color:var(--on-accent)}
+.setmsg{margin:0;min-height:1.5em;font-size:.875rem;font-weight:600;color:var(--ok-fg)}.setmsg.bad{color:var(--pill-rejected-fg)}.setmsg.busy{color:var(--text-tertiary)}
 .setnav{position:sticky;top:24px;display:flex;flex-direction:column;gap:2px}
 .setnav a{display:flex;align-items:center;min-height:40px;padding:0 12px;border-radius:8px;color:var(--text-secondary);font-weight:500}
 .setnav a:hover{background:var(--surface-alt);text-decoration:none;color:var(--text)}
@@ -296,7 +318,7 @@ tr:last-child td{border-bottom:none}
 .gsteps3>li:not(.cur) .btnrow,.gsteps3>li:not(.cur) details{display:none}
 .gsteps3>li.done>div>p{display:none}
 label.btn{cursor:pointer}
-@media (max-width:900px){.setwrap{grid-template-columns:1fr}.setnav{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none}.setnav a{white-space:nowrap}}
+@media (max-width:900px){.setwrap{grid-template-columns:1fr}.setnav{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none}.setnav a{white-space:nowrap}.settabs button{width:auto;flex:none;min-height:44px;padding:6px 12px}.settabs .ic,.settabs .tx span,.settabs em{display:none}.settabs b{white-space:nowrap}}
 /* My CV */
 #cvPanel{max-width:1080px}
 #cvPanel .phead{margin-bottom:20px}
@@ -538,7 +560,7 @@ body.wizopen{overflow:hidden}
 }
 
 /* Review cards: swipe right if you like a job, left if not. Buttons and arrow keys do the same. */
-.sw{max-width:440px;margin:0 auto}
+.swd{max-width:440px;margin:0 auto}
 .sw-prog{display:flex;gap:4px}.sw-prog i{flex:1;height:4px;border-radius:2px;background:var(--border)}.sw-prog i.l{background:var(--success)}.sw-prog i.p{background:var(--error)}.sw-prog i.c{background:var(--accent)}
 .sw-deck{position:relative;height:372px;margin:14px 0;touch-action:pan-y;border-radius:20px;transition:background .2s}
 .sw-deck:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
@@ -563,7 +585,7 @@ body.wizopen{overflow:hidden}
 .sw-why{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}.sw-why span{width:100%;text-align:center;font-size:.8125rem;color:var(--text-tertiary)}
 .sw-why button{min-height:36px;padding:4px 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font:inherit;font-size:.8125rem;cursor:pointer}
 .sw-msg{text-align:center;font-size:.8125rem;color:var(--text-tertiary);min-height:1.4em;margin:10px 0 0}
-@media (prefers-reduced-motion:reduce){.sw *{transition:none!important}}
+@media (prefers-reduced-motion:reduce){.swd *{transition:none!important}}
 
 /* Live search: the steps of a running search, played one by one (sources, each job, each letter sentence). */
 .lv{padding:18px 20px;position:relative;overflow:hidden}
@@ -891,13 +913,12 @@ body.wizopen{overflow:hidden}
     </section>
     <section class="page-x" id="setPanel" aria-labelledby="set-h" hidden>
       <header class="phead">
-        <div><h1 id="set-h">Settings</h1><p>What to search, where, and who writes your documents.</p></div>
+        <div><h1 id="set-h">Settings</h1><p>Changes save by themselves.</p></div>
         <div class="btnrow"><a class="btn sec" href="https://github.com/srvskr1/stellenpilot/issues/new?template=bug_report.md" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M12 20v-9M9 6l-2-3M15 6l2-3M3 13h5M16 13h5M4 8l4 2M20 8l-4 2M4 19l4-2M20 19l-4-2"/></svg>Report a bug</a><button class="btn sec" type="button" data-setup>Run setup again</button></div>
       </header>
       <div class="setwrap">
-        <nav class="setnav" aria-label="Settings sections" id="setNav">
-          <a href="#settings" data-sec="s-lang">Language</a><a href="#settings" data-sec="s-search">Job search</a><a href="#settings" data-sec="s-sources">Job sources</a><a href="#settings" data-sec="s-ai">AI model</a>
-          <a href="#settings" data-sec="s-docs">Documents</a><a href="#settings" data-sec="s-auto">Automatic search</a><a href="#settings" data-sec="s-icon">Desktop icon</a><a href="#settings" data-sec="s-gmail">Email</a>
+        <nav class="setnav settabs" aria-label="Settings sections" id="setNav" role="tablist">
+          <button type="button" role="tab" data-tab="search"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span><span class="tx"><b>What I'm looking for</b><span id="st-search"></span></span><em id="sb-search"></em></button><button type="button" role="tab" data-tab="sources"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><span class="tx"><b>Where jobs come from</b><span id="st-sources"></span></span><em id="sb-sources"></em></button><button type="button" role="tab" data-tab="ai"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg></span><span class="tx"><b>AI</b><span id="st-ai"></span></span><em id="sb-ai"></em></button><button type="button" role="tab" data-tab="docs"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><span class="tx"><b>CV and letters</b><span id="st-docs"></span></span><em id="sb-docs"></em></button><button type="button" role="tab" data-tab="auto"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="tx"><b>Daily search</b><span id="st-auto"></span></span><em id="sb-auto"></em></button><button type="button" role="tab" data-tab="gmail"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span><span class="tx"><b>Email</b><span id="st-gmail"></span></span><em id="sb-gmail"></em></button><button type="button" role="tab" data-tab="app"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></span><span class="tx"><b>App</b><span id="st-app"></span></span><em id="sb-app"></em></button>
         </nav>
         <div class="setcol">
         <form class="addform setform" id="setForm">
@@ -907,21 +928,23 @@ body.wizopen{overflow:hidden}
             <label class="check"><input type="checkbox" name="check_updates"> Tell me when a new version is out <span class="muted">Asks GitHub once a day. Nothing about you is sent.</span></label>
             <label class="check"><input type="checkbox" name="visa_hints"> Show Blue Card hints <span class="muted">For people who need a work visa: says if a job's pay is enough for an EU Blue Card.</span></label>
           </section>
-          <section class="box scard" id="s-search"><h2>Job search</h2><p class="hint">What you are looking for and where.</p>
-            <label>Job titles <span class="muted">One per line, written the way companies write them.</span><textarea class="input lines" name="keywords" placeholder="Werkstudent Data&#10;Junior Data Engineer"></textarea></label>
-            <div class="g3">
+          <section class="box scard" id="s-search"><h2>What I'm looking for</h2><p class="hint">Stellenpilot searches for these jobs every time.</p>
+            <div class="q"><label for="kwAdd">Job titles</label><p class="qh">Written the way companies write them.</p>
+              <textarea name="keywords" hidden></textarea><div class="chipbox" data-chips="keywords" data-add="Add a title"></div></div>
+            <div class="q g2">
               <label>City <input class="input" name="city" placeholder="Essen"></label>
-              <label>Distance from the city (km) <input class="input" name="radius_km" type="number" min="0" max="1000"></label>
-              <label>Country code <input class="input" name="country" maxlength="2" placeholder="de"></label>
+              <label>Country <select class="input" name="country"><option value="de">Germany</option><option value="at">Austria</option><option value="ch">Switzerland</option><option value="nl">Netherlands</option></select></label>
             </div>
-            <label class="check"><input type="checkbox" name="include_remote"> Also remote jobs anywhere in the country</label>
-            <div class="g2">
-              <label>Only ads from the last ... days <input class="input" name="max_age_days" type="number" min="1" max="60"></label>
-              <label>Skip titles with these words <span class="muted">One per line.</span><textarea class="input lines" name="exclude_title_words" placeholder="senior&#10;lead"></textarea></label>
-            </div>
+            <div class="q"><label for="radIn">How far from the city</label><p class="qh">Jobs farther away are left out.</p>
+              <div class="slide"><input id="radIn" name="radius_km" type="range" min="0" max="200" step="5"><output id="radOut" for="radIn"></output></div>
+              <label class="check sw"><input type="checkbox" name="include_remote"><span class="t"><b>Also show remote jobs</b><span>Anywhere in the country.</span></span></label></div>
+            <div class="q"><span class="ql" id="ageLab">How new should the ads be</span><p class="qh">Older ads often have many applicants already.</p>
+              <input name="max_age_days" type="hidden"><div class="seg" id="ageSeg" role="radiogroup" aria-labelledby="ageLab"></div></div>
+            <div class="q"><label for="exAdd">Never show titles with these words</label><p class="qh">For example senior roles or jobs outside your field.</p>
+              <textarea name="exclude_title_words" hidden></textarea><div class="chipbox neg" data-chips="exclude_title_words" data-add="Add a word"></div></div>
           </section>
 
-          <section class="box scard" id="s-sources"><h2>Job sources</h2><p class="hint">Where jobs come from. The first two work without any key. Saved keys are never shown again; leave a key box empty to keep it.</p>
+          <section class="box scard" id="s-sources"><h2>Where jobs come from</h2><p class="hint">The first two work without any key. Saved keys are never shown again; leave a key box empty to keep it.</p>
             <div class="srcrow"><label class="check sw"><input type="checkbox" name="arbeitsagentur"><span class="t"><b>Bundesagentur für Arbeit</b><span>The biggest German job board. Free, no key.</span></span></label></div>
             <div class="srcrow"><label class="check sw"><input type="checkbox" name="arbeitnow"><span class="t"><b>Arbeitnow</b><span>Many English speaking jobs in Germany. Free, no key.</span></span></label></div>
             <div class="srcrow"><label class="check sw"><input type="checkbox" name="adzuna"><span class="t"><b>Adzuna</b><span>Collects ads from many sites. Free key, about 3 minutes to get.</span></span></label>
@@ -993,7 +1016,7 @@ body.wizopen{overflow:hidden}
             <div id="rereadBox" hidden><div class="btnrow" style="margin-top:12px;align-items:center"><span id="rereadMsg" role="status">Your profile has no jobs or projects yet. The AI can read your CV again and fill them in.</span><button type="button" class="btn sec" id="rereadBtn">Read my CV again</button></div></div>
           </section>
 
-          <section class="box scard" id="s-docs"><h2>Documents and German</h2><p class="hint">When CVs and letters are made, and in which language.</p>
+          <section class="box scard" id="s-docs"><h2>CV and letters</h2><p class="hint">When CVs and letters are made, and in which language.</p>
             <div class="g3">
               <label>My German level
                 <select class="input" name="my_german_level"><option value="">From my CV</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></label>
@@ -1006,7 +1029,7 @@ body.wizopen{overflow:hidden}
             <p class="hint">Match goes from 0 to 100. Automatic writes German letters only if your German is B2 or better.</p>
           </section>
 
-          <section class="box scard" id="s-auto"><h2>Automatic search</h2><p class="hint">Search for new jobs every day without opening Stellenpilot.</p>
+          <section class="box scard" id="s-auto"><h2>Daily search</h2><p class="hint">Search for new jobs every day without opening Stellenpilot.</p>
             <label class="check sw"><input type="checkbox" name="enabled"><span class="t"><b>Search every day</b><span>The dashboard does not need to be open.</span></span></label>
             <div class="g3"><label>At <input class="input" name="time" type="time" value="08:45"></label></div>
             <p class="state" id="schedState"></p>
@@ -1016,7 +1039,7 @@ body.wizopen{overflow:hidden}
             <p class="state" id="iconState"></p>
             <div class="btnrow"><button type="button" class="btn sec" id="iconBtn">Put the icon on my desktop</button></div>
           </section>
-          <div class="savebar" id="saveBar"><span id="setMsg" role="status">No changes yet.</span><button class="btn" type="submit" id="setSave">Save changes</button></div>
+          <p class="setmsg" id="setMsg" role="status"></p>
         </form>
 
         <section class="box scard" id="s-gmail" aria-labelledby="gm-h2"><h2 id="gm-h2">Email</h2>
@@ -1067,7 +1090,7 @@ body.wizopen{overflow:hidden}
       <div class="box strip" id="strip" role="status"><span class="muted">No search yet. Press Search now to find your first jobs.</span></div>
       <section aria-labelledby="sw-h" id="swSec" hidden>
         <div class="sechead"><h2 id="sw-h">Review new jobs</h2><span id="swCnt"></span></div>
-        <div class="sw">
+        <div class="swd">
           <div class="sw-prog" id="swProg" aria-hidden="true"></div>
           <div class="sw-deck" id="swDeck" tabindex="0" aria-label="Job cards. Right arrow if you like the job, left arrow if not."></div>
           <div class="sw-btns"><button type="button" class="sw-rb" id="swNo" aria-label="Not for me"></button><button type="button" class="sw-rb u" id="swUndo" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button><button type="button" class="sw-rb" id="swYes" aria-label="I like this job"></button></div>
@@ -1295,7 +1318,7 @@ const DE={
 "Home":"Start","Today":"Heute","More":"Mehr","Newest matches, insights":"Neueste Treffer, Einblicke","Searching now":"Suche läuft","Starting the daily search":"Die tägliche Suche startet","Watch live":"Live zusehen","Review new jobs":"Neue Jobs ansehen","Swipe right if you like it, left if not.":"Wische nach rechts, wenn dir der Job gefällt, sonst nach links.","Job cards. Right arrow if you like the job, left arrow if not.":"Jobkarten. Pfeil rechts, wenn dir der Job gefällt, Pfeil links, wenn nicht.","I like this job":"Dieser Job gefällt mir","Undo":"Rückgängig","{a} of {b}":"{a} von {b}","German {l}":"Deutsch {l}","CV and cover letter ready":"Lebenslauf und Anschreiben fertig","{a} liked, {b} passed":"{a} gefallen dir, {b} nicht","The next AI scoring learns from these choices.":"Die nächste KI Bewertung lernt aus dieser Auswahl.","Your choices are saved. The scoring uses them once an AI model is set up in Settings.":"Deine Auswahl ist gespeichert. Die Bewertung nutzt sie, sobald in den Einstellungen ein KI Modell eingerichtet ist.","{c}: your CV and cover letter are under Ready to apply.":"{c}: Lebenslauf und Anschreiben findest du unter Bereit zum Bewerben.","{c}: noted as a job you like.":"{c}: als Job gemerkt, der dir gefällt.","{c}: noted as not for you.":"{c}: als nicht passend gemerkt.","Why not {c}? You can skip this.":"Warum nicht {c}? Du kannst das überspringen.","Too far":"Zu weit weg","Needs German":"Braucht Deutsch","Wrong role":"Falsche Stelle","Pay too low":"Zu wenig Gehalt","Not this company":"Nicht diese Firma","Got it. The AI scoring takes that into account from the next search.":"Verstanden. Die KI Bewertung berücksichtigt das ab der nächsten Suche.","Got it, saved.":"Verstanden, gespeichert.","Back to {c}.":"Zurück zu {c}.","Replay":"Noch einmal ansehen","Live search":"Suche live","Shortlist":"Auswahl","This letter names only tools and numbers your CV shows.":"Dieses Anschreiben nennt nur Werkzeuge und Zahlen, die dein Lebenslauf zeigt.","Not a match":"Passt nicht","Reading the ad":"Liest die Anzeige","Company watchlist":"Firmen Watchlist","Asking your job sources for new jobs":"Fragt deine Jobquellen nach neuen Jobs","Searching {n} sources":"Durchsucht {n} Quellen","{s}: {n} jobs found":"{s}: {n} Jobs gefunden","Reading {a} at {b}":"Liest {a} bei {b}","Checking your CV":"Vergleicht mit deinem Lebenslauf","Scoring the match":"Bewertet die Passung","{a} at {b}: {m}% match, shortlisted":"{a} bei {b}: {m}% Passung, in der Auswahl","{a} at {b}: {m}% match":"{a} bei {b}: {m}% Passung","Documents {a} of {b}":"Unterlagen {a} von {b}","Writing your CV and cover letter":"Schreibt Lebenslauf und Anschreiben","Writing your CV and cover letter for {b}":"Schreibt Lebenslauf und Anschreiben für {b}","Writing the cover letter":"Schreibt das Anschreiben","Writing the letter again":"Schreibt das Anschreiben neu","Not in your CV: {x}":"Steht nicht in deinem Lebenslauf: {x}","Backed by your CV:":"Durch deinen Lebenslauf belegt:","The truth guard stopped this draft":"Die Wahrheitsprüfung hat diesen Entwurf gestoppt","The draft named things your CV does not show ({x}), so it is not used.":"Der Entwurf nennt Dinge, die dein Lebenslauf nicht zeigt ({x}), deshalb wird er nicht verwendet.","Truth checked":"Wahrheit geprüft","Letter ready":"Anschreiben fertig","Template letter":"Vorlage","A safe template letter is used instead":"Stattdessen wird eine sichere Vorlage verwendet","CV and cover letter ready for {b}":"Lebenslauf und Anschreiben für {b} sind fertig","Reply from {b}":"Antwort von {b}","Moved to {s}":"Verschoben nach {s}","{a} new jobs, {b} shortlisted, {c} documents made":"{a} neue Jobs, {b} in der Auswahl, {c} Unterlagen erstellt","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
 "Automatic search off":"Automatische Suche aus","Automatic search on":"Automatische Suche an","Every day at {x}":"Jeden Tag um {x}",
 "Turn it on in Settings":"In den Einstellungen einschalten","Run setup again":"Einrichtung erneut starten","Report a bug":"Fehler melden","Star on GitHub":"Stern auf GitHub geben",
-"Main":"Hauptmenü","Language":"Sprache",
+"Main":"Hauptmenü","1 job title near {c}":"1 Jobtitel bei {c}","Connected":"Verbunden","On":"An","Switched on here, but the task is missing on your computer. Switch it off and on again to create it.":"Hier eingeschaltet, aber die Aufgabe fehlt auf deinem Computer. Schalte sie aus und wieder ein, um sie neu anzulegen.","Changes save by themselves.":"Änderungen werden von selbst gespeichert.","What I'm looking for":"Was ich suche","Stellenpilot searches for these jobs every time.":"Nach diesen Jobs sucht Stellenpilot jedes Mal.","Written the way companies write them.":"So geschrieben, wie Firmen sie schreiben.","Country":"Land","Germany":"Deutschland","Austria":"Österreich","Switzerland":"Schweiz","Netherlands":"Niederlande","How far from the city":"Wie weit von der Stadt entfernt","Jobs farther away are left out.":"Jobs, die weiter weg sind, werden weggelassen.","Also show remote jobs":"Auch Remote Jobs zeigen","Anywhere in the country.":"Überall im Land.","How new should the ads be":"Wie neu sollen die Anzeigen sein","Older ads often have many applicants already.":"Ältere Anzeigen haben oft schon viele Bewerbungen.","Never show titles with these words":"Titel mit diesen Wörtern nie zeigen","For example senior roles or jobs outside your field.":"Zum Beispiel Senior Stellen oder Jobs außerhalb deines Fachs.","Add a title":"Titel hinzufügen","Add a word":"Wort hinzufügen","Remove {x}":"{x} entfernen","Where jobs come from":"Woher die Jobs kommen","CV and letters":"Lebenslauf und Anschreiben","Daily search":"Tägliche Suche","App":"App","AI":"KI","Saving…":"Wird gespeichert…","{n} job titles near {c}":"{n} Jobtitel bei {c}","{a} of {b} sources on":"{a} von {b} Quellen an","Not switched on":"Nicht eingeschaltet","Off":"Aus","Not connected":"Nicht verbunden","Language, updates, desktop icon":"Sprache, Updates, Desktop Symbol","3 days":"3 Tage","1 week":"1 Woche","2 weeks":"2 Wochen","1 month":"1 Monat","{n} days":"{n} Tage","Language":"Sprache",
 // My CV
 "Every score, CV and cover letter is made from this. Nothing else is ever added.":"Jede Bewertung, jeder Lebenslauf und jedes Anschreiben entsteht daraus. Nichts anderes wird je hinzugefügt.",
 "Upload a new CV":"Neuen Lebenslauf hochladen","Check these before saving":"Prüfe das vor dem Speichern","Your CV text, to copy from":"Dein Lebenslauftext zum Kopieren",
@@ -1329,7 +1352,7 @@ const DE={
 "What you are looking for and where.":"Was du suchst und wo.","Job titles":"Jobtitel","One per line, written the way companies write them.":"Einer pro Zeile, so geschrieben, wie Firmen sie schreiben.",
 "Distance from the city (km)":"Entfernung zur Stadt (km)","Country code":"Ländercode","Also remote jobs anywhere in the country":"Auch Remote Jobs im ganzen Land",
 "Only ads from the last ... days":"Nur Anzeigen der letzten ... Tage","Skip titles with these words":"Titel mit diesen Wörtern überspringen",
-"Where jobs come from. The first two work without any key. Saved keys are never shown again; leave a key box empty to keep it.":"Woher die Jobs kommen. Die ersten zwei gehen ohne Schlüssel. Gespeicherte Schlüssel werden nie wieder angezeigt; lass ein Feld leer, um den Schlüssel zu behalten.",
+"The first two work without any key. Saved keys are never shown again; leave a key box empty to keep it.":"Woher die Jobs kommen. Die ersten zwei gehen ohne Schlüssel. Gespeicherte Schlüssel werden nie wieder angezeigt; lass ein Feld leer, um den Schlüssel zu behalten.",
 "The biggest German job board. Free, no key.":"Die größte deutsche Jobbörse. Kostenlos, ohne Schlüssel.","Many English speaking jobs in Germany. Free, no key.":"Viele englischsprachige Jobs in Deutschland. Kostenlos, ohne Schlüssel.",
 "Collects ads from many sites. Free key, about 3 minutes to get.":"Sammelt Anzeigen von vielen Seiten. Kostenloser Schlüssel, in etwa 3 Minuten erstellt.",
 "How to get your free Adzuna keys":"So bekommst du deine kostenlosen Adzuna Schlüssel","Open":"Öffne",
@@ -2057,7 +2080,7 @@ function route(){
   if(page==="cv")loadCv();if(page==="settings")loadSettings();
   document.title=(page==="home"?"":document.querySelector(`.nav a[data-page="${page}"]`).textContent.replace(/\d+$/,"").trim()+" · ")+"Stellenpilot";
 }
-addEventListener("hashchange",()=>{route();scrollTo(0,0);if(goto){const t=goto;goto="";setTimeout(()=>$(t).scrollIntoView({block:"start"}),50)}});
+addEventListener("hashchange",()=>{route();scrollTo(0,0);if(goto){const t=goto;goto="";if(t.startsWith("s-"))setTabFor(t);setTimeout(()=>$(t).scrollIntoView({block:"start"}),50)}});
 let goto="";document.addEventListener("click",e=>{const a=e.target.closest("a[data-goto]");if(a)goto=a.dataset.goto});
 
 // Mock interview overlay
@@ -2400,14 +2423,17 @@ async function loadSettings(){
   const f=$("setForm");
   try{
     const r=await api("GET","/api/settings");$("rereadBox").hidden=!r.rereadOffer;
-    for(const [sec,keys] of Object.entries(SETF))for(const k of keys){const el=f.elements[k],v=r[sec][k];if(el.type==="checkbox")el.checked=!!v;else el.value=Array.isArray(v)?v.join("\n"):v??""}
+    for(const [sec,keys] of Object.entries(SETF))for(const k of keys){const el=f.elements[k],v=r[sec][k];if(el===document.activeElement&&el.type!=="checkbox")continue;
+      if(el.tagName==="SELECT"&&v&&![...el.options].some(o=>o.value===String(v)))el.add(new Option(String(v).toUpperCase(),v));
+      if(el.type==="range"&&Number(v)>Number(el.max))el.max=v;
+      if(el.type==="checkbox")el.checked=!!v;else el.value=Array.isArray(v)?v.join("\n"):v??""}
     f.querySelectorAll(".keyset").forEach(el=>el.innerHTML=r.keys[el.dataset.key]?`Key saved <button type="button" class="linkbtn" data-clear-key="${esc(el.dataset.key)}">Remove</button>`:"");
-    f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{el.value="";if(el.dataset.ph===undefined)el.dataset.ph=el.placeholder;el.placeholder=r.keys[el.name]?"saved, type to replace":el.dataset.ph});
+    f.querySelectorAll('input[type="password"],input[name="ADZUNA_APP_ID"]').forEach(el=>{if(el===document.activeElement)return;el.value="";if(el.dataset.ph===undefined)el.dataset.ph=el.placeholder;el.placeholder=r.keys[el.name]?"saved, type to replace":el.dataset.ph});
     showProvider();showKeys();
     const ss=$("schedState");
-    ss.textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"Switched on here, but the task is missing on your computer. Press Save changes to create it again.":r.scheduleActive?t("✓ On: every day at {x}.",{x:r.schedule.time}):"Off right now.";
+    ss.textContent=r.inDocker?"Inside Docker this cannot be set up from here. See docs/docker.md.":r.schedule.enabled&&!r.scheduleActive?"Switched on here, but the task is missing on your computer. Switch it off and on again to create it.":r.scheduleActive?t("✓ On: every day at {x}.",{x:r.schedule.time}):"Off right now.";
     ss.className="state"+(r.scheduleActive?" ok":r.schedule.enabled?" bad":"");
-    f.elements.enabled.disabled=r.inDocker;renderGmail(r.gmail);renderIcon(r.shortcut);setDirty(false);
+    f.elements.enabled.disabled=r.inDocker;renderGmail(r.gmail);renderIcon(r.shortcut);setFancy();setStatus(r);
   }catch(e){$("setMsg").textContent=e.message}
 }
 
@@ -2424,26 +2450,53 @@ $("rereadBtn").addEventListener("click",async()=>{const b=$("rereadBtn"),m=$("re
   try{const r=await withProgress("cv",()=>api("POST","/api/cv/reread",{}),p=>{m.innerHTML=progressHtml(p,{slow:SLOW_CV})});cv=normCv(r.profile);if($("cvForm"))renderCv();
     m.textContent="✓ Your CV is read and saved. Check it under My CV.";b.hidden=true}
   catch(e){m.textContent=e.message;b.disabled=false}});
-$("setForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const f=e.target,m=$("setMsg"),b=$("setSave"),body={keys:{}};
-  for(const [sec,keys] of Object.entries(SETF)){body[sec]={};for(const k of keys){const el=f.elements[k];body[sec][k]=el.type==="checkbox"?el.checked:el.tagName==="TEXTAREA"?lines(el.value):el.value.trim()}}
-  f.querySelectorAll(".keyset").forEach(el=>body.keys[el.dataset.key]=f.elements[el.dataset.key].value);
-  b.disabled=true;m.textContent="";
-  try{const r=await api("POST","/api/settings",body);if(body.ui.language!==UI_CHOICE){location.reload();return}await loadSettings();m.textContent=t("Saved.")+" "+(r.scheduleNote?t("Automatic search: ")+r.scheduleNote:t("The next search uses these settings."));$("rereadBox").hidden=!r.rereadOffer;lastState="";refresh()}
-  catch(err){m.textContent=err.message}finally{b.disabled=false}
-});
-
+let setTimer=null;
+async function setAutosave(){const m=$("setMsg");m.className="setmsg busy";m.textContent=t("Saving…");
+  try{const r=await saveSettings();if(!r)return;m.className="setmsg";m.textContent="✓ "+t("Saved.")+(r.scheduleNote?" "+t("Automatic search: ")+r.scheduleNote:"")}
+  catch(err){m.className="setmsg bad";m.textContent=ts(err.message)}}
+$("setForm").addEventListener("submit",e=>{e.preventDefault();setAutosave()});
+$("setForm").addEventListener("change",e=>{if(e.target.matches(".chipbox input"))return;clearTimeout(setTimer);setTimer=setTimeout(setAutosave,500)});
 
 let sched={enabled:false,time:"08:45"};
 const schedText=()=>sched.enabled?`Automatic search daily at <b>${esc(sched.time)}</b>.`:"Automatic search is off (Settings).";
 const renderSched=()=>{$("lastrun").innerHTML=sched.enabled?`<div class="live on"><i></i>${t("Automatic search on")}</div><div>${t("Every day at {x}",{x:esc(sched.time)})}</div>`:`<div class="live"><i></i>Automatic search off</div><div><a href="#settings">Turn it on in Settings</a></div>`};
 /* ---------- Settings extras ---------- */
-function setDirty(on){$("saveBar").classList.toggle("dirty",on);if(on)$("setMsg").textContent=t("You have unsaved changes.");else if($("setMsg").textContent===t("You have unsaved changes."))$("setMsg").textContent=t("No changes yet.")}
-$("setForm").addEventListener("input",()=>setDirty(true));$("setForm").addEventListener("change",()=>setDirty(true));
+/* Tabs: one group of settings at a time. A tab can hold more than one card. */
+const SET_TABS={search:["s-search"],sources:["s-sources"],ai:["s-ai"],docs:["s-docs"],auto:["s-auto"],gmail:["s-gmail"],app:["s-lang","s-icon"]};
+let setTabNow="search";
+function setTab(k){setTabNow=SET_TABS[k]?k:"search";for(const [n,ids] of Object.entries(SET_TABS))ids.forEach(id=>$(id).classList.toggle("offtab",n!==setTabNow));
+  document.querySelectorAll("#setNav [data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===setTabNow));$("setMsg").textContent=""}
+const setTabFor=id=>setTab(Object.keys(SET_TABS).find(k=>SET_TABS[k].includes(id)));
+// the short line under each tab, so you see how things are set without opening it
+function setStatus(r){const f=$("setForm"),opt=n=>f.elements[n].selectedOptions[0]?.textContent||"",put=(k,txt,badge="",ok=false)=>{$("st-"+k).textContent=txt;const b=$("sb-"+k);b.textContent=badge;b.className=ok?"ok":""};
+  const kw=r.search.keywords.length,src=SETF.sources.filter(k=>r.sources[k]).length+(r.watch.starter_list?1:0),g=r.gmail||{},mail=g.enabled&&g.connected;
+  put("search",t(kw===1?"1 job title near {c}":"{n} job titles near {c}",{n:kw,c:r.search.city}));
+  put("sources",t("{a} of {b} sources on",{a:src,b:SETF.sources.length+1}));
+  put("ai",opt("provider").replace(/\s*\(.*\)$/,""),r.llm.provider==="none"?t("Off"):"");
+  put("docs",opt("cv_style").split(",")[0]);
+  put("auto",r.scheduleActive?t("Every day at {x}",{x:r.schedule.time}):t("Not switched on"),t(r.scheduleActive?"On":"Off"),r.scheduleActive);
+  put("gmail",t(mail?"Connected":"Not connected"),t(mail?"On":"Off"),mail);
+  put("app",t("Language, updates, desktop icon"))}
+/* Friendlier inputs on top of the plain form fields: chips for lists, a slider, a row of choices. */
+const AGES=[[1,"Today"],[3,"3 days"],[7,"1 week"],[14,"2 weeks"],[30,"1 month"]];
+function setFancy(){const f=$("setForm");
+  f.querySelectorAll("[data-chips]").forEach(box=>{const ta=f.elements[box.dataset.chips],had=document.activeElement&&box.contains(document.activeElement)&&document.activeElement.tagName==="INPUT";
+    box.innerHTML=lines(ta.value).map((w,i)=>`<span class="c2">${esc(w)}<button type="button" data-rm="${i}" aria-label="${esc(t("Remove {x}",{x:w}))}">×</button></span>`).join("")+`<input id="${box.dataset.chips==="keywords"?"kwAdd":"exAdd"}" placeholder="${esc(t(box.dataset.add))}" enterkeyhint="done">`;
+    if(had)box.querySelector("input").focus()});
+  $("radOut").textContent=f.elements.radius_km.value+" km";
+  const v=Number(f.elements.max_age_days.value),opts=AGES.some(a=>a[0]===v)||!v?AGES:[...AGES,[v,null]].sort((a,b)=>a[0]-b[0]);
+  $("ageSeg").innerHTML=opts.map(([d,l])=>`<button type="button" role="radio" aria-checked="${d===v}" data-days="${d}">${l?t(l):t("{n} days",{n:d})}</button>`).join("")}
+function chipSet(box,list){const ta=$("setForm").elements[box.dataset.chips];ta.value=[...new Set(list)].join("\n");setFancy();ta.dispatchEvent(new Event("change",{bubbles:true}))}
+function chipAdd(inp){const v=inp.value.trim();if(!v)return;const box=inp.closest("[data-chips]");chipSet(box,[...lines($("setForm").elements[box.dataset.chips].value),...v.split(",").map(x=>x.trim()).filter(Boolean)])}
+$("setForm").addEventListener("click",e=>{const rm=e.target.closest("[data-rm]"),day=e.target.closest("[data-days]");
+  if(rm){const box=rm.closest("[data-chips]"),l=lines($("setForm").elements[box.dataset.chips].value);l.splice(Number(rm.dataset.rm),1);chipSet(box,l)}
+  if(day){const el=$("setForm").elements.max_age_days;el.value=day.dataset.days;setFancy();el.dispatchEvent(new Event("change",{bubbles:true}))}});
+$("setForm").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches(".chipbox input")){e.preventDefault();chipAdd(e.target)}});
+$("setForm").addEventListener("focusout",e=>{if(e.target.matches(".chipbox input"))chipAdd(e.target)});
+$("setForm").addEventListener("input",e=>{if(e.target.name==="radius_km")$("radOut").textContent=e.target.value+" km"});
 /* The Settings side menu. My CV has its own (#cvNav); querySelector(".setnav") used to find that one first. */
-$("setNav").addEventListener("click",e=>{const a=e.target.closest("[data-sec]");if(!a)return;e.preventDefault();
-  document.querySelectorAll("#setNav a").forEach(x=>x.classList.toggle("on",x===a));$(a.dataset.sec).scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
+$("setNav").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)setTab(b.dataset.tab)});
+setTab("search");
 $("aiTest").addEventListener("click",async()=>{const m=$("aiTestMsg"),b=$("aiTest");b.disabled=true;m.className="state";m.textContent="Saving and testing…";
   try{await saveSettings();const r=await api("GET","/api/check"),c=r.checks.find(x=>x.step==="ai");m.className="state "+(c.ok?"ok":"bad");m.textContent=(c.ok?"✓ ":"")+ts(c.text.replace(/^AI model: /,"").replace(/\s*\(\w+\)$/,""))}
   catch(e){m.className="state bad";m.textContent=e.message}finally{b.disabled=false}});
@@ -2513,7 +2566,7 @@ async function biLoad(){try{bi=await api("GET","/api/builtin");if(!biKeySet&&bi.
 let biKeySet=false;
 document.addEventListener("toggle",e=>{if(e.target.matches&&e.target.matches("details.speed"))biOpen=e.target.open},true);
 document.addEventListener("click",async e=>{
-  const m=e.target.closest("[data-bikey]");if(m){biKey=m.dataset.bikey;biKeySet=true;biSpeed=null;if($("setForm").provider.value==="builtin"){$("setForm").model.value=biKey;setDirty(true)}biRender();return}
+  const m=e.target.closest("[data-bikey]");if(m){biKey=m.dataset.bikey;biKeySet=true;biSpeed=null;if($("setForm").provider.value==="builtin"){$("setForm").model.value=biKey;$("setForm").model.dispatchEvent(new Event("change",{bubbles:true}))}biRender();return}
   if(e.target.closest("[data-bidl]")){try{bi=await api("POST","/api/builtin/download",{model:biKey});biRender();setTimeout(biLoad,800)}catch(err){toast(err.message)}return}
   if(e.target.closest("[data-bitest]")){biSpeed={busy:true};biRender();try{const r=await api("POST","/api/builtin/test",{model:biKey});biSpeed=r.speed}catch(err){biSpeed={error:err.message}}biRender();return}
   if(e.target.closest("[data-biremove]")){try{bi=await api("POST","/api/builtin/remove",{model:biKey});biSpeed=null;biRender();toast("The AI files were removed")}catch(err){toast(err.message)}return}

@@ -152,3 +152,22 @@ class TodayPageTest(unittest.TestCase):
             self.assertLess(page.index(on_top), page.index('id="moreSec"'))
         self.assertIn(">Today</a>", html)
         self.assertIn('"Today":"Heute"', html)
+
+
+class SettingsTabsTest(unittest.TestCase):
+    def setUp(self):
+        self.html = (Path(__file__).parents[1] / "stellenpilot" / "web" / "index.html").read_text(encoding="utf-8")
+
+    def test_every_settings_card_belongs_to_a_tab_and_every_tab_has_a_button(self):
+        import re
+        panel = self.html[self.html.index('id="setPanel"'):self.html.index('id="page-home"')]
+        cards = set(re.findall(r'class="box scard" id="(s-[a-z]+)"', panel))
+        tabs = re.search(r"const SET_TABS=\{(.*?)\};", self.html).group(1)
+        in_tabs = set(re.findall(r'"(s-[a-z]+)"', tabs))
+        self.assertEqual(cards, in_tabs)  # a card in no tab could never be opened
+        self.assertEqual(set(re.findall(r'data-tab="([a-z]+)"', panel)), set(re.findall(r"(\w+):\[", tabs)))
+
+    def test_the_review_deck_does_not_restyle_the_toggles(self):
+        # `.sw` is the switch style of every toggle in Settings; the review deck once reused the name and centred them all
+        import re
+        self.assertFalse(re.search(r"(^|[}\s])\.sw\{", self.html, re.M))
