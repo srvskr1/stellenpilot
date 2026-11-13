@@ -108,18 +108,19 @@ class FlakyDownloadTest(unittest.TestCase):
         r.read.side_effect = io.BytesIO(data).read
         return r
 
-    def _run(self, urlopen, data, home):
+    def _run(self, urlopen, data, home, reach=()):
         import hashlib
         dest = Path(home) / "ai" / "e.zip"
         with mock.patch.object(builtin.urllib.request, "urlopen", side_effect=urlopen), \
                 mock.patch.object(builtin.time, "sleep"), mock.patch.object(builtin.Path, "home", return_value=Path(home)), \
+                mock.patch.object(builtin, "_reachable", side_effect=lambda h: h in reach), \
                 mock.patch.dict(os.environ, {"STELLENPILOT_AI_DIR": str(Path(home) / "ai")}):
             builtin._dl["manual"] = []
             builtin._fetch(["https://github.com/e.zip", "https://huggingface.co/e.zip"], dest, "engine",
                            hashlib.sha256(data).hexdigest())
         return dest
 
-    def test_falls_back_to_the_mirror_and_resumes(self):
+    def test_tries_the_next_source_and_resumes(self):
         data, seen = b"0123456789", []
 
         def urlopen(req, timeout):
@@ -136,16 +137,22 @@ class FlakyDownloadTest(unittest.TestCase):
         self.assertEqual(seen[-1], ("https://huggingface.co/e.zip", "bytes=4-"))
         self.assertEqual(len(seen), 5)  # 3 GitHub tries, then the mirror twice
 
-    def test_plain_words_and_browser_link_when_everything_fails(self):
+    def _fail(self, reach):
         def urlopen(req, timeout):
             raise builtin.urllib.error.URLError(OSError(10060, "A connection attempt failed because the connected party did not properly respond"))
         with tempfile.TemporaryDirectory() as d, self.assertRaises(RuntimeError) as cm:
-            self._run(urlopen, b"x", d)
-        msg = builtin._plain(cm.exception)
-        self.assertIn("github.com or huggingface.co", msg)
-        self.assertIn("browser", msg)
-        self.assertNotIn("10060", msg)
+            self._run(urlopen, b"x", d, reach)
+        self.assertNotIn("10060", str(cm.exception))
+        return str(cm.exception)
+
+    def test_says_which_kind_of_network_problem_it_is(self):
+        blocked = self._fail(reach=("example.com",))
+        self.assertIn("Your internet works, but this network cannot reach github.com", blocked)
         self.assertEqual(builtin._dl["manual"], [{"name": "e.zip", "url": "https://github.com/e.zip"}])
+        self.assertIn("kept dropping", self._fail(reach=("github.com",)))
+        offline = self._fail(reach=())
+        self.assertIn("not connected to the internet", offline)
+        self.assertEqual(builtin._dl["manual"], [])  # a browser link is no help without internet
 
     def test_uses_a_copy_saved_in_downloads(self):
         data = b"saved by the browser"

@@ -97,10 +97,31 @@ def status(key: str = "standard") -> dict:
 
 _dl = {"active": False, "step": "", "done": 0, "total": 0, "error": "", "manual": []}
 
-# Second source for the engine, tried when GitHub cannot be reached (some networks only reach it over a
-# broken IPv4 path). Same files, same pinned SHA-256, so a wrong file is still never run.
-ENGINE_MIRROR = "https://huggingface.co/srvskr1/stellenpilot-engine/resolve/main/"
 TRIES = 3
+# Only asked "can a connection be opened at all" when a download fails, to tell "no internet" from
+# "this one site is blocked". Nothing is sent to them.
+PROBES = ("example.com", "www.wikipedia.org")
+
+
+def _reachable(host: str) -> bool:
+    try:
+        socket.create_connection((host, 443), timeout=5).close()
+        return True
+    except OSError:
+        return False
+
+
+def _diagnose(host: str) -> str:
+    """Why the download failed, in words the user can act on."""
+    if _reachable(host):
+        return (f"The download from {host} started but the connection kept dropping. "
+                "Press Try again; it continues where it stopped.")
+    if any(_reachable(h) for h in PROBES):
+        return (f"Your internet works, but this network cannot reach {host}. A firewall, a VPN, an antivirus "
+                "or the network itself is blocking it. Try another network such as a phone hotspot, switch "
+                "your VPN off or on, or download the file in your browser.")
+    return ("This computer is not connected to the internet right now. "
+            "Check your Wi-Fi or network cable, then press Try again.")
 
 
 def _sha256(path: Path) -> str:
@@ -165,9 +186,12 @@ def _fetch(urls: list[str], dest: Path, step: str, sha256: str) -> None:
             return
         part.unlink(missing_ok=True)
         last = OSError(f"The downloaded {step} did not match its checksum, so it was deleted.")
-    _dl["manual"].append({"name": dest.name, "url": urls[0]})
-    hosts = " or ".join(dict.fromkeys(urllib.parse.urlsplit(u).hostname for u in urls))
-    raise RuntimeError(f"Could not download the {step} from {hosts}. {_plain(last)}")
+    text = _plain(last)
+    if text == NETWORK:  # a network problem: find out which kind
+        text = _diagnose(urllib.parse.urlsplit(urls[0]).hostname)
+    if "not connected to the internet" not in text:  # a browser link is no help without internet
+        _dl["manual"].append({"name": dest.name, "url": urls[0]})
+    raise RuntimeError(f"Could not download the AI {step}. {text}")
 
 
 def _safe_extract(archive: Path, target: Path) -> None:
@@ -199,7 +223,7 @@ def install_engine() -> Path:
         raise RuntimeError(f"There is no ready made AI engine for {platform.system()} on {platform.machine()}. "
                            "Use Ollama or an API key instead.")
     archive = ai_dir() / asset
-    _fetch([RELEASES + asset, ENGINE_MIRROR + asset], archive, "engine", ENGINE_SHA256.get(asset, ""))
+    _fetch([RELEASES + asset], archive, "engine", ENGINE_SHA256.get(asset, ""))
     _dl["step"] = "unpack"
     target = ai_dir() / "engine"
     shutil.rmtree(target, ignore_errors=True)
@@ -269,6 +293,9 @@ def _quiet(fn, *a):
         pass
 
 
+NETWORK = "The connection timed out or was cut off. Check the internet connection and try again."
+
+
 def _plain(e: Exception | None) -> str:
     text = str(e)
     if "CERTIFICATE_VERIFY_FAILED" in text or "SSL" in text:
@@ -278,8 +305,7 @@ def _plain(e: Exception | None) -> str:
     if "No space left" in text:
         return "Not enough free disk space. The AI needs about 3 GB."
     if isinstance(e, OSError) and "checksum" not in text:  # timeouts, refused, DNS, cut off (WinError 10060 too)
-        return ("The connection timed out or was cut off. Try again, try another network such as a phone "
-                "hotspot, or download the file in your browser and press Try again.")
+        return NETWORK
     return text
 
 
