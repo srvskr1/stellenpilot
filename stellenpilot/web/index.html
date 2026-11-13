@@ -587,43 +587,45 @@ body.wizopen{overflow:hidden}
 .sw-msg{text-align:center;font-size:.8125rem;color:var(--text-tertiary);min-height:1.4em;margin:10px 0 0}
 @media (prefers-reduced-motion:reduce){.swd *{transition:none!important}}
 
-/* Live search: the steps of a running search, played one by one (sources, each job, each letter sentence). */
-.lv{padding:18px 20px;position:relative;overflow:hidden}
-.lv-src{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px}
-.lv-s{position:relative;text-align:center;font-size:.8125rem;padding:8px 6px;border-radius:10px;background:var(--surface-alt);color:var(--text-tertiary);transition:transform .25s var(--ease-out),background .3s,color .3s}
-.lv-s.on{background:var(--accent);color:var(--on-accent)}.lv-s.ok{background:var(--ok-bg);color:var(--ok-fg)}.lv-s.bad{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg)}
-.lv-s b{position:absolute;top:-7px;right:-4px;min-width:20px;font-size:.6875rem;line-height:1.6;padding:0 6px;border-radius:999px;background:var(--text);color:var(--surface);transform:scale(0);transition:transform .3s cubic-bezier(.2,.9,.3,1.6)}.lv-s b.in{transform:scale(1)}
-.lv-desk{position:relative;height:168px;margin-bottom:14px;transition:height .45s var(--ease-in-out)}.lv-desk.tall{height:330px}
-.lv-ad{position:absolute;inset:0;border:1.5px solid var(--accent);border-radius:14px;padding:14px 16px;background:var(--surface);overflow:hidden;transition:transform .5s var(--ease-in-out),opacity .5s}
-.lv-ad.enter{transform:translateX(60%) rotate(3deg);opacity:0}.lv-ad.toL{transform:translate(-25%,150px) scale(.3) rotate(-8deg);opacity:0}.lv-ad.toR{transform:translate(25%,150px) scale(.3) rotate(8deg);opacity:0}
-.lv-ad.mid{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;border-style:dashed}
-.lv-scan{position:absolute;left:0;right:0;height:28px;top:-30px;background:linear-gradient(transparent,rgba(var(--accent-rgb),.16),transparent);pointer-events:none;animation:lvscan 1.6s ease-in-out infinite}
-@keyframes lvscan{from{top:-30px}to{top:100%}}
-.lv-lbl{display:flex;align-items:center;gap:8px;margin:0;font-size:.8125rem;font-weight:600;color:var(--accent)}
-.lv-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:lvpulse 1s ease-in-out infinite}@keyframes lvpulse{50%{opacity:.3}}
-.lv-t{display:block;font-size:1.0625rem;font-weight:600;margin:4px 70px 0 0}.lv-m{display:block;font-size:.8125rem;color:var(--text-tertiary)}
-.lv-tags{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
-.lv-tag{font-size:.75rem;padding:2px 9px;border-radius:999px;animation:lvpop .3s cubic-bezier(.2,.9,.3,1.6)}.lv-tag.ok{background:var(--ok-bg);color:var(--ok-fg)}.lv-tag.no{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg)}
+/* Live search inside the office: the robot's bubble shows the job it is working on, small pills count the
+   sources and the results, and a sheet of paper slides in while a cover letter is written. */
+.bub.live{max-width:300px}.bub.live div{text-align:left;padding:10px 12px;min-width:210px}
+.lvb-l{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--accent);margin-bottom:2px}
+.lvb-l i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:lvpulse 1s ease-in-out infinite}@keyframes lvpulse{50%{opacity:.3}}
+.lvb-t{display:block;font-weight:600;font-size:14px;line-height:1.3}.lvb-t.r{padding-right:48px}.lvb-m{display:block;font-size:12px;font-weight:400;color:var(--text-tertiary)}
+.lvb-ring{position:absolute;right:10px;top:10px;width:42px;height:42px}.lvb-ring circle{fill:none;stroke-width:5}.lvb-ring .bg{stroke:var(--surface-alt)}
+.lvb-ring .fg{stroke:var(--accent);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1s var(--ease-in-out)}
+.lvb-ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.lvb-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.lv-tag{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;animation:lvpop .3s cubic-bezier(.2,.9,.3,1.6)}.lv-tag.ok{background:var(--ok-bg);color:var(--ok-fg)}.lv-tag.no{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg)}
 @keyframes lvpop{from{transform:scale(.4);opacity:0}}
-.lv-ring{position:absolute;right:14px;top:14px;width:58px;height:58px}.lv-ring circle{fill:none;stroke-width:6}.lv-ring .bg{stroke:var(--surface-alt)}
-.lv-ring .fg{stroke:var(--accent);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1s var(--ease-in-out)}
-.lv-ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.875rem;font-variant-numeric:tabular-nums}
-.lv-paper{margin-top:10px;border-top:1px solid var(--border);padding-top:10px;height:190px;overflow:hidden;font-family:Georgia,"Times New Roman",serif;font-size:.9375rem;line-height:1.6}
+.lv-cnt{display:flex;flex-wrap:wrap;gap:6px}.lv-cnt:not(:empty){margin-top:10px}
+.lv-src{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.lv-src:not(:empty){margin-top:12px}
+.lv-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;animation:lvpop .3s var(--ease-out);transition:border-color .3s,background .3s}
+.lv-card b{display:block;font-size:.8125rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv-card strong{display:block;font-size:1.375rem;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.lv-card span{display:block;font-size:.75rem;color:var(--text-tertiary)}
+.lv-card.on{border-color:var(--accent)}.lv-card.on strong{color:var(--accent);animation:lvpulse 1s ease-in-out infinite}
+.lv-card.ok strong{color:var(--ok-fg)}.lv-card.bad{background:var(--pill-rejected-bg);border-color:transparent}.lv-card.bad strong,.lv-card.bad span{color:var(--pill-rejected-fg)}
+.offwrap{display:flex;gap:14px;align-items:stretch}.offwrap .office{flex:1 1 0;min-width:0}
+.office.live .tag{opacity:0}
+@media (min-width:901px){.offwrap:has(.lv-paper.on) .office{--sc:.6}}
+.lv-pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface);color:var(--text-tertiary);box-shadow:0 0 0 1px var(--border);animation:lvpop .3s cubic-bezier(.2,.9,.3,1.6);transition:background .3s,color .3s,transform .2s}
+.lv-pill.on{color:var(--accent)}.lv-pill.ok{background:var(--ok-bg);color:var(--ok-fg)}.lv-pill.bad{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg)}.lv-pill.bump{transform:scale(1.18)}
+.lv-fly{position:absolute;z-index:3;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap;pointer-events:none;transition:transform .6s var(--ease-in-out),opacity .6s}
+.lv-fly.ok{background:var(--ok-bg);color:var(--ok-fg)}.lv-fly.bad{background:var(--surface-alt);color:var(--text-tertiary)}
+.lv-paper{position:relative;flex:0 0 0;min-width:0;overflow:hidden;opacity:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid transparent;border-radius:16px;padding:16px 0;transition:flex-basis .45s var(--ease-in-out),padding .45s var(--ease-in-out),opacity .3s}
+.lv-paper.on{flex-basis:340px;padding:16px 18px;opacity:1;border-color:var(--border)}
+.lv-paper>*{min-width:300px}
+@media (max-width:900px){.offwrap{flex-direction:column}.offwrap .office{flex:none}.lv-src{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}.lv-card{padding:8px 10px}.lv-card strong{font-size:1.125rem}.lv-paper{flex-basis:auto;height:0;padding:0 18px;transition:height .45s var(--ease-in-out),padding .45s,opacity .3s}.lv-paper.on{flex-basis:auto;height:280px;padding:16px 18px}.lv-paper>*{min-width:0}}
+.lv-paper h3{margin:0;font-size:14px}.lv-backed{min-height:22px;margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:11px;color:var(--text-tertiary)}
+.lv-text{flex:1;min-height:0;overflow:hidden;margin-top:8px;border-top:1px solid var(--border);padding-top:8px;font-family:Georgia,"Times New Roman",serif;font-size:13.5px;line-height:1.55}
 .lv-sn{border-radius:4px;transition:background .3s}.lv-sn.chk{background:var(--accent-soft)}.lv-sn.bad{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg);text-decoration:line-through;text-decoration-thickness:2px}
-.lv-why{display:block;font:500 .75rem/1.5 var(--f-ui);color:var(--pill-rejected-fg);margin:2px 0 4px}
-.lv-backed{min-height:26px;margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.75rem;color:var(--text-tertiary)}
-.lv-stamp{position:absolute;right:16px;top:44px;font-size:.75rem;font-weight:700;color:var(--ok-fg);background:var(--surface);border:2px solid currentColor;border-radius:8px;padding:2px 10px;transform:rotate(-8deg);animation:lvstamp .35s cubic-bezier(.2,.9,.3,1.5)}
-.lv-stamp.warn{color:var(--low-fg)}
+.lv-why{display:block;font:600 11px/1.5 var(--f-ui);color:var(--pill-rejected-fg);margin:2px 0 4px}
+.lv-stamp{position:absolute;right:14px;bottom:14px;font-size:12px;font-weight:700;color:var(--ok-fg);background:#fff;border:2px solid currentColor;border-radius:8px;padding:2px 10px;transform:rotate(-8deg);animation:lvstamp .35s cubic-bezier(.2,.9,.3,1.5)}.lv-stamp.warn{color:var(--low-fg)}
 @keyframes lvstamp{from{transform:rotate(-8deg) scale(2.2);opacity:0}}
-.lv-trays{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.lv-tray{border:1px dashed var(--border-strong);border-radius:12px;padding:10px 12px;min-height:92px;transition:background .3s}.lv-tray.hit{background:var(--surface-alt)}
-.lv-tray h3{margin:0 0 4px;font-size:.8125rem;font-weight:600;display:flex;justify-content:space-between}
-.lv-mini{font-size:.75rem;padding:4px 8px;border-radius:8px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:lvdrop .4s cubic-bezier(.2,.9,.3,1.4)}
-.lv-mini.g{background:var(--ok-bg);color:var(--ok-fg)}.lv-mini.x{background:var(--surface-alt);color:var(--text-tertiary)}
-@keyframes lvdrop{from{transform:translateY(-14px) scale(.8);opacity:0}}
-.lv-foot{margin:12px 0 0;font-size:.8125rem;color:var(--text-tertiary);min-height:1.3em}
-.lv-conf{position:absolute;top:-10px;width:6px;height:10px;border-radius:2px;animation:lvconf 1.6s ease-in forwards;pointer-events:none}@keyframes lvconf{to{transform:translateY(700px) rotate(540deg);opacity:0}}
-@media (prefers-reduced-motion:reduce){.lv *{animation:none!important;transition:none!important}}
+.lv-conf{position:absolute;z-index:3;top:-10px;width:6px;height:10px;border-radius:2px;animation:lvconf 1.6s ease-in forwards;pointer-events:none}@keyframes lvconf{to{transform:translateY(520px) rotate(540deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.lv-pill,.lv-tag,.lv-stamp,.lvb-l i{animation:none}.lv-paper,.lv-paper.on,.lv-fly,.lvb-ring .fg{transition:none}}
 
 /* Agent office: an isometric room built from CSS 3D planes. A robot works one desk per step,
    sits on its chair while it types, and rests on the sofa between searches. */
@@ -1107,22 +1109,12 @@ body.wizopen{overflow:hidden}
         <div id="ready"></div>
       </section>
       <section aria-labelledby="soon-h"><div class="sechead"><h2 id="soon-h">Coming up</h2></div><div id="soon"></div></section>
-      <section aria-labelledby="lv-h" id="lvSec" hidden>
-        <div class="sechead"><h2 id="lv-h">Live search</h2><span id="lvSub"></span></div>
-        <div class="box lv" id="lv">
-          <div class="lv-src" id="lvSrc"></div>
-          <div class="lv-desk" id="lvDesk"></div>
-          <div class="lv-trays">
-            <div class="lv-tray" id="lvS"><h3><span>Shortlist</span><b id="lvSc">0</b></h3><div id="lvSl"></div></div>
-            <div class="lv-tray" id="lvX"><h3><span>Not a match</span><b id="lvXc">0</b></h3><div id="lvXl"></div></div>
-          </div>
-          <p class="lv-foot" id="lvFoot" role="status" aria-atomic="true"></p>
-        </div>
-      </section>
       <section aria-labelledby="off-h">
         <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
         <p id="off-note"></p>
-        <div class="office" id="office" role="img" aria-label="Agent office"></div>
+        <div class="offwrap"><div class="office" id="office" role="img" aria-label="Agent office"></div><aside class="lv-paper" id="lvPaper" aria-hidden="true"></aside></div>
+        <div class="lv-cnt" id="lvCnt"></div>
+        <div class="lv-src" id="lvSrc"></div>
       </section>
       <details class="history more" id="moreSec"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><span>More</span><span class="cnt">Newest matches, insights</span></summary>
         <section aria-labelledby="new-h"><div class="sechead"><h2 id="new-h">Newest matches</h2><a href="#jobs" id="seeAll"></a></div><div class="box rows" id="fresh"></div></section>
@@ -1315,7 +1307,7 @@ document.documentElement.lang=LANG;
 const LOC=LANG==="de"?"de-DE":"en-GB";
 const DE={
 // navigation and page heads
-"Home":"Start","Today":"Heute","More":"Mehr","Newest matches, insights":"Neueste Treffer, Einblicke","Searching now":"Suche läuft","Starting the daily search":"Die tägliche Suche startet","Watch live":"Live zusehen","Review new jobs":"Neue Jobs ansehen","Swipe right if you like it, left if not.":"Wische nach rechts, wenn dir der Job gefällt, sonst nach links.","Job cards. Right arrow if you like the job, left arrow if not.":"Jobkarten. Pfeil rechts, wenn dir der Job gefällt, Pfeil links, wenn nicht.","I like this job":"Dieser Job gefällt mir","Undo":"Rückgängig","{a} of {b}":"{a} von {b}","German {l}":"Deutsch {l}","CV and cover letter ready":"Lebenslauf und Anschreiben fertig","{a} liked, {b} passed":"{a} gefallen dir, {b} nicht","The next AI scoring learns from these choices.":"Die nächste KI Bewertung lernt aus dieser Auswahl.","Your choices are saved. The scoring uses them once an AI model is set up in Settings.":"Deine Auswahl ist gespeichert. Die Bewertung nutzt sie, sobald in den Einstellungen ein KI Modell eingerichtet ist.","{c}: your CV and cover letter are under Ready to apply.":"{c}: Lebenslauf und Anschreiben findest du unter Bereit zum Bewerben.","{c}: noted as a job you like.":"{c}: als Job gemerkt, der dir gefällt.","{c}: noted as not for you.":"{c}: als nicht passend gemerkt.","Why not {c}? You can skip this.":"Warum nicht {c}? Du kannst das überspringen.","Too far":"Zu weit weg","Needs German":"Braucht Deutsch","Wrong role":"Falsche Stelle","Pay too low":"Zu wenig Gehalt","Not this company":"Nicht diese Firma","Got it. The AI scoring takes that into account from the next search.":"Verstanden. Die KI Bewertung berücksichtigt das ab der nächsten Suche.","Got it, saved.":"Verstanden, gespeichert.","Back to {c}.":"Zurück zu {c}.","Replay":"Noch einmal ansehen","Live search":"Suche live","Shortlist":"Auswahl","This letter names only tools and numbers your CV shows.":"Dieses Anschreiben nennt nur Werkzeuge und Zahlen, die dein Lebenslauf zeigt.","Not a match":"Passt nicht","Reading the ad":"Liest die Anzeige","Company watchlist":"Firmen Watchlist","Asking your job sources for new jobs":"Fragt deine Jobquellen nach neuen Jobs","Searching {n} sources":"Durchsucht {n} Quellen","{s}: {n} jobs found":"{s}: {n} Jobs gefunden","Reading {a} at {b}":"Liest {a} bei {b}","Checking your CV":"Vergleicht mit deinem Lebenslauf","Scoring the match":"Bewertet die Passung","{a} at {b}: {m}% match, shortlisted":"{a} bei {b}: {m}% Passung, in der Auswahl","{a} at {b}: {m}% match":"{a} bei {b}: {m}% Passung","Documents {a} of {b}":"Unterlagen {a} von {b}","Writing your CV and cover letter":"Schreibt Lebenslauf und Anschreiben","Writing your CV and cover letter for {b}":"Schreibt Lebenslauf und Anschreiben für {b}","Writing the cover letter":"Schreibt das Anschreiben","Writing the letter again":"Schreibt das Anschreiben neu","Not in your CV: {x}":"Steht nicht in deinem Lebenslauf: {x}","Backed by your CV:":"Durch deinen Lebenslauf belegt:","The truth guard stopped this draft":"Die Wahrheitsprüfung hat diesen Entwurf gestoppt","The draft named things your CV does not show ({x}), so it is not used.":"Der Entwurf nennt Dinge, die dein Lebenslauf nicht zeigt ({x}), deshalb wird er nicht verwendet.","Truth checked":"Wahrheit geprüft","Letter ready":"Anschreiben fertig","Template letter":"Vorlage","A safe template letter is used instead":"Stattdessen wird eine sichere Vorlage verwendet","CV and cover letter ready for {b}":"Lebenslauf und Anschreiben für {b} sind fertig","Reply from {b}":"Antwort von {b}","Moved to {s}":"Verschoben nach {s}","{a} new jobs, {b} shortlisted, {c} documents made":"{a} neue Jobs, {b} in der Auswahl, {c} Unterlagen erstellt","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
+"Home":"Start","Today":"Heute","More":"Mehr","Newest matches, insights":"Neueste Treffer, Einblicke","Searching now":"Suche läuft","Starting the daily search":"Die tägliche Suche startet","Watch live":"Live zusehen","Searching":"Suche","searching":"sucht","new job":"neuer Job","new jobs":"neue Jobs","Asking {n} job sources":"Fragt {n} Jobquellen","{s} did not answer":"{s} hat nicht geantwortet","{s}: {n} jobs":"{s}: {n} Jobs","{s}: 1 job":"{s}: 1 Job","Shortlist {n}":"Auswahl {n}","Not a match {n}":"Passt nicht {n}","{n} jobs found in {s} sources":"{n} Jobs in {s} Quellen gefunden","{n} not reached":"{n} nicht erreicht","Review new jobs":"Neue Jobs ansehen","Swipe right if you like it, left if not.":"Wische nach rechts, wenn dir der Job gefällt, sonst nach links.","Job cards. Right arrow if you like the job, left arrow if not.":"Jobkarten. Pfeil rechts, wenn dir der Job gefällt, Pfeil links, wenn nicht.","I like this job":"Dieser Job gefällt mir","Undo":"Rückgängig","{a} of {b}":"{a} von {b}","German {l}":"Deutsch {l}","CV and cover letter ready":"Lebenslauf und Anschreiben fertig","{a} liked, {b} passed":"{a} gefallen dir, {b} nicht","The next AI scoring learns from these choices.":"Die nächste KI Bewertung lernt aus dieser Auswahl.","Your choices are saved. The scoring uses them once an AI model is set up in Settings.":"Deine Auswahl ist gespeichert. Die Bewertung nutzt sie, sobald in den Einstellungen ein KI Modell eingerichtet ist.","{c}: your CV and cover letter are under Ready to apply.":"{c}: Lebenslauf und Anschreiben findest du unter Bereit zum Bewerben.","{c}: noted as a job you like.":"{c}: als Job gemerkt, der dir gefällt.","{c}: noted as not for you.":"{c}: als nicht passend gemerkt.","Why not {c}? You can skip this.":"Warum nicht {c}? Du kannst das überspringen.","Too far":"Zu weit weg","Needs German":"Braucht Deutsch","Wrong role":"Falsche Stelle","Pay too low":"Zu wenig Gehalt","Not this company":"Nicht diese Firma","Got it. The AI scoring takes that into account from the next search.":"Verstanden. Die KI Bewertung berücksichtigt das ab der nächsten Suche.","Got it, saved.":"Verstanden, gespeichert.","Back to {c}.":"Zurück zu {c}.","Replay":"Noch einmal ansehen","Live search":"Suche live","Shortlist":"Auswahl","This letter names only tools and numbers your CV shows.":"Dieses Anschreiben nennt nur Werkzeuge und Zahlen, die dein Lebenslauf zeigt.","Not a match":"Passt nicht","Reading the ad":"Liest die Anzeige","Company watchlist":"Firmen Watchlist","Asking your job sources for new jobs":"Fragt deine Jobquellen nach neuen Jobs","Searching {n} sources":"Durchsucht {n} Quellen","{s}: {n} jobs found":"{s}: {n} Jobs gefunden","Reading {a} at {b}":"Liest {a} bei {b}","Checking your CV":"Vergleicht mit deinem Lebenslauf","Scoring the match":"Bewertet die Passung","{a} at {b}: {m}% match, shortlisted":"{a} bei {b}: {m}% Passung, in der Auswahl","{a} at {b}: {m}% match":"{a} bei {b}: {m}% Passung","Documents {a} of {b}":"Unterlagen {a} von {b}","Writing your CV and cover letter":"Schreibt Lebenslauf und Anschreiben","Writing your CV and cover letter for {b}":"Schreibt Lebenslauf und Anschreiben für {b}","Writing the cover letter":"Schreibt das Anschreiben","Writing the letter again":"Schreibt das Anschreiben neu","Not in your CV: {x}":"Steht nicht in deinem Lebenslauf: {x}","Backed by your CV:":"Durch deinen Lebenslauf belegt:","The truth guard stopped this draft":"Die Wahrheitsprüfung hat diesen Entwurf gestoppt","The draft named things your CV does not show ({x}), so it is not used.":"Der Entwurf nennt Dinge, die dein Lebenslauf nicht zeigt ({x}), deshalb wird er nicht verwendet.","Truth checked":"Wahrheit geprüft","Letter ready":"Anschreiben fertig","Template letter":"Vorlage","A safe template letter is used instead":"Stattdessen wird eine sichere Vorlage verwendet","CV and cover letter ready for {b}":"Lebenslauf und Anschreiben für {b} sind fertig","Reply from {b}":"Antwort von {b}","Moved to {s}":"Verschoben nach {s}","{a} new jobs, {b} shortlisted, {c} documents made":"{a} neue Jobs, {b} in der Auswahl, {c} Unterlagen erstellt","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
 "Automatic search off":"Automatische Suche aus","Automatic search on":"Automatische Suche an","Every day at {x}":"Jeden Tag um {x}",
 "Turn it on in Settings":"In den Einstellungen einschalten","Run setup again":"Einrichtung erneut starten","Report a bug":"Fehler melden","Star on GitHub":"Stern auf GitHub geben",
 "Main":"Hauptmenü","1 job title near {c}":"1 Jobtitel bei {c}","Connected":"Verbunden","On":"An","Switched on here, but the task is missing on your computer. Switch it off and on again to create it.":"Hier eingeschaltet, aber die Aufgabe fehlt auf deinem Computer. Schalte sie aus und wieder ein, um sie neu anzulegen.","Changes save by themselves.":"Änderungen werden von selbst gespeichert.","What I'm looking for":"Was ich suche","Stellenpilot searches for these jobs every time.":"Nach diesen Jobs sucht Stellenpilot jedes Mal.","Written the way companies write them.":"So geschrieben, wie Firmen sie schreiben.","Country":"Land","Germany":"Deutschland","Austria":"Österreich","Switzerland":"Schweiz","Netherlands":"Niederlande","How far from the city":"Wie weit von der Stadt entfernt","Jobs farther away are left out.":"Jobs, die weiter weg sind, werden weggelassen.","Also show remote jobs":"Auch Remote Jobs zeigen","Anywhere in the country.":"Überall im Land.","How new should the ads be":"Wie neu sollen die Anzeigen sein","Older ads often have many applicants already.":"Ältere Anzeigen haben oft schon viele Bewerbungen.","Never show titles with these words":"Titel mit diesen Wörtern nie zeigen","For example senior roles or jobs outside your field.":"Zum Beispiel Senior Stellen oder Jobs außerhalb deines Fachs.","Add a title":"Titel hinzufügen","Add a word":"Wort hinzufügen","Remove {x}":"{x} entfernen","Where jobs come from":"Woher die Jobs kommen","CV and letters":"Lebenslauf und Anschreiben","Daily search":"Tägliche Suche","App":"App","AI":"KI","Saving…":"Wird gespeichert…","{n} job titles near {c}":"{n} Jobtitel bei {c}","{a} of {b} sources on":"{a} von {b} Quellen an","Not switched on":"Nicht eingeschaltet","Off":"Aus","Not connected":"Nicht verbunden","Language, updates, desktop icon":"Sprache, Updates, Desktop Symbol","3 days":"3 Tage","1 week":"1 Woche","2 weeks":"2 Wochen","1 month":"1 Monat","{n} days":"{n} Tage","Language":"Sprache",
@@ -2250,7 +2242,7 @@ function officeState(){
 const chrAt=(x,y,z=0)=>`translate3d(${x}px,${y}px,${z}px)`;
 function renderOffice(){
   if(!$("chr"))buildOffice();
-  const s=officeState(),idx=OFF.findIndex(o=>o[0]===s.st),[,name,x,y]=OFF[idx],working=s.st!=="break";
+  const s=lvOn&&lvStage?{st:lvStage,note:""}:officeState(),idx=OFF.findIndex(o=>o[0]===s.st),[,name,x,y]=OFF[idx],working=s.st!=="break";
   OFF.forEach(([k],i)=>{$("stn-"+k).classList.toggle("on",i===idx&&working);const t=$("tag-"+k);t.classList.toggle("on",i===idx);t.classList.toggle("rest",i===idx&&!working);t.classList.toggle("done",working&&!localGmail&&i<idx&&k!=="break")});
   const pill=$("off-state");pill.className="offpill"+(s.warn?" warn":working?" work":"");
   pill.textContent=s.warn?t("Search interrupted"):working?t("Working: {x}",{x:t(name)}):t("On a break");
@@ -2271,7 +2263,7 @@ function renderOffice(){
   offX=x;offY=y;
 }
 // Text changes in place: a 2px blur bridges the old and new words so they never read as two bubbles.
-function setBubble(txt){const d=$("bub").firstElementChild;if(d.textContent===txt)return;
+function setBubble(txt){if(lvOn)return;const d=$("bub").firstElementChild;if(d.textContent===txt)return;
   if(reduce||$("bub").classList.contains("away")){d.textContent=txt;return}
   d.classList.add("swap");setTimeout(()=>{d.textContent=txt;placeBub();d.classList.remove("swap")},120)}
 // The bubble is a flat layer above the 3D room, so walls and screens never cut through it.
@@ -2396,7 +2388,7 @@ async function importCv(file){
   finally{$("drop").style.pointerEvents="";$("cvFile").value=""}
 }
 $("cvFile").addEventListener("change",e=>importCv(e.target.files[0]));
-document.addEventListener("click",e=>{if(!e.target.closest("[data-watch]"))return;$($("lvSec").hidden?"office":"lvSec").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
+document.addEventListener("click",e=>{if(!e.target.closest("[data-watch]"))return;$("office").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})});
 $("drop").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("cvFile").click()}});
 ["dragenter","dragover"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.add("over")}));
 ["dragleave","drop"].forEach(t=>$("drop").addEventListener(t,e=>{e.preventDefault();$("drop").classList.remove("over")}));
@@ -2788,55 +2780,61 @@ $("swYes").innerHTML=ICO.up;$("swNo").innerHTML=ICO.down;$("swYes").onclick=()=>
 $("swUndo").onclick=()=>{const d=swDone.pop();if(!d)return;const j=jobs.find(x=>x._id===d.id);if(j){j.rating=null;j.ratingReason=""}swPatch(d.id,{rating:null});$("swWhy").innerHTML="";$("swMsg").textContent=j?t("Back to {c}.",{c:j.company}):"";renderSwipe()};
 $("swDeck").addEventListener("keydown",e=>{if(e.key==="ArrowRight"){e.preventDefault();swipe(1)}if(e.key==="ArrowLeft"){e.preventDefault();swipe(-1)}});
 
-/* ---------- Live search: plays the events of a running search (GET /api/events), one after another ---------- */
-let lvLast=0,lvQ=[],lvBusy=false,lvPoll=null,lvCur="",lvEnded=true;
-const LV_R=2*Math.PI*24,lvWait=ms=>new Promise(r=>setTimeout(r,reduce?Math.min(ms,60):ms)),lvFast=()=>lvQ.length>8;
-const lvFoot=s=>{$("lvFoot").textContent=s};
-function lvReset(){lvEnded=false;lvCur="";["lvSrc","lvDesk","lvSl","lvXl"].forEach(i=>$(i).innerHTML="");$("lvSc").textContent=$("lvXc").textContent="0";$("lvDesk").classList.remove("tall");$("lvSub").textContent="";lvFoot("")}
-function lvMid(title,sub="",live=true){$("lvDesk").classList.remove("tall");lvCur="";$("lvDesk").innerHTML=`<div class="lv-ad mid">${live?`<p class="lv-lbl"><i class="lv-dot"></i><span>${esc(title)}</span></p>`:`<b style="font-size:1.0625rem">${esc(title)}</b>`}${sub?`<span class="lv-m">${esc(sub)}</span>`:""}</div>`}
-function lvCard(e){lvCur=e.id;$("lvDesk").classList.remove("tall");
-  $("lvDesk").innerHTML=`<div class="lv-ad enter" id="lvAd"><i class="lv-scan" id="lvScan"></i><p class="lv-lbl"><i class="lv-dot"></i><span id="lvLbl">${t("Reading the ad")}</span></p><b class="lv-t">${esc(e.title)}</b><span class="lv-m">${esc([e.company,e.location,SRC(e.source)==="Other"?"":SRC(e.source)].filter(Boolean).join(" · "))}</span><div class="lv-tags" id="lvTags"></div><div class="lv-ring"><svg viewBox="0 0 58 58" aria-hidden="true"><circle class="bg" cx="29" cy="29" r="24"/><circle class="fg" id="lvFg" cx="29" cy="29" r="24" stroke-dasharray="${LV_R}" stroke-dashoffset="${LV_R}"/></svg><span id="lvPc"></span></div></div>`;
-  requestAnimationFrame(()=>requestAnimationFrame(()=>$("lvAd")&&$("lvAd").classList.remove("enter")))}
-function lvDrop(e){const ok=e.shortlisted,L=$(ok?"lvSl":"lvXl"),c=$(ok?"lvSc":"lvXc"),m=document.createElement("div");
-  m.className="lv-mini "+(ok?"g":"x");m.dataset.id=e.id;m.textContent=`${e.match}% · ${e.company} · ${e.title}`;L.prepend(m);while(L.children.length>4)L.lastChild.remove();c.textContent=+c.textContent+1}
+/* ---------- Live search: plays the events of a running search (GET /api/events) inside the office ---------- */
+const LV_AT={start:"collect",source:"collect",reading:"score",job:"score",writing:"tailor",draft:"tailor",template:"tailor",docs:"tailor",mail:"gmail",done:"break"};
+let lvStage="",lvLast=0,lvQ=[],lvBusy=false,lvPoll=null,lvCur="",lvEnded=true,lvOn=false,lvN={s:0,x:0,found:0,src:0,bad:0};
+const LV_R=2*Math.PI*17,lvWait=ms=>new Promise(r=>setTimeout(r,reduce?Math.min(ms,60):ms)),lvFast=()=>lvQ.length>8;
+const lvPaper=on=>{$("lvPaper").classList.toggle("on",on);setTimeout(placeBub,reduce?0:480)};
+function lvReset(){lvEnded=false;lvStage="";$("office").classList.add("live");lvOn=true;lvCur="";lvN={s:0,x:0,found:0,src:0,bad:0};$("lvSrc").innerHTML=$("lvCnt").innerHTML="";lvPaper(false);$("bub").classList.add("live")}
+// what the robot "says": a label, a title, a second line, and for a job its match ring and skill tags
+function lvSay(lbl,title,meta="",ring=false){const d=$("bub").firstElementChild;
+  d.innerHTML=`${lbl?`<span class="lvb-l"><i></i><span id="lvLbl">${esc(lbl)}</span></span>`:""}<span class="lvb-t${ring?" r":""}">${esc(title)}</span>${meta?`<span class="lvb-m">${esc(meta)}</span>`:""}${ring?`<span class="lvb-tags" id="lvTags"></span><span class="lvb-ring"><svg viewBox="0 0 42 42" aria-hidden="true"><circle class="bg" cx="21" cy="21" r="17"/><circle class="fg" id="lvFg" cx="21" cy="21" r="17" stroke-dasharray="${LV_R}" stroke-dashoffset="${LV_R}"/></svg><b id="lvPc"></b></span>`:""}`;
+  $("office").setAttribute("aria-label",t("Agent office")+": "+[lbl,title,meta].filter(Boolean).join(", "));placeBub()}
+function lvCount(ok){lvN[ok?"s":"x"]++;const id=ok?"lvCs":"lvCx";if(!$(id))$("lvCnt").insertAdjacentHTML(ok?"afterbegin":"beforeend",`<span class="lv-pill ${ok?"ok":""}" id="${id}"></span>`);
+  const p=$(id);p.textContent=t(ok?"Shortlist {n}":"Not a match {n}",{n:lvN[ok?"s":"x"]});p.classList.add("bump");setTimeout(()=>p.classList.remove("bump"),220);return p}
+function lvFly(e){const o=$("office").getBoundingClientRect(),f=$("bub").getBoundingClientRect(),p=lvCount(e.shortlisted);if(reduce)return;
+  const to=p.getBoundingClientRect(),c=document.createElement("span");c.className="lv-fly "+(e.shortlisted?"ok":"bad");c.textContent=`${e.match}% · ${e.company}`;
+  c.style.left=f.left-o.left+f.width/2-50+"px";c.style.top=f.top-o.top+f.height/2+"px";$("office").append(c);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{c.style.transform=`translate(${to.left-f.left-f.width/2+50}px,${to.top-f.top-f.height/2}px) scale(.6)`;c.style.opacity=.2}));setTimeout(()=>c.remove(),650)}
 async function lvType(el,txt){if(reduce||lvFast()){el.textContent=txt;return}const step=Math.max(1,Math.ceil(txt.length/36));for(let k=step;k<txt.length+step;k+=step){el.textContent=txt.slice(0,k);await lvWait(22)}}
+const lvName=n=>n==="watchlist"?t("Company watchlist"):SRC(n);
 const LV={
-  start(e){lvReset();$("lvSrc").innerHTML=e.sources.map(n=>`<div class="lv-s on" data-n="${esc(n)}">${esc(n==="watchlist"?t("Company watchlist"):SRC(n))}<b></b></div>`).join("");lvMid(t("Asking your job sources for new jobs"));lvFoot(t("Searching {n} sources",{n:e.sources.length}))},
-  async source(e){const el=[...$("lvSrc").children].find(x=>x.dataset.n===e.name);if(!el)return;const name=el.firstChild.textContent,b=el.querySelector("b");
-    el.classList.remove("on");el.classList.add(e.error?"bad":"ok");b.textContent=e.error?"!":e.count;b.classList.add("in");if(e.error)el.title=e.error;
-    lvFoot(e.error?`${name}: ${ts(e.error)}`:t("{s}: {n} jobs found",{s:name,n:e.count}));await lvWait(lvFast()?60:450)},
-  async reading(e){lvCard(e);lvFoot(t("Reading {a} at {b}",{a:e.title,b:e.company}));await lvWait(500)},
-  async job(e){if(lvFast()){lvDrop(e);return lvWait(90)}
-    if(lvCur!==e.id){lvCard(e);await lvWait(900)}
-    $("lvScan").remove();$("lvLbl").textContent=t("Checking your CV");
-    const tags=[...e.have.map(s=>[s,"ok"]),...e.miss.map(s=>[s,"no"])];
-    for(const [s,c] of tags){$("lvTags").insertAdjacentHTML("beforeend",`<span class="lv-tag ${c}">${esc(s)}</span>`);await lvWait(160)}
+  start(e){lvReset();$("lvSrc").innerHTML=e.sources.map(n=>`<div class="lv-card on" data-n="${esc(n)}"><b>${esc(lvName(n))}</b><strong>…</strong><span>${t("searching")}</span></div>`).join("");lvSay(t("Searching"),t("Asking {n} job sources",{n:e.sources.length}))},
+  async source(e){const el=[...$("lvSrc").children].find(x=>x.dataset.n===e.name);if(!el)return;lvN.src++;lvN.found+=e.count;if(e.error)lvN.bad++;
+    el.className="lv-card "+(e.error?"bad":"ok");el.querySelector("strong").textContent=e.error?"!":e.count;el.querySelector("span").textContent=e.error?ts(e.error):t(e.count===1?"new job":"new jobs");
+    lvSay(t("Searching"),e.error?t("{s} did not answer",{s:lvName(e.name)}):t(e.count===1?"{s}: 1 job":"{s}: {n} jobs",{s:lvName(e.name),n:e.count}),e.error?ts(e.error):"");await lvWait(lvFast()?60:500)},
+  async reading(e){lvCur=e.id;lvSay(t("Reading the ad"),e.title,[e.company,e.location].filter(Boolean).join(" · "),true);await lvWait(500)},
+  async job(e){if(lvFast()){lvCount(e.shortlisted);return lvWait(80)}
+    if(lvCur!==e.id){lvCur=e.id;lvSay(t("Reading the ad"),e.title,[e.company,e.location].filter(Boolean).join(" · "),true);await lvWait(800)}
+    $("lvLbl").textContent=t("Checking your CV");
+    for(const [x,c] of [...e.have.slice(0,3).map(x=>[x,"ok"]),...e.miss.slice(0,2).map(x=>[x,"no"])]){$("lvTags").insertAdjacentHTML("beforeend",`<span class="lv-tag ${c}">${esc(x)}</span>`);placeBub();await lvWait(170)}
     $("lvLbl").textContent=t("Scoring the match");const fg=$("lvFg");fg.style.stroke=e.shortlisted?"var(--ok-fg)":"var(--s-skipped)";fg.style.strokeDashoffset=LV_R*(1-e.match/100);$("lvPc").textContent=e.match+"%";await lvWait(1100);
-    $("lvLbl").textContent=t(e.shortlisted?"Shortlisted":"Not a match");const tr=$(e.shortlisted?"lvS":"lvX");$("lvAd").classList.add(e.shortlisted?"toL":"toR");tr.classList.add("hit");await lvWait(480);
-    tr.classList.remove("hit");lvDrop(e);lvFoot(t(e.shortlisted?"{a} at {b}: {m}% match, shortlisted":"{a} at {b}: {m}% match",{a:e.title,b:e.company,m:e.match}))},
-  async writing(e){lvCur="";$("lvDesk").classList.add("tall");$("lvSub").textContent=t("Documents {a} of {b}",{a:e.i,b:e.n});
-    $("lvDesk").innerHTML=`<div class="lv-ad enter" id="lvAd"><p class="lv-lbl"><i class="lv-dot"></i><span id="lvLbl">${t("Writing your CV and cover letter")}</span></p><b class="lv-t">${esc(e.title)}</b><span class="lv-m">${esc(e.company)}</span><div class="lv-backed" id="lvBacked"></div><div class="lv-paper" id="lvPaper"><div></div></div></div>`;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>$("lvAd")&&$("lvAd").classList.remove("enter")));lvFoot(t("Writing your CV and cover letter for {b}",{b:e.company}));await lvWait(600)},
-  async draft(e){const P=$("lvPaper");if(!P)return;const box=P.firstElementChild;box.innerHTML="";$("lvLbl").textContent=t(e.n>1?"Writing the letter again":"Writing the cover letter");
-    for(const s of e.sentences){const sp=document.createElement("span");sp.className="lv-sn";box.append(sp," ");P.scrollTop=P.scrollHeight;await lvType(sp,s.text);P.scrollTop=P.scrollHeight;
+    $("lvLbl").textContent=t(e.shortlisted?"Shortlisted":"Not a match");await lvWait(350);lvFly(e);await lvWait(600)},
+  async writing(e){lvCur="";lvSay(t("Documents {a} of {b}",{a:e.i,b:e.n}),t("Writing your CV and cover letter"),e.company);
+    $("lvPaper").innerHTML=`<h3>${esc(e.title)}</h3><span class="lvb-m">${esc(e.company)}</span><div class="lv-backed" id="lvBacked"></div><div class="lv-text" id="lvText"></div>`;lvPaper(true);await lvWait(700)},
+  async draft(e){const P=$("lvText");if(!P)return;P.innerHTML="";$("lvPaper").querySelector(".lv-stamp")?.remove();if($("lvLbl"))$("lvLbl").textContent=t(e.n>1?"Writing the letter again":"Writing the cover letter");
+    for(const s of e.sentences){const sp=document.createElement("span");sp.className="lv-sn";P.append(sp," ");await lvType(sp,s.text);P.scrollTop=P.scrollHeight;
       if(!lvFast()){sp.classList.add("chk");await lvWait(380);sp.classList.remove("chk")}
       if(s.bad.length){sp.classList.add("bad");sp.insertAdjacentHTML("afterend",`<span class="lv-why">${esc(t("Not in your CV: {x}",{x:s.bad.join(", ")}))}</span>`);P.scrollTop=P.scrollHeight;await lvWait(lvFast()?60:1300)}
       else for(const b of s.backed)if(![...$("lvBacked").children].some(c=>c.textContent===b)){if(!$("lvBacked").children.length)$("lvBacked").textContent=t("Backed by your CV:")+" ";$("lvBacked").insertAdjacentHTML("beforeend",`<span class="lv-tag ok">${esc(b)}</span>`)}}
-    if(e.bad.length){$("lvLbl").textContent=t("The truth guard stopped this draft");lvFoot(t("The draft named things your CV does not show ({x}), so it is not used.",{x:e.bad.join(", ")}));await lvWait(lvFast()?100:1800)}
-    else{$("lvAd").insertAdjacentHTML("beforeend",`<span class="lv-stamp">${t("Truth checked")}</span>`);$("lvLbl").textContent=t("Letter ready");lvFoot(t("This letter names only tools and numbers your CV shows."));await lvWait(900)}},
-  async template(){if(!$("lvAd"))return;$("lvPaper").firstElementChild.innerHTML="";$("lvAd").insertAdjacentHTML("beforeend",`<span class="lv-stamp warn">${t("Template letter")}</span>`);$("lvLbl").textContent=t("A safe template letter is used instead");await lvWait(1200)},
-  async docs(e){const m=[...$("lvSl").children].find(x=>x.dataset.id===e.id);if(m&&!m.dataset.doc){m.dataset.doc=1;m.textContent="✓ "+m.textContent}
-    lvFoot(t("CV and cover letter ready for {b}",{b:e.company}));await lvWait(700)},
-  async mail(e){lvMid(t("Reply from {b}",{b:e.company}),t("Moved to {s}",{s:t(LABEL[e.to]||e.to)}));await lvWait(1600)},
-  done(e){lvEnded=true;$("lvSub").textContent="";lvMid(t("Today's search is done"),t("{a} new jobs, {b} shortlisted, {c} documents made",{a:e.found,b:e.shortlisted,c:e.docs}),false);lvFoot("");
-    if(!reduce&&e.shortlisted)for(let k=0;k<22;k++){const c=document.createElement("i");c.className="lv-conf";c.style.left=Math.random()*100+"%";c.style.background=["#1D4ED8","#059669","#F59E0B","#7C3AED"][k%4];c.style.animationDelay=Math.random()*.5+"s";$("lv").append(c);setTimeout(()=>c.remove(),2300)}}
+    if(e.bad.length){if($("lvLbl"))$("lvLbl").textContent=t("The truth guard stopped this draft");await lvWait(lvFast()?100:1800)}
+    else{$("lvPaper").insertAdjacentHTML("beforeend",`<span class="lv-stamp">${t("Truth checked")}</span>`);if($("lvLbl"))$("lvLbl").textContent=t("Letter ready");await lvWait(1100)}},
+  async template(){if(!$("lvText"))return;$("lvText").textContent=t("A safe template letter is used instead");$("lvPaper").insertAdjacentHTML("beforeend",`<span class="lv-stamp warn">${t("Template letter")}</span>`);await lvWait(1200)},
+  async docs(e){lvSay("",t("CV and cover letter ready"),e.company);await lvWait(800);lvPaper(false);await lvWait(500)},
+  async mail(e){lvSay(t("Email"),t("Reply from {b}",{b:e.company}),t("Moved to {s}",{s:t(LABEL[e.to]||e.to)}));await lvWait(1800)},
+  async done(e){lvEnded=true;lvPaper(false);lvSay("",t("Today's search is done"),t("{a} new jobs, {b} shortlisted, {c} documents made",{a:e.found,b:e.shortlisted,c:e.docs}));
+    if(!reduce&&e.shortlisted)for(let k=0;k<22;k++){const c=document.createElement("i");c.className="lv-conf";c.style.left=Math.random()*100+"%";c.style.background=["#1D4ED8","#059669","#F59E0B","#7C3AED"][k%4];c.style.animationDelay=Math.random()*.5+"s";$("office").append(c);setTimeout(()=>c.remove(),2300)}
+    await lvWait(6000);if(lvEnded&&!lvQ.length){lvOn=false;lvStage="";$("bub").classList.remove("live");$("office").classList.remove("live");$("lvSrc").innerHTML=$("lvCnt").innerHTML="";$("bub").firstElementChild.textContent="";renderOffice()}}
 };
 async function lvPlay(){if(lvBusy)return;lvBusy=true;
-  while(lvQ.length){const e=lvQ.shift();if(lvEnded&&e.kind!=="start")lvReset();try{if(LV[e.kind])await LV[e.kind](e)}catch(err){}}
+  while(lvQ.length){const e=lvQ.shift();if(lvEnded&&e.kind!=="start")lvReset();
+    // the robot walks to the desk of the step being played, so the room and the bubble always agree
+    const st=LV_AT[e.kind];if(st&&st!==lvStage){lvStage=st;renderOffice();if(!lvFast())await lvWait(900)}
+    try{if(LV[e.kind])await LV[e.kind](e)}catch(err){}}
   lvBusy=false}
-async function lvFetch(){try{const r=await api("GET","/api/events?after="+lvLast);if(!r.events.length)return;for(const e of r.events){lvLast=e.id;lvQ.push(e)}$("lvSec").hidden=false;lvPlay()}catch(e){}}
+async function lvFetch(){try{const r=await api("GET","/api/events?after="+lvLast);if(!r.events.length)return;for(const e of r.events){lvLast=e.id;lvQ.push(e)}lvPlay()}catch(e){}}
 function lvWatch(on){if(on&&!lvPoll){lvPoll=setInterval(lvFetch,1500);lvFetch()}else if(!on&&lvPoll){clearInterval(lvPoll);lvPoll=null;lvFetch()}}
-document.addEventListener("click",e=>{if(!e.target.closest("[data-replay]"))return;lvLast=0;lvQ=[];lvEnded=true;lvFetch().then(()=>$("lvSec").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"}))});
+document.addEventListener("click",e=>{if(!e.target.closest("[data-replay]"))return;lvLast=0;lvQ=[];lvEnded=true;$("office").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});lvFetch()});
 
 /* ---------- live progress of slow AI work (reading a CV, writing documents) ---------- */
 const mmss=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
