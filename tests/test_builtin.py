@@ -96,3 +96,69 @@ class PipelineCapTest(unittest.TestCase):
                 pipeline.run(settings, tailor=False)
             self.assertEqual({j for j, ai in used if ai}, {"j0", "j1"})
             self.assertEqual(len(used), 5)
+
+
+class FlakyDownloadTest(unittest.TestCase):
+    """WinError 10060 on a Vodafone line in November 2026: GitHub timed out, the raw error reached the user."""
+
+    def _resp(self, data: bytes, status=200):
+        r = mock.MagicMock()
+        r.__enter__.return_value = r
+        r.status, r.headers = status, {"Content-Length": str(len(data))}
+        r.read.side_effect = io.BytesIO(data).read
+        return r
+
+    def _run(self, urlopen, data, home, reach=()):
+        import hashlib
+        dest = Path(home) / "ai" / "e.zip"
+        with mock.patch.object(builtin.urllib.request, "urlopen", side_effect=urlopen), \
+                mock.patch.object(builtin.time, "sleep"), mock.patch.object(builtin.Path, "home", return_value=Path(home)), \
+                mock.patch.object(builtin, "_reachable", side_effect=lambda h: h in reach), \
+                mock.patch.dict(os.environ, {"STELLENPILOT_AI_DIR": str(Path(home) / "ai")}):
+            builtin._dl["manual"] = []
+            builtin._fetch(["https://github.com/e.zip", "https://huggingface.co/e.zip"], dest, "engine",
+                           hashlib.sha256(data).hexdigest())
+        return dest
+
+    def test_tries_the_next_source_and_resumes(self):
+        data, seen = b"0123456789", []
+
+        def urlopen(req, timeout):
+            seen.append((req.full_url, req.get_header("Range")))
+            if "github" in req.full_url:
+                raise builtin.urllib.error.URLError(TimeoutError(10060, "A connection attempt failed"))
+            if len(seen) == 4:  # first mirror try: half the file, then the line drops
+                r = self._resp(data)
+                r.read.side_effect = [data[:4], ConnectionResetError()]
+                return r
+            return self._resp(data[4:], status=206)
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(self._run(urlopen, data, d).read_bytes(), data)
+        self.assertEqual(seen[-1], ("https://huggingface.co/e.zip", "bytes=4-"))
+        self.assertEqual(len(seen), 5)  # 3 GitHub tries, then the mirror twice
+
+    def _fail(self, reach):
+        def urlopen(req, timeout):
+            raise builtin.urllib.error.URLError(OSError(10060, "A connection attempt failed because the connected party did not properly respond"))
+        with tempfile.TemporaryDirectory() as d, self.assertRaises(RuntimeError) as cm:
+            self._run(urlopen, b"x", d, reach)
+        self.assertNotIn("10060", str(cm.exception))
+        return str(cm.exception)
+
+    def test_says_which_kind_of_network_problem_it_is(self):
+        blocked = self._fail(reach=("example.com",))
+        self.assertIn("Your internet works, but this network cannot reach github.com", blocked)
+        self.assertEqual(builtin._dl["manual"], [{"name": "e.zip", "url": "https://github.com/e.zip"}])
+        self.assertIn("kept dropping", self._fail(reach=("github.com",)))
+        offline = self._fail(reach=())
+        self.assertIn("not connected to the internet", offline)
+        self.assertEqual(builtin._dl["manual"], [])  # a browser link is no help without internet
+
+    def test_uses_a_copy_saved_in_downloads(self):
+        data = b"saved by the browser"
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "Downloads").mkdir()
+            (Path(d) / "Downloads" / "e.zip").write_bytes(data)
+            dest = self._run(mock.Mock(side_effect=AssertionError("no network needed")), data, d)
+            self.assertEqual(dest.read_bytes(), data)
+            self.assertFalse((Path(d) / "Downloads" / "e.zip").exists())

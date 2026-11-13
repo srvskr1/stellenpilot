@@ -707,6 +707,7 @@ body.wizopen{overflow:hidden}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 .aiprog{display:grid;gap:6px;font-weight:400}
 .aiprog b{font-weight:600;color:var(--text)}
+.manualdl{display:flex;flex-direction:column;gap:6px;padding:14px 16px;margin-top:10px}.manualdl a{font-weight:600;word-break:break-all}
 .aiprog progress{width:100%;max-width:420px;height:8px;accent-color:var(--accent)}
 .aiprog .sub{font-size:.875rem;color:var(--text-tertiary)}
 /* Language switch (setup wizard) */
@@ -1407,7 +1408,7 @@ const DE={
 "About twice as fast, simpler writing. For older computers or 8 GB of memory.":"Etwa doppelt so schnell, schreibt einfacher. Für ältere Computer oder 8 GB Arbeitsspeicher.","✓ Downloaded":"✓ Heruntergeladen",
 "Downloading the AI engine":"Die KI Engine wird heruntergeladen","Unpacking the engine":"Die Engine wird entpackt","Downloading the AI model":"Das KI Modell wird heruntergeladen",": {a} of {b} MB":": {a} von {b} MB",
 "You can keep using Stellenpilot.":"Du kannst Stellenpilot weiter nutzen.","✓ Ready. It starts by itself when a search needs it.":"✓ Bereit. Sie startet von selbst, wenn eine Suche sie braucht.",
-"Test speed":"Tempo testen","Remove the AI files":"KI Dateien entfernen","Download ({n} GB)":"Herunterladen ({n} GB)",
+"Test speed":"Tempo testen","Remove the AI files":"KI Dateien entfernen","Download ({n} GB)":"Herunterladen ({n} GB)","Try again ({n} GB)":"Noch einmal versuchen ({n} GB)","It continues where it stopped.":"Der Download macht dort weiter, wo er aufgehört hat.","Or download it in your browser":"Oder lade die Datei im Browser herunter","Leave it in your Downloads folder, then press Try again. Stellenpilot checks the file and uses it.":"Lass sie im Ordner Downloads und klicke dann auf Noch einmal versuchen. Stellenpilot prüft die Datei und verwendet sie.",
 "Downloaded once from llama.cpp on GitHub and Qwen on Hugging Face, then everything runs offline.":"Einmal von llama.cpp auf GitHub und Qwen auf Hugging Face geladen, danach läuft alles offline.",
 "Starting the AI and measuring. The first start can take a minute…":"Die KI startet und misst. Der erste Start kann eine Minute dauern…",
 "On this computer: about <b>{a} seconds</b> to score a job and <b>{b} minutes</b> for a CV with cover letter. A daily search takes about <b>{c} minutes</b>.":"Auf diesem Computer: etwa <b>{a} Sekunden</b>, um einen Job zu bewerten, und <b>{b} Minuten</b> für einen Lebenslauf mit Anschreiben. Eine tägliche Suche dauert etwa <b>{c} Minuten</b>.",
@@ -1586,7 +1587,7 @@ const DE_RX=[
  [/^nothing answers at (\S+)\. Start the model server, then test again\.(.*)$/,"Unter $1 antwortet nichts. Starte den Modellserver und teste dann erneut.$2"],
  [/^(\S+) at (\S+), model (.+) ready$/,"$1 unter $2, Modell $3 bereit"],
  [/^(\S+) is running, but model '(.+)' is not installed\. Available: (.*?)\.(?: Run: (.+))?$/,(m,p,mod,av,run)=>`${p} läuft, aber das Modell '${mod}' ist nicht installiert. Verfügbar: ${av==="none"?"keins":av}.`+(run?` Führe aus: ${run}`:"")],
- [/^Searching (.+)$/,"Durchsucht $1"],[/^Scoring (\d+) new jobs against your CV$/,"$1 neue Jobs werden mit deinem Lebenslauf verglichen"],
+ [/^Searching (.+)$/,"Durchsucht $1"],[/^Could not download the AI (engine|model)\. The download from (.+?) started but the connection kept dropping\..*$/,"Die KI konnte nicht geladen werden. Der Download von $2 hat begonnen, aber die Verbindung ist immer wieder abgebrochen. Klicke auf Noch einmal versuchen, der Download macht dort weiter, wo er aufgehört hat."],[/^Could not download the AI (engine|model)\. Your internet works, but this network cannot reach (.+?)\. .*$/,"Die KI konnte nicht geladen werden. Dein Internet funktioniert, aber dieses Netz erreicht $2 nicht. Eine Firewall, ein VPN, ein Virenschutz oder das Netz selbst blockiert die Seite. Nimm ein anderes Netz wie einen Handy Hotspot, schalte dein VPN aus oder ein, oder lade die Datei im Browser herunter."],[/^Could not download the AI (engine|model)\. This computer is not connected to the internet.*$/,"Die KI konnte nicht geladen werden. Dieser Computer ist gerade nicht mit dem Internet verbunden. Prüfe WLAN oder Netzwerkkabel und klicke dann auf Noch einmal versuchen."],[/^Scoring (\d+) new jobs against your CV$/,"$1 neue Jobs werden mit deinem Lebenslauf verglichen"],
  [/^Scoring (\d+) new jobs; the AI reads the (\d+) most promising$/,"$1 neue Jobs werden bewertet; die KI liest die $2 vielversprechendsten"],
  [/^Scoring new jobs with the AI on this computer \((\d+) of (\d+)\)$/,"Neue Jobs werden mit der KI auf diesem Computer bewertet ($1 von $2)"],
  [/^Tailoring CV (\d+) of (\d+): (.+)$/,"Lebenslauf $1 von $2 wird angepasst: $3"],[/^Preparing your (.+) interview$/,"Dein Gespräch bei $1 wird vorbereitet"]];
@@ -2498,8 +2499,9 @@ function biHtml(){
   let action;
   if(d.active)action=`<div class="bar"><i style="width:${pct}%"></i></div><p class="small">${t(d.step==="engine"?"Downloading the AI engine":d.step==="unpack"?"Unpacking the engine":"Downloading the AI model")}${d.total?t(": {a} of {b} MB",{a:Math.round(d.done/1e6),b:Math.round(d.total/1e6)}):"…"}. ${t("You can keep using Stellenpilot.")}</p>`;
   else if(ready)action=`<p class="state ok">✓ Ready. It starts by itself when a search needs it.</p><div class="btnrow"><button type="button" class="btn sec" data-bitest>Test speed</button><button type="button" class="linkbtn" data-biremove>Remove the AI files</button></div>`;
-  else action=`<div class="btnrow"><button type="button" class="btn" data-bidl>${t("Download ({n} GB)",{n:bi.models[biKey].gb})}</button></div><p class="small">Downloaded once from llama.cpp on GitHub and Qwen on Hugging Face, then everything runs offline.</p>`;
-  const err=d.error?`<p class="state bad">${esc(d.error)}</p>`:"";
+  else action=`<div class="btnrow"><button type="button" class="btn" data-bidl>${t(d.error?"Try again ({n} GB)":"Download ({n} GB)",{n:bi.models[biKey].gb})}</button></div><p class="small">${d.error?"It continues where it stopped.":"Downloaded once from llama.cpp on GitHub and Qwen on Hugging Face, then everything runs offline."}</p>`;
+  const manual=d.error&&(d.manual||[]).length?`<div class="box manualdl"><b>Or download it in your browser</b>${d.manual.map(m=>`<a href="${esc(safeUrl(m.url))}" target="_blank" rel="noopener">${esc(m.name)}</a>`).join("")}<p class="small">Leave it in your Downloads folder, then press Try again. Stellenpilot checks the file and uses it.</p></div>`:"";
+  const err=d.error?`<p class="state bad" role="alert">${esc(ts(d.error))}</p>${manual}`:"";
   const meas=biSpeed?(biSpeed.error?`<p class="state bad">${esc(biSpeed.error)}</p>`:biSpeed.busy?`<p class="small">Starting the AI and measuring. The first start can take a minute…</p>`
     :`<p class="meas">${t("On this computer: about <b>{a} seconds</b> to score a job and <b>{b} minutes</b> for a CV with cover letter. A daily search takes about <b>{c} minutes</b>.",{a:biSpeed.seconds_per_job,b:biSpeed.minutes_per_document,c:biSpeed.minutes_daily})}</p>`):"";
   const quick=`<p class="small">${t(biKey==="light"?"Speed on a typical laptop: 30 to 60 seconds per CV with cover letter, and 5 to 10 minutes for a daily search with the AI. It runs in the background.":"Speed on a typical laptop: 1 to 2 minutes per CV with cover letter, and 10 to 20 minutes for a daily search with the AI. It runs in the background.")}</p>`;

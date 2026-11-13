@@ -22,14 +22,14 @@ class DownloadChecksumTests(unittest.TestCase):  # S1
         data = b"engine bytes"
         with tempfile.TemporaryDirectory() as d, self._fake_urlopen(data):
             dest = Path(d) / "engine.zip"
-            builtin._fetch("https://example.com/e.zip", dest, "engine", hashlib.sha256(data).hexdigest())
+            builtin._fetch(["https://example.com/e.zip"], dest, "engine", hashlib.sha256(data).hexdigest())
             self.assertEqual(dest.read_bytes(), data)
 
     def test_tampered_file_is_deleted(self):
         with tempfile.TemporaryDirectory() as d, self._fake_urlopen(b"evil"):
             dest = Path(d) / "engine.zip"
-            with self.assertRaises(OSError):
-                builtin._fetch("https://example.com/e.zip", dest, "engine", "0" * 64)
+            with self.assertRaisesRegex(RuntimeError, "checksum"):
+                builtin._fetch(["https://example.com/e.zip"], dest, "engine", "0" * 64)
             self.assertEqual(list(Path(d).iterdir()), [])
 
     def test_every_download_is_pinned(self):

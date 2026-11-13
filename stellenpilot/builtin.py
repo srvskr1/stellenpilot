@@ -17,6 +17,8 @@ import sys
 import tarfile
 import threading
 import time
+import urllib.error
+import urllib.parse
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -93,31 +95,103 @@ def status(key: str = "standard") -> dict:
 
 # ------------------------------------------------------------------ download
 
-_dl = {"active": False, "step": "", "done": 0, "total": 0, "error": ""}
+_dl = {"active": False, "step": "", "done": 0, "total": 0, "error": "", "manual": []}
+
+TRIES = 3
+# Only asked "can a connection be opened at all" when a download fails, to tell "no internet" from
+# "this one site is blocked". Nothing is sent to them.
+PROBES = ("example.com", "www.wikipedia.org")
 
 
-def _fetch(url: str, dest: Path, step: str, sha256: str) -> None:
-    """Download to a .part file and keep it only if its SHA-256 matches the pinned value."""
+def _reachable(host: str) -> bool:
+    try:
+        socket.create_connection((host, 443), timeout=5).close()
+        return True
+    except OSError:
+        return False
+
+
+def _diagnose(host: str) -> str:
+    """Why the download failed, in words the user can act on."""
+    if _reachable(host):
+        return (f"The download from {host} started but the connection kept dropping. "
+                "Press Try again; it continues where it stopped.")
+    if any(_reachable(h) for h in PROBES):
+        return (f"Your internet works, but this network cannot reach {host}. A firewall, a VPN, an antivirus "
+                "or the network itself is blocking it. Try another network such as a phone hotspot, switch "
+                "your VPN off or on, or download the file in your browser.")
+    return ("This computer is not connected to the internet right now. "
+            "Check your Wi-Fi or network cable, then press Try again.")
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        while chunk := f.read(1 << 20):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _from_downloads(dest: Path, sha256: str) -> bool:
+    """Use a copy the user saved with the browser, when the app itself cannot download."""
+    for f in (Path.home() / "Downloads" / dest.name, ai_dir() / dest.name):
+        if f != dest and f.is_file() and _sha256(f) == sha256.lower():
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(f), dest)
+            return True
+    return False
+
+
+def _get(url: str, part: Path) -> None:
+    """One attempt. Continues a .part file left by an earlier attempt instead of starting over."""
+    have = part.stat().st_size if part.exists() else 0
+    headers = {"User-Agent": USER_AGENT, **({"Range": f"bytes={have}-"} if have else {})}
+    with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=60) as r:  # noqa: S310 (fixed https URLs)
+        if r.status != 206:  # server ignored the range: start from zero
+            have = 0
+        _dl.update(done=have, total=have + int(r.headers.get("Content-Length") or 0))
+        with open(part, "ab" if have else "wb") as f:
+            while chunk := r.read(1 << 20):
+                f.write(chunk)
+                _dl["done"] += len(chunk)
+    if _dl["total"] and part.stat().st_size != _dl["total"]:
+        raise ConnectionError("The download was cut off.")
+
+
+def _fetch(urls: list[str], dest: Path, step: str, sha256: str) -> None:
+    """Try each source a few times, resuming where it stopped. Keep the file only if its SHA-256 matches."""
     if not sha256:
         raise RuntimeError(f"No checksum is known for {dest.name}. Please report this as a bug.")
+    _dl.update(step=step, done=0, total=0)
+    if _from_downloads(dest, sha256):
+        return
     dest.parent.mkdir(parents=True, exist_ok=True)
     part = dest.with_name(dest.name + ".part")
-    digest = hashlib.sha256()
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=60) as r, open(part, "wb") as f:  # noqa: S310 (fixed https URLs)
-        _dl.update(step=step, done=0, total=int(r.headers.get("Content-Length") or 0))
-        while chunk := r.read(1 << 20):
-            f.write(chunk)
-            digest.update(chunk)
-            _dl["done"] += len(chunk)
-    if _dl["total"] and part.stat().st_size != _dl["total"]:
+    last: Exception | None = None
+    for url in urls:
+        for attempt in range(TRIES):
+            try:
+                _get(url, part)
+                break
+            except OSError as e:
+                if "No space left" in str(e):
+                    raise
+                last = e
+                if attempt + 1 < TRIES:
+                    time.sleep(2 * 2 ** attempt)  # 2, 4 seconds
+        else:
+            continue  # this source failed every try, use the next one
+        if _sha256(part) == sha256.lower():
+            part.replace(dest)
+            return
         part.unlink(missing_ok=True)
-        raise OSError("The download was cut off. Try again.")
-    if digest.hexdigest() != sha256.lower():
-        part.unlink(missing_ok=True)
-        raise OSError(f"The downloaded {step} did not match its checksum, so it was deleted. Try again; "
-                      "if it keeps happening, please report it.")
-    part.replace(dest)
+        last = OSError(f"The downloaded {step} did not match its checksum, so it was deleted.")
+    text = _plain(last)
+    if text == NETWORK:  # a network problem: find out which kind
+        text = _diagnose(urllib.parse.urlsplit(urls[0]).hostname)
+    if "not connected to the internet" not in text:  # a browser link is no help without internet
+        _dl["manual"].append({"name": dest.name, "url": urls[0]})
+    raise RuntimeError(f"Could not download the AI {step}. {text}")
 
 
 def _safe_extract(archive: Path, target: Path) -> None:
@@ -149,7 +223,7 @@ def install_engine() -> Path:
         raise RuntimeError(f"There is no ready made AI engine for {platform.system()} on {platform.machine()}. "
                            "Use Ollama or an API key instead.")
     archive = ai_dir() / asset
-    _fetch(RELEASES + asset, archive, "engine", ENGINE_SHA256.get(asset, ""))
+    _fetch([RELEASES + asset], archive, "engine", ENGINE_SHA256.get(asset, ""))
     _dl["step"] = "unpack"
     target = ai_dir() / "engine"
     shutil.rmtree(target, ignore_errors=True)
@@ -168,11 +242,11 @@ def install_engine() -> Path:
 def download(key: str = "standard") -> None:
     """Engine plus model. Blocking; the dashboard runs it in a thread and reads _dl for progress."""
     key = key if key in MODELS else "standard"
-    _dl.update(active=True, error="", step="", done=0, total=0)  # start_download sets this first; the CLI path needs it too
+    _dl.update(active=True, error="", step="", done=0, total=0, manual=[])  # start_download sets this first; the CLI path needs it too
     try:
         install_engine()
         if not model_path(key).exists():
-            _fetch(MODELS[key]["url"], model_path(key), "model", MODELS[key]["sha256"])
+            _fetch([MODELS[key]["url"]], model_path(key), "model", MODELS[key]["sha256"])
         _dl["step"] = "done"
     except Exception as e:
         _dl["error"] = _plain(e)
@@ -189,7 +263,7 @@ def start_download(key: str) -> bool:
     with _dl_lock:
         if _dl["active"]:
             return False
-        _dl.update(active=True, error="", step="", done=0, total=0)
+        _dl.update(active=True, error="", step="", done=0, total=0, manual=[])
     threading.Thread(target=lambda: _quiet(download, key), daemon=True).start()
     return True
 
@@ -219,16 +293,19 @@ def _quiet(fn, *a):
         pass
 
 
-def _plain(e: Exception) -> str:
+NETWORK = "The connection timed out or was cut off. Check the internet connection and try again."
+
+
+def _plain(e: Exception | None) -> str:
     text = str(e)
-    if isinstance(e, OSError) and ("getaddrinfo" in text or "timed out" in text or "Connection" in text):
-        return "Could not download. Check the internet connection and try again."
     if "CERTIFICATE_VERIFY_FAILED" in text or "SSL" in text:
         return ("Could not check the secure connection to the download site. This usually means an antivirus "
                 "or a company network is inspecting web traffic. Update Stellenpilot (it now uses the same "
                 "certificate check as your browser), or allow Python in the antivirus web shield, then try again.")
     if "No space left" in text:
         return "Not enough free disk space. The AI needs about 3 GB."
+    if isinstance(e, OSError) and "checksum" not in text:  # timeouts, refused, DNS, cut off (WinError 10060 too)
+        return NETWORK
     return text
 
 
