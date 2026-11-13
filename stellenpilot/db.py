@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS run_log (
 STATUSES = ("new", "ready", "applied", "interview", "offer", "rejected", "skipped")
 REACHED = ("applied", "interview", "offer")
 # Fields the user owns. The pipeline never overwrites them.
-USER_FIELDS = ("rating", "notes", "prep_done")
+USER_FIELDS = ("rating", "rating_reason", "notes", "prep_done")
 EDITABLE = {"status", "status_note", "rating", "notes", "closed", "interview_at", "prep", "prep_done", "mock", "folder"}
 
 
@@ -117,7 +117,7 @@ class DB:
     def _migrate(self) -> None:
         """Add columns introduced after a user's database was created."""
         have = {r[1] for r in self.conn.execute("PRAGMA table_info(jobs)")}
-        for col in ("german_level", "summary_en", "skills", "cv_style", "reached", "prep_done", "mock"):
+        for col in ("german_level", "summary_en", "skills", "cv_style", "reached", "prep_done", "mock", "rating_reason"):
             if col not in have:
                 self.conn.execute(f"ALTER TABLE jobs ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
         if "reached" not in have:

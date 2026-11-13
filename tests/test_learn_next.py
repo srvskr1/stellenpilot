@@ -87,3 +87,28 @@ class CvStyleTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PassReasonTest(unittest.TestCase):
+    def test_the_reason_for_a_pass_reaches_the_ai(self):
+        from stellenpilot.score import taste_summary
+        rated = [{"title": "BI Analyst", "company": "Bosch", "location": "Stuttgart", "rating": -1, "rating_reason": "far"},
+                 {"title": "Cook", "company": "Cafe", "location": "Essen", "rating": -1, "rating_reason": ""},
+                 {"title": "Data Engineer", "company": "Acme", "location": "Essen", "rating": 1, "rating_reason": ""}]
+        text = taste_summary(rated)
+        self.assertIn("BI Analyst at Bosch (Stuttgart), because: too far away", text)
+        self.assertIn("Cook at Cafe (Essen)", text)
+        self.assertNotIn("Cook at Cafe (Essen), because", text)
+
+    def test_old_databases_get_the_column_and_it_is_the_users_to_set(self):
+        import tempfile
+        from pathlib import Path
+        from stellenpilot.db import DB
+        with tempfile.TemporaryDirectory() as d:
+            db = DB(Path(d) / "j.db")
+            db.insert_job({"id": "a", "title": "T", "company": "C", "location": "", "url": "", "source": "x", "description": "", "dedupe_key": "k"})
+            db.update_job("a", {"rating": -1, "rating_reason": "pay"})  # the pipeline must not overwrite it
+            self.assertFalse(db.job("a")["rating_reason"])
+            db.update_job("a", {"rating": -1, "rating_reason": "pay"}, by_user=True)
+            self.assertEqual(db.job("a")["rating_reason"], "pay")
+            db.conn.close()
