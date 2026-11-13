@@ -375,6 +375,11 @@ def make_handler(settings, port: int = 8765):
                 from . import progress
                 task = (parse_qs(urlsplit(self.path).query).get("task") or [""])[0]
                 return self._send(200, progress.snapshot(task))
+            if self.path.startswith("/api/events"):  # the live view of a running search
+                from urllib.parse import parse_qs, urlsplit
+                after = (parse_qs(urlsplit(self.path).query).get("after") or ["0"])[0]
+                with lock:
+                    return self._send(200, {"events": db.events(int(after) if after.isdigit() else 0)})
             if self.path == "/api/update":  # asks GitHub at most once a day, may wait 10 s, so no lock
                 from . import update
                 return self._send(200, update.status(settings.home, bool(settings["ui"].get("check_updates", True))))
