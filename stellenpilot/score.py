@@ -147,10 +147,16 @@ def llm_score(llm, job: dict, profile: dict, taste: str = "") -> dict:
     }
 
 
+PASS_REASONS = {"far": "too far away", "german": "asks for more German than I have", "role": "wrong kind of role",
+                "pay": "pay too low", "company": "not this company"}
+
+
 def taste_summary(rated: list[dict]) -> str:
     """Plain list of liked and disliked jobs. The LLM reads patterns from it."""
     likes = [f"{j['title']} at {j['company']} ({j['location']})" for j in rated if j.get("rating") == 1]
-    dislikes = [f"{j['title']} at {j['company']} ({j['location']})" for j in rated if j.get("rating") == -1]
+    dislikes = [f"{j['title']} at {j['company']} ({j['location']})"
+                + (f", because: {PASS_REASONS[j['rating_reason']]}" if j.get("rating_reason") in PASS_REASONS else "")
+                for j in rated if j.get("rating") == -1]
     parts = []
     if likes:
         parts.append("Liked: " + "; ".join(likes[:15]))
