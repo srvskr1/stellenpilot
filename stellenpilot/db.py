@@ -58,6 +58,12 @@ CREATE TABLE IF NOT EXISTS runs (
   stage_at TEXT,
   stage_note TEXT NOT NULL DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  at TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  data TEXT NOT NULL DEFAULT '{}'
+);
 CREATE TABLE IF NOT EXISTS run_log (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   date TEXT NOT NULL,
@@ -225,6 +231,20 @@ class DB:
     def stage(self, stage: str, note: str = "") -> None:
         """Live progress for the dashboard's office scene."""
         self.run_update(today(), stage=stage, stage_at=now(), stage_note=note)
+
+    def event(self, kind: str, **data) -> None:
+        """One step of the running search (a source answered, a job was scored, a sentence was checked),
+        for the live view on the dashboard. Kept until the next search starts, so it can be replayed."""
+        self.conn.execute("INSERT INTO events (at, kind, data) VALUES (?, ?, ?)", (now(), kind, json.dumps(data, ensure_ascii=False)))
+        self.conn.commit()
+
+    def clear_events(self) -> None:
+        self.conn.execute("DELETE FROM events")
+        self.conn.commit()
+
+    def events(self, after: int = 0) -> list[dict]:
+        return [{**json.loads(r["data"]), "id": r["id"], "kind": r["kind"], "at": r["at"]}
+                for r in self.conn.execute("SELECT * FROM events WHERE id > ? ORDER BY id LIMIT 500", (after,))]
 
     def runs(self) -> list[dict]:
         return [dict(r) for r in self.conn.execute("SELECT * FROM runs ORDER BY date DESC")]
