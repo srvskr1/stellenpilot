@@ -10,7 +10,7 @@ from datetime import date, timedelta
 import urllib.parse
 import urllib.request
 
-from . import sources
+from . import progress, sources
 from .http import friendly_error
 from .db import DB, today
 from .llm import LLM, job_ad
@@ -54,9 +54,13 @@ def collect(settings, db: DB) -> tuple[list[dict], list[str]]:
     if todo:
         db.stage("collect", f"Searching {len(todo)} sources")
         with ThreadPoolExecutor(len(todo)) as pool:
+            progress.emit("start", sources=todo)
             futures = {n: pool.submit(sources.REGISTRY[n].fetch, settings) for n in todo}
-            for done, _ in enumerate(as_completed(futures.values()), 1):
+            names = {f: n for n, f in futures.items()}
+            for done, f in enumerate(as_completed(futures.values()), 1):
                 db.stage("collect", f"Searching {len(todo)} sources, {done} done")
+                err = f.exception()
+                progress.emit("source", name=names[f], count=0 if err else len(f.result()), error=friendly_error(err) if err else "")
     for name in todo:
         try:
             found = futures[name].result()
@@ -205,7 +209,9 @@ def stronger_answer(job: dict, profile: dict, question: str, answer: str, llm) -
 def run(settings, *, tailor: bool = True) -> dict:
     db = DB(settings.db_path)
     try:
-        return _run(settings, db, tailor)
+        db.clear_events()
+        with progress.events_to(db.event):
+            return _run(settings, db, tailor)
     finally:
         db.conn.close()
         if settings["llm"].get("provider") == "builtin":
@@ -228,6 +234,7 @@ def _run(settings, db: DB, tailor: bool) -> dict:
         problems.insert(0, gaps)
 
     db.stage("score", f"Scoring {len(new)} new jobs against your CV")
+    min_match = settings["tailor"]["min_match"]
     taste = taste_summary(db.jobs("rating IS NOT NULL"))
     added = 0
     lang_cfg = settings["language"]
@@ -243,11 +250,17 @@ def _run(settings, db: DB, tailor: bool) -> dict:
         use = llm if ai_ids is None or job["id"] in ai_ids else None
         if use and llm.local and i % 5 == 0:
             db.stage("score", f"Scoring new jobs with the AI on this computer ({i} of {len(new)})")
+        card = {k: job.get(k, "") for k in ("id", "title", "company", "location", "source")}
+        if use and llm.enabled:  # the AI takes a while per ad, so the live view shows which one it is reading
+            progress.emit("reading", **card)
         try:
             job.update(score_job(job, profile, use, taste, skip_de, my_de, tol))
         except Exception as e:
             problems.append(f"scoring {job['id']}: {e}")
             continue
+        progress.emit("job", **card, match=job.get("match") or 0, have=list(job.get("skills") or [])[:5],
+                      miss=list(job.get("gap_tags") or [])[:4],
+                      shortlisted=(job.get("match") or 0) >= min_match and job.get("lang") != "German needed" and job.get("status") != "skipped")
         if db.insert_job(job):
             added += 1
         else:
@@ -261,6 +274,7 @@ def _run(settings, db: DB, tailor: bool) -> dict:
         out_root = (settings.home / t["output_dir"]).resolve()
         for i, job in enumerate(todo, 1):
             db.stage("tailor", f"Tailoring CV {i} of {len(todo)}: {job['company']}")
+            progress.emit("writing", id=job["id"], title=job["title"], company=job["company"], i=i, n=len(todo))
             try:
                 res = tailor_job(job, profile, out_root, llm, t.get("make_pdf", True), t.get("letter_language", "auto"), my_de,
                                  t.get("cv_style", "modern"))
@@ -269,6 +283,7 @@ def _run(settings, db: DB, tailor: bool) -> dict:
                 continue
             db.mark_ready(job["id"], res["folder"], f"Your experience shows {res['coverage']}% of the tools the ad names", res["cv_style"])
             docs += len(res["files"])
+            progress.emit("docs", id=job["id"], title=job["title"], company=job["company"])
 
     db.stage("score", "Checking if open postings are still online")
     closed = check_closed(db)
@@ -290,6 +305,8 @@ def _run(settings, db: DB, tailor: bool) -> dict:
         except Exception as e:
             problems.append(f"gmail: {e}")
 
+    for c in gmail_changes:
+        progress.emit("mail", company=c.get("company", ""), to=c.get("to", ""))
     shortlisted = sum(1 for j in new if (j.get("match") or 0) >= settings["tailor"]["min_match"] and j.get("lang") != "German needed")
     from .notify import send_digest
     problems += send_digest(settings, db, {"new": added, "shortlisted": shortlisted, "gmail": gmail_changes,
@@ -298,6 +315,7 @@ def _run(settings, db: DB, tailor: bool) -> dict:
                    gmail_updates=len(gmail_changes), notes="; ".join(problems)[:500])
     db.run_update(day, **summary)
     db.log_run(day, **summary)
+    progress.emit("done", found=len(new), shortlisted=shortlisted, docs=docs, problems=len(problems))
     db.stage("done", f"Done: {len(new)} new jobs, {shortlisted} shortlisted")
     return {"new": added, "shortlisted": shortlisted, "docs": docs, "closed": closed,
             "gmail": gmail_changes, "problems": problems}

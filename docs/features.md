@@ -12,7 +12,7 @@
 
 Five calm pages, in your browser, on your computer:
 
-* **Home**: what is ready to apply, interviews coming up, the newest matches, and a small 3D office where a robot works through each step of the search.
+* **Today**: what is ready to apply and your next interviews come first. New jobs show up as cards: swipe right if you like one, left if you don't, and say why if you want. While a search runs, Live search shows each source, each job with its match, and the cover letter with any sentence the truth guard rejected. A small 3D office shows a robot working through each step. Newest matches and Insights sit under More.
 * **Jobs**: every job with its score, why it fits, honest gaps, your documents, notes and interview prep. Filter by word, source, type, place, day, match or status, and see which tools of the ad you have, which ones you are missing, and what the job would score with each of them.
 * **Applications**: a board you drag cards across (Applied, Interview, Offer, Rejected). Below it, Insights shows reply rates by source and CV layout, where your applications stop (CV, first check or interviews), a follow up email for interviews that went quiet, how many English ads still want good German, the skills that would open the most jobs for you, and a weekly summary.
 * **My CV**: your profile, with tips to improve your matches.

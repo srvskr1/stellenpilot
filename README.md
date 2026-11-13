@@ -15,6 +15,8 @@
 
 **New in 0.13.0:** every job source is searched at the same time, so a search takes about as long as the slowest source instead of all of them added up. And the dashboard opens in its own window, without browser tabs or an address bar (Edge or Chrome; otherwise a normal browser tab). Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
 
+**Coming in the next release (already on main):** Home is now Today, with what needs you on top. Live search shows the agent at work on real jobs: each source, each ad with its match, and the cover letter with any sentence the truth guard rejected. New jobs are cards you swipe right if you like them and left if you don't. And when the built-in AI can't download, Stellenpilot tells you whether you are offline, the site is blocked on your network, or the connection keeps dropping.
+
 ## Install
 
 [![Download for Windows](https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTMgM2g4LjV2OC41SDN6TTEyLjUgM0gyMXY4LjVoLTguNXpNMyAxMi41aDguNVYyMUgzek0xMi41IDEyLjVIMjFWMjFoLTguNXoiLz48L3N2Zz4%3D)](https://github.com/srvskr1/stellenpilot/releases/latest) [![Download for Mac](https://img.shields.io/badge/Download_for-Mac-3A3A3C?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/srvskr1/stellenpilot/releases/latest)
