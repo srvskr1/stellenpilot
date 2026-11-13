@@ -537,6 +537,34 @@ body.wizopen{overflow:hidden}
   .tools{justify-content:stretch}.tools .input[type=search]{max-width:none;flex-basis:100%}
 }
 
+/* Review cards: swipe right if you like a job, left if not. Buttons and arrow keys do the same. */
+.sw{max-width:440px;margin:0 auto}
+.sw-prog{display:flex;gap:4px}.sw-prog i{flex:1;height:4px;border-radius:2px;background:var(--border)}.sw-prog i.l{background:var(--success)}.sw-prog i.p{background:var(--error)}.sw-prog i.c{background:var(--accent)}
+.sw-deck{position:relative;height:372px;margin:14px 0;touch-action:pan-y;border-radius:20px;transition:background .2s}
+.sw-deck:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.sw-deck.end{height:190px}.sw-deck.y{background:var(--ok-bg)}.sw-deck.n{background:var(--pill-rejected-bg)}
+.sw-card{position:absolute;inset:0;background:var(--surface);border:1px solid var(--border-strong);border-radius:20px;padding:18px;box-shadow:var(--shadow-1);user-select:none;cursor:grab;overflow:hidden;transition:transform .4s cubic-bezier(.2,.9,.3,1.15),opacity .35s,border-color .2s}
+.sw-card.drag{transition:border-color .15s;cursor:grabbing}
+.sw-card.b1{transform:translateY(12px) scale(.95)}.sw-card.b2{transform:translateY(24px) scale(.9);opacity:.7}
+.sw-emo{position:absolute;top:50%;left:50%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:56px;transform:scale(.3);opacity:0;pointer-events:none;z-index:2}
+.sw-emo.y{background:var(--ok-bg);color:var(--ok-fg)}.sw-emo.n{background:var(--pill-rejected-bg);color:var(--pill-rejected-fg)}.sw-emo svg{width:48px;height:48px}
+.sw-hd{display:flex;gap:12px;align-items:center;margin-right:70px}.sw-hd b{display:block;font-weight:600}.sw-hd span{display:block;font-size:.8125rem;color:var(--text-tertiary)}
+.sw-av{flex:none;width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.sw-ring{position:absolute;right:16px;top:16px;width:58px;height:58px}.sw-ring circle{fill:none;stroke-width:5}.sw-ring .bg{stroke:var(--surface-alt)}.sw-ring .fg{transform:rotate(-90deg);transform-origin:50% 50%;stroke-linecap:round}
+.sw-ring span{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.875rem;font-weight:700;line-height:1}.sw-ring small{font-size:.5625rem;font-weight:500;color:var(--text-tertiary);margin-top:2px}
+.sw-t{font-size:1.125rem;font-weight:600;line-height:1.3;margin-top:14px}
+.sw-tiles{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.sw-tiles span{background:var(--surface-alt);border-radius:8px;padding:4px 10px;font-size:.8125rem;font-weight:500}
+.sw-lab{font-size:.75rem;color:var(--text-tertiary);margin:10px 0 4px}.sw-card .chips{display:flex;flex-wrap:wrap;gap:6px}.sw-card .chip{font-size:.75rem;padding:2px 9px}
+.sw-ready{position:absolute;left:18px;right:18px;bottom:16px;font-size:.8125rem;font-weight:600;padding:8px 12px;border-radius:10px;background:var(--accent-soft);color:var(--accent)}
+.sw-end{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;cursor:default}.sw-end i{color:var(--ok-fg)}.sw-end i svg{width:44px;height:44px}
+.sw-btns{display:flex;justify-content:center;align-items:center;gap:22px}
+.sw-rb{width:62px;height:62px;border-radius:50%;border:1px solid var(--border-strong);background:var(--surface);font-size:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s cubic-bezier(.2,.9,.3,1.6),background .15s}
+.sw-rb:hover{background:var(--surface-hover)}.sw-rb:active{transform:scale(.88)}.sw-rb.u{width:44px;height:44px;color:var(--text-tertiary)}.sw-rb.u svg{width:20px;height:20px}.sw-rb svg{width:28px;height:28px}#swYes{color:var(--ok-fg)}#swNo{color:var(--pill-rejected-fg)}
+.sw-why{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}.sw-why span{width:100%;text-align:center;font-size:.8125rem;color:var(--text-tertiary)}
+.sw-why button{min-height:36px;padding:4px 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font:inherit;font-size:.8125rem;cursor:pointer}
+.sw-msg{text-align:center;font-size:.8125rem;color:var(--text-tertiary);min-height:1.4em;margin:10px 0 0}
+@media (prefers-reduced-motion:reduce){.sw *{transition:none!important}}
+
 /* Live search: the steps of a running search, played one by one (sources, each job, each letter sentence). */
 .lv{padding:18px 20px;position:relative;overflow:hidden}
 .lv-src{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px}
@@ -1036,6 +1064,16 @@ body.wizopen{overflow:hidden}
       <div class="upd" id="upd" role="status" hidden></div>
       <p class="runmsg" id="runMsg" role="status"></p>
       <div class="box strip" id="strip" role="status"><span class="muted">No search yet. Press Search now to find your first jobs.</span></div>
+      <section aria-labelledby="sw-h" id="swSec" hidden>
+        <div class="sechead"><h2 id="sw-h">Review new jobs</h2><span id="swCnt"></span></div>
+        <div class="sw">
+          <div class="sw-prog" id="swProg" aria-hidden="true"></div>
+          <div class="sw-deck" id="swDeck" tabindex="0" aria-label="Job cards. Right arrow if you like the job, left arrow if not."></div>
+          <div class="sw-btns"><button type="button" class="sw-rb" id="swNo" aria-label="Not for me"></button><button type="button" class="sw-rb u" id="swUndo" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button><button type="button" class="sw-rb" id="swYes" aria-label="I like this job"></button></div>
+          <div class="sw-why" id="swWhy"></div>
+          <p class="sw-msg" id="swMsg" role="status" aria-atomic="true">Swipe right if you like it, left if not.</p>
+        </div>
+      </section>
       <section aria-labelledby="af-h" id="afSec" hidden>
         <div class="sechead"><h2 id="af-h">Apply first</h2><span>Good matches you could lose soon</span></div>
         <div class="box af" id="applyFirst"></div>
@@ -1253,7 +1291,7 @@ document.documentElement.lang=LANG;
 const LOC=LANG==="de"?"de-DE":"en-GB";
 const DE={
 // navigation and page heads
-"Home":"Start","Today":"Heute","More":"Mehr","Newest matches, insights":"Neueste Treffer, Einblicke","Searching now":"Suche läuft","Starting the daily search":"Die tägliche Suche startet","Watch live":"Live zusehen","Replay":"Noch einmal ansehen","Live search":"Suche live","Shortlist":"Auswahl","This letter names only tools and numbers your CV shows.":"Dieses Anschreiben nennt nur Werkzeuge und Zahlen, die dein Lebenslauf zeigt.","Not a match":"Passt nicht","Reading the ad":"Liest die Anzeige","Company watchlist":"Firmen Watchlist","Asking your job sources for new jobs":"Fragt deine Jobquellen nach neuen Jobs","Searching {n} sources":"Durchsucht {n} Quellen","{s}: {n} jobs found":"{s}: {n} Jobs gefunden","Reading {a} at {b}":"Liest {a} bei {b}","Checking your CV":"Vergleicht mit deinem Lebenslauf","Scoring the match":"Bewertet die Passung","{a} at {b}: {m}% match, shortlisted":"{a} bei {b}: {m}% Passung, in der Auswahl","{a} at {b}: {m}% match":"{a} bei {b}: {m}% Passung","Documents {a} of {b}":"Unterlagen {a} von {b}","Writing your CV and cover letter":"Schreibt Lebenslauf und Anschreiben","Writing your CV and cover letter for {b}":"Schreibt Lebenslauf und Anschreiben für {b}","Writing the cover letter":"Schreibt das Anschreiben","Writing the letter again":"Schreibt das Anschreiben neu","Not in your CV: {x}":"Steht nicht in deinem Lebenslauf: {x}","Backed by your CV:":"Durch deinen Lebenslauf belegt:","The truth guard stopped this draft":"Die Wahrheitsprüfung hat diesen Entwurf gestoppt","The draft named things your CV does not show ({x}), so it is not used.":"Der Entwurf nennt Dinge, die dein Lebenslauf nicht zeigt ({x}), deshalb wird er nicht verwendet.","Truth checked":"Wahrheit geprüft","Letter ready":"Anschreiben fertig","Template letter":"Vorlage","A safe template letter is used instead":"Stattdessen wird eine sichere Vorlage verwendet","CV and cover letter ready for {b}":"Lebenslauf und Anschreiben für {b} sind fertig","Reply from {b}":"Antwort von {b}","Moved to {s}":"Verschoben nach {s}","{a} new jobs, {b} shortlisted, {c} documents made":"{a} neue Jobs, {b} in der Auswahl, {c} Unterlagen erstellt","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
+"Home":"Start","Today":"Heute","More":"Mehr","Newest matches, insights":"Neueste Treffer, Einblicke","Searching now":"Suche läuft","Starting the daily search":"Die tägliche Suche startet","Watch live":"Live zusehen","Review new jobs":"Neue Jobs ansehen","Swipe right if you like it, left if not.":"Wische nach rechts, wenn dir der Job gefällt, sonst nach links.","Job cards. Right arrow if you like the job, left arrow if not.":"Jobkarten. Pfeil rechts, wenn dir der Job gefällt, Pfeil links, wenn nicht.","I like this job":"Dieser Job gefällt mir","Undo":"Rückgängig","{a} of {b}":"{a} von {b}","German {l}":"Deutsch {l}","CV and cover letter ready":"Lebenslauf und Anschreiben fertig","{a} liked, {b} passed":"{a} gefallen dir, {b} nicht","The next AI scoring learns from these choices.":"Die nächste KI Bewertung lernt aus dieser Auswahl.","Your choices are saved. The scoring uses them once an AI model is set up in Settings.":"Deine Auswahl ist gespeichert. Die Bewertung nutzt sie, sobald in den Einstellungen ein KI Modell eingerichtet ist.","{c}: your CV and cover letter are under Ready to apply.":"{c}: Lebenslauf und Anschreiben findest du unter Bereit zum Bewerben.","{c}: noted as a job you like.":"{c}: als Job gemerkt, der dir gefällt.","{c}: noted as not for you.":"{c}: als nicht passend gemerkt.","Why not {c}? You can skip this.":"Warum nicht {c}? Du kannst das überspringen.","Too far":"Zu weit weg","Needs German":"Braucht Deutsch","Wrong role":"Falsche Stelle","Pay too low":"Zu wenig Gehalt","Not this company":"Nicht diese Firma","Got it. The AI scoring takes that into account from the next search.":"Verstanden. Die KI Bewertung berücksichtigt das ab der nächsten Suche.","Got it, saved.":"Verstanden, gespeichert.","Back to {c}.":"Zurück zu {c}.","Replay":"Noch einmal ansehen","Live search":"Suche live","Shortlist":"Auswahl","This letter names only tools and numbers your CV shows.":"Dieses Anschreiben nennt nur Werkzeuge und Zahlen, die dein Lebenslauf zeigt.","Not a match":"Passt nicht","Reading the ad":"Liest die Anzeige","Company watchlist":"Firmen Watchlist","Asking your job sources for new jobs":"Fragt deine Jobquellen nach neuen Jobs","Searching {n} sources":"Durchsucht {n} Quellen","{s}: {n} jobs found":"{s}: {n} Jobs gefunden","Reading {a} at {b}":"Liest {a} bei {b}","Checking your CV":"Vergleicht mit deinem Lebenslauf","Scoring the match":"Bewertet die Passung","{a} at {b}: {m}% match, shortlisted":"{a} bei {b}: {m}% Passung, in der Auswahl","{a} at {b}: {m}% match":"{a} bei {b}: {m}% Passung","Documents {a} of {b}":"Unterlagen {a} von {b}","Writing your CV and cover letter":"Schreibt Lebenslauf und Anschreiben","Writing your CV and cover letter for {b}":"Schreibt Lebenslauf und Anschreiben für {b}","Writing the cover letter":"Schreibt das Anschreiben","Writing the letter again":"Schreibt das Anschreiben neu","Not in your CV: {x}":"Steht nicht in deinem Lebenslauf: {x}","Backed by your CV:":"Durch deinen Lebenslauf belegt:","The truth guard stopped this draft":"Die Wahrheitsprüfung hat diesen Entwurf gestoppt","The draft named things your CV does not show ({x}), so it is not used.":"Der Entwurf nennt Dinge, die dein Lebenslauf nicht zeigt ({x}), deshalb wird er nicht verwendet.","Truth checked":"Wahrheit geprüft","Letter ready":"Anschreiben fertig","Template letter":"Vorlage","A safe template letter is used instead":"Stattdessen wird eine sichere Vorlage verwendet","CV and cover letter ready for {b}":"Lebenslauf und Anschreiben für {b} sind fertig","Reply from {b}":"Antwort von {b}","Moved to {s}":"Verschoben nach {s}","{a} new jobs, {b} shortlisted, {c} documents made":"{a} neue Jobs, {b} in der Auswahl, {c} Unterlagen erstellt","Applications":"Bewerbungen","My CV":"Mein Lebenslauf","Settings":"Einstellungen",
 "Automatic search off":"Automatische Suche aus","Automatic search on":"Automatische Suche an","Every day at {x}":"Jeden Tag um {x}",
 "Turn it on in Settings":"In den Einstellungen einschalten","Run setup again":"Einrichtung erneut starten","Report a bug":"Fehler melden","Star on GitHub":"Stern auf GitHub geben",
 "Main":"Hauptmenü","Language":"Sprache",
@@ -1877,7 +1915,7 @@ function renderMock(){if(!mk)return;const j=jobs.find(x=>x._id===mk.id);if(!j)re
   body+=`<div class="btnrow"><button class="btn" data-mknext>${last?t("See summary"):t("Next question")}</button><button class="btn sec" data-mkretry>${t("Try again")}</button></div>`;
   B.innerHTML=body;}
 
-function renderHome(){
+function renderHome(){renderSwipe();
   const live=j=>!j.closed, ready=jobs.filter(j=>j.status==="ready"&&live(j)).sort((a,b)=>(b.match||0)-(a.match||0));
   const ints=jobs.filter(j=>j.status==="interview").sort((a,b)=>String(a.interviewAt||"9").localeCompare(String(b.interviewAt||"9")));
   const h=new Date().getHours(), hi=h<12?"Good morning":h<18?"Good afternoon":"Good evening";
@@ -1903,8 +1941,6 @@ function renderToday(){
   jobs.filter(j=>j.closed&&(j.status==="new"||j.status==="ready")).forEach(j=>items.push({c:"closed",ic:ICO.x,
     t:`<b>${esc(j.company)}</b> closed the posting for ${esc(j.title)}`,s:j.closedAt?"Noticed "+fmtDate(j.closedAt):"",
     a:`<button class="mini" data-skip="${esc(j._id)}">Move to skipped</button>`}));
-  const unrated=jobs.filter(j=>Number(j.match)>0&&seen(j)&&j.status==="new"&&live(j)&&!j.rating);
-  if(unrated.length)items.push({c:"rate",ic:ICO.star,t:`Rate <b>${unrated.length}</b> new match${unrated.length>1?"es":""}`,s:"Yes or Not for me on each job teaches the scoring what you like",a:`<button class="mini" data-go="${esc(unrated[0]._id)}">Start rating</button>`});
   $("todaySec").hidden=!items.length;$("today-count").textContent=items.length?`${items.length} to do`:"";
   $("today").innerHTML=items.map(i=>`<div class="todo ${i.c}"><span class="ic">${i.ic}</span><div class="tx">${i.t}<small>${i.s}</small></div><div class="acts">${i.a}</div></div>`).join("");
 }
@@ -2654,6 +2690,49 @@ $("runBtn").addEventListener("click",async()=>{
 });
 
 /* ---------- Local API ---------- */
+/* ---------- Review cards: swipe right for a job you like, left for one you do not ---------- */
+let swDone=[],swSig="",swDrag=false;
+const SW_WHY=[["far","Too far"],["german","Needs German"],["role","Wrong role"],["pay","Pay too low"],["company","Not this company"]];
+const swList=()=>jobs.filter(j=>Number(j.match)>0&&seen(j)&&(j.status==="new"||j.status==="ready")&&!j.closed&&!j.rating).sort((a,b)=>(b.match||0)-(a.match||0));
+const swHue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h};
+const swPatch=(id,body)=>api("PATCH","/api/jobs/"+encodeURIComponent(id),body).catch(()=>toast("Could not save. Try again in a moment."));
+function swCard(j,d){const h=swHue(j.company||""),R=2*Math.PI*24,m=Number(j.match)||0,chips=(a,c)=>a.slice(0,5).map(s=>`<span class="chip ${c}">${esc(s)}</span>`).join("");
+  return `<div class="sw-card${d?" b"+d:""}" data-id="${esc(j._id)}"><div class="sw-emo y" aria-hidden="true">${ICO.up}</div><div class="sw-emo n" aria-hidden="true">${ICO.down}</div>
+  <div class="sw-ring"><svg viewBox="0 0 58 58" aria-hidden="true"><circle class="bg" cx="29" cy="29" r="24"/><circle class="fg" cx="29" cy="29" r="24" stroke="${m>=70?"var(--success)":"var(--accent)"}" stroke-dasharray="${R}" stroke-dashoffset="${R*(1-m/100)}"/></svg><span>${m}%<small>${t("match")}</small></span></div>
+  <div class="sw-hd"><div class="sw-av" style="background:hsl(${h} 70% 93%);color:hsl(${h} 55% 30%)">${esc((j.company||"?").trim().slice(0,2))}</div><div><b>${esc(j.company)}</b><span>${esc(j.location||"")}</span></div></div>
+  <div class="sw-t">${esc(j.title)}</div>
+  <div class="sw-tiles">${[j.jobType,j.germanLevel?t("German {l}",{l:j.germanLevel}):langText(j),SRC(j.source)==="Other"?"":SRC(j.source)].filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join("")}</div>
+  ${j.skills&&j.skills.length?`<p class="sw-lab">${t("In your CV")}</p><div class="chips">${chips(j.skills,"ok")}</div>`:""}
+  ${j.gapTags&&j.gapTags.length?`<p class="sw-lab">${t("Not in your CV")}</p><div class="chips">${chips(j.gapTags,"gap")}</div>`:""}
+  ${j.status==="ready"?`<div class="sw-ready">${t("CV and cover letter ready")}</div>`:""}</div>`}
+function renderSwipe(){if(swDrag)return;
+  const L=swList(),sig=L.map(j=>j._id).join("|")+"#"+swDone.length+LANG;if(sig===swSig)return;swSig=sig;
+  $("swSec").hidden=!L.length&&!swDone.length;if($("swSec").hidden)return;
+  const n=swDone.length+L.length,D=$("swDeck");D.className="sw-deck"+(L.length?"":" end");$("swNo").hidden=$("swYes").hidden=!L.length;
+  $("swProg").innerHTML=n>24?"":swDone.map(d=>`<i class="${d.v>0?"l":"p"}"></i>`).join("")+L.map((_,k)=>`<i class="${k?"":"c"}"></i>`).join("");
+  $("swCnt").textContent=L.length?t("{a} of {b}",{a:swDone.length+1,b:n}):"";
+  if(!L.length){const y=swDone.filter(d=>d.v>0).length;
+    D.innerHTML=`<div class="sw-card sw-end"><i aria-hidden="true">${ICO.check}</i><b>${t("{a} liked, {b} passed",{a:y,b:swDone.length-y})}</b><span class="small">${t(aiOn?"The next AI scoring learns from these choices.":"Your choices are saved. The scoring uses them once an AI model is set up in Settings.")}</span></div>`;return}
+  D.innerHTML=L.slice(0,3).reverse().map((j,k,a)=>swCard(j,a.length-1-k)).join("");swBind(D.lastElementChild)}
+function swFeel(c,x){const p=Math.max(-1,Math.min(1,x/110)),y=c.querySelector(".sw-emo.y"),n=c.querySelector(".sw-emo.n");
+  y.style.opacity=Math.max(0,p);y.style.transform=`scale(${.3+.7*Math.max(0,p)})`;n.style.opacity=Math.max(0,-p);n.style.transform=`scale(${.3+.7*Math.max(0,-p)})`;
+  c.style.borderColor=p>.15?"var(--success)":p<-.15?"var(--error)":"";$("swDeck").classList.toggle("y",p>.15);$("swDeck").classList.toggle("n",p<-.15)}
+function swBind(c){let sx=0,x=0,on=false;
+  c.addEventListener("pointerdown",e=>{on=swDrag=true;sx=e.clientX;x=0;c.setPointerCapture(e.pointerId);c.classList.add("drag")});
+  c.addEventListener("pointermove",e=>{if(!on)return;x=e.clientX-sx;c.style.transform=`translateX(${x}px) rotate(${x/14}deg)`;swFeel(c,x)});
+  const up=()=>{if(!on)return;on=false;c.classList.remove("drag");if(Math.abs(x)>90)swipe(x>0?1:-1);else{swDrag=false;c.style.transform="";swFeel(c,0)}};
+  c.addEventListener("pointerup",up);c.addEventListener("pointercancel",up)}
+function swipe(v){const j=swList()[0],c=$("swDeck").lastElementChild;if(!j||!c||c.classList.contains("sw-end")||c.dataset.gone)return;
+  c.dataset.gone=1;swDrag=true;c.classList.remove("drag");swFeel(c,v*140);c.style.transform=`translateX(${v*520}px) rotate(${v*28}deg)`;c.style.opacity=0;
+  j.rating=v;swDone.push({id:j._id,v});swPatch(j._id,{rating:v});$("swWhy").innerHTML="";
+  $("swMsg").textContent=v>0?t(j.status==="ready"?"{c}: your CV and cover letter are under Ready to apply.":"{c}: noted as a job you like.",{c:j.company}):t("{c}: noted as not for you.",{c:j.company});
+  setTimeout(()=>{swDrag=false;renderSwipe();if(v<0)swAsk(j)},reduce?0:330)}
+function swAsk(j){$("swWhy").innerHTML=`<span>${esc(t("Why not {c}? You can skip this.",{c:j.company}))}</span>`+SW_WHY.map(([k,l])=>`<button type="button" data-why="${k}">${t(l)}</button>`).join("");
+  $("swWhy").onclick=e=>{const b=e.target.closest("[data-why]");if(!b)return;j.ratingReason=b.dataset.why;swPatch(j._id,{ratingReason:b.dataset.why});$("swWhy").innerHTML="";$("swMsg").textContent=t(aiOn?"Got it. The AI scoring takes that into account from the next search.":"Got it, saved.")}}
+$("swYes").innerHTML=ICO.up;$("swNo").innerHTML=ICO.down;$("swYes").onclick=()=>swipe(1);$("swNo").onclick=()=>swipe(-1);
+$("swUndo").onclick=()=>{const d=swDone.pop();if(!d)return;const j=jobs.find(x=>x._id===d.id);if(j){j.rating=null;j.ratingReason=""}swPatch(d.id,{rating:null});$("swWhy").innerHTML="";$("swMsg").textContent=j?t("Back to {c}.",{c:j.company}):"";renderSwipe()};
+$("swDeck").addEventListener("keydown",e=>{if(e.key==="ArrowRight"){e.preventDefault();swipe(1)}if(e.key==="ArrowLeft"){e.preventDefault();swipe(-1)}});
+
 /* ---------- Live search: plays the events of a running search (GET /api/events), one after another ---------- */
 let lvLast=0,lvQ=[],lvBusy=false,lvPoll=null,lvCur="",lvEnded=true;
 const LV_R=2*Math.PI*24,lvWait=ms=>new Promise(r=>setTimeout(r,reduce?Math.min(ms,60):ms)),lvFast=()=>lvQ.length>8;
