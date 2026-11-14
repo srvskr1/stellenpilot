@@ -13,9 +13,7 @@
 
 <sub>All names, companies and jobs in this demo are fictional.</sub>
 
-**New in 0.14.0:** Home is now Today, with what needs you on top. While a search runs, the robot in the agent office shows the job it is reading, its match and the cover letter it is writing, with any sentence the truth guard rejected struck through; each job source gets a card below with its count. New jobs are cards you swipe right if you like them and left if you don't. Settings are split into seven tabs, job titles are chips you add and remove, and every change saves by itself. And when the built-in AI can't download, Stellenpilot tells you whether you are offline, the site is blocked on your network, or the connection keeps dropping. Older releases are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
-
-**On main, not released yet:** the agent office sits right under the summary, with a little runner on a track that shows how far the search is and roughly how long is left. It hops at each step, slows down and sweats when a step takes long, and cheers when the search is done. The job cards come with arrows and a short nudge so it is clear you can swipe them.
+**New in 0.14.1:** the agent office now sits right under the summary, with a little runner on a track that shows how far the search is and roughly how long is left. It hops at each step, slows down and sweats when a step takes long, and cheers when the search is done. New job cards come with arrows and a short nudge so it is clear you can swipe them. The setup guide and the mock interview are now real dialogs, so Esc, focus and screen readers work the way you expect. Older releases, including 0.14.0 (Today, live search in the office, swipe cards, Settings tabs), are on the [releases page](https://github.com/srvskr1/stellenpilot/releases).
 
 
 ## Install
