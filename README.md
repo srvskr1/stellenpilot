@@ -51,13 +51,7 @@ Drop your CV, say what you want, press **Download** for the built in AI and swit
 
 ## How it works
 
-```mermaid
-flowchart LR
-    A["🔎 Collect<br/>7 job sources<br/>+ 200 company sites<br/>all at once"] --> B["🧠 AI scores<br/>each job 0 to 100<br/>with reasons and gaps"]
-    B --> C["✍️ AI writes<br/>tailored CV and<br/>cover letter"]
-    C --> D["📬 Gmail tracks<br/>replies and moves<br/>statuses forward"]
-    D --> E["✅ You decide<br/>read, edit, send"]
-```
+<img src="docs/how-it-works.svg" alt="How it works: collect from 7 job boards and 200 company sites, score every job 0 to 100, write a CV and cover letter for the best matches, Gmail moves your applications forward, and you decide what to send." width="100%">
 
 Every day, by itself, it collects new ads and removes duplicates, scores each one against your CV, writes a CV and cover letter for the best matches (Word and PDF), and with Gmail connected moves your applications forward as replies come in. Interviews get a prep pack and a mock interview.
 
