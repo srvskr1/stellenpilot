@@ -15,6 +15,12 @@ on:
 permissions:
   contents: write
 
+# Windows and Mac both create the release if it is missing. Run one at a time, or both create it and the
+# second copy has no files. ponytail: the second build waits for the first; split out a publish job if that gets slow.
+concurrency:
+  group: github-release
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: macos-latest  # Apple chip (arm64)
