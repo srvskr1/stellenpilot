@@ -1,0 +1,19 @@
+# Fails a pull request if a commit is not by Sourav or carries an AI attribution line.
+name: commit identity
+
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Only Sourav's addresses, no AI attribution
+        env:
+          RANGE: ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}
+        run: bash .github/check-commits.sh "$RANGE"
