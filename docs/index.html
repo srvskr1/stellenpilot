@@ -939,10 +939,12 @@ ph:"Auf Product Hunt ansehen",
 </script>
 
 <script>
-/* Point the download buttons at the newest installer. Falls back to the releases page if GitHub can't be reached. */
-fetch("https://api.github.com/repos/srvskr1/stellenpilot/releases/latest").then(function(r){return r.ok?r.json():null}).then(function(rel){
-  if(!rel)return;
-  var find=function(re){var a=rel.assets.filter(function(x){return re.test(x.name)})[0];return a&&a.browser_download_url};
+/* Point the download buttons at the newest installer. Falls back to the releases page if GitHub can't be reached.
+   Reads the last few releases, not only "latest": a release can briefly have no files while the build uploads them,
+   and once two jobs created the same release twice, so "latest" was an empty one. */
+fetch("https://api.github.com/repos/srvskr1/stellenpilot/releases?per_page=10").then(function(r){return r.ok?r.json():null}).then(function(rels){
+  if(!rels)return;
+  var find=function(re){for(var i=0;i<rels.length;i++){var r=rels[i];if(r.draft||r.prerelease)continue;var a=r.assets.filter(function(x){return re.test(x.name)})[0];if(a)return a.browser_download_url}};
   var url={win:find(/Setup.*\.exe$/i),mac:find(/mac.*\.dmg$/i)};
   var ua=navigator.userAgent;url.auto=/Mac/.test(ua)&&!/iPhone|iPad/.test(ua)?url.mac:/Windows/.test(ua)?url.win:null;
   document.querySelectorAll("[data-dl]").forEach(function(a){var u=url[a.dataset.dl];if(u)a.href=u;});
