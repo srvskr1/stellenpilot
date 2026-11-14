@@ -588,7 +588,12 @@ dialog::backdrop{overflow:hidden;overscroll-behavior:contain;background:none}
 .sw-why{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}.sw-why span{width:100%;text-align:center;font-size:.8125rem;color:var(--text-tertiary)}
 .sw-why button{min-height:36px;padding:4px 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font:inherit;font-size:.8125rem;cursor:pointer}
 .sw-msg{text-align:center;font-size:.8125rem;color:var(--text-tertiary);min-height:1.4em;margin:10px 0 0}
-@media (prefers-reduced-motion:reduce){.swd *{transition:none!important}}
+.sw-hint{display:flex;justify-content:space-between;font-size:.8125rem;font-weight:600;margin:-4px 6px 12px}.sw-hint span{display:flex;align-items:center;gap:4px}.sw-hint svg{width:18px;height:18px}
+.sw-hint[hidden]{display:none}.sw-card.drag{animation:none}
+.sw-hint .n{color:var(--pill-rejected-fg)}.sw-hint .y{color:var(--ok-fg)}.sw-hint .n svg{animation:swl 1.6s ease-in-out infinite}.sw-hint .y svg{animation:swr 1.6s ease-in-out infinite}
+@keyframes swl{50%{transform:translateX(-4px)}}@keyframes swr{50%{transform:translateX(4px)}}
+.sw-card.nudge{animation:swnudge 1.4s .6s ease-in-out}@keyframes swnudge{20%{transform:translateX(28px) rotate(3deg)}45%,55%{transform:none}80%{transform:translateX(-28px) rotate(-3deg)}}
+@media (prefers-reduced-motion:reduce){.swd *{transition:none!important;animation:none!important}}
 
 /* Live search inside the office: the robot's bubble shows the job it is working on, small pills count the
    sources and the results, and a sheet of paper slides in while a cover letter is written. */
@@ -725,6 +730,36 @@ dialog::backdrop{overflow:hidden;overscroll-behavior:contain;background:none}
 .bub.warn div{border:2px solid var(--warning)}
 .offpill{display:inline-flex;align-items:center;gap:8px;font-size:.875rem;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--ok-bg);color:var(--ok-fg);transition:background-color 200ms ease,color 200ms ease}
 .offpill.work::before{animation:glow 2s ease-in-out infinite}
+.offprog{--p:0;padding:56px 26px 34px;margin:0 0 4px}.offprog[hidden]{display:none}
+.optrack{position:relative;height:8px;border-radius:4px;background:var(--surface-alt)}
+.opfill{position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(-45deg,var(--accent) 0 8px,color-mix(in srgb,var(--accent) 72%,var(--surface)) 8px 16px);background-size:22.63px 22.63px;clip-path:inset(0 calc((1 - var(--p))*100%) 0 0 round 4px);transition:clip-path .8s cubic-bezier(.2,.8,.2,1);animation:opstripe .9s linear infinite}
+@keyframes opstripe{to{background-position:22.63px 0}}
+.opbot{position:absolute;bottom:18px;left:clamp(44px,calc(var(--p)*100%),calc(100% - 44px));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--accent);transition:left .8s cubic-bezier(.2,.8,.2,1);z-index:1}
+.opbot svg{width:30px;height:38px;overflow:visible}.opbot svg *{transform-box:view-box}
+.opbot .run{--d:.42s;animation:opbounce calc(var(--d)/2) ease-in-out infinite alternate}@keyframes opbounce{to{transform:translateY(-2.5px)}}
+.opbot .l1,.opbot .l2{transform-origin:14px 24px}.opbot .a1,.opbot .a2{transform-origin:16.6px 14px}
+.opbot .l1,.opbot .a2{animation:opswing var(--d) ease-in-out infinite alternate}.opbot .l2,.opbot .a1{animation:opswing var(--d) ease-in-out infinite alternate-reverse}
+@keyframes opswing{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
+.opbot .fig{transform-origin:14px 38px;transition:transform .8s ease}.opbot .sweat{opacity:0}
+.opbot.tired .run{--d:1.1s}.opbot.tired .fig{transform:rotate(9deg) translateY(1.5px)}.opbot.tired .sweat{animation:opsweat 1.2s ease-in infinite}
+@keyframes opsweat{0%{opacity:0;transform:translate(0,0)}25%{opacity:1}100%{opacity:0;transform:translate(-4px,8px)}}
+.opbot b{white-space:nowrap;font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--accent);color:#fff;box-shadow:var(--shadow-1)}
+.opsteps{list-style:none;margin:0;padding:0}.opsteps li{position:absolute;top:-7px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;font-size:.75rem;color:var(--text-tertiary);white-space:nowrap}
+.opsteps i{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface);border:2px solid var(--border-strong);transition:background .3s,border-color .3s,color .3s}.opsteps i svg{width:12px;height:12px}
+.opsteps li.done i{background:var(--accent);border-color:var(--accent);color:#fff}.opsteps li.done{color:var(--text-secondary)}
+.opsteps li.on i{border-color:var(--accent);color:var(--accent);animation:opring 1.4s ease-out infinite}.opsteps li.on{color:var(--accent);font-weight:600}
+.opbot .dust circle{opacity:0;animation:opdust var(--d,.42s) ease-out infinite}.opbot .dust circle+circle{animation-delay:calc(var(--d,.42s)/2)}
+@keyframes opdust{0%{opacity:.5;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(-9px,-3px) scale(1.4)}}
+.opbot.tired .dust,.opbot.win .dust{display:none}
+.opbot.jump svg{animation:opjump .6s cubic-bezier(.3,1.6,.5,1)}@keyframes opjump{45%{transform:translateY(-12px) rotate(-10deg)}}
+.opsteps li.pop i{animation:oppop .6s cubic-bezier(.3,1.8,.5,1)}@keyframes oppop{40%{transform:scale(1.45)}}
+.opsteps li.pop i::after{content:"";position:absolute;width:4px;height:4px;border-radius:50%;color:var(--accent);box-shadow:0 -16px,14px -8px,14px 8px,0 16px,-14px 8px,-14px -8px;animation:opburst .6s ease-out forwards}.opsteps i{position:relative}
+@keyframes opburst{from{transform:scale(.3);opacity:1}to{transform:scale(1.3);opacity:0}}
+.opbot.win .run,.opbot.win .l1,.opbot.win .l2,.opbot.win .a1,.opbot.win .a2{animation:none}.opbot.win .a1{transform:rotate(-105deg)}.opbot.win .a2{transform:rotate(100deg)}.opbot.win .a1,.opbot.win .a2{transition:transform .3s}
+.opbot.win svg{animation:opjump .6s cubic-bezier(.3,1.6,.5,1) .2s 4}.opbot.win b{background:var(--success)}
+@media (max-width:600px){.opsteps li:not(.on) span{visibility:hidden}}
+@keyframes opring{from{box-shadow:0 0 0 0 rgba(var(--accent-rgb),.45)}to{box-shadow:0 0 0 9px rgba(var(--accent-rgb),0)}}
+@media (prefers-reduced-motion:reduce){.opfill,.opbot *,.opsteps li.on i{animation:none!important}.opfill,.opbot{transition:none}}
 .offpill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
 .offpill.work{background:var(--accent-soft);color:var(--accent)} .offpill.warn{background:var(--pill-interview-bg);color:var(--pill-interview-fg)}
 #off-note{margin:-8px 0 12px;color:var(--text-tertiary);font-size:.9375rem}
@@ -1093,15 +1128,13 @@ dialog::backdrop{overflow:hidden;overscroll-behavior:contain;background:none}
       <div class="upd" id="upd" role="status" hidden></div>
       <p class="runmsg" id="runMsg" role="status"></p>
       <div class="box strip" id="strip" role="status"><span class="muted">No search yet. Press Search now to find your first jobs.</span></div>
-      <section aria-labelledby="sw-h" id="swSec" hidden>
-        <div class="sechead"><h2 id="sw-h">Review new jobs</h2><span id="swCnt"></span></div>
-        <div class="swd">
-          <div class="sw-prog" id="swProg" aria-hidden="true"></div>
-          <div class="sw-deck" id="swDeck" tabindex="0" aria-label="Job cards. Right arrow if you like the job, left arrow if not."></div>
-          <div class="sw-btns"><button type="button" class="sw-rb" id="swNo" aria-label="Not for me"></button><button type="button" class="sw-rb u" id="swUndo" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button><button type="button" class="sw-rb" id="swYes" aria-label="I like this job"></button></div>
-          <div class="sw-why" id="swWhy"></div>
-          <p class="sw-msg" id="swMsg" role="status" aria-atomic="true">Swipe right if you like it, left if not.</p>
-        </div>
+      <section aria-labelledby="off-h">
+        <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
+        <p id="off-note"></p>
+        <div class="offprog" id="offProg" hidden><div class="optrack" id="offBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Search progress"><i class="opfill"></i><span class="opbot" id="offBot"><b id="offEta"></b><svg viewBox="0 0 32 40" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="run"><g class="fig"><circle cx="19" cy="6" r="4"/><path d="M18 10 14 24"/><path class="a1" d="M16.6 14 21 19l3.5-3"/><path class="a2" d="M16.6 14 12 18.5 8.5 16.5"/><path class="l1" d="M14 24l4.5 7-2 7"/><path class="l2" d="M14 24l-4 7-5 3.5"/></g></g><g class="dust" stroke="none" fill="currentColor"><circle cx="9" cy="38" r="1.8"/><circle cx="6" cy="37" r="1.3"/></g><g class="sweat" stroke="none" fill="currentColor"><path d="M12 1c1.6 2 1.6 3.6 0 4-1.6-.4-1.6-2 0-4z"/><path d="M9 6c1.2 1.5 1.2 2.7 0 3-1.2-.3-1.2-1.5 0-3z"/></g></svg></span><ol class="opsteps" id="offSteps"><li data-s="collect" style="left:25%"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></i><span>Sources</span></li><li data-s="score" style="left:50%"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></i><span>Scoring</span></li><li data-s="tailor" style="left:85%"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></i><span>CV + letters</span></li><li data-s="gmail" style="left:100%"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></i><span>Email</span></li></ol></div></div>
+        <div class="offwrap"><div class="office" id="office" role="img" aria-label="Agent office"></div><aside class="lv-paper" id="lvPaper" aria-hidden="true"></aside></div>
+        <div class="lv-cnt" id="lvCnt"></div>
+        <div class="lv-src" id="lvSrc"></div>
       </section>
       <section aria-labelledby="af-h" id="afSec" hidden>
         <div class="sechead"><h2 id="af-h">Apply first</h2><span>Good matches you could lose soon</span></div>
@@ -1112,12 +1145,16 @@ dialog::backdrop{overflow:hidden;overscroll-behavior:contain;background:none}
         <div id="ready"></div>
       </section>
       <section aria-labelledby="soon-h"><div class="sechead"><h2 id="soon-h">Coming up</h2></div><div id="soon"></div></section>
-      <section aria-labelledby="off-h">
-        <div class="sechead"><h2 id="off-h">Agent office</h2><span class="offpill" id="off-state">Loading</span></div>
-        <p id="off-note"></p>
-        <div class="offwrap"><div class="office" id="office" role="img" aria-label="Agent office"></div><aside class="lv-paper" id="lvPaper" aria-hidden="true"></aside></div>
-        <div class="lv-cnt" id="lvCnt"></div>
-        <div class="lv-src" id="lvSrc"></div>
+      <section aria-labelledby="sw-h" id="swSec" hidden>
+        <div class="sechead"><h2 id="sw-h">Review new jobs</h2><span id="swCnt"></span></div>
+        <div class="swd">
+          <div class="sw-prog" id="swProg" aria-hidden="true"></div>
+          <div class="sw-deck" id="swDeck" tabindex="0" aria-label="Job cards. Right arrow if you like the job, left arrow if not."></div>
+          <div class="sw-hint" id="swHint" aria-hidden="true"><span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>Not for me</span><span class="y">I like it<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></div>
+          <div class="sw-btns"><button type="button" class="sw-rb" id="swNo" aria-label="Not for me"></button><button type="button" class="sw-rb u" id="swUndo" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button><button type="button" class="sw-rb" id="swYes" aria-label="I like this job"></button></div>
+          <div class="sw-why" id="swWhy"></div>
+          <p class="sw-msg" id="swMsg" role="status" aria-atomic="true"></p>
+        </div>
       </section>
       <details class="history more" id="moreSec"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><span>More</span><span class="cnt">Newest matches, insights</span></summary>
         <section aria-labelledby="new-h"><div class="sechead"><h2 id="new-h">Newest matches</h2><a href="#jobs" id="seeAll"></a></div><div class="box rows" id="fresh"></div></section>
@@ -1483,7 +1520,7 @@ const DE={
 "You answered {a} of {b}.":"Du hast {a} von {b} beantwortet.","Saved with this job, so you can come back before the interview":"Beim Job gespeichert, damit du vor dem Gespräch zurückkommen kannst","Practise the weak ones":"Die schwachen üben","Close":"Schließen",
 "Good start. Keep going.":"Guter Anfang. Weiter so.","Good. Add a concrete result.":"Gut. Nenn ein konkretes Ergebnis.","Strong answer.":"Starke Antwort.","Good.":"Gut.","Write an answer first.":"Schreib zuerst eine Antwort.",
 "Connect Gmail and interview invites show up here on their own.":"Verbinde Gmail, dann erscheinen Einladungen zu Gesprächen hier von selbst.",
-"Rate this match":"Diesen Treffer bewerten","Is this a good match for you?":"Passt dieser Job zu dir?","Yes":"Ja","Not for me":"Nicht für mich",
+"Rate this match":"Diesen Treffer bewerten","Is this a good match for you?":"Passt dieser Job zu dir?","Yes":"Ja","Not for me":"Nicht für mich","Done!":"Fertig!","Sources":"Quellen","Scoring":"Bewertung","less than a minute left":"noch weniger als eine Minute","about {n} min left":"noch etwa {n} Min.","Search progress":"Fortschritt der Suche","I like it":"Gefällt mir",
 "Contact person, salary, what they said on the phone":"Ansprechperson, Gehalt, was am Telefon gesagt wurde","Marked applied on Home":"Auf der Startseite als beworben markiert",
 "You can view this board but not change it":"Du kannst diese Übersicht ansehen, aber nicht ändern","Could not save. Try again in a moment.":"Speichern ging nicht. Versuch es gleich noch einmal.",
 "Marked as a good match":"Als guter Treffer markiert","Marked as not for you":"Als nicht passend markiert","Rating removed":"Bewertung entfernt","Moved to Applications":"Zu Bewerbungen verschoben",
@@ -2231,6 +2268,27 @@ function buildOffice(){
 }
 let offX=436,offY=476,offTimer=null,localGmail=false;
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* Search progress: each stage owns a slice of the bar, "i of n" in the stage note fills the slice.
+   The runner gets tired (slower, bent, sweating) after 20 s without progress, hops at each stop and cheers for 4.5 s at the end.
+   ponytail: the time left is elapsed/progress, so it is rough while the AI writes slow letters. */
+const OFF_SPAN={collect:[0,.25],score:[.25,.5],tailor:[.5,.85],gmail:[.85,1]};let offP=0,runStart=0,offTired=0,offWin=0;
+const offFlash=(c,ms)=>{const b=$("offBot");b.classList.remove(c);void b.offsetWidth;b.classList.add(c);setTimeout(()=>b.classList.remove(c),ms)};
+function offSet(p,on){$("offProg").style.setProperty("--p",p);$("offBar").setAttribute("aria-valuenow",Math.round(p*100));
+  document.querySelectorAll("#offSteps li").forEach(li=>{const y=OFF_SPAN[li.dataset.s][1],d=p>=y;
+    if(d&&!li.classList.contains("done")&&p<1){li.classList.add("pop");setTimeout(()=>li.classList.remove("pop"),700);offFlash("jump",700)}
+    li.classList.toggle("done",d);li.classList.toggle("on",li.dataset.s===on&&!d)})}
+function offProgress(){if(offWin)return;const r=[...runs].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0],o=officeState(),sp=OFF_SPAN[o.st];
+  if(!sp||localGmail||!r){clearTimeout(offTired);offTired=0;
+    if(offP>0&&!$("offProg").hidden&&!o.warn){offWin=1;$("offBot").classList.remove("tired");$("offBot").classList.add("win");offSet(1,"");$("offEta").textContent=t("Done!");
+      offWin=setTimeout(()=>{offWin=0;offP=0;$("offBot").classList.remove("win");$("offProg").hidden=true},4500);return}
+    offP=0;$("offProg").hidden=true;return}
+  $("offProg").hidden=false;
+  const n=String(r.stageNote||""),m=n.match(/(\d+) of (\d+)/)||n.match(/Searching (\d+) sources, (\d+) done/),f=m?(/Searching/.test(n)&&!/ of /.test(n)?m[2]/m[1]:m[1]/m[2]):0;
+  const was=offP;offP=Math.max(offP,sp[0]+(sp[1]-sp[0])*Math.min(1,f));
+  if(offP>was||!offTired){$("offBot").classList.remove("tired");clearTimeout(offTired);offTired=setTimeout(()=>$("offBot").classList.add("tired"),20000)}
+  offSet(offP,o.st);
+  const el=runStart?(Date.now()-runStart)/1000:0,left=el*(1-offP)/offP,pc=Math.round(offP*100);
+  $("offEta").textContent=el>15&&offP>.1?(left<60?t("less than a minute left"):t("about {n} min left",{n:Math.ceil(left/60)})):pc+"%"}
 function officeState(){
   if(localGmail)return{st:"gmail",note:"Checking your Gmail right now"};
   const r=[...runs].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
@@ -2249,6 +2307,7 @@ function renderOffice(){
   OFF.forEach(([k],i)=>{$("stn-"+k).classList.toggle("on",i===idx&&working);const t=$("tag-"+k);t.classList.toggle("on",i===idx);t.classList.toggle("rest",i===idx&&!working);t.classList.toggle("done",working&&!localGmail&&i<idx&&k!=="break")});
   const pill=$("off-state");pill.className="offpill"+(s.warn?" warn":working?" work":"");
   pill.textContent=s.warn?t("Search interrupted"):working?t("Working: {x}",{x:t(name)}):t("On a break");
+  offProgress();
   $("off-note").textContent=working&&s.since?`${t(OFF_NOTE[s.st]||name)}, ${t("since")} ${new Date(s.since).toLocaleTimeString(LOC,{hour:"2-digit",minute:"2-digit"})}`:"";
   const bub=$("bub"),chr=$("chr"),txt=t(s.note);bub.classList.toggle("warn",!!s.warn);
   $("office").setAttribute("aria-label",t("Agent office")+": "+txt);
@@ -2760,9 +2819,12 @@ function renderSwipe(){if(swDrag)return;
   const n=swDone.length+L.length,D=$("swDeck");D.className="sw-deck"+(L.length?"":" end");$("swNo").hidden=$("swYes").hidden=!L.length;
   $("swProg").innerHTML=n>24?"":swDone.map(d=>`<i class="${d.v>0?"l":"p"}"></i>`).join("")+L.map((_,k)=>`<i class="${k?"":"c"}"></i>`).join("");
   $("swCnt").textContent=L.length?t("{a} of {b}",{a:swDone.length+1,b:n}):"";
+  $("swHint").hidden=swDone.length>0||!L.length;
   if(!L.length){const y=swDone.filter(d=>d.v>0).length;
     D.innerHTML=`<div class="sw-card sw-end"><i aria-hidden="true">${ICO.check}</i><b>${t("{a} liked, {b} passed",{a:y,b:swDone.length-y})}</b><span class="small">${t(aiOn?"The next AI scoring learns from these choices.":"Your choices are saved. The scoring uses them once an AI model is set up in Settings.")}</span></div>`;return}
-  D.innerHTML=L.slice(0,3).reverse().map((j,k,a)=>swCard(j,a.length-1-k)).join("");swBind(D.lastElementChild)}
+  D.innerHTML=L.slice(0,3).reverse().map((j,k,a)=>swCard(j,a.length-1-k)).join("");swBind(D.lastElementChild);
+  if(!swDone.length&&!swNudged){swNudged=true;D.lastElementChild.classList.add("nudge")}}
+let swNudged=false;
 function swFeel(c,x){const p=Math.max(-1,Math.min(1,x/110)),y=c.querySelector(".sw-emo.y"),n=c.querySelector(".sw-emo.n");
   y.style.opacity=Math.max(0,p);y.style.transform=`scale(${.3+.7*Math.max(0,p)})`;n.style.opacity=Math.max(0,-p);n.style.transform=`scale(${.3+.7*Math.max(0,-p)})`;
   c.style.borderColor=p>.15?"var(--success)":p<-.15?"var(--error)":"";$("swDeck").classList.toggle("y",p>.15);$("swDeck").classList.toggle("n",p<-.15)}
@@ -2834,7 +2896,7 @@ async function lvPlay(){if(lvBusy)return;lvBusy=true;
     const st=LV_AT[e.kind];if(st&&st!==lvStage){lvStage=st;renderOffice();if(!lvFast())await lvWait(900)}
     try{if(LV[e.kind])await LV[e.kind](e)}catch(err){}}
   lvBusy=false}
-async function lvFetch(){try{const r=await api("GET","/api/events?after="+lvLast);if(!r.events.length)return;for(const e of r.events){lvLast=e.id;lvQ.push(e)}lvPlay()}catch(e){}}
+async function lvFetch(){try{const r=await api("GET","/api/events?after="+lvLast);if(!r.events.length)return;for(const e of r.events){lvLast=e.id;lvQ.push(e);if(e.kind==="start")runStart=Date.parse(e.at)}lvPlay()}catch(e){}}
 function lvWatch(on){if(on&&!lvPoll){lvPoll=setInterval(lvFetch,1500);lvFetch()}else if(!on&&lvPoll){clearInterval(lvPoll);lvPoll=null;lvFetch()}}
 document.addEventListener("click",e=>{if(!e.target.closest("[data-replay]"))return;lvLast=0;lvQ=[];lvEnded=true;$("office").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});lvFetch()});
 
