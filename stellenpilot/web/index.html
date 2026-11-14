@@ -381,7 +381,11 @@ label.btn{cursor:pointer}
 .bi .meas b{font-variant-numeric:tabular-nums}
 
 /* Setup wizard */
-.wiz{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:32px 16px 48px;display:flex;flex-direction:column;align-items:center}
+.wiz,.mkov{width:auto;height:auto;max-width:none;max-height:none;margin:0;border:0;inset:0;color:inherit}
+dialog:modal{overscroll-behavior:contain}
+dialog::backdrop{overflow:hidden;overscroll-behavior:contain;background:none}
+.wiz{background:var(--bg);overflow:auto;padding:32px 16px 48px}
+.wiz[open]{display:flex;flex-direction:column;align-items:center}
 .wtop{width:100%;max-width:640px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
 .wtop .brand{padding:0}
 .wtop .right{display:flex;align-items:center;gap:16px;color:var(--text-tertiary);font-size:.9375rem}
@@ -442,7 +446,6 @@ label.btn{cursor:pointer}
 .wmsg{flex:1 1 100%;margin:0;font-size:.9375rem;color:var(--pill-rejected-fg)}
 .wmsg:empty{display:none}
 .wfoot{margin:20px 0 0;font-size:.875rem;color:var(--text-tertiary);text-align:center}
-body.wizopen{overflow:hidden}
 .fset{border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;margin:0}
 .fset legend{font:700 .875rem var(--f-ui);padding:0 6px}
 .fset .hint{margin:-6px 0 0;color:var(--text-tertiary);font-size:.8125rem}
@@ -835,8 +838,8 @@ body.wizopen{overflow:hidden}
 .mkcta .ic{width:40px;height:40px;border-radius:50%;background:var(--surface);color:var(--accent);display:grid;place-items:center;flex:none}
 .mkcta .ic svg{width:20px;height:20px}
 .mkcta b{display:block;font-weight:600}.mkcta p{margin:2px 0 12px;font-size:.875rem;color:var(--text-secondary)}
-.mkov{position:fixed;inset:0;z-index:45;background:rgba(var(--bg-rgb),.72);backdrop-filter:blur(4px);overflow:auto;padding:28px 16px 48px;display:flex;justify-content:center;align-items:flex-start}
-.mkov[hidden]{display:none}
+.mkov{background:rgba(var(--bg-rgb),.72);backdrop-filter:blur(4px);overflow:auto;padding:28px 16px 48px}
+.mkov[open]{display:flex;justify-content:center;align-items:flex-start}
 .mkbox{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:clamp(20px,4vw,30px);display:flex;flex-direction:column;gap:18px;box-shadow:0 12px 40px rgba(16,24,40,.16);margin:auto}
 .mkhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .mkhead h2{margin:0;font-size:1.125rem;font-weight:700}.mkhead p{margin:2px 0 0;font-size:.875rem;color:var(--text-tertiary)}
@@ -1189,7 +1192,7 @@ body.wizopen{overflow:hidden}
     </section>
   </main>
 </div>
-<div class="wiz" id="setup" role="dialog" aria-modal="true" aria-labelledby="wTitle" hidden>
+<dialog class="wiz" id="setup" aria-labelledby="wTitle">
   <div class="wtop">
     <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 20l8-4 8 4z"/></svg></span><b>Stellenpilot</b></div>
     <div class="right"><div class="wlang" role="group" aria-label="Language" id="wLang"><button type="button" data-lang="en" lang="en" translate="no">English</button><button type="button" data-lang="de" lang="de" translate="no">Deutsch</button></div><span id="wCount">Step 1 of 4</span><button class="linkbtn" type="button" id="wLater">Finish later</button></div>
@@ -1289,9 +1292,9 @@ body.wizopen{overflow:hidden}
     </div>
   </div>
   <p class="wfoot">Stellenpilot never applies for you and never contacts companies.</p>
-</div>
+</dialog>
 <div class="toast" id="toast" hidden></div>
-<div class="mkov" id="mockOv" role="dialog" aria-modal="true" aria-label="Mock interview" hidden><div class="mkbox" id="mockBox"></div></div>
+<dialog class="mkov" id="mockOv" aria-label="Mock interview"><div class="mkbox" id="mockBox"></div></dialog>
 <footer class="credits">Job data from <a href="https://www.arbeitsagentur.de/jobsuche/" target="_blank" rel="noopener">Bundesagentur für Arbeit</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a>, <a href="https://www.adzuna.de" target="_blank" rel="noopener">The Adzuna API</a>, <a href="https://theirstack.com" target="_blank" rel="noopener">TheirStack</a>, <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a>, <a href="https://www.workingstudentjobs.de" target="_blank" rel="noopener">workingstudentjobs.de</a> and <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>, depending on which sources you enable.</footer>
 
 <script>
@@ -1874,9 +1877,9 @@ function openMock(id){const j=jobs.find(x=>x._id===id);if(!j||!j.prep)return;
   const qs=mockQuestions(j);if(!qs.length)return;const d=mockData(j);
   let idx=qs.findIndex((q,i)=>!(d.answers[i]&&d.answers[i].a));if(idx<0)idx=0;
   mk={id,idx,phase:d.answers[idx]&&d.answers[idx].a?"feedback":"answer",draft:(d.answers[idx]||{}).a||""};
-  $("mockOv").hidden=false;document.body.classList.add("wizopen");renderMock();
+  $("mockOv").showModal();renderMock();
   const ta=$("mockBox").querySelector("textarea");if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}}
-function closeMock(){mk=null;$("mockOv").hidden=true;document.body.classList.remove("wizopen");renderDetail&&renderDetail()}
+function closeMock(){$("mockOv").close()}
 function mockSave(){const j=jobs.find(x=>x._id===mk.id);return save(mk.id,{mock:j.mock})}
 function setAns(j,i,patch){const d=mockData(j);d.answers[i]={...(d.answers[i]||{}),...patch};j.mock=JSON.stringify(d);return d;}
 const chk=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
@@ -2079,7 +2082,7 @@ let goto="";document.addEventListener("click",e=>{const a=e.target.closest("a[da
 const mockOv=$("mockOv");
 mockOv.addEventListener("input",e=>{if(e.target.id!=="mkAns"||!mk)return;mk.draft=e.target.value;
   const wc=$("mockBox").querySelector("#mkWc");if(wc)wc.firstChild.textContent=e.target.value.trim().split(/\s+/).filter(Boolean).length+" ";});
-mockOv.addEventListener("keydown",e=>{if(e.key==="Escape")closeMock()});
+mockOv.addEventListener("close",()=>{mk=null;renderDetail&&renderDetail()});
 mockOv.addEventListener("click",async e=>{
   if(e.target===mockOv)return closeMock();
   const b=e.target.closest("button");if(!b||!mk)return;
@@ -2591,7 +2594,7 @@ function wAiRender(){
   if(wz.ai==="builtin")biLoad();
 }
 async function openSetup(){
-  document.body.classList.add("wizopen");W("setup").hidden=false;wShow(0);
+  W("setup").showModal();wShow(0);
   try{
     const [st,c]=await Promise.all([api("GET","/api/settings"),api("GET","/api/cv")]);
     const s=st.search;wz.titles=c.isExample?[]:[...(s.keywords||[])];W("wCity").value=s.city||"";W("wKm").value=s.radius_km||50;W("wRemote").checked=!!s.include_remote;
@@ -2611,7 +2614,7 @@ async function openSetup(){
     wChipsRender();wKm();wAiRender();
   }catch(e){wMsg(e.message)}
 }
-function closeSetup(){W("setup").hidden=true;document.body.classList.remove("wizopen")}
+function closeSetup(){W("setup").close()}
 function wCvNote(kind,html){const o=W("wCvOut");o.className="wnote"+(kind?" "+kind:"");o.innerHTML=html}
 async function readFile(file){return new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=()=>bad(new Error("Could not read the file"));fr.readAsDataURL(file)})}
 async function importAndSave(file,render){
@@ -2700,7 +2703,6 @@ W("wLang").addEventListener("click",async e=>{const b=e.target.closest("[data-la
 W("wNext").addEventListener("click",wNext);
 W("wBack").addEventListener("click",()=>wShow(Math.max(0,wz.step-1)));
 W("wLater").addEventListener("click",closeSetup);
-W("setup").addEventListener("keydown",e=>{if(e.key==="Escape")closeSetup()});
 W("wType").addEventListener("click",()=>{closeSetup();location.hash="#cv"});
 W("wFile").addEventListener("change",e=>wImport(e.target.files[0]));
 W("wDrop").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();W("wFile").click()}});
