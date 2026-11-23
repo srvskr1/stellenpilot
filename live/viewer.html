@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stellenpilot Live Traffic</title>
+<style>
+  :root{
+    --bg:#0b0f14;--card:#121821;--border:#223040;--text:#e6edf3;--muted:#93a1af;
+    --primary:#58a6ff;--live:#3fb950;--warn:#d29922;--danger:#f85149;--bar:#2f81f7;
+    --r:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px 16px 40px}
+  header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:20px}
+  h1{font-size:18px;margin:0;font-weight:650;letter-spacing:-.01em}
+  h1 span{color:var(--muted);font-weight:500}
+  .status{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:4px 10px;border:1px solid var(--border);border-radius:999px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(63,185,80,.6);animation:pulse 2s infinite}
+  .status.err .dot{background:var(--danger);animation:none}
+  .status.demo .dot{background:var(--warn)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(63,185,80,.55)}70%{box-shadow:0 0 0 8px rgba(63,185,80,0)}100%{box-shadow:0 0 0 0 rgba(63,185,80,0)}}
+  .spacer{flex:1}
+  button{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;min-height:40px;cursor:pointer;transition:border-color .15s,background .15s}
+  button:hover{border-color:var(--primary)}
+  button.primary{background:var(--bar);border-color:var(--bar);color:#fff}
+  :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+  .kpi .label{font-size:13px;color:var(--muted)}
+  .kpi .val{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:4px}
+  .kpi.hero .val{color:var(--live);font-size:40px}
+  .card h2{font-size:14px;font-weight:600;margin:0 0 12px;color:var(--text)}
+  .card h2 small{color:var(--muted);font-weight:400}
+
+  .chart{display:flex;align-items:flex-end;gap:2px;height:140px;padding-top:8px}
+  .chart div{flex:1;background:var(--bar);border-radius:2px 2px 0 0;min-height:2px;transition:height .3s ease;opacity:.85}
+  .chart div:last-child{background:var(--live);opacity:1}
+  .chart div:hover{opacity:1}
+  .axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+  ol.list{list-style:none;margin:0;padding:0}
+  ol.list li{position:relative;display:flex;justify-content:space-between;gap:12px;padding:7px 10px;border-radius:6px;font-size:14px;overflow:hidden}
+  ol.list li .fill{position:absolute;inset:0 auto 0 0;background:rgba(88,166,255,.12);z-index:0}
+  ol.list li span{position:relative;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  ol.list li b{position:relative;z-index:1;font-variant-numeric:tabular-nums;font-weight:600}
+  .empty{color:var(--muted);font-size:14px;padding:8px 0}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;color:var(--muted);font-weight:500;font-size:13px;padding:6px 8px;border-bottom:1px solid var(--border)}
+  td{padding:7px 8px;border-bottom:1px solid #18212c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
+  td.t{color:var(--muted);font-variant-numeric:tabular-nums;width:90px}
+  tr.new td{animation:flash 1.2s ease-out}
+  @keyframes flash{from{background:rgba(63,185,80,.18)}to{background:transparent}}
+  .scroll{overflow-x:auto}
+  .dlgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .dlgrid .label{font-size:13px;color:var(--muted)}
+  .dlgrid .val{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0 10px}
+  .spark{display:flex;align-items:flex-end;gap:1px;height:36px;margin-bottom:10px}
+  .spark div{flex:1;background:var(--live);border-radius:1px;min-height:1px;opacity:.8}
+  td .tag{display:inline-block;font-size:12px;font-weight:600;color:var(--live);border:1px solid rgba(63,185,80,.4);border-radius:999px;padding:0 8px;margin-right:6px}
+  section.card+section.card{margin-top:12px}
+
+  dialog{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:var(--r);padding:20px;width:min(460px,92vw)}
+  dialog::backdrop{background:rgba(0,0,0,.6)}
+  dialog h2{margin:0 0 4px;font-size:17px}
+  dialog p{margin:0 0 16px;color:var(--muted);font-size:14px}
+  label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
+  input{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;min-height:44px}
+  .help{font-size:12px;color:var(--muted);margin-top:4px}
+  .row{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+  @media (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid3,.dlgrid{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>stellenpilot.dev <span>live traffic</span></h1>
+    <div class="status demo" id="status" role="status" aria-live="polite"><i class="dot" aria-hidden="true"></i><span id="statusText">Demo data</span></div>
+    <div class="spacer"></div>
+    <button id="connectBtn" type="button">View key</button>
+  </header>
+
+  <section class="kpis" aria-label="Key numbers">
+    <div class="card kpi hero"><div class="label">Visitors right now</div><div class="val" id="kActive">0</div></div>
+    <div class="card kpi"><div class="label">Page views, last 30 min</div><div class="val" id="k30">0</div></div>
+    <div class="card kpi"><div class="label">Page views, last hour</div><div class="val" id="k60">0</div></div>
+    <div class="card kpi"><div class="label">Busiest minute</div><div class="val" id="kPeak">0</div></div>
+  </section>
+
+  <section class="card">
+    <h2>Page views per minute <small>last 60 minutes</small></h2>
+    <div class="chart" id="chart" role="img" aria-label="Page views per minute"></div>
+    <div class="axis" aria-hidden="true"><span>60 min ago</span><span>30 min ago</span><span>now</span></div>
+  </section>
+
+  <section class="grid3">
+    <div class="card"><h2>Top pages <small>30 min</small></h2><ol class="list" id="lPages"></ol></div>
+    <div class="card"><h2>Coming from <small>30 min</small></h2><ol class="list" id="lRefs"></ol></div>
+    <div class="card"><h2>Countries <small>30 min</small></h2><ol class="list" id="lCountries"></ol></div>
+  </section>
+
+  <section class="card" aria-labelledby="dlH">
+    <h2 id="dlH">Downloads</h2>
+    <div class="dlgrid">
+      <div><div class="label">Download clicks, last hour</div><div class="val" id="kDl">0</div>
+        <div class="spark" id="dlChart" role="img" aria-label="Download clicks per minute"></div>
+        <ol class="list" id="lClicks"></ol></div>
+      <div><div class="label">GitHub release downloads, all time</div><div class="val" id="kGh">?</div><ol class="list" id="lGh"></ol></div>
+      <div><div class="label">pip installs (PyPI)</div><div class="val" id="kPy">?</div>
+        <ol class="list" id="lPy"></ol><div class="help">PyPI counts with a delay of about a day and includes mirrors and CI.</div></div>
+    </div>
+    <p class="help">A click opens the GitHub release page, so clicks show interest right now. The GitHub and PyPI numbers are the real downloads, refreshed every 10 minutes.</p>
+  </section>
+
+  <section class="card">
+    <h2>Live feed</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Time</th><th>Page</th><th>From</th><th>Country</th></tr></thead>
+      <tbody id="feed"></tbody>
+    </table></div>
+  </section>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <h2>Enter your view key</h2>
+    <p>Leave it empty to go back to demo data. Saved only in this browser.</p>
+    <label for="fKey">View key</label>
+    <input id="fKey" type="password" autocomplete="off">
+    <div class="help">The VIEW_KEY secret you set with wrangler.</div>
+    <div class="row"><button value="cancel" type="submit" formnovalidate>Cancel</button><button class="primary" value="save" type="submit">Save</button></div>
+  </form>
+</dialog>
+
+<script>
+const $ = id => document.getElementById(id);
+const store = { get(){ try { return JSON.parse(localStorage.getItem('spLive')) || {}; } catch { return {}; } },
+                set(v){ try { localStorage.setItem('spLive', JSON.stringify(v)); } catch {} } };
+let cfg = store.get(), seen = new Set(), timer;
+
+// ---------- demo data (same shape the Worker returns) ----------
+const demo = (() => {
+  const pages = ['/', '/', '/', '/blog/werkstudent-jobs.html', '/about.html', '/tools/cv-check.html', '/blog/blue-card-salary.html', '/#download'];
+  const refs = ['', '', 'news.ycombinator.com', 'github.com', 'www.google.com', 'www.producthunt.com', 'www.reddit.com', 'www.linkedin.com'];
+  const cs = ['DE', 'DE', 'DE', 'NL', 'AT', 'IN', 'US', 'CH', 'BD', 'GB'];
+  const dls = ['Windows', 'Windows', 'Windows', 'macOS', 'macOS', 'pip', 'Linux'];
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const hits = [], now0 = Date.now();
+  for (let i = 0; i < 260; i++) hits.push({ t: now0 - Math.random() * 36e5, p: pick(pages), r: pick(refs), c: pick(cs) });
+  for (let i = 0; i < 30; i++) hits.push({ t: now0 - Math.random() * 36e5, p: '/', r: pick(refs), c: pick(cs), d: pick(dls) });
+  hits.sort((a, b) => a.t - b.t);
+  return () => {
+    const now = Date.now();
+    for (let i = 0, n = Math.random() < .7 ? 1 + (Math.random() * 3 | 0) : 0; i < n; i++) hits.push({ t: now - i * 300, p: pick(pages), r: pick(refs), c: pick(cs) });
+    if (Math.random() < .15) hits.push({ t: now, p: '/', r: pick(refs), c: pick(cs), d: pick(dls) });
+    while (hits.length && now - hits[0].t > 36e5) hits.shift();
+    const perMin = Array(60).fill(0), dlPer = Array(60).fill(0), P = {}, R = {}, C = {}, D = {}, add = (o, k) => k && (o[k] = (o[k] || 0) + 1);
+    for (const h of hits) { const a = now - h.t, m = 59 - Math.min(59, a / 6e4 | 0);
+      if (h.d) { dlPer[m]++; add(D, h.d); continue; }
+      perMin[m]++; if (a < 18e5) { add(P, h.p); add(R, h.r); add(C, h.c); } }
+    const top = o => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const downloads = { perMin: dlPer, clicks: top(D), github: [['Windows', 412], ['macOS', 188], ['Other', 9]], githubTotal: 609, pypi: { last_day: 14, last_week: 96, last_month: 431 } };
+    return { active: 6 + (Math.random() * 6 | 0), perMin, pages: top(P), refs: top(R), countries: top(C), downloads, recent: hits.slice(-25).reverse(), now };
+  };
+})();
+
+// ---------- rendering ----------
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sum = a => a.reduce((x, y) => x + y, 0);
+
+function list(el, rows) {
+  if (!rows.length) { el.innerHTML = '<li class="empty">Nothing yet</li>'; return; }
+  const max = rows[0][1];
+  el.innerHTML = rows.map(([k, v]) => `<li><i class="fill" style="width:${(v / max * 100).toFixed(1)}%"></i><span title="${esc(k)}">${esc(k)}</span><b>${v}</b></li>`).join('');
+}
+
+function render(s) {
+  $('kActive').textContent = s.active;
+  $('k30').textContent = sum(s.perMin.slice(30));
+  $('k60').textContent = sum(s.perMin);
+  $('kPeak').textContent = Math.max(...s.perMin);
+
+  const max = Math.max(1, ...s.perMin), chart = $('chart');
+  if (chart.children.length !== 60) chart.innerHTML = '<div></div>'.repeat(60);
+  s.perMin.forEach((v, i) => { const b = chart.children[i]; b.style.height = (v / max * 100) + '%'; b.title = `${60 - i} min ago: ${v} views`; });
+  chart.setAttribute('aria-label', `Page views per minute, last 60 minutes. Last minute: ${s.perMin[59]}. Busiest minute: ${max}.`);
+
+  list($('lPages'), s.pages); list($('lRefs'), s.refs); list($('lCountries'), s.countries);
+
+  const d = s.downloads || {}, dper = d.perMin || [], dmax = Math.max(1, ...dper), sp = $('dlChart');
+  $('kDl').textContent = sum(dper);
+  if (sp.children.length !== 60) sp.innerHTML = '<div></div>'.repeat(60);
+  dper.forEach((v, i) => { sp.children[i].style.height = (v / dmax * 100) + '%'; sp.children[i].title = `${60 - i} min ago: ${v} clicks`; });
+  sp.setAttribute('aria-label', `Download clicks per minute, last hour: ${sum(dper)} in total.`);
+  list($('lClicks'), d.clicks || []);
+  $('kGh').textContent = d.github ? d.githubTotal : '?';
+  if (d.github) list($('lGh'), d.github); else $('lGh').innerHTML = '<li class="empty">Not loaded yet</li>';
+  $('kPy').textContent = d.pypi ? d.pypi.last_month + ' / month' : '?';
+  if (d.pypi) list($('lPy'), [['Last day', d.pypi.last_day], ['Last week', d.pypi.last_week], ['Last month', d.pypi.last_month]]); else $('lPy').innerHTML = '<li class="empty">Not loaded yet</li>';
+
+  $('feed').innerHTML = s.recent.map(h => {
+    const k = h.t + h.p, fresh = seen.size && !seen.has(k);
+    return `<tr class="${fresh ? 'new' : ''}"><td class="t">${new Date(h.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${h.d ? `<span class="tag">Download</span>${esc(h.d)}` : esc(h.p)}</td><td>${esc(h.r || 'direct')}</td><td>${esc(h.c || '?')}</td></tr>`;
+  }).join('') || '<tr><td colspan="4" class="empty">No visits in the last hour</td></tr>';
+  seen = new Set(s.recent.map(h => h.t + h.p));
+}
+
+function setStatus(kind, text) { $('status').className = 'status ' + kind; $('statusText').textContent = text; }
+
+async function tick() {
+  if (!cfg.key) { render(demo()); setStatus('demo', 'Demo data'); return; }
+  try {
+    const r = await fetch('/live?key=' + encodeURIComponent(cfg.key), { cache: 'no-store' });
+    if (r.status === 401) throw new Error('Wrong view key');
+    if (!r.ok) throw new Error('Worker answered ' + r.status);
+    render(await r.json());
+    setStatus('', 'Live · updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+  } catch (e) { setStatus('err', e.message === 'Failed to fetch' ? 'Cannot reach the Worker' : e.message); }
+}
+
+function start() { clearInterval(timer); seen = new Set(); tick(); timer = setInterval(() => document.visibilityState === 'visible' && tick(), 5000); }
+
+$('connectBtn').onclick = () => { $('fKey').value = cfg.key || ''; $('dlg').showModal(); };
+$('dlg').addEventListener('close', () => {
+  if ($('dlg').returnValue !== 'save') return;
+  cfg = { key: $('fKey').value };
+  store.set(cfg); start();
+});
+start();
+</script>
+</body>
+</html>

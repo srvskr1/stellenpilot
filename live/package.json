@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "scripts": { "deploy": "wrangler deploy", "check": "node check.mjs" },
+  "devDependencies": { "wrangler": "^4.167.0" }
+}
