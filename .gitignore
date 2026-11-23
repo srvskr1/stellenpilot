@@ -31,3 +31,7 @@ data/
 
 # editor settings
 .vscode/
+
+# live traffic worker
+live/node_modules/
+live/.wrangler/
